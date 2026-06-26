@@ -139,15 +139,15 @@ export default function HeroSection({ stats }: StatsProps) {
                 {mockEvents.map((event) => (
                   <Link key={event.id} href={`/agenda/${event.slug}`} className="group relative block bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 rounded-sm p-4 transition-all duration-300 hover:border-white/10 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-0.5 shrink-0">
                     <div className="flex gap-4 items-center">
-                      <div className="shrink-0 text-center w-[68px] bg-[#0a0f1a]/80 rounded-sm py-3 border border-white/5 shadow-inner transition-colors group-hover:border-[#c20000]/30">
-                        <div className="text-[10px] text-[#ff4d4d] font-bold uppercase tracking-widest mb-1 leading-none">{new Date(event.date).toLocaleDateString('id-ID', { month: 'short' })}</div>
-                        <div className="text-2xl font-black text-white leading-none">{new Date(event.date).getDate().toString().padStart(2, '0')}</div>
+                      <div className="shrink-0 text-center w-[68px] bg-[#0a0f1a]/80 rounded-sm py-3 border border-white/5 shadow-inner transition-colors group-hover:border-[#c20000]/30" suppressHydrationWarning>
+                        <div className="text-[10px] text-[#ff4d4d] font-bold uppercase tracking-widest mb-1 leading-none" suppressHydrationWarning>{new Date(event.date).toLocaleDateString('id-ID', { month: 'short' })}</div>
+                        <div className="text-2xl font-black text-white leading-none" suppressHydrationWarning>{new Date(event.date).getDate().toString().padStart(2, '0')}</div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-bold text-white mb-2 group-hover:text-[#ff4d4d] transition-colors line-clamp-2 leading-tight">{event.title}</h3>
                         <div className="flex flex-col gap-1.5 text-xs text-white/60 font-medium">
                           <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 shrink-0 text-[#c20000]"/> <span className="truncate">{event.location}</span></div>
-                          <div className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 shrink-0 text-[#c20000]"/> {new Date(event.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</div>
+                          <div className="flex items-center gap-1.5" suppressHydrationWarning><Clock className="w-3.5 h-3.5 shrink-0 text-[#c20000]"/> {new Date(event.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</div>
                         </div>
                       </div>
                     </div>

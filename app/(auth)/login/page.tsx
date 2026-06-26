@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Loader2, ArrowLeft, Mail, Lock, ShieldCheck } from 'lucide-react';
+import { Loader2, ArrowLeft, Mail, Lock, ShieldCheck, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 
@@ -13,6 +13,8 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [siteLogo, setSiteLogo] = useState<string | null>(null);
   const [siteLogoWhite, setSiteLogoWhite] = useState<string | null>(null);
   const router = useRouter();
@@ -37,6 +39,7 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage('');
 
     try {
       const response = await api.post('/login', { email, password });
@@ -50,9 +53,9 @@ export default function Login() {
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      toast.error(
-        error.response?.data?.message || 'Login gagal. Periksa kembali email dan password Anda.'
-      );
+      const msg = error.response?.data?.message || 'Login gagal. Periksa kembali email dan password Anda.';
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -166,6 +169,18 @@ export default function Login() {
 
             <form onSubmit={handleLogin} className="space-y-6">
               
+              {/* Pesan Error Inline untuk visibilitas status yang lebih baik (HCI) */}
+              {errorMessage && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }} 
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-sm flex items-start gap-3 text-sm font-medium"
+                >
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                  <span>{errorMessage}</span>
+                </motion.div>
+              )}
+
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-900">Email Address</label>
                 <div className="relative group">
@@ -191,14 +206,26 @@ export default function Login() {
                     <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-[#c20000] transition-colors" />
                   </div>
                   <input 
-                    type="password" 
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-sm pl-12 pr-4 py-3.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-all font-medium shadow-sm"
+                    className="w-full bg-white border border-slate-200 rounded-sm pl-12 pr-12 py-3.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-all font-medium shadow-sm"
                     placeholder="••••••••"
                     required
                     disabled={isLoading}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
+                    aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
                 </div>
               </div>
 
