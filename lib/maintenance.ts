@@ -4,7 +4,7 @@ export async function checkMaintenance(pageKey: string): Promise<boolean> {
     const timeoutId = setTimeout(() => controller.abort(), 5000);
     
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, { 
-      next: { revalidate: 60 },
+      cache: 'no-store',
       signal: controller.signal
     });
     clearTimeout(timeoutId);
