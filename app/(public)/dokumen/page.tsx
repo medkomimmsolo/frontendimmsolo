@@ -22,6 +22,8 @@ export const metadata: Metadata = {
   description: 'Pusat unduhan dokumen resmi, materi kajian, dan panduan organisasi PC IMM Kota Surakarta.',
 };
 
+export const dynamic = 'force-dynamic';
+
 async function getDocuments() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/documents?public=true`, {
