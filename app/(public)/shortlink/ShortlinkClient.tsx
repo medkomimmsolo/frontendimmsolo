@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
@@ -33,6 +33,21 @@ export default function PengajuanShortlink() {
   const [statusQuery, setStatusQuery] = useState('');
   const [statusResult, setStatusResult] = useState<any>(null);
 
+  // Captcha State
+  const [captchaNum1, setCaptchaNum1] = useState(0);
+  const [captchaNum2, setCaptchaNum2] = useState(0);
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
+
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
+
+  const generateCaptcha = () => {
+    setCaptchaNum1(Math.floor(Math.random() * 10) + 1);
+    setCaptchaNum2(Math.floor(Math.random() * 10) + 1);
+    setCaptchaAnswer('');
+  };
+
   const generateSlug = () => {
     const randomString = Math.random().toString(36).substring(2, 8);
     setFormData({ ...formData, slug: randomString });
@@ -46,6 +61,14 @@ export default function PengajuanShortlink() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Captcha Validation
+    if (parseInt(captchaAnswer) !== (captchaNum1 + captchaNum2)) {
+      toast.error('Jawaban verifikasi angka salah. Silakan coba lagi.');
+      generateCaptcha();
+      return;
+    }
+
     setIsSubmitting(true);
     
     let finalUrl = formData.target_url;
@@ -72,6 +95,7 @@ export default function PengajuanShortlink() {
 
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Terjadi kesalahan, silakan coba lagi');
+      generateCaptcha();
     } finally {
       setIsSubmitting(false);
     }
@@ -288,6 +312,26 @@ export default function PengajuanShortlink() {
                           onChange={(e) => setFormData({...formData, phone_number: e.target.value})}
                           placeholder="Contoh: 081234567890"
                           className="w-full px-4 py-3 bg-white border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] font-medium text-slate-900 placeholder:font-normal transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="flex items-center text-sm font-bold text-slate-800">
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-[#c20000] mr-2 text-xs">4</span>
+                        Verifikasi Keamanan (Anti-Bot) <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <div className="ml-8 flex items-center space-x-4">
+                        <div className="bg-slate-100 px-4 py-3 rounded-sm font-bold text-lg text-slate-700 tracking-wider">
+                          {captchaNum1} + {captchaNum2} =
+                        </div>
+                        <input 
+                          type="number"
+                          required
+                          value={captchaAnswer}
+                          onChange={(e) => setCaptchaAnswer(e.target.value)}
+                          placeholder="Hasil"
+                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] font-bold text-slate-900 transition-colors"
                         />
                       </div>
                     </div>
