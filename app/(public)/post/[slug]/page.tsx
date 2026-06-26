@@ -8,7 +8,7 @@ import ReadingProgress from '@/components/post/ReadingProgress';
 
 async function getBlog(slug: string) {
   try {
-    const res = await fetch(`/blogs/${slug}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs/${slug}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     const json = await res.json();
     return json.data;
