@@ -235,6 +235,7 @@ export default function Navbar() {
   };
 
   return (
+    <>
     <header
       className={cn(
         'fixed top-0 inset-x-0 z-50 transition-all duration-300 border-b py-3',
@@ -279,6 +280,7 @@ export default function Navbar() {
           </button>
         </div>
       </nav>
+    </header>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
@@ -288,7 +290,7 @@ export default function Navbar() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
             transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-            className="fixed inset-0 z-50 bg-white overflow-y-auto"
+            className="fixed inset-0 z-[100] bg-white overflow-y-auto"
           >
             <div className="flex items-center justify-between px-6 py-6 border-b border-[#0f172a]/5">
               <Link href="/" onClick={() => setMobileMenuOpen(false)}>
@@ -317,6 +319,6 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 }
