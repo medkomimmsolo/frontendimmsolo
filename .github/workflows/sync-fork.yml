@@ -1,0 +1,23 @@
+name: Auto Sync Fork
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Cek update secara otomatis setiap jam 12 malam
+  workflow_dispatch: # Memungkinkan Anda memicunya secara manual
+
+jobs:
+  sync_with_upstream:
+    runs-on: ubuntu-latest
+    name: Sync main with upstream latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Pull dari Akun Utama
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+      with:
+        upstream_sync_repo: yakubfirman/frontendimmsolo
+        upstream_sync_branch: main
+        target_sync_branch: main
+        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
