@@ -30,9 +30,9 @@ export default function ChairmanMessageSection({ name, period, message, photo }:
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="lg:col-span-5 relative"
+            className="lg:col-span-5 relative max-w-sm mx-auto lg:max-w-none w-full"
           >
-            <div className="relative z-10 aspect-[4/5] rounded-sm overflow-hidden border border-[#0f172a]/10 shadow-lg bg-white group">
+            <div className="relative z-10 aspect-square md:aspect-[4/5] rounded-sm overflow-hidden border border-[#0f172a]/10 shadow-lg bg-white group">
               <div className="absolute inset-0 bg-[#0f172a]/5 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
               <Image 
                 src={photoUrl} 
@@ -49,8 +49,8 @@ export default function ChairmanMessageSection({ name, period, message, photo }:
             </div>
             
             {/* Decorative block behind photo */}
-            <div className="absolute -bottom-4 -right-4 w-3/4 h-3/4 bg-[#c20000]/10 rounded-sm -z-10"></div>
-            <div className="absolute -top-4 -left-4 w-24 h-24 border-t-2 border-l-2 border-[#c20000]/30 -z-10"></div>
+            <div className="absolute -bottom-2 -right-2 md:-bottom-4 md:-right-4 w-3/4 h-3/4 bg-[#c20000]/10 rounded-sm -z-10"></div>
+            <div className="absolute -top-2 -left-2 md:-top-4 md:-left-4 w-16 h-16 md:w-24 md:h-24 border-t-2 border-l-2 border-[#c20000]/30 -z-10"></div>
           </motion.div>
 
           {/* Text/Message Section */}
@@ -70,8 +70,8 @@ export default function ChairmanMessageSection({ name, period, message, photo }:
             </h2>
             
             <div className="relative">
-              <Quote className="absolute -top-4 -left-4 w-12 h-12 text-[#c20000]/10 -z-10" />
-              <p className="text-xl md:text-2xl text-[#0f172a]/80 leading-relaxed font-medium italic border-l-4 border-[#c20000] pl-6 py-2">
+              <Quote className="absolute -top-2 -left-2 md:-top-4 md:-left-4 w-8 h-8 md:w-12 md:h-12 text-[#c20000]/10 -z-10" />
+              <p className="text-xl md:text-2xl text-[#0f172a]/80 leading-relaxed font-medium italic border-l-4 border-[#c20000] pl-4 md:pl-6 py-2">
                 "{chairmanMessage}"
               </p>
             </div>
