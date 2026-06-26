@@ -273,6 +273,7 @@ export default function Navbar() {
             type="button"
             className={cn("-m-2.5 inline-flex items-center justify-center p-2.5", isTransparent ? "text-white" : "text-[#0f172a]/90")}
             onClick={() => setMobileMenuOpen(true)}
+            aria-label="Buka menu utama"
           >
             <Menu className="h-6 w-6" />
           </button>
