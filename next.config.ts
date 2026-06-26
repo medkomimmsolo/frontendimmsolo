@@ -18,6 +18,14 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'api.immsolo.or.id',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api-web.immsolo.or.id',
+      },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
       }
     ],
   },
