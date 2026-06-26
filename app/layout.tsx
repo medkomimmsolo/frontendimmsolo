@@ -33,8 +33,16 @@ export async function generateMetadata(): Promise<Metadata> {
   let siteIcon = '';
 
   try {
-    // Fetch settings from the backend (with 60s cache revalidation)
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, { next: { revalidate: 60 } });
+    // Use AbortSignal to prevent build hanging if backend is unreachable
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, { 
+      next: { revalidate: 60 },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    
     const json = await res.json();
     const settings = json.data || [];
     
@@ -146,7 +154,14 @@ export default async function RootLayout({
 }>) {
   let siteIcon = '';
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, { next: { revalidate: 60 } });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, { 
+      next: { revalidate: 60 },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    
     const json = await res.json();
     const settings = json.data || [];
     
