@@ -68,7 +68,7 @@ export default function HeroSection({ stats }: StatsProps) {
         <div className="flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-16 h-full lg:max-h-[80vh]">
           
           {/* Left: Hero Content */}
-          <div className="lg:w-1/2 xl:w-3/5 flex flex-col items-start text-left shrink-0">
+          <div className="lg:w-1/2 xl:w-3/5 flex flex-col items-center text-center lg:items-start lg:text-left shrink-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -103,7 +103,7 @@ export default function HeroSection({ stats }: StatsProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-              className="flex flex-wrap items-center gap-4 w-full"
+              className="flex flex-wrap items-center justify-center lg:justify-start gap-4 w-full"
             >
               <Button asChild size="lg" className="bg-[#c20000] hover:bg-[#a00000] text-white shadow-lg shadow-red-900/30 border-none rounded-full px-8 transition-all duration-300 hover:scale-105">
                 <Link href="#kontak">Hubungi Kami</Link>
