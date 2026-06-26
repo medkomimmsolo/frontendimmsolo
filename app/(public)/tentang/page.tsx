@@ -63,7 +63,7 @@ export default async function TentangPage() {
             <div className="w-16 h-16 bg-[#0f172a]/5 rounded-xl flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500">
               <MapPin className="w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Basis Gerakan</h3>
+            <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Basis Gerakan</h2>
             <p className="text-[#0f172a]/70 leading-relaxed">
               Berpusat di Kota Surakarta (Solo), PC IMM membawahi belasan komisariat yang tersebar di berbagai Perguruan Tinggi, baik Perguruan Tinggi Muhammadiyah (PTM) maupun Perguruan Tinggi Negeri (PTN) di Solo Raya.
             </p>
@@ -77,7 +77,7 @@ export default async function TentangPage() {
             <div className="w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center text-white mb-8 group-hover:bg-[#c20000] transition-colors duration-500 relative z-10">
               <Target className="w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-bold mb-4" style={{ fontFamily: 'var(--font-playfair), serif' }}>Fokus Eksekusi</h3>
+            <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'var(--font-playfair), serif' }}>Fokus Eksekusi</h2>
             <p className="text-white/80 leading-relaxed relative z-10">
               Selain berfokus pada dialektika keilmuan, kami bergerak progresif dalam ranah advokasi kebijakan publik, pendampingan sosial ekonomi warga, hingga respon cepat isu-isu kemanusiaan lokal.
             </p>
@@ -88,7 +88,7 @@ export default async function TentangPage() {
             <div className="w-16 h-16 bg-[#0f172a]/5 rounded-xl flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500">
               <Building className="w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Struktur Organisasi</h3>
+            <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Struktur Organisasi</h2>
             <p className="text-[#0f172a]/70 leading-relaxed">
               Didukung oleh pimpinan cabang yang terstruktur, berbagai Lembaga Otonom (LO) dan Lembaga Semi Otonom (LSO) untuk memfasilitasi minat dan bakat kader secara profesional.
             </p>

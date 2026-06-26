@@ -58,7 +58,7 @@ export default async function SejarahPage() {
             <div className="w-16 h-16 bg-[#0f172a]/5 rounded-xl flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500">
               <Clock className="w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Kelahiran IMM</h3>
+            <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Kelahiran IMM</h2>
             <p className="text-[#0f172a]/70 leading-relaxed">
               Didirikan di Yogyakarta pada 14 Maret 1964 M (29 Syawal 1384 H). Lahir sebagai respons atas kebutuhan Muhammadiyah akan wadah pembinaan mahasiswa Islam.
             </p>
@@ -72,7 +72,7 @@ export default async function SejarahPage() {
             <div className="w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center text-white mb-8 group-hover:bg-[#c20000] transition-colors duration-500 relative z-10">
               <Target className="w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-bold mb-4" style={{ fontFamily: 'var(--font-playfair), serif' }}>Tujuan Mulia</h3>
+            <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'var(--font-playfair), serif' }}>Tujuan Mulia</h2>
             <p className="text-white/80 leading-relaxed relative z-10">
               "Mengusahakan terbentuknya akademisi Islam yang berakhlak mulia dalam rangka mencapai tujuan Muhammadiyah." Sebuah manifesto gerakan intelektual.
             </p>
@@ -83,7 +83,7 @@ export default async function SejarahPage() {
             <div className="w-16 h-16 bg-[#0f172a]/5 rounded-xl flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500">
               <Flag className="w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Deklarasi Kottabarat</h3>
+            <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Deklarasi Kottabarat</h2>
             <p className="text-[#0f172a]/70 leading-relaxed">
               Melahirkan Enam Penegasan IMM di Surakarta, yang menjadi fondasi dan pijakan ideologis perjuangan seluruh kader IMM se-Indonesia hingga saat ini.
             </p>
