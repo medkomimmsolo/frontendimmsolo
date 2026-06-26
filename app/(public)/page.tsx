@@ -62,6 +62,17 @@ export default async function Home() {
     console.error("Failed to fetch latest posts", error);
   }
 
+  let latestEvents: any[] = [];
+  try {
+    const resEvents = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events?limit=3`, { next: { revalidate: 60 } });
+    if (resEvents.ok) {
+      const jsonEvents = await resEvents.json();
+      latestEvents = jsonEvents.data?.data || jsonEvents.data || [];
+    }
+  } catch (error) {
+    console.error("Failed to fetch latest events", error);
+  }
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -89,7 +100,7 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <HeroSection stats={statsData} />
+      <HeroSection stats={statsData} events={latestEvents} />
       <AboutPreview stats={statsData} />
       <StatsSection stats={statsData} />
       <ChairmanMessageSection {...chairmanData} />

@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { ShieldAlert, MessageCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { checkMaintenance } from '@/lib/maintenance';
+import MaintenancePage from '@/components/ui/MaintenancePage';
 
 export const metadata: Metadata = {
   title: 'Shortlink Belum Aktif',
@@ -13,6 +15,7 @@ export default async function PendingShortlinkPage({
   searchParams: Promise<{ slug?: string }>;
 }) {
   const { slug } = await searchParams;
+  if (await checkMaintenance('maintenance_shortlink')) return <MaintenancePage />;
   
   return (
     <main className="min-h-screen bg-slate-50 pt-32 pb-24 px-4 flex items-center justify-center">

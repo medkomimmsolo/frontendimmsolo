@@ -60,7 +60,7 @@ import { checkMaintenance } from '@/lib/maintenance';
 import MaintenancePage from '@/components/ui/MaintenancePage';
 
 export default async function AgendaDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  if (await checkMaintenance('maintenance_berita')) return <MaintenancePage />;
+  if (await checkMaintenance('maintenance_agenda')) return <MaintenancePage />;
   
   const resolvedParams = await params;
   const event = await getEvent(resolvedParams.slug);

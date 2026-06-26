@@ -49,7 +49,7 @@ import { checkMaintenance } from '@/lib/maintenance';
 import MaintenancePage from '@/components/ui/MaintenancePage';
 
 export default async function AgendaPage({ searchParams }: { searchParams: Promise<{ filter?: string }> }) {
-  if (await checkMaintenance('maintenance_berita')) return <MaintenancePage />;
+  if (await checkMaintenance('maintenance_agenda')) return <MaintenancePage />;
   
   const resolvedSearchParams = await searchParams;
   const currentFilter = resolvedSearchParams.filter || 'all';
