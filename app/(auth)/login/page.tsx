@@ -191,7 +191,7 @@ export default function Login() {
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-sm pl-12 pr-4 py-3.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-all font-medium shadow-sm"
+                    className="w-full bg-white border border-slate-200 rounded-sm pl-12 pr-4 py-3.5 text-slate-900 placeholder:text-slate-400/60 placeholder:font-normal focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-all font-medium shadow-sm"
                     placeholder="admin@immsurakarta.org"
                     required
                     disabled={isLoading}
@@ -209,7 +209,7 @@ export default function Login() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-sm pl-12 pr-12 py-3.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-all font-medium shadow-sm"
+                    className="w-full bg-white border border-slate-200 rounded-sm pl-12 pr-12 py-3.5 text-slate-900 placeholder:text-slate-400/60 placeholder:font-normal focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-all font-medium shadow-sm"
                     placeholder="••••••••"
                     required
                     disabled={isLoading}

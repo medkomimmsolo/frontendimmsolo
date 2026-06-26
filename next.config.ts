@@ -25,6 +25,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'immsolo.or.id',
+      },
+      {
+        protocol: 'http',
+        hostname: 'immsolo.or.id',
+      },
+      {
+        protocol: 'https',
         hostname: 'placehold.co',
       }
     ],
