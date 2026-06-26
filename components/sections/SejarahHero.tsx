@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import Image from 'next/image';
 
 export default function SejarahHero() {
   return (
@@ -8,10 +9,12 @@ export default function SejarahHero() {
       
       {/* Full-screen Dummy Background Image matching Home page */}
       <div className="absolute inset-0 z-0">
-        <img 
+        <Image 
           src="/images/imm_hero_bg.jpg" 
           alt="Sejarah IMM Background" 
-          className="w-full h-full object-cover object-center opacity-40 scale-105 motion-safe:animate-[slowZoom_20s_ease-in-out_infinite_alternate]"
+          fill
+          priority
+          className="object-cover object-center opacity-40 scale-105 motion-safe:animate-[slowZoom_20s_ease-in-out_infinite_alternate]"
         />
         <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[2px]"></div>
       </div>

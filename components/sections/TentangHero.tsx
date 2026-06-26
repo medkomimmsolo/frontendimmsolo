@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 
 export default function TentangHero() {
@@ -10,10 +11,12 @@ export default function TentangHero() {
       
       {/* Full-screen Dummy Background Image matching Home page */}
       <div className="absolute inset-0 z-0">
-        <img 
+        <Image 
           src="/images/imm_hero_bg.jpg" 
           alt="PC IMM Surakarta Background" 
-          className="w-full h-full object-cover object-center opacity-50 scale-105 motion-safe:animate-[slowZoom_20s_ease-in-out_infinite_alternate]"
+          fill
+          priority
+          className="object-cover object-center opacity-50 scale-105 motion-safe:animate-[slowZoom_20s_ease-in-out_infinite_alternate]"
         />
         <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-[2px]"></div>
       </div>

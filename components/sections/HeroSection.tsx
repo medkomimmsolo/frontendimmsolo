@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, MapPin, Clock } from 'lucide-react';
 
@@ -50,10 +51,12 @@ export default function HeroSection({ stats }: StatsProps) {
       
       {/* Background with Gradient Overlay */}
       <div className="absolute inset-0 z-0">
-        <img 
+        <Image 
           src="/images/imm_hero_bg.jpg" 
-          alt="PC IMM Surakarta Background" 
-          className="w-full h-full object-cover object-center opacity-40 scale-105 motion-safe:animate-[slowZoom_30s_ease-in-out_infinite_alternate]"
+          alt="PC IMM Surakarta Background"
+          fill
+          priority
+          className="object-cover object-center opacity-40 scale-105 motion-safe:animate-[slowZoom_30s_ease-in-out_infinite_alternate]"
         />
         {/* Solid Dark Overlay for better readability */}
         <div className="absolute inset-0 bg-[#0f172a]/80"></div>

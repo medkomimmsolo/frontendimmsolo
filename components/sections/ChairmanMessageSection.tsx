@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import { Quote } from 'lucide-react';
+import Image from 'next/image';
 
 type ChairmanProps = {
   name?: string;
@@ -33,10 +34,12 @@ export default function ChairmanMessageSection({ name, period, message, photo }:
           >
             <div className="relative z-10 aspect-[4/5] rounded-sm overflow-hidden border border-[#0f172a]/10 shadow-lg bg-white group">
               <div className="absolute inset-0 bg-[#0f172a]/5 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
-              <img 
+              <Image 
                 src={photoUrl} 
                 alt={`Foto ${chairmanName}`}
-                className="w-full h-full object-cover filter grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover filter grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/80 via-transparent to-transparent z-20"></div>
               <div className="absolute bottom-6 left-6 z-30">

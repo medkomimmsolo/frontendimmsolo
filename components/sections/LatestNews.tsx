@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { ArrowRight, Calendar, ArrowUpRight } from 'lucide-react';
@@ -99,10 +100,12 @@ export default function LatestNews({ posts = [] }: LatestNewsProps) {
                 {/* Image or Placeholder */}
                 <div className="absolute inset-0 bg-white transition-transform duration-700 group-hover:scale-105">
                   {featuredBlog.featured_image ? (
-                    <img 
+                    <Image 
                       src={featuredBlog.featured_image} 
                       alt={featuredBlog.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 60vw"
+                      className="object-cover"
                     />
                   ) : (
                     <div className="absolute inset-0 bg-gradient-to-tr from-imm-red-50 to-slate-200 opacity-60"></div>
