@@ -126,9 +126,9 @@ export default function HeroSection({ stats }: StatsProps) {
               {/* Clean solid look without gradient blobs */}
 
               <div className="flex items-center justify-between mb-6 relative z-10 shrink-0">
-                <h3 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+                <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
                   Agenda Mendatang
-                </h3>
+                </h2>
                 <Link href="/agenda" className="text-sm font-semibold text-[#ff4d4d] hover:text-[#ff8080] transition-colors flex items-center gap-1 group">
                   Semua <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
@@ -144,7 +144,7 @@ export default function HeroSection({ stats }: StatsProps) {
                         <div className="text-2xl font-black text-white leading-none">{new Date(event.date).getDate().toString().padStart(2, '0')}</div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-bold text-white mb-2 group-hover:text-[#ff4d4d] transition-colors line-clamp-2 leading-tight">{event.title}</h4>
+                        <h3 className="text-sm font-bold text-white mb-2 group-hover:text-[#ff4d4d] transition-colors line-clamp-2 leading-tight">{event.title}</h3>
                         <div className="flex flex-col gap-1.5 text-xs text-white/60 font-medium">
                           <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 shrink-0 text-[#c20000]"/> <span className="truncate">{event.location}</span></div>
                           <div className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 shrink-0 text-[#c20000]"/> {new Date(event.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</div>
