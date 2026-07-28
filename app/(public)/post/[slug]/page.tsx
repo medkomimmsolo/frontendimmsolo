@@ -8,7 +8,7 @@ import ReadingProgress from '@/components/post/ReadingProgress';
 
 async function getBlog(slug: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs/${slug}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs/${slug}`, { cache: 'no-store' });
     if (!res.ok) return null;
     const json = await res.json();
     return json.data;
@@ -20,7 +20,7 @@ async function getBlog(slug: string) {
 
 async function getTrendingBlogs() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs`, { next: { revalidate: 60 } });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs`, { cache: 'no-store' });
     if (!res.ok) return [];
     const json = await res.json();
     // Assuming the API returns a paginated list or an array directly
@@ -105,10 +105,10 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
   // Format date
   const publishDate = new Date(post.created_at);
   const formattedDate = publishDate.toLocaleDateString('id-ID', { 
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta'
   }).replace('Minggu', 'Ahad');
   const formattedTime = publishDate.toLocaleTimeString('id-ID', { 
-    hour: '2-digit', minute: '2-digit' 
+    hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta'
   }).replace('.', ':');
 
   return (
@@ -381,7 +381,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                                 {rPost.title}
                               </h4>
                               <span className="text-[11px] font-medium text-[#0f172a]/40">
-                                {new Date(rPost.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                {new Date(rPost.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })}
                               </span>
                             </div>
                           </Link>

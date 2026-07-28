@@ -120,10 +120,10 @@ export default function UpcomingEvents() {
                       {/* Date */}
                       <div className="shrink-0 w-32">
                         <div className="text-[#c20000]/80 font-bold text-sm tracking-widest uppercase mb-1">
-                          {new Date(event.date).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })}
+                          {new Date(event.date).toLocaleDateString('id-ID', { month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })}
                         </div>
                         <div className="text-4xl md:text-5xl font-light text-white" style={{ fontFamily: 'var(--font-playfair), serif' }}>
-                          {new Date(event.date).getDate().toString().padStart(2, '0')}
+                          {new Intl.DateTimeFormat('id-ID', { day: '2-digit', timeZone: 'Asia/Jakarta' }).format(new Date(event.date))}
                         </div>
                       </div>
 
@@ -140,7 +140,7 @@ export default function UpcomingEvents() {
                             </div>
                             <div className="flex items-center gap-1.5">
                               <Clock className="w-4 h-4 text-white/50" />
-                              {new Date(event.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
+                              {new Date(event.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }).replace(/\./g, ':')} WIB
                             </div>
                           </div>
                           {event.organizers && (

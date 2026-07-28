@@ -126,7 +126,7 @@ export default function LatestNews({ posts = [] }: LatestNewsProps) {
                     </Badge>
                     <span className="text-white/80 text-sm flex items-center">
                       <Calendar className="w-4 h-4 mr-2" />
-                      {new Date(featuredBlog.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      {new Date(featuredBlog.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}
                     </span>
                   </div>
                   <h3 className="text-2xl md:text-4xl font-bold text-white mb-4 leading-snug group-hover:text-[#c20000]/60 transition-colors" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
@@ -163,7 +163,7 @@ export default function LatestNews({ posts = [] }: LatestNewsProps) {
                         </span>
                         <span className="w-1 h-1 rounded-full bg-slate-300"></span>
                         <span className="text-[#0f172a]/70 text-xs flex items-center">
-                          {new Date(blog.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          {new Date(blog.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })}
                         </span>
                       </div>
                       <h3 className="text-xl md:text-2xl font-bold text-[#0f172a] mb-3 group-hover:text-[#c20000] transition-colors leading-snug" style={{ fontFamily: 'var(--font-playfair), serif' }}>

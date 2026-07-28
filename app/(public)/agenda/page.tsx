@@ -35,7 +35,7 @@ export const dynamic = 'force-dynamic';
 
 async function getEvents() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`, { next: { revalidate: 60 } });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`, { cache: 'no-store' });
     if (!res.ok) return [];
     const json = await res.json();
     return json.data.data || json.data || [];
@@ -150,8 +150,8 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
         <div className="flex flex-col space-y-4">
           {events.map((event: any) => {
             const eventDate = new Date(event.event_date);
-            const time = eventDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
-            const dateStr = eventDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            const time = eventDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }).replace(/\./g, ':') + ' WIB';
+            const dateStr = eventDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' });
 
             return (
               <Card key={event.id} className="group hover:shadow-md transition-all duration-300 border border-[#0f172a]/10 overflow-hidden bg-white">
