@@ -29,17 +29,17 @@ export default function Footer() {
       {/* Decorative background element */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-px bg-gradient-to-r from-transparent via-[#c20000]/80 to-transparent"></div>
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#c20000]/10 rounded-full blur-[100px] pointer-events-none"></div>
-      
+
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
           {/* Brand Info */}
           <div className="lg:col-span-4 space-y-6">
             <Link href="/" className="inline-flex items-center gap-3 group">
               {siteLogoWhite ? (
-                <img 
-                  src={`${siteLogoWhite}`} 
-                  alt="PC IMM Logo" 
-                  className="h-12 w-auto object-contain transition-transform group-hover:scale-105" 
+                <img
+                  src={`${siteLogoWhite}`}
+                  alt="PC IMM Logo"
+                  className="h-12 w-auto object-contain transition-transform group-hover:scale-105"
                 />
               ) : (
                 <>
@@ -99,13 +99,13 @@ export default function Footer() {
                 <div className="w-10 h-10 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-[#c20000] group-hover:border-[#c20000] transition-colors duration-300 shadow-sm">
                   <Mail className="w-5 h-5 text-white group-hover:text-white transition-colors" />
                 </div>
-                <span className="text-base">info@immsurakarta.org</span>
+                <span className="text-base">solo.imm@gmail.com</span>
               </li>
               <li className="flex items-center gap-4 group">
                 <div className="w-10 h-10 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-[#c20000] group-hover:border-[#c20000] transition-colors duration-300 shadow-sm">
                   <Phone className="w-5 h-5 text-white group-hover:text-white transition-colors" />
                 </div>
-                <span className="text-base">+62 812-3456-7890</span>
+                <span className="text-base">+62 85879136568</span>
               </li>
             </ul>
           </div>
@@ -117,9 +117,9 @@ export default function Footer() {
               Dapatkan pembaruan langsung ke kotak masuk Anda mengenai kajian dan aksi kami.
             </p>
             <form className="flex flex-col gap-3" action="#">
-              <input 
-                type="email" 
-                placeholder="Alamat Email Anda" 
+              <input
+                type="email"
+                placeholder="Alamat Email Anda"
                 className="bg-white/5 border border-white/20 rounded-sm px-4 py-3 text-base text-white placeholder:text-white/50 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all shadow-sm"
                 required
               />
