@@ -30,7 +30,7 @@ async function getBlogs(category?: string) {
       ? `${process.env.NEXT_PUBLIC_API_URL}/blogs?category=${category}`
       : `${process.env.NEXT_PUBLIC_API_URL}/blogs`;
       
-    const res = await fetch(url, { next: { revalidate: 60 } });
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) return [];
     const json = await res.json();
     return json.data.data || json.data || [];
@@ -129,7 +129,7 @@ export default async function PostPage(props: Props) {
                   </div>
                   <div className="flex items-center">
                     <Calendar className="w-3.5 h-3.5 mr-1.5" />
-                    {new Date(heroPost.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    {new Date(heroPost.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}
                   </div>
                 </div>
               </div>
@@ -167,7 +167,7 @@ export default async function PostPage(props: Props) {
                       </Link>
                       <div className="mt-auto pt-3 flex items-center text-[11px] text-[#0f172a]/50 font-medium">
                         <Calendar className="w-3 h-3 mr-1" />
-                        {new Date(post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        {new Date(post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}
                       </div>
                     </div>
                   </div>
@@ -208,7 +208,7 @@ export default async function PostPage(props: Props) {
                   <div className="flex items-center text-xs text-[#0f172a]/60 mb-3 font-medium gap-4">
                     <span className="flex items-center">
                       <Calendar className="w-3.5 h-3.5 mr-1.5" />
-                      {new Date(post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      {new Date(post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}
                     </span>
                     <span className="flex items-center">
                       <User className="w-3.5 h-3.5 mr-1.5" />

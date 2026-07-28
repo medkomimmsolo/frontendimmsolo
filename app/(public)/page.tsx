@@ -53,7 +53,7 @@ export default async function Home() {
 
   let latestPosts: any[] = [];
   try {
-    const resPosts = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs`, { next: { revalidate: 60 } });
+    const resPosts = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs`, { cache: 'no-store' });
     if (resPosts.ok) {
       const jsonPosts = await resPosts.json();
       latestPosts = jsonPosts.data?.data || jsonPosts.data || [];
@@ -64,7 +64,7 @@ export default async function Home() {
 
   let latestEvents: any[] = [];
   try {
-    const resEvents = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events?limit=3`, { next: { revalidate: 60 } });
+    const resEvents = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events?limit=3`, { cache: 'no-store' });
     if (resEvents.ok) {
       const jsonEvents = await resEvents.json();
       latestEvents = jsonEvents.data?.data || jsonEvents.data || [];
