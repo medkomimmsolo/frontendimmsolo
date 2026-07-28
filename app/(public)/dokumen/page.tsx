@@ -135,7 +135,7 @@ export default async function DokumenPage() {
                       rel="noopener noreferrer"
                       className="shrink-0"
                     >
-                      <Button size="sm" className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-[#c20000] hover:border-slate-300 rounded-lg px-3 h-8 shadow-sm transition-all text-xs font-medium">
+                      <Button size="sm" className="bg-[#c20000] text-white hover:bg-[#a00000] border-none rounded-lg px-4 h-8 shadow-sm transition-colors text-xs font-medium">
                         <Download className="w-3.5 h-3.5 mr-1.5" />
                         {doc.file_path ? 'Unduh' : 'Buka'}
                       </Button>
