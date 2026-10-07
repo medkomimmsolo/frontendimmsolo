@@ -105,7 +105,7 @@ export default function ShortlinksPage() {
   };
 
   const copyToClipboard = (slug: string) => {
-    const url = `${window.location.origin}/s/${slug}`;
+    const url = `${window.location.origin}/${slug}`;
     navigator.clipboard.writeText(url);
     toast.success('Link disalin ke clipboard');
   };
@@ -161,7 +161,7 @@ export default function ShortlinksPage() {
                     <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-slate-900">immsolo.or.id/s/{item.slug}</span>
+                          <span className="font-semibold text-slate-900">immsolo.or.id/{item.slug}</span>
                           <button 
                             onClick={() => copyToClipboard(item.slug)}
                             className="text-slate-400 hover:text-[#c20000] transition-colors"
