@@ -161,7 +161,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
                   </td>
                   <td className="p-4">
                     <div className="font-bold text-[#0f172a]">{item.title}</div>
-                    <div className="text-xs text-slate-500 truncate max-w-md mt-0.5 font-mono">{item.url?.startsWith('/s/') ? `immsolo.or.id${item.url}` : item.url}</div>
+                    <div className="text-xs text-slate-500 truncate max-w-md mt-0.5 font-mono">{item.url?.startsWith('/s/') ? `immsolo.or.id/${item.url.replace(/^\/s\//, '')}` : item.url}</div>
                   </td>
                   <td className="p-4 text-center">
                     <span className="inline-flex items-center justify-center min-w-[3rem] px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold">{item.clicks ?? 0}</span>
