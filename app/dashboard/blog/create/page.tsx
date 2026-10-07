@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
@@ -9,17 +9,19 @@ import { ArrowLeft, Save, Loader2, Image as ImageIcon, CheckCircle2, XCircle, Al
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { Category } from '@/types';
+import { convertToWebP, uploadInlineImage } from '@/lib/imageUtils';
 import dynamic from 'next/dynamic';
+import { useAuth } from '@/hooks/useAuth';
 
-// Import React Quill dynamically to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill-new'), { 
+// Import Rich Text Editor (dengan dukungan tabel) secara dinamis agar tidak error SSR
+const RichTextEditor = dynamic(() => import('@/components/post/RichTextEditor'), {
   ssr: false,
   loading: () => <div className="h-96 w-full flex items-center justify-center bg-gray-50 border border-gray-200 rounded-sm">Memuat Editor...</div>
 });
-import 'react-quill-new/dist/quill.snow.css';
 
 export default function CreateBlog() {
   const router = useRouter();
+  const { user } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,43 +37,10 @@ export default function CreateBlog() {
     author_role: '',
     editor_role: '',
     keywords: '',
+    meta_title: '',
+    meta_description: '',
   });
   const [featuredImage, setFeaturedImage] = useState<File | null>(null);
-
-  const convertToWebP = (file: File): Promise<File> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target?.result as string;
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          // For 5:4 aspect ratio cropping, you could do it here, but typically we just handle layout.
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0);
-            canvas.toBlob((blob) => {
-              if (blob) {
-                const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
-                  type: 'image/webp',
-                });
-                resolve(newFile);
-              } else {
-                reject(new Error("Canvas to Blob failed"));
-              }
-            }, 'image/webp', 0.8);
-          } else {
-            reject(new Error("Canvas context failed"));
-          }
-        };
-        img.onerror = (error) => reject(error);
-      };
-      reader.onerror = (error) => reject(error);
-    });
-  };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -92,10 +61,23 @@ export default function CreateBlog() {
   };
 
   useEffect(() => {
-    api.get('/categories')
-      .then(res => setCategories(res.data.data || []))
-      .catch(err => console.error(err));
-  }, []);
+    const loadCategories = async () => {
+      try {
+        const res = await api.get('/categories');
+        let list: Category[] = res.data.data || [];
+        const isSuper = user?.roles?.some((r: any) => r.name === 'super-admin');
+        if (user && !isSuper) {
+          const allowed = await api.get(`/users/${user.id}/categories`);
+          const ids: number[] = allowed.data.data?.allowed || [];
+          if (ids.length > 0) list = list.filter((c) => ids.includes(c.id));
+        }
+        setCategories(list);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    if (user !== undefined) loadCategories();
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -121,6 +103,34 @@ export default function CreateBlog() {
     }
   };
 
+  // Autosave draft ke localStorage
+  useEffect(() => {
+    const hasContent = formData.title || formData.content || formData.excerpt;
+    if (hasContent) {
+      const timer = setTimeout(() => {
+        localStorage.setItem('blog_create_draft', JSON.stringify(formData));
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [formData]);
+
+  // Pulihkan draft saat halaman dibuka
+  useEffect(() => {
+    const saved = localStorage.getItem('blog_create_draft');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.title || parsed.content) {
+          setFormData((prev) => ({ ...prev, ...parsed }));
+          toast.success('Draft terakhir dipulihkan');
+        }
+      } catch {
+        localStorage.removeItem('blog_create_draft');
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.content || formData.content === '<p><br></p>') {
@@ -139,7 +149,8 @@ export default function CreateBlog() {
       }
 
       await api.post('/blogs', data);
-      toast.success('Post berhasil diterbitkan');
+      localStorage.removeItem('blog_create_draft');
+      toast.success(formData.status === 'published' ? 'Post berhasil diterbitkan' : 'Draft berhasil disimpan');
       router.push('/dashboard/blog');
     } catch (error: any) {
       console.error(error);
@@ -150,21 +161,55 @@ export default function CreateBlog() {
   };
 
   // --- Rich Text Editor Modules ---
+  const quillRef = useRef<HTMLDivElement>(null);
+
   const quillModules = useMemo(() => ({
-    toolbar: [
+    toolbar: {
+      container: [
       [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
       ['bold', 'italic', 'underline', 'strike', 'blockquote'],
       [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
       ['link', 'image', 'video'],
       ['clean']
-    ],
+      ],
+      handlers: {
+      image: () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async () => {
+          const file = input.files?.[0];
+          if (!file) return;
+          try {
+            const url = await uploadInlineImage(file);
+            const { Quill } = await import('react-quill-new');
+            const container = quillRef.current?.querySelector('.ql-container');
+            const quill = container ? (Quill as any).find(container) : null;
+            if (quill) {
+              const range = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
+              quill.insertEmbed(range.index, 'image', url);
+              quill.setSelection(range.index + 1);
+            }
+          } catch (err) {
+            console.error(err);
+            toast.error('Gagal mengunggah gambar');
+          }
+        };
+        input.click();
+      },
+    },
+    },
   }), []);
 
   const quillFormats = [
     'header',
     'bold', 'italic', 'underline', 'strike', 'blockquote',
     'list', 'indent',
-    'link', 'image', 'video'
+    'link', 'image', 'video',
+    // Format tabel dari quill-table-up
+    'table-up', 'table-up-main', 'table-up-col', 'table-up-colgroup',
+    'table-up-cell', 'table-up-cell-inner', 'table-up-row',
+    'table-up-head', 'table-up-body', 'table-up-foot', 'table-up-caption',
   ];
 
   // --- SEO Analysis Logic ---
@@ -251,6 +296,12 @@ export default function CreateBlog() {
               className="w-full bg-white border border-slate-300 rounded-sm px-4 py-3 text-xl font-medium text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-shadow shadow-sm placeholder:text-slate-400"
             />
           </div>
+          {formData.title && (
+            <p className="text-xs text-slate-500 -mt-4">
+              Slug: <span className="font-mono text-slate-700">/post/{formData.title.toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/[\s_]+/g, '-').replace(/-+/g, '-')}</span>
+            </p>
+          )}
+
 
           {/* Editor Box */}
           <div className="bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden">
@@ -272,18 +323,66 @@ export default function CreateBlog() {
                   min-height: 450px;
                   padding: 1.5rem;
                   color: #0f172a;
+                  overflow-x: auto;
                 }
                 .quill-editor-container .ql-editor.ql-blank::before {
                   color: #94a3b8;
                   font-style: normal;
                 }
+                /* ── Tabel ─────────────────────────────────────────── */
+                .quill-editor-container .ql-editor table {
+                  border-collapse: collapse;
+                  table-layout: fixed;
+                  width: auto;
+                  min-width: 200px;
+                  margin: 0.5rem 0;
+                }
+                .quill-editor-container .ql-editor td,
+                .quill-editor-container .ql-editor th {
+                  border: 1px solid #cbd5e1;
+                  padding: 6px 10px;
+                  min-width: 40px;
+                  word-break: break-word;
+                  vertical-align: top;
+                }
+                .quill-editor-container .ql-editor th {
+                  background: #f1f5f9;
+                  font-weight: 600;
+                }
+                /* Tombol sisipkan tabel di toolbar */
+                .quill-editor-container .ql-table-insert-btn {
+                  border: none;
+                  background: transparent;
+                  border-radius: 3px;
+                  color: #444;
+                  line-height: 1;
+                }
+                .quill-editor-container .ql-table-insert-btn:hover {
+                  background: #e2e8f0;
+                  color: #0f172a;
+                }
+                /* Handle resize kolom (TableResizeBox) */
+                .table-up-resize-box-col-separator {
+                  background-color: #3b82f6 !important;
+                  width: 3px !important;
+                  opacity: 0.7;
+                }
+                /* Handle resize scale tabel (TableResizeScale) */
+                .table-up-resize-scale-handle {
+                  background-color: #3b82f6 !important;
+                  border-radius: 2px !important;
+                }
+                /* Selection multi-sel */
+                .table-up-selection-line {
+                  border-color: #3b82f6 !important;
+                }
               `}} />
-              <ReactQuill 
-                theme="snow"
+              <RichTextEditor
                 value={formData.content}
                 onChange={handleContentChange}
                 modules={quillModules}
                 formats={quillFormats}
+                containerRef={quillRef}
                 placeholder="Start writing or type / to choose a block..."
               />
             </div>
@@ -480,6 +579,37 @@ export default function CreateBlog() {
                     </Button>
                   </div>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Meta SEO Box */}
+          <Card className="border-slate-200 shadow-sm rounded-sm">
+            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
+              <CardTitle className="text-sm font-semibold text-[#0f172a]">Meta SEO</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Meta Title</label>
+                <input
+                  type="text"
+                  name="meta_title"
+                  value={formData.meta_title}
+                  onChange={handleChange}
+                  placeholder="Default: judul post"
+                  className="w-full bg-white border border-slate-300 rounded-sm px-3 py-2 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Meta Description</label>
+                <textarea
+                  name="meta_description"
+                  value={formData.meta_description}
+                  onChange={handleChange}
+                  rows={3}
+                  placeholder="Default: ringkasan post"
+                  className="w-full bg-white border border-slate-300 rounded-sm px-3 py-2 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                />
               </div>
             </CardContent>
           </Card>

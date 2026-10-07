@@ -101,14 +101,14 @@ export default function ProfileSettings() {
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-200"
+        className="flex items-center gap-4 mb-8 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5"
       >
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#c20000] to-red-900 flex items-center justify-center shadow-lg shadow-red-900/20">
-          <UserIcon className="w-6 h-6 text-white" />
+        <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center border border-red-100">
+          <UserIcon className="w-6 h-6 text-[#c20000]" />
         </div>
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Pengaturan Profil</h1>
-          <p className="text-slate-500 mt-1 font-medium">Kelola informasi akun Anda seperti nama, email, dan kata sandi.</p>
+          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Pengaturan Profil</h1>
+          <p className="text-[#0f172a]/70 text-sm mt-1">Kelola informasi akun Anda seperti nama, email, dan kata sandi.</p>
         </div>
       </motion.div>
 

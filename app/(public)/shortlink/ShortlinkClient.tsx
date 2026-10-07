@@ -32,11 +32,22 @@ export default function PengajuanShortlink() {
   const [isChecking, setIsChecking] = useState(false);
   const [statusQuery, setStatusQuery] = useState('');
   const [statusResult, setStatusResult] = useState<any>(null);
+  const [adminWa, setAdminWa] = useState('6282226252923');
 
   // Captcha State
   const [captchaNum1, setCaptchaNum1] = useState(0);
   const [captchaNum2, setCaptchaNum2] = useState(0);
   const [captchaAnswer, setCaptchaAnswer] = useState('');
+
+  useEffect(() => {
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/settings`)
+      .then((res) => {
+        const data = res.data?.data;
+        const val = Array.isArray(data) ? data.find((i: any) => i.key === 'shortlink_admin_wa')?.value : data?.shortlink_admin_wa;
+        if (val) setAdminWa(val.replace(/[^0-9]/g, ''));
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     generateCaptcha();
@@ -86,7 +97,7 @@ export default function PengajuanShortlink() {
       setIsSuccess(true);
       toast.success('Pengajuan berhasil dikirim!');
 
-      const waNumber = '6282226252923';
+      const waNumber = adminWa;
       const text = `Halo Admin PC IMM Kota Surakarta,%0A%0ASaya telah mengajukan pembuatan tautan pendek (Shortlink) baru dengan rincian berikut:%0A%0A- *Tautan Akhir*: immsolo.or.id/${formData.slug}%0A- *URL Tujuan*: ${finalUrl}%0A- *No. HP Pengaju*: ${formData.phone_number}%0A%0AMohon bantuannya untuk mengecek dan memberikan token aktivasi untuk tautan tersebut. Terima kasih!`;
       
       setTimeout(() => {
@@ -167,7 +178,7 @@ export default function PengajuanShortlink() {
                 className="w-full h-14 text-base font-bold bg-[#25D366] hover:bg-[#1da851] text-white shadow-md shadow-[#25D366]/20 rounded-sm"
                 onClick={() => {
                   const text = `Halo Admin PC IMM Kota Surakarta,%0A%0ASaya telah mengajukan pembuatan tautan pendek (Shortlink) baru dengan rincian berikut:%0A%0A- *Tautan Akhir*: immsolo.or.id/${formData.slug}%0A- *URL Tujuan*: ${formData.target_url}%0A- *No. HP Pengaju*: ${formData.phone_number}%0A%0AMohon bantuannya untuk mengecek dan memberikan token aktivasi untuk tautan tersebut. Terima kasih!`;
-                  window.open(`https://wa.me/6282226252923?text=${text}`, '_blank');
+                  window.open(`https://wa.me/${adminWa}?text=${text}`, '_blank');
                 }}
               >
                 Minta Token via WhatsApp

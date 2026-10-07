@@ -17,7 +17,9 @@ import {
   ChevronDown,
   User,
   FolderOpen,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Layers,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { motion, AnimatePresence } from 'motion/react';
@@ -94,17 +96,45 @@ export default function DashboardLayout({
     }
   }, [user, isLoading, logout, router]);
 
-  const menuItems = [
-    { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5 shrink-0" /> },
-    { name: 'Media Library', href: '/dashboard/media', icon: <FolderOpen className="w-5 h-5 shrink-0" /> },
-    { name: 'Kelola Post', href: '/dashboard/blog', icon: <FileText className="w-5 h-5 shrink-0" /> },
-    { name: 'Agenda Kegiatan', href: '/dashboard/events', icon: <CalendarDays className="w-5 h-5 shrink-0" /> },
-    { name: 'Struktur Organisasi', href: '/dashboard/struktural', icon: <Users className="w-5 h-5 shrink-0" /> },
-    { name: 'Dokumen', href: '/dashboard/documents', icon: <FileText className="w-5 h-5 shrink-0" /> },
-    { name: 'Tautan Pendek', href: '/dashboard/shortlinks', icon: <LinkIcon className="w-5 h-5 shrink-0" /> },
+  const isSuperAdmin = user?.roles?.some((r: any) => r.name === 'super-admin');
+  const can = (permission?: string | string[]) => {
+    if (isSuperAdmin) return true;
+    if (!permission) return true;
+    const perms = Array.isArray(permission) ? permission : [permission];
+    return perms.some((p) => user?.all_permissions?.includes(p));
+  };
 
-    { name: 'Pengguna', href: '/dashboard/users', icon: <Users className="w-5 h-5 shrink-0" /> },
-    { name: 'Pengaturan', href: '/dashboard/settings', icon: <Settings className="w-5 h-5 shrink-0" /> },
+  const menuGroups = [
+    {
+      label: 'Menu Utama',
+      items: [
+        { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5 shrink-0" /> },
+        { name: 'Media Library', href: '/dashboard/media', icon: <FolderOpen className="w-5 h-5 shrink-0" />, permission: 'manage-media' },
+      ],
+    },
+    {
+      label: 'Konten',
+      items: [
+        { name: 'Kelola Post', href: '/dashboard/blog', icon: <FileText className="w-5 h-5 shrink-0" />, permission: 'manage-blog' },
+        { name: 'Agenda Kegiatan', href: '/dashboard/events', icon: <CalendarDays className="w-5 h-5 shrink-0" />, permission: 'manage-event' },
+        { name: 'Dokumen', href: '/dashboard/documents', icon: <FileText className="w-5 h-5 shrink-0" />, permission: 'manage-document' },
+        { name: 'Tautan Pendek', href: '/dashboard/shortlinks', icon: <LinkIcon className="w-5 h-5 shrink-0" />, permission: 'manage-shortlinks' },
+        { name: 'Linktree', href: '/dashboard/links', icon: <Layers className="w-5 h-5 shrink-0" />, permission: 'manage-links' },
+      ],
+    },
+    {
+      label: 'Organisasi',
+      items: [
+        { name: 'Struktur Organisasi', href: '/dashboard/struktural', icon: <Users className="w-5 h-5 shrink-0" />, permission: 'manage-struktural' },
+      ],
+    },
+    {
+      label: 'Sistem',
+      items: [
+        { name: 'Pengguna', href: '/dashboard/users', icon: <Users className="w-5 h-5 shrink-0" />, permission: 'manage-users' },
+        { name: 'Pengaturan', href: '/dashboard/settings', icon: <Settings className="w-5 h-5 shrink-0" />, permission: 'manage-settings' },
+      ],
+    },
   ];
 
   if (isLoading || !user) {
@@ -118,55 +148,65 @@ export default function DashboardLayout({
       
       {/* Sidebar Desktop & Mobile */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-50 bg-[#0f172a] text-white/80 transition-all duration-300 transform 
+        className={`fixed inset-y-0 left-0 z-50 bg-white text-slate-700 transition-all duration-300 transform 
           ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
-          lg:translate-x-0 lg:static lg:block flex flex-col h-screen shadow-xl lg:shadow-none
+          lg:translate-x-0 lg:static lg:block flex flex-col h-screen border-r border-slate-200 shadow-xl lg:shadow-none
           ${sidebarWidth}
         `}
       >
         {/* Logo Area */}
-        <div className={`h-16 flex items-center bg-slate-950/50 border-b border-slate-800 transition-all ${isDesktopCollapsed ? 'justify-center px-0' : 'px-6'}`}>
+        <div className={`h-16 flex items-center bg-white border-b border-slate-100 transition-all ${isDesktopCollapsed ? 'justify-center px-0' : 'px-6'}`}>
           <div className="w-8 h-8 rounded-sm bg-gradient-to-br from-[#c20000] to-[#a30000] flex items-center justify-center text-white font-bold text-lg shadow-sm shadow-[#c20000]/20 shrink-0">
             I
           </div>
           {!isDesktopCollapsed && (
-            <span className="font-bold text-white tracking-wide ml-3 whitespace-nowrap overflow-hidden" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+            <span className="font-bold text-[#0f172a] tracking-wide ml-3 whitespace-nowrap overflow-hidden" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
               PC IMM
             </span>
           )}
-          <button className="ml-auto lg:hidden text-slate-400 hover:text-white" onClick={() => setIsMobileSidebarOpen(false)}>
+          <button className="ml-auto lg:hidden text-slate-400 hover:text-slate-800" onClick={() => setIsMobileSidebarOpen(false)}>
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2 custom-scrollbar">
-          {!isDesktopCollapsed && (
-             <div className="px-2 mb-4 text-[11px] font-extrabold text-white/40 uppercase tracking-[0.15em]">Menu Utama</div>
-          )}
-          {menuItems.map((item) => {
-            const isActive = item.href === '/dashboard' 
-              ? pathname === '/dashboard' 
-              : pathname === item.href || pathname?.startsWith(`${item.href}/`);
+        <nav className="flex-1 overflow-y-auto py-6 px-4 custom-scrollbar">
+          {menuGroups.map((group) => {
+            const visibleItems = group.items.filter((item: any) => can(item.permission));
+            if (visibleItems.length === 0) return null;
             return (
-              <Link 
-                key={item.name} 
-                href={item.href}
-                className={`flex items-center rounded-xl text-sm font-semibold transition-all group ${
-                  isActive 
-                  ? 'bg-[#c20000] text-white shadow-md shadow-[#c20000]/20' 
-                  : 'text-white/60 hover:bg-white/5 hover:text-white'
-                } ${isDesktopCollapsed ? 'w-11 h-11 justify-center mx-auto' : 'px-4 py-3.5'}`}
-                title={isDesktopCollapsed ? item.name : undefined}
-              >
-                <span className={`${isActive ? 'text-white' : 'text-white/50 group-hover:text-white/90'} transition-colors flex items-center justify-center`}>
-                  {item.icon}
-                </span>
-                
+              <div key={group.label} className="mb-6 last:mb-0">
                 {!isDesktopCollapsed && (
-                  <span className="ml-3.5 truncate">{item.name}</span>
+                  <div className="px-2 mb-2 text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.15em]">{group.label}</div>
                 )}
-              </Link>
+                <div className="space-y-1.5">
+                  {visibleItems.map((item: any) => {
+                    const isActive = item.href === '/dashboard'
+                      ? pathname === '/dashboard'
+                      : pathname === item.href || pathname?.startsWith(`${item.href}/`);
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className={`flex items-center rounded-xl text-sm font-semibold transition-all group ${
+                          isActive
+                          ? 'bg-red-50 text-[#c20000] shadow-sm border border-red-100'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                        } ${isDesktopCollapsed ? 'w-11 h-11 justify-center mx-auto' : 'px-4 py-3.5'}`}
+                        title={isDesktopCollapsed ? item.name : undefined}
+                      >
+                        <span className={`${isActive ? 'text-[#c20000]' : 'text-slate-400 group-hover:text-slate-700'} transition-colors flex items-center justify-center`}>
+                          {item.icon}
+                        </span>
+
+                        {!isDesktopCollapsed && (
+                          <span className="ml-3.5 truncate">{item.name}</span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
         </nav>

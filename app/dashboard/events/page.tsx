@@ -13,6 +13,7 @@ import {
   Trash2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { formatDateTime } from '@/lib/utils';
 import { Event } from '@/types';
 import Link from 'next/link';
@@ -20,6 +21,7 @@ import { useDebounce } from 'use-debounce';
 
 export default function EventsManagement() {
   const { user } = useAuth();
+  const { confirm } = useConfirm();
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -94,7 +96,7 @@ export default function EventsManagement() {
   }, [debouncedSearch, statusFilter]);
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Apakah Anda yakin ingin memindahkan agenda ini ke tempat sampah?')) {
+    if (await confirm({ message: 'Apakah Anda yakin ingin memindahkan agenda ini ke tempat sampah?', tone: 'danger' })) {
       try {
         await api.delete(`/events/${id}`);
         toast.success('Agenda berhasil dihapus');
@@ -125,7 +127,7 @@ export default function EventsManagement() {
 
   const applyBulkAction = async () => {
     if (bulkAction === 'trash' && selectedEvents.length > 0) {
-      if (window.confirm(`Apakah Anda yakin ingin menghapus ${selectedEvents.length} agenda?`)) {
+      if (await confirm({ message: `Apakah Anda yakin ingin menghapus ${selectedEvents.length} agenda?`, tone: 'danger' })) {
         setIsBulkLoading(true);
         try {
           await Promise.all(selectedEvents.map(id => api.delete(`/events/${id}`)));
@@ -145,10 +147,10 @@ export default function EventsManagement() {
   };
 
   const PaginationControls = () => {
-    if (totalPages <= 1) return <div className="text-xs text-[#0f172a]/60 font-medium">{totalItems} items</div>;
+    if (totalPages <= 1) return <div className="text-xs text-[#0f172a]/60 font-medium">Menampilkan {totalItems} data</div>;
     return (
       <div className="flex items-center gap-3 text-sm text-[#0f172a]/60 font-medium">
-        <span>{totalItems} items</span>
+        <span>Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} data</span>
         <div className="flex items-center gap-1">
           <button 
             disabled={currentPage === 1 || isLoading}
@@ -188,12 +190,12 @@ export default function EventsManagement() {
     <div className="space-y-6 w-full">
       
       {/* IMM-Style Header but WP Layout */}
-      <div className="flex items-center gap-4 mb-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
         <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
           Agendas
         </h1>
         <Link href="/dashboard/events/create">
-          <Button variant="outline" size="sm" className="h-8 border-[#c20000] text-[#c20000] hover:bg-[#c20000]/10 bg-white rounded-md text-sm font-medium px-4">
+          <Button variant="outline" size="sm" className="h-9 bg-[#c20000] hover:bg-[#a30000] text-white rounded-md text-sm font-medium px-4 shadow-sm">
             Add New Agenda
           </Button>
         </Link>

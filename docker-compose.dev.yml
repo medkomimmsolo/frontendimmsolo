@@ -1,0 +1,20 @@
+# Dev frontend via Docker — tanpa Node global. Jalankan: docker compose -f docker-compose.dev.yml up -d
+# Buka: http://127.0.0.1:3005 — hentikan: docker compose -f docker-compose.dev.yml stop
+# Prod tetap pakai Dockerfile bawaan (standalone): docker build -t frontendimmsolo-prod .
+services:
+  web:
+    image: node:20-bookworm-slim
+    working_dir: /app
+    command: sh -c "test -d /app/node_modules/next || npm ci --no-audit --no-fund; npm run dev -- --port 3005 --hostname 0.0.0.0"
+    ports:
+      - "127.0.0.1:3005:3005"
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: 1
+      PORT: "3005"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - /app/.next
+    mem_limit: 1g
+    restart: unless-stopped

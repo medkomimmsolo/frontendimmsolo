@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -24,19 +25,22 @@ export const metadata: Metadata = {
   }
 };
 
-async function getBlogs(category?: string) {
+async function getBlogs(category?: string, page: number = 1) {
   try {
-    const url = category 
-      ? `${process.env.NEXT_PUBLIC_API_URL}/blogs?category=${category}`
-      : `${process.env.NEXT_PUBLIC_API_URL}/blogs`;
-      
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) return [];
+    const params = new URLSearchParams({ page: String(page), per_page: '12' });
+    if (category) params.set('category', category);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs?${params}`, { cache: 'no-store' });
+    if (!res.ok) return { items: [], currentPage: 1, lastPage: 1 };
     const json = await res.json();
-    return json.data.data || json.data || [];
+    const payload = json.data || {};
+    return {
+      items: Array.isArray(payload) ? payload : payload.data || [],
+      currentPage: payload.current_page || 1,
+      lastPage: payload.last_page || 1,
+    };
   } catch (error) {
     console.error('Error fetching blogs:', error);
-    return [];
+    return { items: [], currentPage: 1, lastPage: 1 };
   }
 }
 
@@ -53,7 +57,9 @@ export default async function PostPage(props: Props) {
   const searchParams = await props.searchParams;
   const category = typeof searchParams?.category === 'string' ? searchParams.category : undefined;
 
-  const posts = await getBlogs(category);
+  const searchParams2 = await props.searchParams;
+  const page = typeof searchParams2?.page === 'string' ? parseInt(searchParams2.page) || 1 : 1;
+  const { items: posts, currentPage, lastPage } = await getBlogs(category, page);
   const heroPost = posts.length > 0 ? posts[0] : null;
   const topPosts = posts.slice(1, 5); // Up to 4 posts
   const remainingPosts = posts.slice(5);
@@ -96,12 +102,15 @@ export default async function PostPage(props: Props) {
             <div className="group bg-white rounded-md shadow-sm border border-[#0f172a]/5 overflow-hidden flex flex-col hover:shadow-lg transition-shadow duration-300">
               <div className="relative aspect-[16/9] overflow-hidden">
                 <Link href={`/post/${heroPost.slug}`} className="block w-full h-full">
-                  <img 
+                  <Image
+                    
                     src={heroPost.featured_image 
                       ? (heroPost.featured_image.startsWith('http') ? heroPost.featured_image : `/storage/${heroPost.featured_image.replace(/^\/?storage\//, '')}`)
-                      : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop'} 
+                      : '/images/imm_hero_bg.jpg'} 
                     alt={heroPost.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
                   />
                 </Link>
                 <div className="absolute bottom-4 left-4">
@@ -142,12 +151,15 @@ export default async function PostPage(props: Props) {
                   <div key={post.id} className="group bg-white rounded-md shadow-sm border border-[#0f172a]/5 overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-300">
                     <div className="relative aspect-[16/9] overflow-hidden">
                       <Link href={`/post/${post.slug}`} className="block w-full h-full">
-                        <img 
+                        <Image
+                    
                           src={post.featured_image 
                             ? (post.featured_image.startsWith('http') ? post.featured_image : `/storage/${post.featured_image.replace(/^\/?storage\//, '')}`)
-                            : 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=2070&auto=format&fit=crop'} 
+                            : '/images/imm_hero_bg.jpg'} 
                           alt={post.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 50vw"
                         />
                       </Link>
                       <div className="absolute bottom-3 left-3">
@@ -191,12 +203,15 @@ export default async function PostPage(props: Props) {
             {remainingPosts.map((post: any) => (
               <Card key={post.id} className="group hover:shadow-xl transition-all duration-300 border-[#0f172a]/5 overflow-hidden flex flex-col rounded-md">
                 <Link href={`/post/${post.slug}`} className="block relative aspect-[16/9] overflow-hidden">
-                  <img 
+                  <Image
+                    
                     src={post.featured_image 
                       ? (post.featured_image.startsWith('http') ? post.featured_image : `/storage/${post.featured_image.replace(/^\/?storage\//, '')}`)
-                      : 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=2070&auto=format&fit=crop'} 
+                      : '/images/imm_hero_bg.jpg'} 
                     alt={post.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
                   />
                   <div className="absolute bottom-4 left-4">
                     <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] border-none shadow-sm rounded-sm">
@@ -246,6 +261,24 @@ export default async function PostPage(props: Props) {
         <div className="text-center py-20">
           <p className="text-[#0f172a]/70 text-lg">Belum ada post yang dipublikasikan.</p>
         </div>
+      )}
+
+      {lastPage > 1 && (
+        <nav className="flex items-center justify-center gap-2 mt-14" aria-label="Pagination">
+          {currentPage > 1 && (
+            <Link href={`/post?page=${currentPage - 1}${category ? `&category=${category}` : ''}`} className="px-4 py-2 rounded-md border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors">
+              Sebelumnya
+            </Link>
+          )}
+          <span className="px-4 py-2 text-sm font-semibold text-slate-500">
+            Halaman {currentPage} dari {lastPage}
+          </span>
+          {currentPage < lastPage && (
+            <Link href={`/post?page=${currentPage + 1}${category ? `&category=${category}` : ''}`} className="px-4 py-2 rounded-md border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors">
+              Selanjutnya
+            </Link>
+          )}
+        </nav>
       )}
 
     </main>

@@ -150,7 +150,7 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ s
         {/* Hero Image */}
         <div className="relative w-full h-[300px] md:h-[500px] rounded-sm overflow-hidden mb-12 shadow-md">
           <img 
-            src={event.banner_image || 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2070&auto=format&fit=crop'} 
+            src={event.banner_image || '/images/imm_hero_bg.jpg'} 
             alt={event.title} 
             className="w-full h-full object-cover"
           />

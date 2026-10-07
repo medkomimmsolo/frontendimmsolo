@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/Card';
+import Link from 'next/link';
 import { FileText, CalendarDays, Users, Building2, TrendingUp, Activity } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -17,6 +18,7 @@ interface DashboardStats {
 export default function DashboardOverview() {
   const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [recentPosts, setRecentPosts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -35,6 +37,9 @@ export default function DashboardOverview() {
     };
 
     fetchStats();
+    api.get('/blogs', { params: { per_page: 4, status: 'published' } })
+      .then((res) => setRecentPosts(res.data.data?.data || res.data.data || []))
+      .catch(() => {});
   }, []);
 
   const statCards = [
@@ -43,28 +48,28 @@ export default function DashboardOverview() {
       value: stats?.blogs || 0, 
       icon: <FileText className="w-6 h-6 text-blue-500" />,
       bg: 'bg-blue-50',
-      trend: '+12% bulan ini'
+      trend: 'Artikel & berita terbit'
     },
     { 
       title: 'Agenda Aktif', 
       value: stats?.events || 0, 
       icon: <CalendarDays className="w-6 h-6 text-amber-500" />,
       bg: 'bg-amber-50',
-      trend: '3 akan datang'
+      trend: 'Agenda terjadwal'
     },
     { 
       title: 'Pengurus & Kader', 
       value: stats?.users || 0, 
       icon: <Users className="w-6 h-6 text-emerald-500" />,
       bg: 'bg-emerald-50',
-      trend: '+5 admin baru'
+      trend: 'Akun terdaftar'
     },
     { 
       title: 'Komisariat & LSO', 
       value: stats?.lembaga || 0, 
       icon: <Building2 className="w-6 h-6 text-[#c20000]" />,
       bg: 'bg-[#c20000]/5',
-      trend: 'Aktif semua'
+      trend: 'Komisariat & LSO'
     },
   ];
 
@@ -124,45 +129,30 @@ export default function DashboardOverview() {
           <Card className="border-[#0f172a]/10 shadow-sm h-full">
             <div className="p-6 border-b border-[#0f172a]/5 flex items-center justify-between">
               <h2 className="text-lg font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Aktivitas Terbaru</h2>
-              <Activity className="w-5 h-5 text-white/70" />
+              <Activity className="w-5 h-5 text-slate-400" />
             </div>
             <CardContent className="p-0">
               <div className="divide-y divide-slate-100">
                 {isLoading ? (
                   <div className="p-6 text-center text-sm text-[#0f172a]/70">Memuat data...</div>
                 ) : (
-                  // Placeholder for recent activity
                   <>
-                    <div className="p-4 sm:p-6 hover:bg-white transition-colors">
-                      <div className="flex items-start">
-                        <div className="w-2 h-2 mt-2 rounded-full bg-blue-500 mr-4"></div>
-                        <div>
-                          <p className="text-sm font-semibold text-[#0f172a]">Admin menambahkan post baru</p>
-                          <p className="text-xs text-[#0f172a]/70 mb-1">"Pelantikan Serentak PC IMM..."</p>
-                          <p className="text-xs text-white/70">2 jam yang lalu</p>
+                  {recentPosts.length === 0 ? (
+                    <div className="p-6 text-center text-sm text-[#0f172a]/70">Belum ada aktivitas post terbaru.</div>
+                  ) : (
+                    recentPosts.map((post) => (
+                      <Link href={`/dashboard/blog/${post.id}`} key={post.id} className="block p-4 sm:p-6 hover:bg-slate-50 transition-colors">
+                        <div className="flex items-start">
+                          <div className="w-2 h-2 mt-2 rounded-full bg-[#c20000] mr-4"></div>
+                          <div>
+                            <p className="text-sm font-semibold text-[#0f172a]">{post.title}</p>
+                            <p className="text-xs text-[#0f172a]/70 mb-1">{post.category?.name || 'Umum'}</p>
+                            <p className="text-xs text-slate-400">{new Date(post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                    <div className="p-4 sm:p-6 hover:bg-white transition-colors">
-                      <div className="flex items-start">
-                        <div className="w-2 h-2 mt-2 rounded-full bg-amber-500 mr-4"></div>
-                        <div>
-                          <p className="text-sm font-semibold text-[#0f172a]">Agenda baru dijadwalkan</p>
-                          <p className="text-xs text-[#0f172a]/70 mb-1">"Sekolah Instruktur Dasar (SID)"</p>
-                          <p className="text-xs text-white/70">5 jam yang lalu</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-4 sm:p-6 hover:bg-white transition-colors">
-                      <div className="flex items-start">
-                        <div className="w-2 h-2 mt-2 rounded-full bg-emerald-500 mr-4"></div>
-                        <div>
-                          <p className="text-sm font-semibold text-[#0f172a]">Sistem diperbarui</p>
-                          <p className="text-xs text-[#0f172a]/70 mb-1">Pembaruan konfigurasi SEO</p>
-                          <p className="text-xs text-white/70">1 hari yang lalu</p>
-                        </div>
-                      </div>
-                    </div>
+                      </Link>
+                    ))
+                  )}
                   </>
                 )}
               </div>
@@ -177,7 +167,7 @@ export default function DashboardOverview() {
               <h2 className="text-lg font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Aksi Cepat</h2>
             </div>
             <CardContent className="p-6 space-y-4">
-              <button className="w-full flex items-center p-3 rounded-sm border border-[#0f172a]/10 hover:border-imm-red-500 hover:bg-[#c20000]/5 hover:text-[#c20000] transition-colors group">
+              <Link href="/dashboard/blog/create" className="w-full flex items-center p-3 rounded-sm border border-[#0f172a]/10 hover:border-imm-red-500 hover:bg-[#c20000]/5 hover:text-[#c20000] transition-colors group">
                 <div className="w-10 h-10 rounded-sm bg-white text-[#0f172a]/70 group-hover:bg-white group-hover:text-[#c20000] flex items-center justify-center mr-3 transition-colors">
                   <FileText className="w-5 h-5" />
                 </div>
@@ -185,9 +175,9 @@ export default function DashboardOverview() {
                   <div className="text-sm font-bold text-[#0f172a] group-hover:text-[#c20000]">Tulis Post</div>
                   <div className="text-xs text-[#0f172a]/70">Buat artikel jurnal baru</div>
                 </div>
-              </button>
+              </Link>
 
-              <button className="w-full flex items-center p-3 rounded-sm border border-[#0f172a]/10 hover:border-amber-500 hover:bg-amber-50 hover:text-amber-600 transition-colors group">
+              <Link href="/dashboard/events/create" className="w-full flex items-center p-3 rounded-sm border border-[#0f172a]/10 hover:border-amber-500 hover:bg-amber-50 hover:text-amber-600 transition-colors group">
                 <div className="w-10 h-10 rounded-sm bg-white text-[#0f172a]/70 group-hover:bg-white group-hover:text-amber-600 flex items-center justify-center mr-3 transition-colors">
                   <CalendarDays className="w-5 h-5" />
                 </div>
@@ -195,7 +185,7 @@ export default function DashboardOverview() {
                   <div className="text-sm font-bold text-[#0f172a] group-hover:text-amber-600">Buat Agenda</div>
                   <div className="text-xs text-[#0f172a]/70">Jadwalkan kegiatan baru</div>
                 </div>
-              </button>
+              </Link>
             </CardContent>
           </Card>
         </div>
