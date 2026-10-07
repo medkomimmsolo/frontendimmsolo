@@ -257,6 +257,13 @@ export default function Login() {
               </Button>
             </form>
 
+            <p className="text-center text-sm text-slate-600 mt-6">
+              Belum punya akun?{' '}
+              <Link href="/ajukan-akun" className="font-bold text-[#c20000] hover:text-[#a30000] transition-colors">
+                Ajukan Akun
+              </Link>
+            </p>
+
           </motion.div>
         </div>
       </div>

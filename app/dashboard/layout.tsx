@@ -19,6 +19,7 @@ import {
   FolderOpen,
   Link as LinkIcon,
   Layers,
+  UserPlus,
   ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -132,6 +133,7 @@ export default function DashboardLayout({
       label: 'Sistem',
       items: [
         { name: 'Pengguna', href: '/dashboard/users', icon: <Users className="w-5 h-5 shrink-0" />, permission: 'manage-users' },
+        { name: 'Pengajuan Akun', href: '/dashboard/account-requests', icon: <UserPlus className="w-5 h-5 shrink-0" />, permission: 'manage-users' },
         { name: 'Pengaturan', href: '/dashboard/settings', icon: <Settings className="w-5 h-5 shrink-0" />, permission: 'manage-settings' },
       ],
     },
