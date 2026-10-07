@@ -127,7 +127,7 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[#0f172a]/90">Password Baru <span className="text-white/70 font-normal">(Opsional)</span></label>
+              <label className="text-sm font-medium text-[#0f172a]/90">Password Baru <span className="text-slate-400 font-normal">(Opsional)</span></label>
               <input 
                 type="password" 
                 name="password"

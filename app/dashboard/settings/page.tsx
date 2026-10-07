@@ -21,6 +21,7 @@ export default function SettingsManagement() {
     site_icon: '',
     contact_email: '',
     contact_phone: '',
+    shortlink_admin_wa: '',
     address: '',
     social_instagram: '',
     social_youtube: '',
@@ -200,14 +201,14 @@ export default function SettingsManagement() {
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-4 mb-10 pb-6 border-b border-slate-200"
+        className="flex items-center gap-4 mb-8 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5"
       >
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/20">
-          <SettingsIcon className="w-6 h-6 text-white" />
+        <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center border border-red-100">
+          <SettingsIcon className="w-6 h-6 text-[#c20000]" />
         </div>
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Pengaturan Sistem</h1>
-          <p className="text-slate-500 mt-1 font-medium">Kelola identitas utama, logo, dan kontak resmi organisasi.</p>
+          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Pengaturan Sistem</h1>
+          <p className="text-[#0f172a]/70 text-sm mt-1">Kelola identitas utama, logo, dan kontak resmi organisasi.</p>
         </div>
       </motion.div>
 
@@ -383,6 +384,21 @@ export default function SettingsManagement() {
                       placeholder="+62 8..."
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Nomor WhatsApp Admin Shortlink</label>
+                  <input 
+                    type="text" 
+                    name="shortlink_admin_wa"
+                    pattern="62[0-9]{8,13}"
+                    title="Format: 628xxxxxxxxxx"
+                    value={settings.shortlink_admin_wa}
+                    onChange={handleChange}
+                    className={inputClass}
+                    placeholder="628xxxxxxxxxx"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">Nomor tujuan pengajuan token shortlink dari halaman publik (format: 628...).</p>
                 </div>
 
                 <div>

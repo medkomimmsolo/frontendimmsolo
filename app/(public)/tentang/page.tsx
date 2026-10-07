@@ -129,7 +129,7 @@ export default async function TentangPage() {
               {/* Image itself */}
               <div className="relative h-[500px] rounded-sm overflow-hidden shadow-xl">
                 <img 
-                  src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=2000&auto=format&fit=crop" 
+                  src="/images/imm_hero_bg.jpg" 
                   alt="Kegiatan PC IMM Surakarta" 
                   className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-1000"
                 />

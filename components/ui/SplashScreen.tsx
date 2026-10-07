@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { usePathname } from 'next/navigation';
 
 const smoothEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const slowEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -11,41 +10,13 @@ export default function SplashScreen({ iconUrl }: { iconUrl?: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   
-  const pathname = usePathname();
   const isInitialLoad = useRef(true);
-
-  // Intercept all internal link clicks to show the splash screen IMMEDIATELY
-  useEffect(() => {
-    const handleDocumentClick = (e: MouseEvent) => {
-      const anchor = (e.target as HTMLElement).closest('a');
-      
-      if (
-        anchor && 
-        anchor.href && 
-        anchor.href.startsWith(window.location.origin) && 
-        anchor.target !== '_blank' &&
-        !e.ctrlKey && 
-        !e.metaKey
-      ) {
-        const currentUrl = new URL(window.location.href);
-        const targetUrl = new URL(anchor.href);
-        
-        // If navigating to a different page
-        if (currentUrl.pathname !== targetUrl.pathname) {
-          setIsLoading(true);
-          setProgress(15); // Start progress slightly to show activity
-        }
-      }
-    };
-
-    document.addEventListener('click', handleDocumentClick, true);
-    return () => document.removeEventListener('click', handleDocumentClick, true);
-  }, []);
 
   // Handle the progress animation and hiding logic
   useEffect(() => {
-    setIsLoading(true);
     const isFirst = isInitialLoad.current;
+    if (!isFirst) return;
+    setIsLoading(true);
     if (isFirst) {
       isInitialLoad.current = false;
       setProgress(0);
@@ -80,7 +51,7 @@ export default function SplashScreen({ iconUrl }: { iconUrl?: string }) {
       clearInterval(counterInterval);
       clearTimeout(hideTimer);
     };
-  }, [pathname]);
+  }, []);
 
   const imageSource = iconUrl 
     ? (iconUrl.startsWith('http') ? iconUrl : `${iconUrl}`) 

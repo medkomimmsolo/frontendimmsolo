@@ -6,13 +6,20 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Plus, Edit, Trash2, Link as LinkIcon, ExternalLink, Activity, Key } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useConfirm } from '@/components/providers/ConfirmProvider';
 
 export default function ShortlinksPage() {
-  const [shortlinks, setShortlinks] = useState([]);
+  const { confirm } = useConfirm();
+  const [shortlinks, setShortlinks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+
   const [formData, setFormData] = useState({
     slug: '',
     target_url: '',
@@ -20,10 +27,17 @@ export default function ShortlinksPage() {
     is_active: true
   });
 
-  const fetchShortlinks = async () => {
+  const fetchShortlinks = async (page = currentPage, search = searchQuery) => {
     try {
-      const res = await api.get('/shortlinks');
-      setShortlinks(res.data.data);
+      const res = await api.get('/shortlinks', { params: { page, per_page: 15, search: search || undefined } });
+      const payload = res.data.data;
+      if (payload && payload.data) {
+        setShortlinks(payload.data);
+        setTotalPages(payload.last_page || 1);
+        setTotalItems(payload.total || 0);
+      } else {
+        setShortlinks(Array.isArray(payload) ? payload : []);
+      }
     } catch (error) {
       toast.error('Gagal mengambil data shortlink');
     } finally {
@@ -33,7 +47,8 @@ export default function ShortlinksPage() {
 
   useEffect(() => {
     fetchShortlinks();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
 
   const handleOpenModal = (item: any = null) => {
     if (item) {
@@ -74,7 +89,7 @@ export default function ShortlinksPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Yakin ingin menghapus shortlink ini?')) return;
+    if (!(await confirm({ message: 'Yakin ingin menghapus shortlink ini?', tone: 'danger' }))) return;
     try {
       await api.delete(`/shortlinks/${id}`);
       toast.success('Shortlink berhasil dihapus');
@@ -90,14 +105,14 @@ export default function ShortlinksPage() {
   };
 
   const copyToClipboard = (slug: string) => {
-    const url = `${window.location.origin}/${slug}`;
+    const url = `${window.location.origin}/s/${slug}`;
     navigator.clipboard.writeText(url);
     toast.success('Link disalin ke clipboard');
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
         <div>
           <h1 className="text-2xl font-bold text-slate-800" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Manajemen Shortlink</h1>
           <p className="text-slate-500 text-sm mt-1">Buat dan kelola tautan pendek (URL Shortener)</p>
@@ -107,6 +122,16 @@ export default function ShortlinksPage() {
           Buat Shortlink
         </Button>
       </div>
+
+      <form onSubmit={(e) => { e.preventDefault(); setCurrentPage(1); fetchShortlinks(1, searchQuery); }} className="bg-white border border-slate-200 rounded-sm p-4 shadow-sm">
+        <input
+          type="text"
+          placeholder="Cari slug atau target URL... (Enter)"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+        />
+      </form>
 
       <Card className="border border-slate-200 shadow-sm">
         <CardContent className="p-0">
@@ -136,7 +161,7 @@ export default function ShortlinksPage() {
                     <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-slate-900">{item.slug}</span>
+                          <span className="font-semibold text-slate-900">immsolo.or.id/s/{item.slug}</span>
                           <button 
                             onClick={() => copyToClipboard(item.slug)}
                             className="text-slate-400 hover:text-[#c20000] transition-colors"
@@ -145,7 +170,7 @@ export default function ShortlinksPage() {
                             <LinkIcon className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                        <div className="text-xs text-slate-500 mt-1">/{item.slug}</div>
+                        <div className="text-xs text-slate-500 mt-1 font-mono">/{item.slug}</div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="max-w-xs truncate text-slate-600" title={item.target_url}>
@@ -191,10 +216,10 @@ export default function ShortlinksPage() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           {!item.is_active && (
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="h-8 w-8 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200" 
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-9 w-9 p-0 text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-sm" 
                               onClick={async () => {
                                 try {
                                   const res = await api.post(`/shortlinks/${item.id}/token`);
@@ -211,10 +236,10 @@ export default function ShortlinksPage() {
                               <Key className="w-4 h-4" />
                             </Button>
                           )}
-                          <Button variant="outline" size="sm" onClick={() => handleOpenModal(item)} className="h-8 w-8 p-0">
-                            <Edit className="w-4 h-4 text-slate-600" />
+                          <Button variant="ghost" size="sm" onClick={() => handleOpenModal(item)} title="Edit" className="h-9 w-9 p-0 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm">
+                            <Edit className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="sm" className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-200" onClick={() => handleDelete(item.id)}>
+                          <Button variant="ghost" size="sm" className="h-9 w-9 p-0 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm" title="Hapus" onClick={() => handleDelete(item.id)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -224,6 +249,16 @@ export default function ShortlinksPage() {
                 )}
               </tbody>
             </table>
+          </div>
+          <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
+            <p className="text-xs text-slate-500 font-medium">
+              Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} shortlink
+            </p>
+            <div className="flex items-center gap-2">
+              <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
+              <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
+              <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -2,6 +2,18 @@ import { Metadata } from 'next';
 import { ShieldAlert, MessageCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { checkMaintenance } from '@/lib/maintenance';
+
+async function getAdminWa(): Promise<string> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, { cache: 'no-store' });
+    const data = await res.json();
+    const raw = data?.data;
+    const val = Array.isArray(raw) ? raw.find((i: any) => i.key === 'shortlink_admin_wa')?.value : raw?.shortlink_admin_wa;
+    return val ? String(val).replace(/[^0-9]/g, '') : '6282226252923';
+  } catch {
+    return '6282226252923';
+  }
+}
 import MaintenancePage from '@/components/ui/MaintenancePage';
 
 export const metadata: Metadata = {
@@ -15,6 +27,7 @@ export default async function PendingShortlinkPage({
   searchParams: Promise<{ slug?: string }>;
 }) {
   const { slug } = await searchParams;
+  const adminWa = await getAdminWa();
   if (await checkMaintenance('maintenance_shortlink')) return <MaintenancePage />;
   
   return (
@@ -39,7 +52,7 @@ export default async function PendingShortlinkPage({
             Silakan hubungi Admin untuk konfirmasi agar tautan segera diaktifkan. Anda bisa langsung chat tanpa format khusus.
           </p>
           <a 
-            href="https://wa.me/6282226252923" 
+            href={`https://wa.me/${adminWa}`} 
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebd5a] text-white py-2.5 rounded-lg font-medium transition-colors"

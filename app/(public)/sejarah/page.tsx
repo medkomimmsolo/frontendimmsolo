@@ -139,7 +139,7 @@ export default async function SejarahPage() {
               {/* Image itself */}
               <div className="relative h-[600px] rounded-sm overflow-hidden shadow-xl">
                 <img 
-                  src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070&auto=format&fit=crop" 
+                  src="/images/imm_hero_bg.jpg" 
                   alt="Sejarah IMM" 
                   className="w-full h-full object-cover mix-blend-overlay opacity-80 hover:scale-105 transition-transform duration-1000"
                 />

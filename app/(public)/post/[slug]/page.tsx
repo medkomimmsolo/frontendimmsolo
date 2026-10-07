@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Badge } from '@/components/ui/Badge';
 import { ArrowLeft, Calendar, User, ChevronRight, Clock, TrendingUp, Eye } from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -96,7 +97,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
 
   const imageUrl = post.featured_image 
     ? (post.featured_image.startsWith('http') ? post.featured_image : `/storage/${post.featured_image.replace(/^\/?storage\//, '')}`) 
-    : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop';
+    : '/images/imm_hero_bg.jpg';
 
   // Calculate reading time (roughly 250 words per minute)
   const wordCount = post.content ? post.content.replace(/<[^>]*>?/gm, '').split(/\s+/).length : 0;
@@ -251,11 +252,13 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
               {/* ── Featured Image ── */}
               <figure className="relative w-full mb-10">
                 <div className="relative aspect-[16/9] rounded-md overflow-hidden bg-slate-100 border border-[#0f172a]/8">
-                  <img 
-                    src={imageUrl} 
-                    alt={post.title} 
+                  <Image
+                    src={imageUrl}
+                    alt={post.title}
                     className="w-full h-full object-cover"
-                    loading="eager"
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 900px"
                   />
                 </div>
                 {/* Image caption area */}
@@ -271,17 +274,20 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
               {/* ── Article Content (Rich Text from CMS) ── */}
               <div 
                 className="article-content"
-                dangerouslySetInnerHTML={{ 
-                  __html: post.content
-                    // 1. Hapus paragraf kosong di awal (seperti <p><br></p> atau <p>&nbsp;</p>) yang sering dibuat oleh editor teks
-                    .replace(/^(?:\s*<p[^>]*>(?:\s*|&nbsp;|<br\s*\/?>)*<\/p>\s*)+/i, '')
-                    // 2. Cari tag <p> pertama yang BENAR-BENAR berisi teks, lalu sisipkan dateline
-                    .replace(
-                      /(<p[^>]*>)/i, 
-                      '$1<span class="dateline">Surakarta, <a href="https://immsolo.or.id" title="Beranda PC IMM Kota Surakarta" style="text-decoration: none !important; border-bottom: none !important; transition: color 0.2s ease;" onmouseover="this.style.color=\'#ef4444\'" onmouseout="this.style.color=\'#c20000\'">immsolo.or.id</a> &mdash; </span>'
-                    )
-                    // 3. Perbaiki URL gambar relatif atau malformed (seperti /v1/storage/storage/blogs/...) agar mengarah ke backend yang benar
-                    .replace(/src="[^"]*\/storage\/(blogs\/[^"]+)"/g, 'src="/storage/$1"')
+                dangerouslySetInnerHTML={{
+                  __html: (() => {
+                    let html = post.content
+                      .replace(/^(?:\s*<p[^>]*>(?:\s*|&nbsp;|<br\s*\/?>)*<\/p>\s*)+/i, '')
+                      .replace(/src="[^"]*\/storage\/(blogs\/[^"]+)"/g, 'src="/storage/$1"');
+                    const safeForDateline = !/dateline/i.test(html) && !/^\s*<(figure|img|h[1-6]|table|div|blockquote)/i.test(html);
+                    if (safeForDateline) {
+                      html = html.replace(
+                        /(<p[^>]*>)/i,
+                        '$1<span class="dateline">Surakarta, <a href="https://immsolo.or.id" title="Beranda PC IMM Kota Surakarta" style="text-decoration: none !important; border-bottom: none !important;">immsolo.or.id</a> &mdash; </span>'
+                      );
+                    }
+                    return html;
+                  })()
                 }}
               />
 

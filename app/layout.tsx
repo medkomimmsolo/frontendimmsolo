@@ -5,6 +5,7 @@ import QueryProvider from '@/providers/QueryProvider';
 import { Toaster } from 'react-hot-toast';
 import SplashScreen from '@/components/ui/SplashScreen';
 import { ProgressBarProvider } from '@/components/providers/ProgressBarProvider';
+import { ConfirmProvider } from '@/components/providers/ConfirmProvider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -183,6 +184,7 @@ export default async function RootLayout({
       <body className="min-h-screen bg-white text-[#0f172a] font-sans antialiased" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
         <QueryProvider>
           <ProgressBarProvider>
+            <ConfirmProvider>
             <SplashScreen iconUrl={siteIcon} />
             {children}
             <Toaster
@@ -202,6 +204,7 @@ export default async function RootLayout({
                 },
               }}
             />
+                      </ConfirmProvider>
           </ProgressBarProvider>
         </QueryProvider>
       </body>

@@ -17,6 +17,7 @@ import {
   GripVertical
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { Struktural } from '@/types';
 import Link from 'next/link';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
@@ -35,6 +36,7 @@ type KategoriNode = {
 
 export default function StrukturalManagement() {
   const { user } = useAuth();
+  const { confirm } = useConfirm();
   const [struktural, setStruktural] = useState<Struktural[]>([]);
   const [treeData, setTreeData] = useState<KategoriNode[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -110,7 +112,7 @@ export default function StrukturalManagement() {
   }, [struktural, selectedPeriod]);
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus data pengurus ini?')) {
+    if (await confirm({ message: 'Apakah Anda yakin ingin menghapus data pengurus ini?', tone: 'danger' })) {
       try {
         await api.delete(`/struktural/${id}`);
         toast.success('Data pengurus berhasil dihapus');
@@ -410,7 +412,7 @@ export default function StrukturalManagement() {
       {isLoading ? (
         <Card className="border-[#0f172a]/10 shadow-sm overflow-hidden">
           <div className="p-12 text-center">
-            <div className="flex flex-col items-center justify-center text-white/70">
+            <div className="flex flex-col items-center justify-center text-slate-400">
               <Loader2 className="w-8 h-8 animate-spin mb-4 text-[#c20000]" />
               <p>Memuat data pengurus...</p>
             </div>

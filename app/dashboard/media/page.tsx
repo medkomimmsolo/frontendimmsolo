@@ -86,7 +86,7 @@ export default function MediaLibrary() {
   if (groups.length === 0) {
     return (
       <div className="space-y-6">
-        <div>
+        <div className="bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
           <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
             Media Library
           </h1>

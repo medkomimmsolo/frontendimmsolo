@@ -5,7 +5,9 @@ export interface User {
   komisariat_id: number | null;
   bidang_id: number | null;
   profile_photo_path: string | null;
+  is_active: boolean;
   roles: Role[];
+  all_permissions?: string[];
   created_at: string;
   updated_at: string;
 }

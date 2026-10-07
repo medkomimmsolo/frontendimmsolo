@@ -1,8 +1,18 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  webpack(config) {
+    // Pastikan "quill" selalu resolve ke satu salinan yang sama di semua package
+    // (quill-table-up dan react-quill-new harus berbagi instance yang identik)
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      quill: path.resolve('./node_modules/quill'),
+    };
+    return config;
+  },
   images: {
     remotePatterns: [
       {
