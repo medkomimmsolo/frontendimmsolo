@@ -31,6 +31,7 @@ export default function UsersManagement() {
   const [totalItems, setTotalItems] = useState(0);
   const [accessModalUser, setAccessModalUser] = useState<User | null>(null);
   const [accessDirect, setAccessDirect] = useState<string[]>([]);
+  const [accessDenied, setAccessDenied] = useState<string[]>([]);
   const [accessViaRole, setAccessViaRole] = useState<string[]>([]);
   const [accessAllPerms, setAccessAllPerms] = useState<string[]>([]);
   const [accessAllCats, setAccessAllCats] = useState<any[]>([]);
@@ -57,6 +58,7 @@ export default function UsersManagement() {
       const isSuper = u.roles?.some((r: any) => r.name === 'super-admin');
       setAccessDirect(permRes.data.data.direct || []);
       setAccessViaRole(isSuper ? (rolesRes.data.data.permissions || []) : (permRes.data.data.via_role || []));
+      setAccessDenied(isSuper ? [] : (permRes.data.data.denied || []));
     } catch {
       toast.error('Gagal memuat hak akses');
     } finally {
@@ -65,7 +67,14 @@ export default function UsersManagement() {
   };
 
   const toggleAccessPerm = (perm: string) => {
-    if (accessViaRole.includes(perm)) return;
+    if (accessDenied.includes(perm)) {
+      setAccessDenied((prev) => prev.filter((x) => x !== perm));
+      return;
+    }
+    if (accessViaRole.includes(perm)) {
+      setAccessDenied((prev) => [...prev, perm]);
+      return;
+    }
     setAccessDirect((prev) => (prev.includes(perm) ? prev.filter((x) => x !== perm) : [...prev, perm]));
   };
 
@@ -73,7 +82,7 @@ export default function UsersManagement() {
     if (!accessModalUser) return;
     setAccessSaving(true);
     try {
-      await api.put(`/users/${accessModalUser.id}/permissions`, { permissions: accessDirect });
+      await api.put(`/users/${accessModalUser.id}/permissions`, { permissions: accessDirect, denied: accessDenied });
       await api.put(`/users/${accessModalUser.id}/categories`, { categories: accessAllowedCats });
       toast.success(`Hak akses modul untuk "${accessModalUser.name}" diperbarui`);
       setAccessModalUser(null);
@@ -106,6 +115,9 @@ export default function UsersManagement() {
     'manage-settings': 'Pengaturan',
     'manage-users': 'Pengguna & Hak Akses',
     'manage-links': 'Linktree',
+    'manage-account-requests': 'Pengajuan Akun',
+    'manage-audit-logs': 'Log Aktivitas',
+    'manage-messages': 'Kotak Masuk',
   };
 
 
@@ -310,14 +322,16 @@ export default function UsersManagement() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {accessAllPerms.map((perm) => {
                   const fromRole = accessViaRole.includes(perm);
-                  const checked = fromRole || accessDirect.includes(perm);
-                  const locked = fromRole || accessModalUser.roles?.some((r: any) => r.name === 'super-admin');
+                  const isDenied = accessDenied.includes(perm);
+                  const checked = !isDenied && (fromRole || accessDirect.includes(perm));
+                  const locked = accessModalUser.roles?.some((r: any) => r.name === 'super-admin');
                   return (
                     <label key={perm} className={`flex items-center gap-3 p-3 border rounded-lg transition-colors ${checked ? 'border-[#c20000]/40 bg-[#c20000]/5' : 'border-slate-200'} ${locked ? 'opacity-60' : 'cursor-pointer hover:bg-slate-50'}`}>
                       <input type="checkbox" checked={checked} disabled={locked} onChange={() => toggleAccessPerm(perm)} className="w-4 h-4 accent-[#c20000]" />
                       <span className="text-sm font-medium text-slate-700">
                         {PERM_LABELS[perm] ?? perm}
-                        {fromRole && <span className="ml-2 text-[10px] uppercase tracking-wide text-slate-400">via role</span>}
+                        {fromRole && !isDenied && <span className="ml-2 text-[10px] uppercase tracking-wide text-slate-400">via role</span>}
+                        {isDenied && <span className="ml-2 text-[10px] uppercase tracking-wide text-red-400">dimatikan</span>}
                       </span>
                     </label>
                   );

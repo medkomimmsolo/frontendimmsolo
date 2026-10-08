@@ -129,6 +129,36 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
         </Button>
       </div>
 
+      {items.length > 0 && (() => {
+        const total = items.reduce((sum: number, it: any) => sum + (it.clicks || 0), 0);
+        const max = Math.max(...items.map((it: any) => it.clicks || 0), 1);
+        return (
+          <Card className="border-[#0f172a]/10 shadow-sm">
+            <div className="p-6 grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Total Klik</p>
+                <p className="text-3xl font-bold text-[#0f172a] mt-1">{total}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Tautan Aktif</p>
+                <p className="text-3xl font-bold text-[#0f172a] mt-1">{items.filter((it: any) => it.is_active).length}/{items.length}</p>
+              </div>
+              <div className="col-span-2 space-y-2 pt-2">
+                {items.map((it: any) => (
+                  <div key={it.id} className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-slate-600 w-40 truncate">{it.title}</span>
+                    <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div className="h-full rounded-full bg-[#c20000]" style={{ width: `${Math.round(((it.clicks || 0) / max) * 100)}%` }} />
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 w-10 text-right">{it.clicks || 0}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        );
+      })()}
+
       <Card className="border-[#0f172a]/10 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">

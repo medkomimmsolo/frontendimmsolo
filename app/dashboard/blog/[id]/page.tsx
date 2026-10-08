@@ -36,6 +36,7 @@ export default function EditBlog({ params }: { params: Promise<{ id: string }> }
     excerpt: '',
     content: '',
     status: 'draft',
+    published_at: '',
     author_name: '',
     editor_name: '',
     author_role: '',
@@ -95,6 +96,7 @@ export default function EditBlog({ params }: { params: Promise<{ id: string }> }
           excerpt: blog.excerpt || '',
           content: fixedContent,
           status: blog.status || 'draft',
+          published_at: blog.published_at ? blog.published_at.slice(0, 16) : '',
           author_name: blog.author_name || '',
           editor_name: blog.editor_name || '',
           author_role: blog.author_role || '',
@@ -537,6 +539,17 @@ export default function EditBlog({ params }: { params: Promise<{ id: string }> }
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Jadwal Tayang <span className="text-slate-400 font-normal">(opsional)</span></label>
+                <input
+                  type="datetime-local"
+                  name="published_at"
+                  value={formData.published_at}
+                  onChange={handleChange}
+                  className="w-full bg-white border border-slate-300 rounded-sm px-2 py-1.5 text-sm text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Kosongkan untuk tayang langsung. Isi untuk tayang otomatis sesuai jadwal.</p>
               </div>
 
               <div className="flex items-center gap-2 pt-2 border-t border-slate-100">

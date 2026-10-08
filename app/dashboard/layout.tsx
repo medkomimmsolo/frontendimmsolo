@@ -20,6 +20,8 @@ import {
   Link as LinkIcon,
   Layers,
   UserPlus,
+  History,
+  Inbox,
   ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -102,6 +104,8 @@ export default function DashboardLayout({
     if (isSuperAdmin) return true;
     if (!permission) return true;
     const perms = Array.isArray(permission) ? permission : [permission];
+    const denied = user?.denied_permissions || [];
+    if (perms.some((p) => denied.includes(p))) return false;
     return perms.some((p) => user?.all_permissions?.includes(p));
   };
 
@@ -133,7 +137,9 @@ export default function DashboardLayout({
       label: 'Sistem',
       items: [
         { name: 'Pengguna', href: '/dashboard/users', icon: <Users className="w-5 h-5 shrink-0" />, permission: 'manage-users' },
-        { name: 'Pengajuan Akun', href: '/dashboard/account-requests', icon: <UserPlus className="w-5 h-5 shrink-0" />, permission: 'manage-users' },
+        { name: 'Pengajuan Akun', href: '/dashboard/account-requests', icon: <UserPlus className="w-5 h-5 shrink-0" />, permission: 'manage-account-requests' },
+        { name: 'Log Aktivitas', href: '/dashboard/audit-logs', icon: <History className="w-5 h-5 shrink-0" />, permission: 'manage-audit-logs' },
+        { name: 'Kotak Masuk', href: '/dashboard/messages', icon: <Inbox className="w-5 h-5 shrink-0" />, permission: 'manage-messages' },
         { name: 'Pengaturan', href: '/dashboard/settings', icon: <Settings className="w-5 h-5 shrink-0" />, permission: 'manage-settings' },
       ],
     },
