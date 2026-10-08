@@ -1,7 +1,7 @@
 import { Metadata } from "next";
-import { Mail, MapPin, MessageSquare } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import KontakFormClient from "./KontakFormClient";
 
 export const metadata: Metadata = {
   title: "Kontak",
@@ -144,60 +144,7 @@ export default async function KontakPage() {
                 >
                   Kirim Pesan
                 </h3>
-                <form className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-semibold text-[#0f172a]">
-                        Nama Lengkap
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Masukkan nama..."
-                        className="w-full px-4 py-3 rounded-sm border border-slate-200 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-sm font-semibold text-[#0f172a]">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        placeholder="contoh@email.com"
-                        className="w-full px-4 py-3 rounded-sm border border-slate-200 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-[#0f172a]">
-                      Subjek
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Hal yang ingin didiskusikan"
-                      className="w-full px-4 py-3 rounded-sm border border-slate-200 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-semibold text-[#0f172a]">
-                      Pesan
-                    </label>
-                    <textarea
-                      rows={5}
-                      placeholder="Tuliskan pesan Anda di sini..."
-                      className="w-full px-4 py-3 rounded-sm border border-slate-200 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors resize-none"
-                    ></textarea>
-                  </div>
-
-                  <Button
-                    type="button"
-                    className="w-full bg-[#c20000] hover:bg-[#a30000] text-white py-6 rounded-sm font-semibold text-base mt-4 shadow-md shadow-red-500/20"
-                  >
-                    <MessageSquare className="w-5 h-5 mr-2" />
-                    Kirim Pesan
-                  </Button>
-                </form>
+                <KontakFormClient />
               </CardContent>
             </Card>
           </div>

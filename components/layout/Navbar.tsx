@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, ChevronRight, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronRight, ChevronDown, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 
@@ -261,6 +261,9 @@ export default function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-4">
+          <Link href="/cari" title="Cari" className={cn("p-2 rounded-full transition-colors", isTransparent ? "text-white hover:bg-white/10" : "text-[#0f172a]/70 hover:bg-slate-100")}>
+            <Search className="w-5 h-5" />
+          </Link>
           <Link href="/login">
             <Button className={cn("rounded-sm transition-colors bg-[#c20000] hover:bg-[#a30000] text-white border-none px-6", isTransparent ? "shadow-none" : "shadow-sm")}>
               Masuk

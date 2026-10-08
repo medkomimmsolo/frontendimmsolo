@@ -8,6 +8,7 @@ export interface User {
   is_active: boolean;
   roles: Role[];
   all_permissions?: string[];
+  denied_permissions?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -31,9 +32,11 @@ export interface Blog {
   title: string;
   slug: string;
   excerpt: string;
+  published_at: string | null;
   content: string;
   featured_image: string | null;
   status: 'draft' | 'published' | 'archived';
+  review_status?: 'pending' | 'approved' | 'rejected';
   views_count: number;
   meta_title: string | null;
   meta_description: string | null;

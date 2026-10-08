@@ -14,8 +14,7 @@ import {
   FileText,
   Edit,
   Trash2,
-  Eye
-} from 'lucide-react';
+  Eye, Check, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { formatDate } from '@/lib/utils';
@@ -34,6 +33,7 @@ export default function BlogManagement() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch] = useDebounce(searchQuery, 800);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [reviewFilter, setReviewFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -60,6 +60,7 @@ export default function BlogManagement() {
         admin: 1,
         search: debouncedSearch || undefined,
         status: statusFilter === 'all' ? undefined : statusFilter,
+        review_status: reviewFilter || undefined,
         page: currentPage,
         per_page: 15
       };
@@ -85,7 +86,7 @@ export default function BlogManagement() {
     } finally {
       setIsLoading(false);
     }
-  }, [debouncedSearch, statusFilter, categoryFilter, currentPage]);
+  }, [debouncedSearch, statusFilter, reviewFilter, categoryFilter, currentPage]);
 
   useEffect(() => {
     fetchCategories();
@@ -109,6 +110,29 @@ export default function BlogManagement() {
         console.error('Failed to delete', error);
         toast.error('Gagal menghapus post');
       }
+    }
+  };
+
+  const isAdmin = user?.roles?.some((r: any) => ['super-admin', 'admin'].includes(r.name));
+
+  const handleApprove = async (id: number) => {
+    try {
+      await api.post(`/blogs/${id}/approve`);
+      toast.success('Post disetujui dan diterbitkan');
+      fetchBlogs();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Gagal menyetujui');
+    }
+  };
+
+  const handleReject = async (id: number) => {
+    if (!(await confirm({ message: 'Tolak post ini?', tone: 'danger' }))) return;
+    try {
+      await api.post(`/blogs/${id}/reject`);
+      toast.success('Post ditolak');
+      fetchBlogs();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Gagal menolak');
     }
   };
 
@@ -246,6 +270,15 @@ export default function BlogManagement() {
           >
             Drafts
           </button>
+          <span className="text-slate-300 mx-2">|</span>
+        </li>
+        <li>
+          <button 
+            onClick={() => { setReviewFilter(reviewFilter === 'pending' ? '' : 'pending'); setStatusFilter('all'); }} 
+            className={`transition-colors pb-1 ${reviewFilter === 'pending' ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
+          >
+            Menunggu Review
+          </button>
         </li>
       </ul>
 
@@ -356,6 +389,21 @@ export default function BlogManagement() {
                             Draft
                           </span>
                         )}
+                        {blog.review_status === 'pending' && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-violet-50 text-violet-600 border border-violet-200">
+                            Menunggu Review
+                          </span>
+                        )}
+                        {blog.review_status === 'rejected' && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-600 border border-red-200">
+                            Ditolak
+                          </span>
+                        )}
+                        {blog.status === 'published' && blog.published_at && new Date(blog.published_at) > new Date() && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200" title={`Tayang ${new Date(blog.published_at).toLocaleString('id-ID')}`}>
+                            Terjadwal
+                          </span>
+                        )}
                       </div>
                       
                       {/* Hover Actions */}
@@ -364,6 +412,18 @@ export default function BlogManagement() {
                           <Edit className="w-3 h-3" /> Edit
                         </Link>
                         <span className="text-slate-300">|</span>
+                        {isAdmin && blog.review_status === 'pending' && (
+                          <>
+                            <button onClick={() => handleApprove(blog.id)} className="text-emerald-600 hover:text-emerald-800 transition-colors flex items-center gap-1">
+                              <Check className="w-3 h-3" /> Setujui
+                            </button>
+                            <span className="text-slate-300">|</span>
+                            <button onClick={() => handleReject(blog.id)} className="text-amber-600 hover:text-amber-800 transition-colors flex items-center gap-1">
+                              <X className="w-3 h-3" /> Tolak
+                            </button>
+                            <span className="text-slate-300">|</span>
+                          </>
+                        )}
                         <button onClick={() => handleDelete(blog.id)} className="text-red-600 hover:text-red-800 transition-colors flex items-center gap-1">
                           <Trash2 className="w-3 h-3" /> Trash
                         </button>

@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 import SplashScreen from '@/components/ui/SplashScreen';
 import { ProgressBarProvider } from '@/components/providers/ProgressBarProvider';
 import { ConfirmProvider } from '@/components/providers/ConfirmProvider';
+import SwRegister from '@/components/providers/SwRegister';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -124,6 +125,13 @@ export async function generateMetadata(): Promise<Metadata> {
       description: siteDescription,
       images: [siteIcon || '/icon.png'],
     },
+    manifest: '/manifest.webmanifest',
+    themeColor: '#c20000',
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'black-translucent',
+      title: 'PC IMM Surakarta',
+    },
     robots: {
       index: true,
       follow: true,
@@ -186,6 +194,7 @@ export default async function RootLayout({
           <ProgressBarProvider>
             <ConfirmProvider>
             <SplashScreen iconUrl={siteIcon} />
+            <SwRegister />
             {children}
             <Toaster
               position="top-right"

@@ -130,15 +130,16 @@ export default function LinksManagement() {
                 <th className="p-4 pl-6">Halaman</th>
                 <th className="p-4">Slug / URL</th>
                 <th className="p-4 text-center">Tautan</th>
+                <th className="p-4 text-center">Total Klik</th>
                 <th className="p-4 text-center">Status</th>
                 <th className="p-4 pr-6 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
               {isLoading ? (
-                <tr><td colSpan={5} className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#c20000]" /></td></tr>
+                <tr><td colSpan={6} className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#c20000]" /></td></tr>
               ) : pages.length === 0 ? (
-                <tr><td colSpan={5} className="p-12 text-center text-slate-500">Belum ada halaman link</td></tr>
+                <tr><td colSpan={6} className="p-12 text-center text-slate-500">Belum ada halaman link</td></tr>
               ) : pages.map((p: any) => (
                 <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                   <td className="p-4 pl-6">
@@ -151,6 +152,7 @@ export default function LinksManagement() {
                     </a>
                   </td>
                   <td className="p-4 text-center"><span className="font-semibold text-slate-700">{p.items_count ?? '-'}</span></td>
+                  <td className="p-4 text-center"><span className="inline-flex items-center justify-center min-w-[3rem] px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold">{p.items_clicks_sum ?? 0}</span></td>
                   <td className="p-4 text-center">
                     <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold border ${p.is_active ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
                       {p.is_active ? 'Aktif' : 'Nonaktif'}

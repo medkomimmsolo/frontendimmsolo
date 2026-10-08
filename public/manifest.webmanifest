@@ -1,0 +1,24 @@
+{
+  "name": "PC IMM Kota Surakarta",
+  "short_name": "PC IMM",
+  "description": "Website Resmi Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#c20000",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "300x300",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "300x300",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
