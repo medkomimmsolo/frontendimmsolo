@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Download, FileText, Calendar, Link as LinkIcon, HardDrive, Globe, ExternalLink, Archive } from 'lucide-react';
+import { Download, FileText, HardDrive, Globe, Archive } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
@@ -139,7 +139,7 @@ export default async function DokumenPage() {
 
                   {/* Footer Action */}
                   <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <div className="text-xs text-slate-500 font-medium flex items-center">
+                    <div className="text-xs text-slate-500 font-medium flex items-center gap-3">
                       {doc.file_size ? (
                         <span className="flex items-center gap-1.5">
                           <HardDrive className="w-3.5 h-3.5 text-slate-400" />
@@ -149,6 +149,12 @@ export default async function DokumenPage() {
                         <span className="flex items-center gap-1.5">
                           <Globe className="w-3.5 h-3.5 text-slate-400" />
                           Web Link
+                        </span>
+                      )}
+                      {doc.downloads_count > 0 && (
+                        <span className="flex items-center gap-1.5 text-slate-400">
+                          <Download className="w-3 h-3" />
+                          {doc.downloads_count.toLocaleString('id-ID')}×
                         </span>
                       )}
                     </div>

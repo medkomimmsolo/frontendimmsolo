@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { FileText, CalendarDays, Users, Building2, TrendingUp, Activity, BarChart2, Link as LinkIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ChartArea, BarChartSimple } from '@/components/ui/ChartArea';
+import { ActivityTrendChart, type TrendItem } from '@/components/ui/ActivityTrendChart';
 
 interface DashboardStats {
   total_blogs: number;
@@ -39,6 +40,7 @@ export default function DashboardOverview() {
   const [recentPosts, setRecentPosts] = useState<any[]>([]);
   const [shortlinkAnalytics, setShortlinkAnalytics] = useState<ClickAnalytics | null>(null);
   const [linkAnalytics, setLinkAnalytics] = useState<ClickAnalytics | null>(null);
+  const [activityTrend, setActivityTrend] = useState<TrendItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(true);
 
@@ -78,6 +80,14 @@ export default function DashboardOverview() {
 
     fetchStats();
     fetchAnalytics();
+    api.get('/dashboard/trend', { params: { months: 6 } })
+      .then((res) => {
+        if (res.data.success) {
+          setActivityTrend(res.data.data || []);
+        }
+      })
+      .catch((e) => console.error('Failed to fetch activity trend', e));
+
     api.get('/blogs', { params: { per_page: 4, status: 'published' } })
       .then((res) => setRecentPosts(res.data.data?.data || res.data.data || []))
       .catch(() => {});
@@ -161,6 +171,13 @@ export default function DashboardOverview() {
           ))
         )}
       </div>
+
+      {/* Tren Aktivitas Organisasi */}
+      {activityTrend.length > 0 && (
+        <div className="mb-8">
+          <ActivityTrendChart data={activityTrend} />
+        </div>
+      )}
 
       {/* Main Content Area */}
       <div className="grid lg:grid-cols-3 gap-6">

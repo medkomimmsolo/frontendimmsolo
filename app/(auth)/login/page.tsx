@@ -57,7 +57,10 @@ export default function Login() {
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      const msg = error.response?.data?.message || 'Login gagal. Periksa kembali email dan password Anda.';
+      let msg = error.response?.data?.message || 'Login gagal. Periksa kembali email dan password Anda.';
+      if (error.response?.status === 429) {
+        msg = 'Terlalu banyak percobaan login. Silakan tunggu sekitar 1 menit sebelum mencoba kembali.';
+      }
       setErrorMessage(msg);
       toast.error(msg);
     } finally {
