@@ -23,10 +23,13 @@ import {
   History,
   Inbox,
   ClipboardList,
-  ShieldCheck
+  ShieldCheck,
+  Megaphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { getApiBase, isSettingEnabled, normalizeSettings } from '@/lib/settings';
+import { useNotificationCount } from '@/hooks/useNotificationCount';
+import AnnouncementBanner from '@/components/dashboard/AnnouncementBanner';
 
 export default function DashboardLayout({
   children,
@@ -108,6 +111,7 @@ export default function DashboardLayout({
   }, [user, isLoading, logout, router]);
 
   const isSuperAdmin = user?.roles?.some((r: any) => r.name === 'super-admin');
+  const { counts: notifCounts } = useNotificationCount(!!user);
   const can = (permission?: string | string[]) => {
     if (isSuperAdmin) return true;
     if (!permission) return true;
@@ -128,7 +132,7 @@ export default function DashboardLayout({
     {
       label: 'Konten',
       items: [
-        { name: 'Kelola Post', href: '/dashboard/blog', icon: <FileText className="w-5 h-5 shrink-0" />, permission: 'manage-blog' },
+        { name: 'Kelola Post', href: '/dashboard/blog', icon: <FileText className="w-5 h-5 shrink-0" />, permission: 'manage-blog', badge: notifCounts.pending_blogs },
         { name: 'Agenda Kegiatan', href: '/dashboard/events', icon: <CalendarDays className="w-5 h-5 shrink-0" />, permission: 'manage-event' },
         { name: 'Dokumen', href: '/dashboard/documents', icon: <FileText className="w-5 h-5 shrink-0" />, permission: 'manage-document' },
         { name: 'Tautan Pendek', href: '/dashboard/shortlinks', icon: <LinkIcon className="w-5 h-5 shrink-0" />, permission: 'manage-shortlinks' },
@@ -145,10 +149,11 @@ export default function DashboardLayout({
     {
       label: 'Sistem',
       items: [
+        { name: 'Pengumuman', href: '/dashboard/announcements', icon: <Megaphone className="w-5 h-5 shrink-0" />, permission: 'manage-announcements' },
         { name: 'Pengguna', href: '/dashboard/users', icon: <Users className="w-5 h-5 shrink-0" />, permission: 'manage-users' },
-        { name: 'Pengajuan Akun', href: '/dashboard/account-requests', icon: <UserPlus className="w-5 h-5 shrink-0" />, permission: 'manage-account-requests' },
+        { name: 'Pengajuan Akun', href: '/dashboard/account-requests', icon: <UserPlus className="w-5 h-5 shrink-0" />, permission: 'manage-account-requests', badge: notifCounts.pending_account_requests },
         { name: 'Log Aktivitas', href: '/dashboard/audit-logs', icon: <History className="w-5 h-5 shrink-0" />, permission: 'manage-audit-logs' },
-        { name: 'Kotak Masuk', href: '/dashboard/messages', icon: <Inbox className="w-5 h-5 shrink-0" />, permission: 'manage-messages' },
+        { name: 'Kotak Masuk', href: '/dashboard/messages', icon: <Inbox className="w-5 h-5 shrink-0" />, permission: 'manage-messages', badge: notifCounts.unread_messages },
         { name: 'Pengaturan', href: '/dashboard/settings', icon: <Settings className="w-5 h-5 shrink-0" />, permission: 'manage-settings' },
       ],
     },
@@ -226,7 +231,20 @@ export default function DashboardLayout({
                         </span>
 
                         {!isDesktopCollapsed && (
-                          <span className="ml-3.5 truncate">{item.name}</span>
+                          <span className="ml-3.5 truncate flex-1">{item.name}</span>
+                        )}
+
+                        {/* Badge notifikasi */}
+                        {!isDesktopCollapsed && (item as any).badge > 0 && (
+                          <span className="ml-auto shrink-0 min-w-5 h-5 px-1.5 bg-[#c20000] text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                            {(item as any).badge > 99 ? '99+' : (item as any).badge}
+                          </span>
+                        )}
+
+                        {isDesktopCollapsed && (item as any).badge > 0 && (
+                          <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#c20000] text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none">
+                            {(item as any).badge > 9 ? '9+' : (item as any).badge}
+                          </span>
                         )}
                       </Link>
                     );
@@ -321,6 +339,7 @@ export default function DashboardLayout({
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-slate-50/50">
           <div className="w-full">
+            <AnnouncementBanner />
             {children}
           </div>
         </main>

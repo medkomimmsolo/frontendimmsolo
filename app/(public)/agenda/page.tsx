@@ -1,9 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { MapPin, Clock, Calendar as CalendarIcon, ArrowRight, ExternalLink } from 'lucide-react';
+import AgendaView from '@/components/agenda/AgendaView';
 
 import { checkMaintenance } from '@/lib/maintenance';
 import MaintenancePage from '@/components/ui/MaintenancePage';
@@ -165,86 +163,8 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
           })}
         </div>
 
-        {/* Events List (Vertical, No Images) */}
-        <div className="flex flex-col space-y-4">
-          {events.map((event: any) => {
-            const eventDate = new Date(event.event_date);
-            const time = eventDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }).replace(/\./g, ':') + ' WIB';
-            const dateStr = eventDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' });
-
-            return (
-              <Card key={event.id} className="group hover:shadow-md transition-all duration-300 border border-[#0f172a]/10 overflow-hidden bg-white">
-                <CardContent className="p-6 flex flex-col">
-                  
-                  {/* Top Bar: Badge & Location */}
-                  <div className="flex items-center justify-between mb-4">
-                    <Badge className={`${event.badgeClass} border-none shadow-sm rounded-full px-3 py-1 font-semibold`}>
-                      {event.badgeText}
-                    </Badge>
-                  </div>
-
-                  {/* Title */}
-                  <div className="mb-3">
-                    <h2 
-                      className="text-xl md:text-2xl font-bold text-[#0f172a] leading-snug"
-                      style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
-                    >
-                      {event.title}
-                    </h2>
-                  </div>
-
-                  {/* Metadata (Date, Location, Organizers) */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm text-[#0f172a]/70 font-medium mb-2 bg-[#0f172a]/5 p-3 rounded-sm w-fit max-w-full flex-wrap">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <CalendarIcon className="w-4 h-4 mr-2 text-[#c20000] shrink-0" />
-                      <span>{dateStr} • {time}</span>
-                    </div>
-                    <div className="flex items-center gap-2 min-w-0">
-                      <MapPin className="w-4 h-4 mr-2 text-[#c20000] shrink-0" />
-                      <span className="break-words">{event.location}</span>
-                    </div>
-                  </div>
-                  
-                  {/* Penyelenggara */}
-                  {event.organizers && (
-                    <div className="flex flex-wrap items-center gap-2 mt-1 mb-2">
-                      <span className="text-xs text-[#0f172a]/50 font-semibold uppercase tracking-wider">Oleh:</span>
-                      {event.organizers.split(',').map((org: string, idx: number) => (
-                        <Badge key={idx} variant="outline" className="text-xs border-[#c20000]/20 bg-[#c20000]/5 text-[#c20000] font-medium shadow-none px-2 py-0.5">
-                          {org.trim()}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  {event.registration_link && event.computedStatus === 'upcoming' && (
-                    <div className="flex items-center gap-3 mt-4 border-t border-[#0f172a]/5 pt-4">
-                      <Button asChild className="bg-[#c20000] hover:bg-[#a30000] text-white shadow-sm rounded-sm">
-                        <a href={event.registration_link} target="_blank" rel="noopener noreferrer">
-                          Daftar Sekarang
-                          <ExternalLink className="w-4 h-4 ml-1.5" />
-                        </a>
-                      </Button>
-                    </div>
-                  )}
-
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {events.length === 0 && (
-          <div className="text-center py-20 max-w-md mx-auto">
-            <CalendarIcon className="w-12 h-12 text-[#0f172a]/20 mx-auto mb-4" />
-            <p className="text-[#0f172a] font-semibold text-lg mb-2">Belum ada agenda kegiatan.</p>
-            <p className="text-[#0f172a]/70 text-sm mb-6">Coba ubah filter atau kembali lagi nanti.</p>
-            <Link href="/agenda" className="inline-flex items-center px-5 py-2.5 rounded-sm border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors">
-              Tampilkan Semua Agenda
-            </Link>
-          </div>
-        )}
+        {/* Agenda View (Toggle List & Kalender) */}
+        <AgendaView events={events} />
 
       </section>
     </main>

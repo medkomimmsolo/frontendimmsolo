@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/Badge';
 import { ArrowLeft, Calendar, MapPin, ChevronRight, ExternalLink, Download } from 'lucide-react';
 import ShareIconButtons from '@/components/post/ShareIconButtons';
 import AddToCalendarButtons from '@/components/agenda/AddToCalendarButtons';
+import EventLocationMap from '@/components/agenda/EventLocationMap';
 import { notFound } from 'next/navigation';
 
 export const revalidate = 60;
@@ -221,6 +222,11 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ s
           startInput={event.event_date}
           slug={event.slug}
         />
+
+        {/* Peta Lokasi Kegiatan */}
+        {event.location && (
+          <EventLocationMap location={event.location} />
+        )}
 
         {/* Registration Banner */}
         {event.registration_link && event.status === 'upcoming' && (
