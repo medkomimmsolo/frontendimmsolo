@@ -17,6 +17,7 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
   
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+  const [availableRoles, setAvailableRoles] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -25,10 +26,16 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
   });
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserAndRoles = async () => {
       try {
-        const response = await api.get(`/users/${id}`);
-        const data = response.data.data;
+        const [userRes, rolesRes] = await Promise.all([
+          api.get(`/users/${id}`),
+          api.get('/roles').catch(() => null),
+        ]);
+        const data = userRes.data.data;
+        if (rolesRes?.data?.data?.roles) {
+          setAvailableRoles(rolesRes.data.data.roles);
+        }
         
         setFormData({
           name: data.name,
@@ -45,7 +52,7 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
       }
     };
     
-    fetchUser();
+    fetchUserAndRoles();
   }, [id, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -146,12 +153,22 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
                 required
                 value={formData.role}
                 onChange={handleChange}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
+                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors capitalize"
               >
-                <option value="komisariat">Komisariat (Kontributor Lokal)</option>
-                <option value="bidang">Bidang (Cabang)</option>
-                <option value="admin">Admin (Pengelola Konten)</option>
-                <option value="super-admin">Super Admin (Akses Penuh)</option>
+                {availableRoles.length > 0 ? (
+                  availableRoles.map((r: any) => (
+                    <option key={r.id} value={r.name}>
+                      {r.name.replace(/-/g, ' ')} {r.name === 'super-admin' ? '(Akses Penuh)' : ''}
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option value="komisariat">Komisariat (Kontributor Lokal)</option>
+                    <option value="bidang">Bidang (Cabang)</option>
+                    <option value="admin">Admin (Pengelola Konten)</option>
+                    <option value="super-admin">Super Admin (Akses Penuh)</option>
+                  </>
+                )}
               </select>
             </div>
 

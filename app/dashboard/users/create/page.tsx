@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
@@ -12,12 +12,27 @@ import Link from 'next/link';
 export default function CreateUser() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [availableRoles, setAvailableRoles] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     role: 'komisariat',
   });
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await api.get('/roles');
+        if (res.data?.data?.roles) {
+          setAvailableRoles(res.data.data.roles);
+        }
+      } catch (err) {
+        console.error('Gagal memuat roles', err);
+      }
+    };
+    fetchRoles();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -102,12 +117,22 @@ export default function CreateUser() {
                 required
                 value={formData.role}
                 onChange={handleChange}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
+                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors capitalize"
               >
-                <option value="komisariat">Komisariat (Kontributor Lokal)</option>
-                <option value="bidang">Bidang (Cabang)</option>
-                <option value="admin">Admin (Pengelola Konten)</option>
-                <option value="super-admin">Super Admin (Akses Penuh)</option>
+                {availableRoles.length > 0 ? (
+                  availableRoles.map((r: any) => (
+                    <option key={r.id} value={r.name}>
+                      {r.name.replace(/-/g, ' ')} {r.name === 'super-admin' ? '(Akses Penuh)' : ''}
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option value="komisariat">Komisariat (Kontributor Lokal)</option>
+                    <option value="bidang">Bidang (Cabang)</option>
+                    <option value="admin">Admin (Pengelola Konten)</option>
+                    <option value="super-admin">Super Admin (Akses Penuh)</option>
+                  </>
+                )}
               </select>
             </div>
 

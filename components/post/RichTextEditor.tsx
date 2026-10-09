@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useRef, useEffect, type Ref } from 'react';
+import React, { useMemo, useRef, useEffect, useImperativeHandle, type Ref } from 'react';
 import ReactQuill, { Quill } from 'react-quill-new';
 import TableUp, {
   TableAlign,
@@ -175,17 +175,10 @@ export default function RichTextEditor({
     }
   }, []);
 
+  useImperativeHandle(containerRef, () => innerRef.current as HTMLDivElement, []);
+
   return (
-    <div
-      ref={(node) => {
-        // Gabungkan innerRef (untuk handler tabel) dan containerRef (untuk parent)
-        (innerRef as any).current = node;
-        if (typeof containerRef === 'function') containerRef(node);
-        else if (containerRef && 'current' in containerRef) {
-          (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
-        }
-      }}
-    >
+    <div ref={innerRef}>
       <ReactQuill
         theme="snow"
         value={value}

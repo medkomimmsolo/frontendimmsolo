@@ -65,7 +65,6 @@ export default function PengajuanShortlink() {
       }
     }, 600);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.slug]);
 
   useEffect(() => {
@@ -94,7 +93,6 @@ export default function PengajuanShortlink() {
 
   useEffect(() => {
     fetchCaptcha();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const generateSlug = () => {

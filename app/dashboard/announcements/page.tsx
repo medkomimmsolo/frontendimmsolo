@@ -17,9 +17,12 @@ import {
   Info,
   Calendar,
   X,
+  UserCheck,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
+import { useAuth } from '@/hooks/useAuth';
+import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
 
 interface AnnouncementItem {
   id: number;
@@ -43,6 +46,8 @@ const typeBadges = {
 };
 
 export default function AnnouncementsPage() {
+  const { user } = useAuth();
+  const isSuperAdmin = user?.roles?.some((r: any) => r.name === 'super-admin');
   const { confirm } = useConfirm();
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,6 +58,7 @@ export default function AnnouncementsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingItem, setEditingItem] = useState<AnnouncementItem | null>(null);
+  const [transferItem, setTransferItem] = useState<AnnouncementItem | null>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -260,6 +266,17 @@ export default function AnnouncementsPage() {
                     >
                       {item.is_active ? 'Nonaktifkan' : 'Aktifkan'}
                     </Button>
+                    {isSuperAdmin && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setTransferItem(item)}
+                        className="w-8 h-8 text-purple-600 hover:bg-purple-50 hover:border-purple-200"
+                        title="Transfer Pemilik"
+                      >
+                        <UserCheck className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       size="icon"
@@ -425,6 +442,25 @@ export default function AnnouncementsPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Modal Transfer Pemilik */}
+      {transferItem && (
+        <TransferOwnershipModal
+          isOpen={!!transferItem}
+          onClose={() => setTransferItem(null)}
+          itemTitle={transferItem.title}
+          currentOwnerName={transferItem.user?.name}
+          onTransfer={async (newUserId) => {
+            await api.put(`/announcements/${transferItem.id}`, {
+              title: transferItem.title,
+              content: transferItem.content,
+              type: transferItem.type,
+              user_id: newUserId,
+            });
+            fetchAnnouncements();
+          }}
+        />
       )}
     </div>
   );

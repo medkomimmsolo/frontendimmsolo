@@ -57,13 +57,13 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
   if (await checkMaintenance('maintenance_profil')) return <MaintenancePage />;
   
   const resolvedSearchParams = await searchParams;
-  let allStruktural = await getStruktural();
+  const allStruktural = await getStruktural();
 
   const periods = Array.from(new Set(allStruktural.map((s: any) => s.periode))).filter(Boolean).sort().reverse() as string[];
   const currentPeriod = resolvedSearchParams.periode || (periods.length > 0 ? periods[0] : '2024-2025');
 
   // Remove dummy members used for category structuring
-  let struktural = allStruktural.filter((s: any) => s.periode === currentPeriod && s.name !== '-');
+  const struktural = allStruktural.filter((s: any) => s.periode === currentPeriod && s.name !== '-');
   struktural.sort((a: any, b: any) => a.urutan - b.urutan);
 
   const groupedByKategori = struktural.reduce((acc: any, curr: any) => {

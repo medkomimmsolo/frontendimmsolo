@@ -14,20 +14,24 @@ import {
   FileText,
   Edit,
   Trash2,
-  Eye, Check, X } from 'lucide-react';
+  Eye, Check, X, UserCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { formatDate } from '@/lib/utils';
 import { Blog, Category } from '@/types';
 import Link from 'next/link';
 import { useDebounce } from 'use-debounce';
+import { PaginationControls } from '@/components/ui/PaginationControls';
+import { TransferOwnershipModal } from '@/components/ui/TransferOwnershipModal';
 
 export default function BlogManagement() {
   const { user } = useAuth();
   const { confirm } = useConfirm();
+  const isSuperAdmin = user?.roles?.some((r: any) => r.name === 'super-admin');
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [transferItem, setTransferItem] = useState<any>(null);
   
   // Filters & Pagination
   const [searchQuery, setSearchQuery] = useState('');
@@ -176,20 +180,6 @@ export default function BlogManagement() {
       toast.error('Pilih setidaknya satu post');
     }
   };
-
-  // Helper for Pagination controls
-  const PaginationControls = () => (
-    <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
-      <p className="text-xs text-slate-500 font-medium">
-        Menampilkan {totalItems === 0 ? 0 : (currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} post
-      </p>
-      <div className="flex items-center gap-2">
-        <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
-        <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
-        <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
-      </div>
-    </div>
-  );
 
   return (
     <div className="space-y-6 w-full">
@@ -395,6 +385,15 @@ export default function BlogManagement() {
                         <button onClick={() => handleDelete(blog.id)} title="Hapus" className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
+                        {isSuperAdmin && (
+                          <button
+                            onClick={() => setTransferItem(blog)}
+                            title="Transfer Pemilik"
+                            className="h-9 w-9 inline-flex items-center justify-center text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-sm transition-colors"
+                          >
+                            <UserCheck className="w-4 h-4" />
+                          </button>
+                        )}
                         <Link href={`/post/${blog.slug}`} target="_blank" title="Lihat" className="h-9 w-9 inline-flex items-center justify-center text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-sm transition-colors">
                           <Eye className="w-4 h-4" />
                         </Link>
@@ -449,9 +448,27 @@ export default function BlogManagement() {
       
       {/* Bottom Pagination */}
       <div className="bg-white border border-[#0f172a]/10 rounded-sm mt-4">
-        <PaginationControls />
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          unit="post"
+          onPageChange={setCurrentPage}
+        />
       </div>
 
+      {transferItem && (
+        <TransferOwnershipModal
+          isOpen={!!transferItem}
+          onClose={() => setTransferItem(null)}
+          itemTitle={transferItem.title}
+          currentOwnerName={transferItem.user?.name}
+          onTransfer={async (newUserId) => {
+            await api.put(`/blogs/${transferItem.id}`, { user_id: newUserId });
+            fetchBlogs();
+          }}
+        />
+      )}
     </div>
   );
 }

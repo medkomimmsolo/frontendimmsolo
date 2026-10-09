@@ -5,12 +5,16 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Plus, Search, Edit, Trash2, Loader2, ClipboardList, ExternalLink } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Loader2, ClipboardList, ExternalLink, UserCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
+import { useAuth } from '@/hooks/useAuth';
+import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
 import { useDebounce } from 'use-debounce';
 
 export default function FormsManagement() {
+  const { user } = useAuth();
+  const isSuperAdmin = user?.roles?.some((r: any) => r.name === 'super-admin');
   const { confirm } = useConfirm();
   const [forms, setForms] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,6 +25,7 @@ export default function FormsManagement() {
   const [totalItems, setTotalItems] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
+  const [transferItem, setTransferItem] = useState<any>(null);
   const [formData, setFormData] = useState({ title: '', slug: '', description: '', success_message: '', starts_at: '', ends_at: '', max_responses: '', is_active: true });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -154,6 +159,13 @@ export default function FormsManagement() {
                         /form/{f.slug} <ExternalLink className="w-3 h-3" />
                       </a>
                     </div>
+                    {f.user?.name && (
+                      <div className="text-xs text-slate-500 mt-1">
+                        <span className="text-[11px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">
+                          Oleh: {f.user.name}
+                        </span>
+                      </div>
+                    )}
                   </td>
                   <td className="p-4 text-center font-semibold text-slate-700">{f.fields_count ?? '-'}</td>
                   <td className="p-4 text-center font-semibold text-slate-700">{f.responses_count ?? '-'}</td>
@@ -167,6 +179,15 @@ export default function FormsManagement() {
                       <Link href={`/dashboard/forms/${f.id}`} title="Kelola kolom & data" className="h-9 w-9 inline-flex items-center justify-center text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-sm transition-colors">
                         <ClipboardList className="w-4 h-4" />
                       </Link>
+                      {isSuperAdmin && (
+                        <button
+                          onClick={() => setTransferItem(f)}
+                          title="Transfer Pemilik"
+                          className="h-9 w-9 inline-flex items-center justify-center text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-sm transition-colors"
+                        >
+                          <UserCheck className="w-4 h-4" />
+                        </button>
+                      )}
                       <button onClick={() => openModal(f)} title="Edit" className="h-9 w-9 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors">
                         <Edit className="w-4 h-4" />
                       </button>
@@ -245,6 +266,20 @@ export default function FormsManagement() {
             </div>
           </form>
         </div>
+      )}
+
+      {/* Modal Transfer Pemilik */}
+      {transferItem && (
+        <TransferOwnershipModal
+          isOpen={!!transferItem}
+          onClose={() => setTransferItem(null)}
+          itemTitle={transferItem.title}
+          currentOwnerName={transferItem.user?.name}
+          onTransfer={async (newUserId) => {
+            await api.put(`/form-admin/${transferItem.id}`, { user_id: newUserId });
+            fetchForms();
+          }}
+        />
       )}
     </div>
   );

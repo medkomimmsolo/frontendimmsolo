@@ -1,5 +1,6 @@
 import { redirect, notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,8 +20,19 @@ export default async function ShortlinkRedirect({ params }: { params: Promise<{ 
   let isPending = false;
 
   try {
+    const reqHeaders = await headers();
+    const forwardedFor = reqHeaders.get('x-forwarded-for') || reqHeaders.get('x-real-ip') || '';
+    const userAgent = reqHeaders.get('user-agent') || '';
+    const referer = reqHeaders.get('referer') || '';
+
+    const fetchHeaders: Record<string, string> = {};
+    if (forwardedFor) fetchHeaders['X-Forwarded-For'] = forwardedFor;
+    if (userAgent) fetchHeaders['User-Agent'] = userAgent;
+    if (referer) fetchHeaders['Referer'] = referer;
+
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/s/${slug}`, {
-      cache: 'no-store'
+      cache: 'no-store',
+      headers: fetchHeaders,
     });
 
     if (res.ok) {
