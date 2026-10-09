@@ -12,6 +12,7 @@ import {
   List,
   MapPin,
   ExternalLink,
+  ArrowRight,
   X,
   CalendarDays,
 } from 'lucide-react';
@@ -63,12 +64,14 @@ function EventCard({ event }: { event: AgendaEvent }) {
           </Badge>
         </div>
         <div className="mb-3">
-          <h2
-            className="text-xl md:text-2xl font-bold text-[#0f172a] leading-snug"
-            style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
-          >
-            {event.title}
-          </h2>
+          <Link href={`/agenda/${event.slug}`} className="group-hover:text-[#c20000] transition-colors">
+            <h2
+              className="text-xl md:text-2xl font-bold text-[#0f172a] leading-snug group-hover:text-[#c20000] transition-colors"
+              style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
+            >
+              {event.title}
+            </h2>
+          </Link>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm text-[#0f172a]/70 font-medium mb-2 bg-[#0f172a]/5 p-3 rounded-sm w-fit max-w-full flex-wrap">
           <div className="flex items-center gap-2 min-w-0">
@@ -90,16 +93,22 @@ function EventCard({ event }: { event: AgendaEvent }) {
             ))}
           </div>
         )}
-        {event.registration_link && event.computedStatus === 'upcoming' && (
-          <div className="flex items-center gap-3 mt-4 border-t border-[#0f172a]/5 pt-4">
-            <Button asChild className="bg-[#c20000] hover:bg-[#a30000] text-white shadow-sm rounded-sm">
+        <div className="flex flex-wrap items-center gap-3 mt-4 border-t border-[#0f172a]/5 pt-4">
+          <Button asChild variant="outline" size="sm" className="border-[#0f172a]/10 hover:border-[#c20000] hover:text-[#c20000] rounded-sm text-xs font-semibold">
+            <Link href={`/agenda/${event.slug}`}>
+              Detail Kegiatan
+              <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+            </Link>
+          </Button>
+          {event.registration_link && event.computedStatus === 'upcoming' && (
+            <Button asChild size="sm" className="bg-[#c20000] hover:bg-[#a30000] text-white shadow-sm rounded-sm text-xs font-semibold">
               <a href={event.registration_link} target="_blank" rel="noopener noreferrer">
                 Daftar Sekarang
-                <ExternalLink className="w-4 h-4 ml-1.5" />
+                <ExternalLink className="w-3.5 h-3.5 ml-1.5" />
               </a>
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </CardContent>
     </Card>
   );

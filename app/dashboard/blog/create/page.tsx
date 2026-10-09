@@ -141,7 +141,6 @@ export default function CreateBlog() {
         localStorage.removeItem('blog_create_draft');
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

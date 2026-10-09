@@ -38,7 +38,7 @@ export default async function TentangPage() {
   if (await checkMaintenance('maintenance_profil')) return <MaintenancePage />;
   
   // Fetch stats data for StatsSection
-  let statsData = {
+  const statsData = {
     stat_kader: '2.000+',
     stat_komisariat: '14',
     stat_lembaga: '5',

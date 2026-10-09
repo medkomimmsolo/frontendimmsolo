@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import { Search, FileText, CalendarDays, FolderOpen, Loader2 } from 'lucide-react';
@@ -15,32 +15,7 @@ export default function CariClient() {
   const [hasError, setHasError] = useState(false);
   const requestId = useRef(0);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get('q') || '';
-    if (q) {
-      setQuery(q);
-      doSearch(q);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Cari otomatis saat mengetik (debounce 600ms)
-  useEffect(() => {
-    if (query.trim().length < 2) {
-      setTyping(false);
-      return;
-    }
-    setTyping(true);
-    const t = setTimeout(() => {
-      doSearch(query);
-      setTyping(false);
-    }, 600);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
-
-  const doSearch = async (q: string) => {
+  const doSearch = useCallback(async (q: string) => {
     const term = q.trim();
     if (term.length < 2) return;
     const myId = ++requestId.current;
@@ -60,7 +35,30 @@ export default function CariClient() {
     } finally {
       if (myId === requestId.current) setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q') || '';
+    if (q) {
+      setQuery(q);
+      doSearch(q);
+    }
+  }, [doSearch]);
+
+  // Cari otomatis saat mengetik (debounce 600ms)
+  useEffect(() => {
+    if (query.trim().length < 2) {
+      setTyping(false);
+      return;
+    }
+    setTyping(true);
+    const t = setTimeout(() => {
+      doSearch(query);
+      setTyping(false);
+    }, 600);
+    return () => clearTimeout(t);
+  }, [query, doSearch]);
 
   const total = (results?.blogs.length || 0) + (results?.events.length || 0) + (results?.documents.length || 0);
 

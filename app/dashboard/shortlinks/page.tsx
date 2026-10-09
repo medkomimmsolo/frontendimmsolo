@@ -4,17 +4,22 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Plus, Edit, Trash2, Link as LinkIcon, ExternalLink, Activity, Key, Loader2, Search, QrCode, BarChart3, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Link as LinkIcon, ExternalLink, Activity, Key, Loader2, Search, QrCode, BarChart3, X, UserCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
+import { useAuth } from '@/hooks/useAuth';
+import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
 import { QRCodeSVG } from 'qrcode.react';
 
 export default function ShortlinksPage() {
+  const { user } = useAuth();
+  const isSuperAdmin = user?.roles?.some((r: any) => r.name === 'super-admin');
   const { confirm } = useConfirm();
   const [shortlinks, setShortlinks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [transferItem, setTransferItem] = useState<any>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,7 +62,6 @@ export default function ShortlinksPage() {
     api.get('/shortlinks/analytics', { params: { days: 30 } })
       .then((res) => setSummary(res.data?.data))
       .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
   const handleOpenModal = (item: any = null) => {
@@ -254,6 +258,13 @@ export default function ShortlinksPage() {
                         <div className="text-sm font-medium text-slate-700">
                           {item.phone_number || '-'}
                         </div>
+                        {item.user?.name && (
+                          <div className="text-xs text-slate-500 mt-1">
+                            <span className="text-[11px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">
+                              Oleh: {item.user.name}
+                            </span>
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-center">
                         <div className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 font-medium min-w-[3rem]">
@@ -307,6 +318,17 @@ export default function ShortlinksPage() {
                           <Button variant="ghost" size="sm" onClick={() => openStats(item)} title="Statistik klik & referer" className="h-9 w-9 p-0 text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-sm">
                             <BarChart3 className="w-4 h-4" />
                           </Button>
+                          {isSuperAdmin && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setTransferItem(item)}
+                              title="Transfer Pemilik"
+                              className="h-9 w-9 p-0 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-sm"
+                            >
+                              <UserCheck className="w-4 h-4" />
+                            </Button>
+                          )}
                           <Button variant="ghost" size="sm" onClick={() => handleOpenModal(item)} title="Edit" className="h-9 w-9 p-0 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm">
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -483,6 +505,20 @@ export default function ShortlinksPage() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Modal Transfer Pemilik */}
+      {transferItem && (
+        <TransferOwnershipModal
+          isOpen={!!transferItem}
+          onClose={() => setTransferItem(null)}
+          itemTitle={`/${transferItem.slug}`}
+          currentOwnerName={transferItem.user?.name}
+          onTransfer={async (newUserId) => {
+            await api.put(`/shortlinks/${transferItem.id}`, { user_id: newUserId });
+            fetchShortlinks();
+          }}
+        />
       )}
     </div>
   );

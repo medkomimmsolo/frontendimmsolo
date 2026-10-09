@@ -72,14 +72,14 @@ async function fetchLatestEvents(): Promise<any[]> {
 
 export default async function Home() {
   if (await checkMaintenance('maintenance_beranda')) return <MaintenancePage />;
-  let statsData = {
+  const statsData = {
     stat_kader: '2.000+',
     stat_komisariat: '14',
     stat_lembaga: '5',
     stat_universitas: '4',
   };
 
-  let chairmanData = {
+  const chairmanData = {
     name: '',
     period: '',
     message: '',

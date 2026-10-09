@@ -12,7 +12,8 @@ import {
   MapPin,
   Edit,
   Trash2,
-  Eye
+  Eye,
+  UserCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
@@ -20,12 +21,16 @@ import { formatDateTime } from '@/lib/utils';
 import { Event } from '@/types';
 import Link from 'next/link';
 import { useDebounce } from 'use-debounce';
+import { PaginationControls } from '@/components/ui/PaginationControls';
+import { TransferOwnershipModal } from '@/components/ui/TransferOwnershipModal';
 
 export default function EventsManagement() {
   const { user } = useAuth();
   const { confirm } = useConfirm();
+  const isSuperAdmin = user?.roles?.some((r: any) => r.name === 'super-admin');
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [transferItem, setTransferItem] = useState<any>(null);
   
   // Filters & Pagination
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,10 +48,8 @@ export default function EventsManagement() {
   const fetchEvents = useCallback(async () => {
     setIsLoading(true);
     try {
-      // In a real WP scenario, pagination params would be passed
-      // But the current backend endpoint /events might not support pagination like blogs.
-      // Assuming it does:
       const params: any = {
+        admin: 1,
         search: debouncedSearch || undefined,
         status: statusFilter === 'all' ? undefined : statusFilter,
         page: currentPage,
@@ -147,19 +150,6 @@ export default function EventsManagement() {
       toast.error('Pilih setidaknya satu agenda');
     }
   };
-
-  const PaginationControls = () => (
-    <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
-      <p className="text-xs text-slate-500 font-medium">
-        Menampilkan {totalItems === 0 ? 0 : (currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} agenda
-      </p>
-      <div className="flex items-center gap-2">
-        <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
-        <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
-        <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
-      </div>
-    </div>
-  );
 
   return (
     <div className="space-y-6 w-full">
@@ -307,12 +297,26 @@ export default function EventsManagement() {
                           {event.title}
                         </Link>
                       </div>
+                      {(event as any).user?.name && (
+                        <div className="text-xs text-slate-500 mt-1">
+                          Pembuat: <span className="font-medium text-slate-700">{(event as any).user.name}</span>
+                        </div>
+                      )}
                       
                       {/* Aksi */}
                       <div className="flex items-center gap-2 mt-2">
                         <Link href={`/dashboard/events/${event.id}`} title="Edit" className="h-9 w-9 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors">
                           <Edit className="w-4 h-4" />
                         </Link>
+                        {isSuperAdmin && (
+                          <button
+                            onClick={() => setTransferItem(event)}
+                            title="Transfer Pemilik"
+                            className="h-9 w-9 inline-flex items-center justify-center text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-sm transition-colors"
+                          >
+                            <UserCheck className="w-4 h-4" />
+                          </button>
+                        )}
                         <button onClick={() => handleDelete(event.id)} title="Hapus" className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -369,9 +373,27 @@ export default function EventsManagement() {
       
       {/* Bottom Pagination */}
       <div className="bg-white border border-[#0f172a]/10 rounded-sm mt-4">
-        <PaginationControls />
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          unit="agenda"
+          onPageChange={setCurrentPage}
+        />
       </div>
 
+      {transferItem && (
+        <TransferOwnershipModal
+          isOpen={!!transferItem}
+          onClose={() => setTransferItem(null)}
+          itemTitle={transferItem.title}
+          currentOwnerName={transferItem.user?.name}
+          onTransfer={async (newUserId) => {
+            await api.put(`/events/${transferItem.id}`, { user_id: newUserId });
+            fetchEvents();
+          }}
+        />
+      )}
     </div>
   );
 }

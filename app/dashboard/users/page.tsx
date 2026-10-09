@@ -17,7 +17,7 @@ import {
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { User } from '@/types';
-import { ShieldCheck, Power, PowerOff } from 'lucide-react';
+import { ShieldCheck, Shield, Power, PowerOff } from 'lucide-react';
 import Link from 'next/link';
 
 export default function UsersManagement() {
@@ -38,6 +38,15 @@ export default function UsersManagement() {
   const [accessAllowedCats, setAccessAllowedCats] = useState<number[]>([]);
   const [accessLoading, setAccessLoading] = useState(false);
   const [accessSaving, setAccessSaving] = useState(false);
+
+  // Role Management State
+  const [isRolesModalOpen, setIsRolesModalOpen] = useState(false);
+  const [rolesList, setRolesList] = useState<any[]>([]);
+  const [allPermissionsList, setAllPermissionsList] = useState<string[]>([]);
+  const [rolesLoading, setRolesLoading] = useState(false);
+  const [newRoleName, setNewRoleName] = useState('');
+  const [newRolePerms, setNewRolePerms] = useState<string[]>([]);
+  const [creatingRole, setCreatingRole] = useState(false);
 
   const isSuperAdmin = user?.roles?.some((r: any) => r.name === 'super-admin');
 
@@ -119,6 +128,7 @@ export default function UsersManagement() {
     'manage-audit-logs': 'Log Aktivitas',
     'manage-messages': 'Kotak Masuk',
     'manage-forms': 'Formulir Pendaftaran',
+    'manage-announcements': 'Pengumuman Internal',
   };
 
 
@@ -144,7 +154,6 @@ export default function UsersManagement() {
 
   useEffect(() => {
     fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -166,6 +175,60 @@ export default function UsersManagement() {
     }
   };
 
+  const openRolesModal = async () => {
+    setIsRolesModalOpen(true);
+    setRolesLoading(true);
+    try {
+      const res = await api.get('/roles');
+      if (res.data?.data) {
+        setRolesList(res.data.data.roles || []);
+        setAllPermissionsList(res.data.data.permissions || []);
+      }
+    } catch {
+      toast.error('Gagal memuat daftar role');
+    } finally {
+      setRolesLoading(false);
+    }
+  };
+
+  const handleCreateRole = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newRoleName.trim()) return;
+    setCreatingRole(true);
+    try {
+      await api.post('/roles', {
+        name: newRoleName.trim().toLowerCase(),
+        permissions: newRolePerms,
+      });
+      toast.success(`Role "${newRoleName.trim().toLowerCase()}" berhasil dibuat`);
+      setNewRoleName('');
+      setNewRolePerms([]);
+      const res = await api.get('/roles');
+      if (res.data?.data) {
+        setRolesList(res.data.data.roles || []);
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Gagal membuat role');
+    } finally {
+      setCreatingRole(false);
+    }
+  };
+
+  const handleDeleteRole = async (role: any) => {
+    if (['super-admin', 'admin', 'bidang', 'komisariat'].includes(role.name)) {
+      toast.error('Role sistem bawaan tidak dapat dihapus');
+      return;
+    }
+    if (!(await confirm({ message: `Apakah Anda yakin ingin menghapus role "${role.name}"?`, tone: 'danger' }))) return;
+    try {
+      await api.delete(`/roles/${role.id}`);
+      toast.success(`Role "${role.name}" berhasil dihapus`);
+      setRolesList((prev) => prev.filter((r) => r.id !== role.id));
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Gagal menghapus role');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
@@ -175,12 +238,25 @@ export default function UsersManagement() {
           </h1>
           <p className="text-[#0f172a]/70 text-sm mt-1">Sistem manajemen akun admin dan kontributor website.</p>
         </div>
-        <Link href="/dashboard/users/create">
-          <Button className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm text-sm font-semibold shadow-sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Tambah Pengguna
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          {isSuperAdmin && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={openRolesModal}
+              className="h-10 px-4 border-[#0f172a]/20 hover:bg-slate-50 text-slate-700 rounded-sm text-sm font-semibold"
+            >
+              <Shield className="w-4 h-4 mr-2 text-[#c20000]" />
+              Kelola Role
+            </Button>
+          )}
+          <Link href="/dashboard/users/create">
+            <Button className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm text-sm font-semibold shadow-sm">
+              <Plus className="w-4 h-4 mr-2" />
+              Tambah Pengguna
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card className="border-[#0f172a]/10 shadow-sm">
@@ -370,6 +446,134 @@ export default function UsersManagement() {
                 </Button>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Role Management Modal */}
+      {isRolesModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4" onClick={() => setIsRolesModalOpen(false)}>
+          <div className="bg-white rounded-sm shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+              <div>
+                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-[#c20000]" />
+                  Kelola Role & Hak Akses
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Atur hak akses bawaan dan tambahkan role kustom untuk tim/anggota website.
+                </p>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setIsRolesModalOpen(false)} className="rounded-sm">
+                Tutup
+              </Button>
+            </div>
+
+            {rolesLoading ? (
+              <div className="flex justify-center py-16">
+                <Loader2 className="w-8 h-8 animate-spin text-[#c20000]" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Form Tambah Role Baru */}
+                <div className="lg:col-span-5 bg-slate-50 p-5 rounded-sm border border-slate-200 space-y-4">
+                  <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <Plus className="w-4 h-4 text-[#c20000]" />
+                    Tambah Role Baru
+                  </h3>
+                  <form onSubmit={handleCreateRole} className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-700">Nama Role</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="contoh: humas, editor-media"
+                        value={newRoleName}
+                        onChange={(e) => setNewRoleName(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
+                        className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#c20000]"
+                      />
+                      <p className="text-[11px] text-slate-400">Gunakan huruf kecil dan tanda hubung (-).</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-700 block">Pilih Hak Akses (Permissions)</label>
+                      <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1 border border-slate-200 bg-white p-2 rounded-sm">
+                        {allPermissionsList.map((perm) => {
+                          const checked = newRolePerms.includes(perm);
+                          return (
+                            <label key={perm} className="flex items-center gap-2 text-xs p-1.5 hover:bg-slate-50 rounded-sm cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() =>
+                                  setNewRolePerms((prev) =>
+                                    checked ? prev.filter((p) => p !== perm) : [...prev, perm]
+                                  )
+                                }
+                                className="w-3.5 h-3.5 accent-[#c20000]"
+                              />
+                              <span className="text-slate-700">{PERM_LABELS[perm] ?? perm}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      disabled={creatingRole || !newRoleName.trim()}
+                      className="w-full bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm text-sm"
+                    >
+                      {creatingRole && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                      Buat Role Baru
+                    </Button>
+                  </form>
+                </div>
+
+                {/* Daftar Role Aktif */}
+                <div className="lg:col-span-7 space-y-3">
+                  <h3 className="text-base font-bold text-slate-800">Daftar Role Aktif</h3>
+                  <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+                    {rolesList.map((r) => {
+                      const isSystemRole = ['super-admin', 'admin', 'bidang', 'komisariat'].includes(r.name);
+                      return (
+                        <div key={r.id} className="p-4 rounded-sm border border-slate-200 bg-white hover:border-slate-300 transition-colors space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-800 capitalize text-sm">{r.name.replace(/-/g, ' ')}</span>
+                              <Badge variant="outline" className={isSystemRole ? 'bg-slate-100 text-slate-600 border-slate-300 text-[10px]' : 'bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]'}>
+                                {isSystemRole ? 'Sistem Bawaan' : 'Custom Role'}
+                              </Badge>
+                            </div>
+                            {!isSystemRole && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteRole(r)}
+                                className="text-red-500 hover:text-red-700 p-1 rounded-sm hover:bg-red-50 text-xs flex items-center gap-1 transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                Hapus
+                              </button>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {r.permissions && r.permissions.length > 0 ? (
+                              r.permissions.map((p: string) => (
+                                <span key={p} className="px-2 py-0.5 rounded-sm bg-slate-100 text-slate-600 text-[11px]">
+                                  {PERM_LABELS[p] ?? p}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-xs text-slate-400 italic">Tidak ada permission</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
