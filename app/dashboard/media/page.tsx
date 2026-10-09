@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Loader2, Folder, Image as ImageIcon, Trash2, Calendar, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useConfirm } from '@/components/providers/ConfirmProvider';
 
 interface MediaFile {
   name: string;
@@ -23,7 +24,58 @@ type MediaResponse = {
   };
 };
 
+/** Kelompokkan daftar file datar menjadi { group: { year: file[] } }. */
+const groupFlatFiles = (files: MediaFile[]): MediaResponse => {
+  const out: MediaResponse = {};
+  for (const f of files) {
+    if (!f || typeof f !== 'object') continue;
+    const g = typeof f.group === 'string' && f.group ? f.group : 'umum';
+    const y = f.year !== undefined && f.year !== null ? String(f.year) : 'arsip';
+    if (!out[g]) out[g] = {};
+    if (!out[g][y]) out[g][y] = [];
+    out[g][y].push(f);
+  }
+  return out;
+};
+
+/**
+ * Normalisasi respons API menjadi { group: { year: file[] } }.
+ * Menangani bentuk lama (group -> file[]) atau node tunggal sehingga
+ * render tidak pernah crash walau backend mengirim struktur berbeda.
+ */
+const normalizeMedia = (raw: unknown): MediaResponse => {
+  if (Array.isArray(raw)) return groupFlatFiles(raw as MediaFile[]);
+  if (!raw || typeof raw !== 'object') return {};
+  const out: MediaResponse = {};
+  for (const [group, years] of Object.entries(raw as Record<string, unknown>)) {
+    if (Array.isArray(years)) {
+      // Bentuk lama: group -> file[] ; kelompokkan langsung per tahun.
+      if (!out[group]) out[group] = {};
+      for (const f of years as MediaFile[]) {
+        if (!f || typeof f !== 'object') continue;
+        const y = f.year !== undefined && f.year !== null ? String(f.year) : 'arsip';
+        if (!out[group][y]) out[group][y] = [];
+        out[group][y].push(f);
+      }
+      continue;
+    }
+    if (!years || typeof years !== 'object') continue;
+    for (const [year, files] of Object.entries(years as Record<string, unknown>)) {
+      if (Array.isArray(files)) {
+        if (!out[group]) out[group] = {};
+        out[group][year] = files as MediaFile[];
+      } else if (files && typeof files === 'object') {
+        if (!out[group]) out[group] = {};
+        out[group][year] = [files as MediaFile];
+      }
+      // Nilai non-array/non-objek dilewati agar .map tidak pernah crash.
+    }
+  }
+  return out;
+};
+
 export default function MediaLibrary() {
+  const { confirm } = useConfirm();
   const [mediaData, setMediaData] = useState<MediaResponse>({});
   const [isLoading, setIsLoading] = useState(true);
   const [selectedGroup, setSelectedGroup] = useState<string>('');
@@ -32,11 +84,10 @@ export default function MediaLibrary() {
     try {
       setIsLoading(true);
       const res = await api.get('/media');
-      const data = res.data.data;
+      const data = normalizeMedia(res.data.data);
       setMediaData(data);
-      if (Object.keys(data).length > 0 && !selectedGroup) {
-        setSelectedGroup(Object.keys(data)[0]);
-      }
+      const keys = Object.keys(data);
+      setSelectedGroup((prev) => (prev && keys.includes(prev) ? prev : (keys[0] ?? '')));
     } catch (error) {
       console.error(error);
       toast.error('Gagal memuat media library');
@@ -50,7 +101,7 @@ export default function MediaLibrary() {
   }, []);
 
   const handleDelete = async (path: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus file ini? Ini mungkin merusak tampilan website jika file masih digunakan.')) {
+    if (!(await confirm({ message: 'Apakah Anda yakin ingin menghapus file ini? Ini mungkin merusak tampilan website jika file masih digunakan.', tone: 'danger' }))) {
       return;
     }
 
@@ -137,16 +188,19 @@ export default function MediaLibrary() {
           {selectedGroup && mediaData[selectedGroup] && (
             Object.keys(mediaData[selectedGroup])
               .sort((a, b) => Number(b) - Number(a)) // Sort years descending
-              .map((year) => (
+              .map((year) => {
+                const files = mediaData[selectedGroup][year];
+                if (!Array.isArray(files)) return null;
+                return (
                 <div key={year} className="space-y-4">
                   <div className="flex items-center gap-2 border-b border-[#0f172a]/10 pb-2">
                     <Calendar className="w-5 h-5 text-imm-red-500" />
                     <h2 className="text-xl font-semibold text-[#0f172a]">Tahun {year}</h2>
-                    <span className="text-sm text-[#0f172a]/50 ml-2">({mediaData[selectedGroup][year].length} file)</span>
+                    <span className="text-sm text-[#0f172a]/50 ml-2">({files.length} file)</span>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                    {mediaData[selectedGroup][year].map((file) => {
+                    {files.map((file) => {
                       const isImage = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(file.name);
                       return (
                         <Card key={file.path} className="overflow-hidden border-[#0f172a]/10 shadow-sm group">
@@ -155,6 +209,7 @@ export default function MediaLibrary() {
                               <img 
                                 src={process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') + file.url} 
                                 alt={file.name}
+                                loading="lazy"
                                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                 onError={(e) => {
                                   (e.target as HTMLImageElement).src = file.url;
@@ -195,7 +250,8 @@ export default function MediaLibrary() {
                     })}
                   </div>
                 </div>
-              ))
+                );
+              })
           )}
         </div>
       </div>

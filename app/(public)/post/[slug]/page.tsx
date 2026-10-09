@@ -7,9 +7,11 @@ import { notFound } from 'next/navigation';
 import ShareButtons from '@/components/post/ShareButtons';
 import ReadingProgress from '@/components/post/ReadingProgress';
 
+export const revalidate = 60;
+
 async function getBlog(slug: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs/${slug}`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs/${slug}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     const json = await res.json();
     return json.data;
@@ -21,7 +23,7 @@ async function getBlog(slug: string) {
 
 async function getTrendingBlogs() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs?per_page=6`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     const json = await res.json();
     // Assuming the API returns a paginated list or an array directly
@@ -42,8 +44,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
+  const ogImage = toAbsoluteMediaUrl(post.featured_image) || toAbsoluteSiteUrl('/images/imm_hero_bg.jpg');
+
   return {
-    title: `${post.title} | PC IMM Kota Surakarta`,
+    title: post.title,
     description: post.meta_description || post.excerpt || `Berita dan post terbaru PC IMM Kota Surakarta: ${post.title}`,
     keywords: post.keywords ? post.keywords.split(',').map((k: string) => k.trim()) : [],
     alternates: {
@@ -56,9 +60,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       type: 'article',
       publishedTime: post.created_at,
       authors: ['PC IMM Kota Surakarta'],
-      images: post.featured_image ? [
+      images: ogImage ? [
         {
-          url: post.featured_image,
+          url: ogImage,
           width: 1200,
           height: 630,
           alt: post.title,
@@ -69,13 +73,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       card: 'summary_large_image',
       title: post.title,
       description: post.meta_description || post.excerpt,
-      images: post.featured_image ? [post.featured_image] : [],
+      images: ogImage ? [ogImage] : [],
     }
   };
 }
 
 import { checkMaintenance } from '@/lib/maintenance';
 import MaintenancePage from '@/components/ui/MaintenancePage';
+import { toAbsoluteMediaUrl, toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
 
 export default async function PostDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   if (await checkMaintenance('maintenance_berita')) return <MaintenancePage />;
@@ -99,6 +104,8 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
     ? (post.featured_image.startsWith('http') ? post.featured_image : `/storage/${post.featured_image.replace(/^\/?storage\//, '')}`) 
     : '/images/imm_hero_bg.jpg';
 
+  const ogImage = toAbsoluteMediaUrl(post.featured_image);
+
   // Calculate reading time (roughly 250 words per minute)
   const wordCount = post.content ? post.content.replace(/<[^>]*>?/gm, '').split(/\s+/).length : 0;
   const readingTime = Math.ceil(wordCount / 250) || 1;
@@ -112,10 +119,52 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
     hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta'
   }).replace('.', ':');
 
+  const postUrl = toAbsoluteSiteUrl(`/post/${resolvedParams.slug}`);
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.meta_description || post.excerpt || undefined,
+    image: ogImage ? [ogImage] : undefined,
+    datePublished: post.created_at,
+    dateModified: post.updated_at || post.created_at,
+    author: {
+      '@type': 'Organization',
+      name: 'PC IMM Kota Surakarta',
+      url: 'https://immsolo.or.id',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'PC IMM Kota Surakarta',
+      url: 'https://immsolo.or.id',
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': postUrl,
+    },
+  };
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Beranda', item: toAbsoluteSiteUrl('/') },
+      { '@type': 'ListItem', position: 2, name: 'Post', item: toAbsoluteSiteUrl('/post') },
+      { '@type': 'ListItem', position: 3, name: post.title, item: postUrl },
+    ],
+  };
+
   return (
     <>
       {/* Reading Progress Bar */}
       <ReadingProgress />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
 
       <main className="min-h-screen bg-white pt-24 pb-16 selection:bg-[#c20000]/20 selection:text-[#c20000]">
         
@@ -182,7 +231,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#c20000]/10 to-[#c20000]/5 border border-[#0f172a]/8 flex items-center justify-center text-[#0f172a]/40 overflow-hidden shrink-0">
                         {post.user?.profile_photo_path ? (
-                          <img src={post.user.profile_photo_path} alt={post.user.name} className="w-full h-full object-cover" />
+                          <img src={post.user.profile_photo_path} alt={`Foto ${post.user.name}`} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                         ) : (
                           <User className="w-4.5 h-4.5" />
                         )}
@@ -251,7 +300,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
 
               {/* ── Featured Image ── */}
               <figure className="relative w-full mb-10">
-                <div className="relative aspect-[16/9] rounded-md overflow-hidden bg-slate-100 border border-[#0f172a]/8">
+                <div className="relative aspect-[16/9] rounded-sm overflow-hidden bg-slate-100 border border-[#0f172a]/8">
                   <Image
                     src={imageUrl}
                     alt={post.title}
@@ -342,7 +391,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                 
                 {/* ── Trending / Baca Juga ── */}
                 {recentPosts.length > 0 && (
-                  <div className="bg-white rounded-md border border-[#0f172a]/8 overflow-hidden">
+                  <div className="bg-white rounded-sm border border-[#0f172a]/8 overflow-hidden">
                     <div className="bg-slate-50/80 px-5 py-4 border-b border-[#0f172a]/6 flex items-center gap-2.5">
                       <TrendingUp className="w-4 h-4 text-[#c20000]" />
                       <h3 className="text-[13px] font-bold uppercase tracking-[0.1em] text-[#0f172a]">
@@ -408,7 +457,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                 )}
 
                 {/* ── Share Box (Desktop) ── */}
-                <div className="hidden lg:block bg-slate-50/80 rounded-md p-5 border border-[#0f172a]/6">
+                <div className="hidden lg:block bg-slate-50/80 rounded-sm p-5 border border-[#0f172a]/6">
                   <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#0f172a]/40 mb-4 text-center">
                     Bagikan Artikel
                   </h3>

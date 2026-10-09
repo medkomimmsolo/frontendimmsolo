@@ -7,6 +7,15 @@ export const metadata: Metadata = {
   title: "Kontak",
   description:
     "Hubungi Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta.",
+  alternates: {
+    canonical: "https://immsolo.or.id/kontak",
+  },
+  openGraph: {
+    title: "Kontak | PC IMM Kota Surakarta",
+    description: "Hubungi Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta.",
+    url: "https://immsolo.or.id/kontak",
+    type: "website",
+  },
 };
 
 import { checkMaintenance } from "@/lib/maintenance";
@@ -15,41 +24,45 @@ import MaintenancePage from "@/components/ui/MaintenancePage";
 export default async function KontakPage() {
   if (await checkMaintenance("maintenance_kontak")) return <MaintenancePage />;
   return (
-    <main className="min-h-screen bg-[#f8f9fa] pt-24 pb-20">
+    <main className="min-h-screen bg-[#f8f9fa] pt-28 pb-20">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Header Section */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h1
-            className="text-3xl md:text-5xl font-bold text-[#0f172a] mb-6"
-            style={{ fontFamily: "var(--font-poppins), sans-serif" }}
-          >
-            Hubungi Kami
-          </h1>
-          <p className="text-[#0f172a]/70 text-lg leading-relaxed">
-            Punya pertanyaan, saran, atau ingin berkolaborasi? Jangan ragu untuk
-            menghubungi PC IMM Kota Surakarta melalui form di bawah atau via
-            kontak langsung kami.
-          </p>
+          <div data-aos="fade-up">
+            <h1
+              className="text-3xl md:text-5xl font-bold text-[#0f172a] mb-6"
+              style={{ fontFamily: "var(--font-poppins), sans-serif" }}
+            >
+              Hubungi Kami
+            </h1>
+          </div>
+          <div data-aos="fade-up" data-aos-delay="100">
+            <p className="text-[#0f172a]/70 text-lg leading-relaxed">
+              Punya pertanyaan, saran, atau ingin berkolaborasi? Jangan ragu untuk
+              menghubungi PC IMM Kota Surakarta melalui form di bawah atau via
+              kontak langsung kami.
+            </p>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
           {/* Contact Info */}
-          <div>
-            <h3
+          <div data-aos="fade-right">
+            <h2
               className="text-2xl font-bold text-[#0f172a] mb-6"
               style={{ fontFamily: "var(--font-poppins), sans-serif" }}
             >
               Informasi Kontak
-            </h3>
+            </h2>
             <div className="space-y-6 mb-10">
               <div className="flex items-start">
-                <div className="w-12 h-12 bg-[#c20000]/10 rounded-full flex items-center justify-center text-[#c20000] mr-4 shrink-0">
+                <div className="w-12 h-12 bg-[#c20000]/10 rounded-sm flex items-center justify-center text-[#c20000] mr-4 shrink-0">
                   <MapPin className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-semibold text-[#0f172a] mb-1">
+                  <h3 className="text-lg font-semibold text-[#0f172a] mb-1">
                     Sekretariat
-                  </h4>
+                  </h3>
                   <p className="text-[#0f172a]/70 leading-relaxed">
                     Gedung Dakwah Balai Muhammadiyah
                     <br />
@@ -61,13 +74,13 @@ export default async function KontakPage() {
               </div>
 
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-[#c20000]/10 rounded-full flex items-center justify-center text-[#c20000] mr-4 shrink-0">
+                <div className="w-12 h-12 bg-[#c20000]/10 rounded-sm flex items-center justify-center text-[#c20000] mr-4 shrink-0">
                   <Mail className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-semibold text-[#0f172a] mb-1">
+                  <h3 className="text-lg font-semibold text-[#0f172a] mb-1">
                     Email
-                  </h4>
+                  </h3>
                   <a
                     href="mailto:solo.imm@gmail.com"
                     className="text-[#c20000] hover:underline font-medium"
@@ -78,7 +91,7 @@ export default async function KontakPage() {
               </div>
 
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-[#c20000]/10 rounded-full flex items-center justify-center text-[#c20000] mr-4 shrink-0">
+                <div className="w-12 h-12 bg-[#c20000]/10 rounded-sm flex items-center justify-center text-[#c20000] mr-4 shrink-0">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -104,24 +117,25 @@ export default async function KontakPage() {
                   </svg>
                 </div>
                 <div>
-                  <h4 className="text-lg font-semibold text-[#0f172a] mb-1">
+                  <h3 className="text-lg font-semibold text-[#0f172a] mb-1">
                     Instagram
-                  </h4>
+                  </h3>
                   <a
-                    href="https://instagram.com/immsolo"
+                    href="https://instagram.com/immsurakarta"
                     target="_blank"
                     rel="noreferrer"
                     className="text-[#c20000] hover:underline font-medium"
                   >
-                    @imm_solo
+                    @immsurakarta
                   </a>
                 </div>
               </div>
             </div>
 
             {/* Map Placeholder */}
-            <div className="w-full h-64 bg-slate-200 rounded-md overflow-hidden relative shadow-sm border border-slate-100">
+            <div className="w-full h-64 bg-slate-200 rounded-sm overflow-hidden relative shadow-sm border border-slate-100">
               <iframe
+                title="Peta lokasi sekretariat PC IMM Kota Surakarta"
                 src="https://maps.google.com/maps?q=Gedung%20Dakwah%20Balai%20Muhammadiyah,%20Jl.%20Teuku%20Umar%20No.5,%20Keprabon,%20Surakarta&t=&z=16&ie=UTF8&iwloc=&output=embed"
                 width="100%"
                 height="100%"
@@ -135,15 +149,15 @@ export default async function KontakPage() {
           </div>
 
           {/* Form */}
-          <div>
+          <div data-aos="fade-left" data-aos-delay="150">
             <Card className="shadow-xl shadow-[#0f172a]/5 border-none">
               <CardContent className="p-8">
-                <h3
+                <h2
                   className="text-2xl font-bold text-[#0f172a] mb-6"
                   style={{ fontFamily: "var(--font-poppins), sans-serif" }}
                 >
                   Kirim Pesan
-                </h3>
+                </h2>
                 <KontakFormClient />
               </CardContent>
             </Card>

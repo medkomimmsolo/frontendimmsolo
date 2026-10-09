@@ -5,20 +5,22 @@ import api from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { Loader2, Search, History } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useDebounce } from 'use-debounce';
 
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch] = useDebounce(searchQuery, 800);
   const [actionFilter, setActionFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
-  const fetchLogs = useCallback(async (page = currentPage, search = searchQuery, action = actionFilter) => {
+  const fetchLogs = useCallback(async (page = currentPage, search = debouncedSearch, action = actionFilter) => {
     setIsLoading(true);
     try {
-      const res = await api.get('/audit-logs', { params: { page, per_page: 20, search: search || undefined, action: action || undefined } });
+      const res = await api.get('/audit-logs', { params: { page, per_page: 15, search: search || undefined, action: action || undefined } });
       const payload = res.data.data;
       if (payload && payload.data) {
         setLogs(payload.data);
@@ -32,7 +34,7 @@ export default function AuditLogsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, searchQuery, actionFilter]);
+  }, [currentPage, debouncedSearch, actionFilter]);
 
   useEffect(() => {
     fetchLogs();
@@ -58,14 +60,14 @@ export default function AuditLogsPage() {
         <p className="text-[#0f172a]/70 text-sm mt-1">Catatan siapa membuat, mengubah, dan menghapus data di sistem.</p>
       </div>
 
-      <div className="bg-white border border-[#0f172a]/10 rounded-sm p-4 shadow-sm flex flex-col sm:flex-row gap-3">
+      <div className="bg-white border border-[#0f172a]/10 rounded-sm p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row gap-3">
         <form onSubmit={(e) => { e.preventDefault(); setCurrentPage(1); fetchLogs(1, searchQuery, actionFilter); }} className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input type="text" placeholder="Cari aktivitas... (Enter)" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border border-slate-200 rounded-md pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
+            className="w-full border border-slate-200 rounded-sm pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
         </form>
         <select value={actionFilter} onChange={(e) => { setActionFilter(e.target.value); setCurrentPage(1); }}
-          className="border border-slate-200 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-[#c20000]">
+          className="border border-slate-200 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-[#c20000]">
           <option value="">Semua aksi</option>
           <option value="membuat">Membuat</option>
           <option value="mengubah">Mengubah</option>
@@ -113,11 +115,11 @@ export default function AuditLogsPage() {
           </table>
         </div>
         <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
-          <p className="text-xs text-slate-500 font-medium">Menampilkan {(currentPage - 1) * 20 + 1}–{Math.min(currentPage * 20, totalItems)} dari {totalItems} log</p>
+          <p className="text-xs text-slate-500 font-medium">Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} log</p>
           <div className="flex items-center gap-2">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
             <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
+            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
           </div>
         </div>
       </Card>

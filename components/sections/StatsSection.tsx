@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'motion/react';
 import { Users, Building2, School, BookOpen } from 'lucide-react';
 
 type StatsProps = {
@@ -45,7 +44,7 @@ export default function StatsSection({ stats }: StatsProps) {
   ];
 
   return (
-    <section className="py-32 bg-[#0f172a] relative overflow-hidden text-white border-y border-slate-800">
+    <section className="py-20 md:py-28 bg-[#0f172a] relative overflow-hidden text-white border-y border-slate-800">
       
       {/* Decorative Map Silhouette Background */}
       <div className="absolute inset-0 z-0 pointer-events-none select-none opacity-40 mix-blend-screen">
@@ -63,37 +62,24 @@ export default function StatsSection({ stats }: StatsProps) {
         
         {/* Top: Heading */}
         <div className="mb-16 max-w-7xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex items-center gap-4 mb-6"
-          >
+          <div data-aos="fade-up" className="flex items-center gap-4 mb-6">
             <span className="text-[#c20000]/80 font-bold uppercase tracking-widest text-sm">
               Jejak Langkah Organisasi
             </span>
-          </motion.div>
+          </div>
           
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
+          <h2 
+            data-aos="fade-up"
+            data-aos-delay="100"
             className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight"
             style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
           >
             IMM Solo Dalam <span className="text-[#c20000] italic">Angka</span>
-          </motion.h2>
+          </h2>
           
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-white/70 text-lg max-w-sm"
-          >
+          <p data-aos="fade-up" data-aos-delay="200" className="text-white/70 text-lg max-w-sm">
             Statistik pergerakan, kekuatan kader, dan jejak penyebaran Ikatan Mahasiswa Muhammadiyah di Kota Surakarta.
-          </motion.p>
+          </p>
         </div>
 
         {/* Grid: Stats Side by Side */}
@@ -101,14 +87,7 @@ export default function StatsSection({ stats }: StatsProps) {
           {statsList.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <motion.div
-                key={stat.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="flex-1"
-              >
+              <div key={stat.id} data-aos="fade-up" data-aos-delay={index * 100} className="flex-1">
                 <div className="h-full border border-slate-800 bg-slate-900/50 p-6 md:p-8 hover:border-slate-600 transition-all duration-300 flex flex-col relative overflow-hidden group rounded-sm">
                   
                   {/* Hover Reveal Background */}
@@ -143,7 +122,7 @@ export default function StatsSection({ stats }: StatsProps) {
 
                   </div>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

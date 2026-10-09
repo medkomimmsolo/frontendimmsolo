@@ -6,16 +6,33 @@ import StatsSection from '@/components/sections/StatsSection';
 import TentangHero from '@/components/sections/TentangHero';
 import { checkMaintenance } from '@/lib/maintenance';
 import MaintenancePage from '@/components/ui/MaintenancePage';
+import { getApiBase, normalizeSettings, type Settings } from '@/lib/settings';
+
+async function fetchSettings(): Promise<Settings> {
+  const res = await fetch(`${getApiBase()}/settings`, { next: { revalidate: 60 } });
+  if (!res.ok) return {};
+  const json = await res.json();
+  return normalizeSettings(json?.data);
+}
 
 export const metadata: Metadata = {
-  title: 'Tentang Kami | PC IMM Kota Surakarta',
+  title: 'Tentang Kami',
   description: 'Profil dan Jejak Langkah Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
   alternates: {
     canonical: 'https://immsolo.or.id/tentang'
   },
+  openGraph: {
+    title: 'Tentang Kami | PC IMM Kota Surakarta',
+    description: 'Profil dan Jejak Langkah Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
+    url: 'https://immsolo.or.id/tentang',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Tentang Kami | PC IMM Kota Surakarta',
+    description: 'Profil dan Jejak Langkah Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
+  },
 };
-
-export const dynamic = 'force-dynamic';
 
 export default async function TentangPage() {
   if (await checkMaintenance('maintenance_profil')) return <MaintenancePage />;
@@ -29,17 +46,8 @@ export default async function TentangPage() {
   };
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, { cache: 'no-store' });
-    const json = await res.json();
-    const settings = json.data || [];
-    
-    let settingsMap: Record<string, string> = {};
-    if (Array.isArray(settings)) {
-      settings.forEach((s: any) => { settingsMap[s.key] = s.value; });
-    } else if (typeof settings === 'object') {
-      settingsMap = settings;
-    }
-    
+    const settingsMap = await fetchSettings();
+
     if (settingsMap.stat_kader) statsData.stat_kader = settingsMap.stat_kader;
     if (settingsMap.stat_komisariat) statsData.stat_komisariat = settingsMap.stat_komisariat;
     if (settingsMap.stat_lembaga) statsData.stat_lembaga = settingsMap.stat_lembaga;
@@ -58,9 +66,9 @@ export default async function TentangPage() {
       <section className="relative z-20 -mt-24 mb-32 max-w-7xl mx-auto px-4 md:px-6">
         <div className="grid md:grid-cols-3 gap-8">
           
-          <div className="bg-white rounded-xl shadow-2xl shadow-slate-200/50 p-8 hover:-translate-y-2 transition-transform duration-500 group relative overflow-hidden">
+          <div data-aos="fade-up" className="bg-white rounded-sm shadow-2xl shadow-slate-200/50 p-8 hover:-translate-y-2 transition-transform duration-500 group relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-200 to-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
-            <div className="w-16 h-16 bg-[#0f172a]/5 rounded-xl flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500">
+            <div className="w-16 h-16 bg-[#0f172a]/5 rounded-sm flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500">
               <MapPin className="w-8 h-8" />
             </div>
             <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Basis Gerakan</h2>
@@ -70,11 +78,11 @@ export default async function TentangPage() {
           </div>
 
           {/* Middle Card: Pushed slightly up for a staggered layout */}
-          <div className="bg-[#0f172a] text-white rounded-xl shadow-2xl shadow-[#0f172a]/30 p-8 md:-translate-y-8 hover:-translate-y-10 transition-transform duration-500 group relative overflow-hidden">
+          <div data-aos="fade-up" data-aos-delay="100" className="bg-[#0f172a] text-white rounded-sm shadow-2xl shadow-[#0f172a]/30 p-8 md:-translate-y-8 hover:-translate-y-10 transition-transform duration-500 group relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
             <div className="absolute -right-10 -top-10 w-40 h-40 bg-[#c20000]/10 rounded-full blur-2xl group-hover:bg-[#c20000]/30 transition-colors duration-500"></div>
             
-            <div className="w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center text-white mb-8 group-hover:bg-[#c20000] transition-colors duration-500 relative z-10">
+            <div className="w-16 h-16 bg-white/10 rounded-sm flex items-center justify-center text-white mb-8 group-hover:bg-[#c20000] transition-colors duration-500 relative z-10">
               <Target className="w-8 h-8" />
             </div>
             <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'var(--font-playfair), serif' }}>Fokus Eksekusi</h2>
@@ -83,9 +91,9 @@ export default async function TentangPage() {
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-2xl shadow-slate-200/50 p-8 hover:-translate-y-2 transition-transform duration-500 group relative overflow-hidden">
+          <div data-aos="fade-up" data-aos-delay="200" className="bg-white rounded-sm shadow-2xl shadow-slate-200/50 p-8 hover:-translate-y-2 transition-transform duration-500 group relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-200 to-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
-            <div className="w-16 h-16 bg-[#0f172a]/5 rounded-xl flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500">
+            <div className="w-16 h-16 bg-[#0f172a]/5 rounded-sm flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500">
               <Building className="w-8 h-8" />
             </div>
             <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Struktur Organisasi</h2>
@@ -98,12 +106,12 @@ export default async function TentangPage() {
       </section>
 
       {/* 3. PROFIL CABANG */}
-      <section className="py-24 bg-[#f8fafc] relative overflow-hidden">
+      <section className="py-20 md:py-28 bg-[#f8fafc] relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
             
             {/* Text Side */}
-            <div>
+            <div data-aos="fade-right">
               <SectionTitle 
                 title="Pusat Pergerakan Solo Raya" 
                 subtitle="TENTANG CABANG" 
@@ -123,14 +131,16 @@ export default async function TentangPage() {
             </div>
 
             {/* Image Side */}
-            <div className="relative">
+            <div data-aos="fade-left" data-aos-delay="150" className="relative">
               {/* Offset decorative box */}
               <div className="absolute inset-0 bg-[#0f172a] translate-x-6 translate-y-6 rounded-sm"></div>
               {/* Image itself */}
-              <div className="relative h-[500px] rounded-sm overflow-hidden shadow-xl">
+              <div className="relative h-64 sm:h-80 md:h-[500px] rounded-sm overflow-hidden shadow-xl">
                 <img 
                   src="/images/imm_hero_bg.jpg" 
                   alt="Kegiatan PC IMM Surakarta" 
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-1000"
                 />
               </div>

@@ -1,6 +1,6 @@
 const CACHE = 'immsolo-v1';
 const OFFLINE_URL = '/offline';
-const PRECACHE = [OFFLINE_URL, '/manifest.webmanifest'];
+const PRECACHE = [OFFLINE_URL, '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/apple-icon.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

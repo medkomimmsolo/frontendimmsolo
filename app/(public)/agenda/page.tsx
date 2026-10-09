@@ -5,24 +5,44 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { MapPin, Clock, Calendar as CalendarIcon, ArrowRight, ExternalLink } from 'lucide-react';
 
-export const metadata: Metadata = {
-  title: 'Agenda Kegiatan | PC IMM Kota Surakarta',
-  description: 'Jadwal dan informasi agenda kegiatan Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
-  alternates: {
-    canonical: 'https://immsolo.or.id/agenda'
-  },
-  openGraph: {
-    title: 'Agenda Kegiatan | PC IMM Kota Surakarta',
+import { checkMaintenance } from '@/lib/maintenance';
+import MaintenancePage from '@/components/ui/MaintenancePage';
+import { toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ filter?: string }> }): Promise<Metadata> {
+  const sp = await searchParams;
+  const filter = sp?.filter && sp.filter !== 'all' ? sp.filter : undefined;
+  const canonical = `https://immsolo.or.id/agenda${filter ? `?filter=${filter}` : ''}`;
+  const ogImage = toAbsoluteSiteUrl('/images/imm_hero_bg.jpg');
+
+  return {
+    title: 'Agenda Kegiatan',
     description: 'Jadwal dan informasi agenda kegiatan Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
-    url: 'https://immsolo.or.id/agenda',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Agenda Kegiatan | PC IMM Kota Surakarta',
-    description: 'Jadwal dan informasi agenda kegiatan Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
-  }
-};
+    alternates: {
+      canonical,
+    },
+    openGraph: {
+      title: 'Agenda Kegiatan | PC IMM Kota Surakarta',
+      description: 'Jadwal dan informasi agenda kegiatan Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
+      url: canonical,
+      type: 'website',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: 'Agenda Kegiatan PC IMM Kota Surakarta',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Agenda Kegiatan | PC IMM Kota Surakarta',
+      description: 'Jadwal dan informasi agenda kegiatan Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
+      images: [ogImage],
+    }
+  };
+}
 
 const filterTabs = [
   { label: 'Semua', value: 'all' },
@@ -31,11 +51,11 @@ const filterTabs = [
   { label: 'Selesai', value: 'completed' },
 ];
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 30;
 
 async function getEvents() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`, { next: { revalidate: 30 } });
     if (!res.ok) return [];
     const json = await res.json();
     return json.data.data || json.data || [];
@@ -44,9 +64,6 @@ async function getEvents() {
     return [];
   }
 }
-
-import { checkMaintenance } from '@/lib/maintenance';
-import MaintenancePage from '@/components/ui/MaintenancePage';
 
 export default async function AgendaPage({ searchParams }: { searchParams: Promise<{ filter?: string }> }) {
   if (await checkMaintenance('maintenance_agenda')) return <MaintenancePage />;
@@ -80,7 +97,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
       } else if (diffDays <= 30) {
         computedStatus = 'upcoming';
         badgeText = `H-${diffDays}`;
-        badgeClass = 'bg-amber-500 text-white animate-pulse hover:bg-amber-600';
+        badgeClass = 'bg-amber-500 text-white hover:bg-amber-600';
       } else {
         computedStatus = 'upcoming';
         badgeText = 'Akan Datang';
@@ -101,7 +118,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
   }
 
   return (
-    <main className="min-h-screen bg-[#f8f9fa] pt-24 pb-20">
+    <main className="min-h-screen bg-[#f8f9fa] pt-28 pb-20">
       
       {/* Breadcrumb & Title Section */}
       <section className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-6">
@@ -109,7 +126,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
           <ul className="flex items-center text-sm text-[#0f172a]/60 space-x-2">
             <li>
               <Link href="/" className="hover:text-[#c20000] transition-colors flex items-center">
-                Home
+                Beranda
               </Link>
             </li>
             <li>
@@ -118,10 +135,12 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
             <li className="text-[#0f172a] font-medium" aria-current="page">Agenda</li>
           </ul>
         </nav>
-        <div className="flex items-center justify-between border-b border-[#0f172a]/10 pb-4 mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-            Index Agenda
-          </h1>
+        <div>
+          <div data-aos="fade-up" className="flex items-center justify-between border-b border-[#0f172a]/10 pb-4 mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+              Agenda Kegiatan
+            </h1>
+          </div>
         </div>
       </section>
 
@@ -159,30 +178,30 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
                   
                   {/* Top Bar: Badge & Location */}
                   <div className="flex items-center justify-between mb-4">
-                    <Badge className={`${event.badgeClass} border-none shadow-sm rounded-sm px-3 py-1 font-semibold`}>
+                    <Badge className={`${event.badgeClass} border-none shadow-sm rounded-full px-3 py-1 font-semibold`}>
                       {event.badgeText}
                     </Badge>
                   </div>
 
                   {/* Title */}
                   <div className="mb-3">
-                    <h3 
+                    <h2 
                       className="text-xl md:text-2xl font-bold text-[#0f172a] leading-snug"
                       style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
                     >
                       {event.title}
-                    </h3>
+                    </h2>
                   </div>
 
                   {/* Metadata (Date, Location, Organizers) */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm text-[#0f172a]/70 font-medium mb-2 bg-[#0f172a]/5 p-3 rounded-lg inline-flex w-fit flex-wrap">
-                    <div className="flex items-center whitespace-nowrap">
-                      <CalendarIcon className="w-4 h-4 mr-2 text-[#c20000]" />
-                      {dateStr} • {time}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-sm text-[#0f172a]/70 font-medium mb-2 bg-[#0f172a]/5 p-3 rounded-sm w-fit max-w-full flex-wrap">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CalendarIcon className="w-4 h-4 mr-2 text-[#c20000] shrink-0" />
+                      <span>{dateStr} • {time}</span>
                     </div>
-                    <div className="flex items-center whitespace-nowrap">
-                      <MapPin className="w-4 h-4 mr-2 text-[#c20000]" />
-                      {event.location}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <MapPin className="w-4 h-4 mr-2 text-[#c20000] shrink-0" />
+                      <span className="break-words">{event.location}</span>
                     </div>
                   </div>
                   
@@ -201,7 +220,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
                   {/* Actions */}
                   {event.registration_link && event.computedStatus === 'upcoming' && (
                     <div className="flex items-center gap-3 mt-4 border-t border-[#0f172a]/5 pt-4">
-                      <Button asChild className="bg-[#c20000] hover:bg-[#a30000] text-white shadow-sm rounded-md">
+                      <Button asChild className="bg-[#c20000] hover:bg-[#a30000] text-white shadow-sm rounded-sm">
                         <a href={event.registration_link} target="_blank" rel="noopener noreferrer">
                           Daftar Sekarang
                           <ExternalLink className="w-4 h-4 ml-1.5" />
@@ -217,8 +236,13 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
         </div>
 
         {events.length === 0 && (
-          <div className="text-center py-20">
-            <p className="text-[#0f172a]/70 text-lg">Belum ada agenda kegiatan.</p>
+          <div className="text-center py-20 max-w-md mx-auto">
+            <CalendarIcon className="w-12 h-12 text-[#0f172a]/20 mx-auto mb-4" />
+            <p className="text-[#0f172a] font-semibold text-lg mb-2">Belum ada agenda kegiatan.</p>
+            <p className="text-[#0f172a]/70 text-sm mb-6">Coba ubah filter atau kembali lagi nanti.</p>
+            <Link href="/agenda" className="inline-flex items-center px-5 py-2.5 rounded-sm border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors">
+              Tampilkan Semua Agenda
+            </Link>
           </div>
         )}
 

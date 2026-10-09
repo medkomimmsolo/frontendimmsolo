@@ -74,11 +74,11 @@ export default function MessagesPage() {
 
       <div className="flex gap-2">
         <button onClick={() => { setUnreadOnly(false); setCurrentPage(1); }}
-          className={`px-4 py-2 rounded-md text-sm font-semibold border transition-colors ${!unreadOnly ? 'bg-[#c20000] text-white border-[#c20000]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}>
+          className={`px-4 py-2 rounded-sm text-sm font-semibold border transition-colors ${!unreadOnly ? 'bg-[#c20000] text-white border-[#c20000]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}>
           Semua
         </button>
         <button onClick={() => { setUnreadOnly(true); setCurrentPage(1); }}
-          className={`px-4 py-2 rounded-md text-sm font-semibold border transition-colors ${unreadOnly ? 'bg-[#c20000] text-white border-[#c20000]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}>
+          className={`px-4 py-2 rounded-sm text-sm font-semibold border transition-colors ${unreadOnly ? 'bg-[#c20000] text-white border-[#c20000]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}>
           Belum dibaca
         </button>
       </div>
@@ -107,7 +107,7 @@ export default function MessagesPage() {
               </button>
               {expanded === m.id && (
                 <div className="px-4 sm:px-6 pb-5 pl-[3.75rem]">
-                  <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50 border border-slate-100 rounded-md p-4">{m.message}</p>
+                  <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap bg-slate-50 border border-slate-100 rounded-sm p-4">{m.message}</p>
                   <a href={`mailto:${m.email}?subject=Re: ${encodeURIComponent(m.subject)}`} className="inline-block mt-3 text-xs font-bold text-[#c20000] hover:text-[#a30000]">
                     Balas via Email →
                   </a>
@@ -119,9 +119,9 @@ export default function MessagesPage() {
         <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
           <p className="text-xs text-slate-500 font-medium">Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} pesan</p>
           <div className="flex items-center gap-2">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
             <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
+            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
           </div>
         </div>
       </Card>

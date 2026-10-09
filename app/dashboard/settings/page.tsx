@@ -7,7 +7,6 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Save, Loader2, Settings as SettingsIcon, Image as ImageIcon, MapPin, Link as LinkIcon, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { convertToWebP } from '@/lib/imageUtils';
-import { motion } from 'motion/react';
 
 export default function SettingsManagement() {
   const [isLoading, setIsLoading] = useState(false);
@@ -192,33 +191,33 @@ export default function SettingsManagement() {
     );
   }
 
-  const inputClass = "w-full bg-slate-50 hover:bg-slate-100/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-[#c20000] focus:ring-4 focus:ring-[#c20000]/10 transition-all text-sm font-medium placeholder:text-slate-400";
+  const inputClass = "w-full bg-slate-50 hover:bg-slate-100/50 border border-slate-200 rounded-sm px-4 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-[#c20000] focus:ring-4 focus:ring-[#c20000]/10 transition-all text-sm font-medium placeholder:text-slate-400";
   const labelClass = "block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2";
 
   return (
     <div className="w-full pb-20">
       {/* Header Section */}
-      <motion.div 
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
+      <div 
+       
+       
         className="flex items-center gap-4 mb-8 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5"
       >
-        <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center border border-red-100">
+        <div className="w-12 h-12 rounded-sm bg-red-50 flex items-center justify-center border border-red-100">
           <SettingsIcon className="w-6 h-6 text-[#c20000]" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Pengaturan Sistem</h1>
           <p className="text-[#0f172a]/70 text-sm mt-1">Kelola identitas utama, logo, dan kontak resmi organisasi.</p>
         </div>
-      </motion.div>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-12">
         
         {/* Section 1: Identitas Utama */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+        <div 
+         
+         
+         
           className="flex flex-col lg:flex-row gap-8"
         >
           <div className="lg:w-80 xl:w-96 shrink-0">
@@ -234,7 +233,7 @@ export default function SettingsManagement() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-2xl border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
                 <div>
@@ -262,68 +261,68 @@ export default function SettingsManagement() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
-                  <div className="p-5 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <div className="p-5 rounded-sm border border-slate-100 bg-slate-50/50">
                     <label className={labelClass}>Logo Berwarna (Header/Terang)</label>
                     <div className="mt-4 flex flex-col items-center gap-4">
                       {settings.site_logo ? (
-                        <div className="w-24 h-24 rounded-lg bg-white border border-slate-200 p-2 shadow-sm flex items-center justify-center">
+                        <div className="w-24 h-24 rounded-sm bg-white border border-slate-200 p-2 shadow-sm flex items-center justify-center">
                           <img src={`${settings.site_logo}`} alt="Logo" className="max-w-full max-h-full object-contain" />
                         </div>
                       ) : (
-                        <div className="w-24 h-24 rounded-lg bg-slate-100 border border-slate-200 border-dashed flex flex-col items-center justify-center text-slate-400">
+                        <div className="w-24 h-24 rounded-sm bg-slate-100 border border-slate-200 border-dashed flex flex-col items-center justify-center text-slate-400">
                           <ImageIcon className="w-6 h-6 mb-1 opacity-50" />
                           <span className="text-[10px] uppercase font-bold tracking-wider">Kosong</span>
                         </div>
                       )}
                       <label className="cursor-pointer group relative">
                         <input type="file" accept="image/*" onChange={(e) => handleLogoUpload(e, 'color')} className="hidden" />
-                        <span className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-50 transition-colors shadow-sm text-center">
+                        <span className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-sm text-sm font-semibold text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-50 transition-colors shadow-sm text-center">
                           Ubah Logo
                         </span>
                       </label>
                     </div>
                   </div>
 
-                  <div className="p-5 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <div className="p-5 rounded-sm border border-slate-100 bg-slate-50/50">
                     <label className={labelClass}>Logo Putih (Footer/Gelap)</label>
                     <div className="mt-4 flex flex-col items-center gap-4">
                       {settings.site_logo_white ? (
-                        <div className="w-24 h-24 rounded-lg bg-slate-900 border border-slate-800 p-2 shadow-sm flex items-center justify-center relative overflow-hidden">
+                        <div className="w-24 h-24 rounded-sm bg-slate-900 border border-slate-800 p-2 shadow-sm flex items-center justify-center relative overflow-hidden">
                           {/* Chessboard pattern to show transparency clearly */}
                           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(45deg, #808080 25%, transparent 25%), linear-gradient(-45deg, #808080 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #808080 75%), linear-gradient(-45deg, transparent 75%, #808080 75%)', backgroundSize: '10px 10px', backgroundPosition: '0 0, 0 5px, 5px -5px, -5px 0px' }}></div>
                           <img src={`${settings.site_logo_white}`} alt="Logo Putih" className="max-w-full max-h-full object-contain relative z-10" />
                         </div>
                       ) : (
-                        <div className="w-24 h-24 rounded-lg bg-slate-900 border border-slate-800 border-dashed flex flex-col items-center justify-center text-white/40">
+                        <div className="w-24 h-24 rounded-sm bg-slate-900 border border-slate-800 border-dashed flex flex-col items-center justify-center text-white/40">
                           <ImageIcon className="w-6 h-6 mb-1 opacity-50" />
                           <span className="text-[10px] uppercase font-bold tracking-wider">Kosong</span>
                         </div>
                       )}
                       <label className="cursor-pointer group relative">
                         <input type="file" accept="image/*" onChange={(e) => handleLogoUpload(e, 'white')} className="hidden" />
-                        <span className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-50 transition-colors shadow-sm text-center">
+                        <span className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-sm text-sm font-semibold text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-50 transition-colors shadow-sm text-center">
                           Ubah Logo Putih
                         </span>
                       </label>
                     </div>
                   </div>
                   
-                  <div className="p-5 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <div className="p-5 rounded-sm border border-slate-100 bg-slate-50/50">
                     <label className={labelClass}>Icon Web (Favicon/Tab)</label>
                     <div className="mt-4 flex flex-col items-center gap-4">
                       {settings.site_icon ? (
-                        <div className="w-24 h-24 rounded-lg bg-white border border-slate-200 p-2 shadow-sm flex items-center justify-center">
+                        <div className="w-24 h-24 rounded-sm bg-white border border-slate-200 p-2 shadow-sm flex items-center justify-center">
                           <img src={`${settings.site_icon}`} alt="Web Icon" className="max-w-full max-h-full object-contain" />
                         </div>
                       ) : (
-                        <div className="w-24 h-24 rounded-lg bg-slate-100 border border-slate-200 border-dashed flex flex-col items-center justify-center text-slate-400">
+                        <div className="w-24 h-24 rounded-sm bg-slate-100 border border-slate-200 border-dashed flex flex-col items-center justify-center text-slate-400">
                           <ImageIcon className="w-6 h-6 mb-1 opacity-50" />
                           <span className="text-[10px] uppercase font-bold tracking-wider">Kosong</span>
                         </div>
                       )}
                       <label className="cursor-pointer group relative">
                         <input type="file" accept="image/*" onChange={(e) => handleLogoUpload(e, 'icon')} className="hidden" />
-                        <span className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-50 transition-colors shadow-sm text-center">
+                        <span className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-sm text-sm font-semibold text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-50 transition-colors shadow-sm text-center">
                           Ubah Icon
                         </span>
                       </label>
@@ -334,15 +333,15 @@ export default function SettingsManagement() {
               </CardContent>
             </Card>
           </div>
-        </motion.div>
+        </div>
 
         <div className="h-px bg-slate-200 w-full"></div>
 
         {/* Section 2: Kontak & Sosial Media */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+        <div 
+         
+         
+         
           className="flex flex-col lg:flex-row gap-8"
         >
           <div className="lg:w-80 xl:w-96 shrink-0">
@@ -358,7 +357,7 @@ export default function SettingsManagement() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-2xl border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -437,15 +436,15 @@ export default function SettingsManagement() {
               </CardContent>
             </Card>
           </div>
-        </motion.div>
+        </div>
 
         <div className="h-px bg-slate-200 w-full"></div>
 
         {/* Section 3: Statistik Beranda */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+        <div 
+         
+         
+         
           className="flex flex-col lg:flex-row gap-8"
         >
           <div className="lg:w-80 xl:w-96 shrink-0">
@@ -461,7 +460,7 @@ export default function SettingsManagement() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-2xl border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -514,13 +513,13 @@ export default function SettingsManagement() {
               </CardContent>
             </Card>
           </div>
-        </motion.div>
+        </div>
 
         {/* Section 4: Sambutan Ketua Umum */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+        <div 
+         
+         
+         
           className="flex flex-col lg:flex-row gap-8"
         >
           <div className="lg:w-80 xl:w-96 shrink-0">
@@ -536,11 +535,11 @@ export default function SettingsManagement() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-2xl border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="md:col-span-1 p-5 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <div className="md:col-span-1 p-5 rounded-sm border border-slate-100 bg-slate-50/50">
                     <label className={labelClass}>Foto Ketua Umum</label>
                     <div className="mt-4 flex flex-col items-center gap-4">
                       {settings.chairman_photo ? (
@@ -555,7 +554,7 @@ export default function SettingsManagement() {
                       )}
                       <label className="cursor-pointer group relative mt-2">
                         <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                        <span className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-50 transition-colors shadow-sm text-center">
+                        <span className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-sm text-sm font-semibold text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-50 transition-colors shadow-sm text-center">
                           Ubah Foto
                         </span>
                       </label>
@@ -604,13 +603,13 @@ export default function SettingsManagement() {
               </CardContent>
             </Card>
           </div>
-        </motion.div>
+        </div>
 
         {/* Section 5: Mode Maintenance */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+        <div 
+         
+         
+         
           className="flex flex-col lg:flex-row gap-8 pb-10"
         >
           <div className="lg:w-80 xl:w-96 shrink-0">
@@ -626,10 +625,10 @@ export default function SettingsManagement() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-2xl border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
-                <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-slate-50">
+                <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-slate-50">
                   <div>
                     <h3 className="font-bold text-slate-800 text-sm">Maintenance Keseluruhan (Global)</h3>
                     <p className="text-xs text-slate-500 mt-1">Aktifkan untuk memblokir seluruh halaman publik.</p>
@@ -652,7 +651,7 @@ export default function SettingsManagement() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       
                       {/* Beranda */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Beranda</h3>
                         </div>
@@ -668,7 +667,7 @@ export default function SettingsManagement() {
                       </div>
 
                       {/* Profil */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Profil</h3>
                         </div>
@@ -684,7 +683,7 @@ export default function SettingsManagement() {
                       </div>
 
                       {/* Berita */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Berita</h3>
                         </div>
@@ -700,7 +699,7 @@ export default function SettingsManagement() {
                       </div>
 
                       {/* Agenda */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Agenda</h3>
                         </div>
@@ -716,7 +715,7 @@ export default function SettingsManagement() {
                       </div>
 
                       {/* Dokumen */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Dokumen</h3>
                         </div>
@@ -732,7 +731,7 @@ export default function SettingsManagement() {
                       </div>
 
                       {/* Kontak */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Kontak</h3>
                         </div>
@@ -748,7 +747,7 @@ export default function SettingsManagement() {
                       </div>
 
                       {/* Shortlink */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Shortlink</h3>
                         </div>
@@ -770,24 +769,24 @@ export default function SettingsManagement() {
               </CardContent>
             </Card>
           </div>
-        </motion.div>
+        </div>
 
         {/* Floating Save Button */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+        <div 
+         
+         
+         
           className="fixed bottom-8 right-8 z-40"
         >
           <Button 
             type="submit" 
             disabled={isLoading} 
-            className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-full px-8 py-6 shadow-xl shadow-[#c20000]/30 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#c20000]/40 text-base font-bold flex items-center gap-3"
+            className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm px-8 py-6 shadow-xl shadow-[#c20000]/30 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#c20000]/40 text-base font-bold flex items-center gap-3"
           >
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
             {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
           </Button>
-        </motion.div>
+        </div>
 
       </form>
     </div>

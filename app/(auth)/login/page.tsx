@@ -7,7 +7,7 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Loader2, ArrowLeft, Mail, Lock, ShieldCheck, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import { motion } from 'motion/react';
+import { getApiBase, normalizeSettings } from '@/lib/settings';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -19,16 +19,20 @@ export default function Login() {
   const [siteLogoWhite, setSiteLogoWhite] = useState<string | null>(null);
   const router = useRouter();
 
+  const emailInvalid = email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const passwordInvalid = password.length > 0 && password.length < 8;
+
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`);
+        const response = await fetch(`${getApiBase()}/settings`);
         const data = await response.json();
-        if (data.success && data.data) {
-          if (data.data.site_logo) setSiteLogo(data.data.site_logo);
-          if (data.data.site_logo_white) setSiteLogoWhite(data.data.site_logo_white);
-          else if (data.data.site_logo) setSiteLogoWhite(data.data.site_logo);
-        }
+        // Backend returns a flat { key: value } map under `data`; normalizeSettings
+        // also tolerates the legacy array-of-{key,value} shape.
+        const settings = normalizeSettings(data?.data);
+        if (settings.site_logo) setSiteLogo(settings.site_logo);
+        if (settings.site_logo_white) setSiteLogoWhite(settings.site_logo_white);
+        else if (settings.site_logo) setSiteLogoWhite(settings.site_logo);
       } catch (e) {
         console.error('Failed to fetch site settings', e);
       }
@@ -91,10 +95,10 @@ export default function Login() {
 
         {/* Center Content */}
         <div className="relative z-10 w-full max-w-md">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+          <div
+           
+           
+           
           >
             <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-6 rounded-full border border-white/10 bg-white/5 backdrop-blur-md">
               <ShieldCheck className="w-4 h-4 text-[#c20000]" />
@@ -124,7 +128,7 @@ export default function Login() {
                 <span className="font-medium">Manajemen Agenda & Event</span>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
 
         {/* Bottom Tagline */}
@@ -144,10 +148,10 @@ export default function Login() {
         </Link>
         
         <div className="w-full max-w-[400px]">
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+          <div
+           
+           
+           
           >
             {/* Mobile Logo Only */}
             <div className="lg:hidden flex justify-center mb-8">
@@ -171,28 +175,36 @@ export default function Login() {
               
               {/* Pesan Error Inline untuk visibilitas status yang lebih baik (HCI) */}
               {errorMessage && (
-                <motion.div 
-                  initial={{ opacity: 0, y: -10 }} 
-                  animate={{ opacity: 1, y: 0 }}
+                <div 
+                  id="login-error"
+                  role="alert"
+                  aria-live="polite"
+                  
+                 
                   className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-sm flex items-start gap-3 text-sm font-medium"
                 >
                   <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                   <span>{errorMessage}</span>
-                </motion.div>
+                </div>
               )}
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-900">Email Address</label>
+                <label htmlFor="login-email" className="text-sm font-bold text-slate-900">Email Address</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-[#c20000] transition-colors" />
                   </div>
                   <input 
+                    id="login-email"
+                    name="email"
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-white border border-slate-200 rounded-sm pl-12 pr-4 py-3.5 text-slate-900 placeholder:text-slate-400/60 placeholder:font-normal focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-all font-medium shadow-sm"
                     placeholder="admin@immsurakarta.org"
+                    autoComplete="email"
+                    aria-invalid={emailInvalid}
+                    aria-describedby={errorMessage ? 'login-error' : undefined}
                     required
                     disabled={isLoading}
                   />
@@ -200,17 +212,22 @@ export default function Login() {
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-900">Password</label>
+                <label htmlFor="login-password" className="text-sm font-bold text-slate-900">Password</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-[#c20000] transition-colors" />
                   </div>
                   <input 
+                    id="login-password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full bg-white border border-slate-200 rounded-sm pl-12 pr-12 py-3.5 text-slate-900 placeholder:text-slate-400/60 placeholder:font-normal focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-all font-medium shadow-sm"
                     placeholder="••••••••"
+                    autoComplete="current-password"
+                    aria-invalid={passwordInvalid}
+                    aria-describedby={errorMessage ? 'login-error' : undefined}
                     required
                     disabled={isLoading}
                   />
@@ -219,6 +236,8 @@ export default function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
                     aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+                    aria-pressed={showPassword}
+                    aria-controls="login-password"
                   >
                     {showPassword ? (
                       <EyeOff className="h-5 w-5" />
@@ -264,7 +283,7 @@ export default function Login() {
               </Link>
             </p>
 
-          </motion.div>
+          </div>
         </div>
       </div>
 

@@ -43,7 +43,7 @@ export default function CreateUser() {
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center gap-4">
         <Link href="/dashboard/users">
-          <Button variant="outline" size="sm" className="h-10 w-10 p-0 rounded-sm">
+          <Button variant="outline" size="sm" className="h-9 w-9 p-0 rounded-sm">
             <ArrowLeft className="w-5 h-5" />
           </Button>
         </Link>
@@ -66,7 +66,7 @@ export default function CreateUser() {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors"
+                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
               />
             </div>
 
@@ -78,7 +78,7 @@ export default function CreateUser() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors"
+                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
               />
             </div>
 
@@ -91,7 +91,7 @@ export default function CreateUser() {
                 minLength={8}
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors"
+                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
               />
             </div>
 
@@ -102,7 +102,7 @@ export default function CreateUser() {
                 required
                 value={formData.role}
                 onChange={handleChange}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors"
+                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
               >
                 <option value="komisariat">Komisariat (Kontributor Lokal)</option>
                 <option value="bidang">Bidang (Cabang)</option>

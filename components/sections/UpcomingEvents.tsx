@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'motion/react';
 import Link from 'next/link';
 import { MapPin, Clock, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -37,7 +36,7 @@ const mockEvents = [
 
 export default function UpcomingEvents() {
   return (
-    <section className="py-32 bg-[#0f172a] relative overflow-hidden text-white">
+    <section className="py-20 md:py-28 bg-[#0f172a] relative overflow-hidden text-white">
       {/* Decorative large text */}
       <div className="absolute top-10 left-0 w-full overflow-hidden opacity-[0.02] pointer-events-none select-none flex whitespace-nowrap">
         <div className="text-[15rem] font-black tracking-tighter" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
@@ -51,42 +50,42 @@ export default function UpcomingEvents() {
           {/* Left Column: Heading */}
           <div className="lg:w-1/3">
             <div className="sticky top-32">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
+              <div
+               
+               
+               
                 className="flex items-center gap-4 mb-6"
               >
                 <span className="text-[#c20000]/80 font-bold uppercase tracking-widest text-sm">Jadwal</span>
-              </motion.div>
+              </div>
               
-              <motion.h2 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
+              <h2 
+               
+               
+               
+               
                 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight"
                 style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
               >
                 Agenda <br/>
                 <span className="text-[#c20000] italic">Mendatang</span>
-              </motion.h2>
+              </h2>
               
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
+              <p
+               
+               
+               
+               
                 className="text-white/70 text-lg mb-10 max-w-sm"
               >
                 Jangan lewatkan berbagai kegiatan menarik, diskusi, dan aksi dari PC IMM Kota Surakarta.
-              </motion.p>
+              </p>
               
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.3 }}
+              <div
+               
+               
+               
+               
               >
                 <Button asChild size="lg" variant="white" className="group">
                   <Link href="/agenda" className="inline-flex items-center">
@@ -94,7 +93,7 @@ export default function UpcomingEvents() {
                     <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </Button>
-              </motion.div>
+              </div>
             </div>
           </div>
 
@@ -102,12 +101,12 @@ export default function UpcomingEvents() {
           <div className="lg:w-2/3">
             <div className="border-t border-slate-800">
               {mockEvents.map((event, index) => (
-                <motion.div
+                <div
                   key={event.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                 
+                 
+                 
+                 
                 >
                   <Link href={`/agenda/${event.slug}`} className="block group border-b border-slate-800 py-8 md:py-12 relative overflow-hidden">
                     
@@ -163,7 +162,7 @@ export default function UpcomingEvents() {
 
                     </div>
                   </Link>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>

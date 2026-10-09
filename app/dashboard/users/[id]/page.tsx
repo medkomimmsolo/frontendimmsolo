@@ -110,7 +110,7 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors"
+                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
               />
             </div>
 
@@ -122,7 +122,7 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors"
+                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
               />
             </div>
 
@@ -135,7 +135,7 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Kosongkan jika tidak ingin mengubah password"
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors"
+                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
               />
             </div>
 
@@ -146,7 +146,7 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
                 required
                 value={formData.role}
                 onChange={handleChange}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors"
+                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
               >
                 <option value="komisariat">Komisariat (Kontributor Lokal)</option>
                 <option value="bidang">Bidang (Cabang)</option>

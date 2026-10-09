@@ -118,6 +118,7 @@ export default function UsersManagement() {
     'manage-account-requests': 'Pengajuan Akun',
     'manage-audit-logs': 'Log Aktivitas',
     'manage-messages': 'Kotak Masuk',
+    'manage-forms': 'Formulir Pendaftaran',
   };
 
 
@@ -175,8 +176,8 @@ export default function UsersManagement() {
           <p className="text-[#0f172a]/70 text-sm mt-1">Sistem manajemen akun admin dan kontributor website.</p>
         </div>
         <Link href="/dashboard/users/create">
-          <Button className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm shadow-md h-11 px-6">
-            <Plus className="w-5 h-5 mr-2" />
+          <Button className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm text-sm font-semibold shadow-sm">
+            <Plus className="w-4 h-4 mr-2" />
             Tambah Pengguna
           </Button>
         </Link>
@@ -192,7 +193,7 @@ export default function UsersManagement() {
                 placeholder="Cari nama atau email... (Enter)" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors"
+                className="w-full bg-white border border-[#0f172a]/10 rounded-sm pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
               />
             </form>
           </div>
@@ -258,13 +259,13 @@ export default function UsersManagement() {
                     </td>
                     <td className="p-4 pr-6">
                       <div className="flex items-center justify-end gap-2">
-                        <Link href={`/dashboard/users/${u.id}`} className="p-2 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors" title="Edit">
+                        <Link href={`/dashboard/users/${u.id}`} className="h-9 w-9 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors" title="Edit">
                           <Edit className="w-4 h-4" />
                         </Link>
                         {isSuperAdmin && (
                           <button
                             onClick={() => openAccessModal(u)}
-                            className="p-2 text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-sm transition-colors"
+                            className="h-9 w-9 inline-flex items-center justify-center text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-sm transition-colors"
                             title="Hak Akses Modul"
                           >
                             <ShieldCheck className="w-4 h-4" />
@@ -273,7 +274,7 @@ export default function UsersManagement() {
                         {isSuperAdmin && user?.id !== u.id && (
                           <button
                             onClick={() => handleToggleActive(u)}
-                            className={`p-2 rounded-sm transition-colors ${u.is_active ? 'text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100' : 'text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100'}`}
+                            className={`h-9 w-9 inline-flex items-center justify-center rounded-sm transition-colors ${u.is_active ? 'text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100' : 'text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100'}`}
                             title={u.is_active ? 'Nonaktifkan' : 'Aktifkan'}
                           >
                             {u.is_active ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
@@ -282,7 +283,7 @@ export default function UsersManagement() {
                         {user?.id !== u.id && (
                           <button 
                             onClick={() => handleDelete(u.id)}
-                            className="p-2 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors" 
+                            className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors" 
                             title="Hapus"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -301,16 +302,16 @@ export default function UsersManagement() {
             Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} pengguna
           </p>
           <div className="flex items-center gap-2">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
             <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
+            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
           </div>
         </div>
       </Card>
 
       {accessModalUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setAccessModalUser(null)}>
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4" onClick={() => setAccessModalUser(null)}>
+          <div className="bg-white rounded-sm shadow-xl max-w-2xl w-full p-6" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-bold text-slate-800 mb-1">Hak Akses Modul — {accessModalUser.name}</h2>
             <p className="text-xs text-slate-500 mb-5">
               Role: <span className="capitalize">{accessModalUser.roles?.[0]?.name || '-'}</span>
@@ -326,7 +327,7 @@ export default function UsersManagement() {
                   const checked = !isDenied && (fromRole || accessDirect.includes(perm));
                   const locked = accessModalUser.roles?.some((r: any) => r.name === 'super-admin');
                   return (
-                    <label key={perm} className={`flex items-center gap-3 p-3 border rounded-lg transition-colors ${checked ? 'border-[#c20000]/40 bg-[#c20000]/5' : 'border-slate-200'} ${locked ? 'opacity-60' : 'cursor-pointer hover:bg-slate-50'}`}>
+                    <label key={perm} className={`flex items-center gap-3 p-3 border rounded-sm transition-colors ${checked ? 'border-[#c20000]/40 bg-[#c20000]/5' : 'border-slate-200'} ${locked ? 'opacity-60' : 'cursor-pointer hover:bg-slate-50'}`}>
                       <input type="checkbox" checked={checked} disabled={locked} onChange={() => toggleAccessPerm(perm)} className="w-4 h-4 accent-[#c20000]" />
                       <span className="text-sm font-medium text-slate-700">
                         {PERM_LABELS[perm] ?? perm}
@@ -346,7 +347,7 @@ export default function UsersManagement() {
                   {accessAllCats.map((c: any) => {
                     const checked = accessAllowedCats.includes(c.id);
                     return (
-                      <label key={c.id} className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${checked ? 'border-[#c20000]/40 bg-[#c20000]/5' : 'border-slate-200 hover:bg-slate-50'}`}>
+                      <label key={c.id} className={`flex items-center gap-3 p-3 border rounded-sm cursor-pointer transition-colors ${checked ? 'border-[#c20000]/40 bg-[#c20000]/5' : 'border-slate-200 hover:bg-slate-50'}`}>
                         <input
                           type="checkbox"
                           checked={checked}

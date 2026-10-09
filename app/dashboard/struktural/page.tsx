@@ -145,17 +145,22 @@ export default function StrukturalManagement() {
     try {
       if (copyStructure && selectedPeriod) {
         const membersToCopy = struktural.filter(s => s.periode === selectedPeriod);
-        for (const member of membersToCopy) {
-          const formData = new FormData();
-          formData.append('name', '-'); // Placeholder
-          formData.append('jabatan', member.jabatan);
-          formData.append('periode', newPeriod);
-          formData.append('kategori', member.kategori || 'BPH');
-          formData.append('kelompok_bidang', member.kelompok_bidang || 'Lainnya');
-          formData.append('urutan', (member.urutan || 0).toString());
-          
-          await api.post('/struktural', formData);
-        }
+        // Fire all copies in parallel; a 40-person structure is one round of
+        // requests instead of 40 serial ones. If any request fails the batch
+        // rejects and the catch below surfaces the error.
+        await Promise.all(
+          membersToCopy.map((member) => {
+            const formData = new FormData();
+            formData.append('name', '-'); // Placeholder
+            formData.append('jabatan', member.jabatan);
+            formData.append('periode', newPeriod);
+            formData.append('kategori', member.kategori || 'BPH');
+            formData.append('kelompok_bidang', member.kelompok_bidang || 'Lainnya');
+            formData.append('urutan', (member.urutan || 0).toString());
+
+            return api.post('/struktural', formData);
+          })
+        );
         toast.success(`Berhasil membuat periode ${newPeriod} dengan struktur salinan.`);
       } else {
         const formData = new FormData();
@@ -379,13 +384,13 @@ export default function StrukturalManagement() {
             </div>
 
             <div className="relative w-full md:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#0f172a]/40" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input 
                 type="text" 
                 placeholder="Cari nama, jabatan, bidang..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors"
+                className="w-full bg-white border border-[#0f172a]/10 rounded-sm pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
               />
             </div>
           </div>
@@ -670,7 +675,7 @@ export default function StrukturalManagement() {
                   value={newPeriodName}
                   onChange={(e) => setNewPeriodName(e.target.value)}
                   placeholder="Contoh: 2025-2026"
-                  className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors"
+                  className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
                   autoFocus
                 />
               </div>
@@ -718,7 +723,7 @@ export default function StrukturalManagement() {
                 <select 
                   value={newKategori}
                   onChange={(e) => setNewKategori(e.target.value)}
-                  className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors"
+                  className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
                 >
                   <option value="BPH">Badan Pimpinan Harian (BPH)</option>
                   <option value="Lembaga Otonom">Lembaga Otonom</option>
@@ -734,7 +739,7 @@ export default function StrukturalManagement() {
                   value={newBidangName}
                   onChange={(e) => setNewBidangName(e.target.value)}
                   placeholder="Contoh: Bidang Kader, LSO Tunas, Korkom UMS..."
-                  className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors"
+                  className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
                   autoFocus
                 />
               </div>

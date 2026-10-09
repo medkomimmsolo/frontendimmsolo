@@ -1,13 +1,42 @@
 import { Metadata } from 'next';
-import { ArrowUpRight } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowUpRight, Users } from 'lucide-react';
+import { toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
 
-export const metadata: Metadata = {
-  title: 'Struktur Organisasi | PC IMM Kota Surakarta',
-  description: 'Susunan Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
-  alternates: {
-    canonical: 'https://immsolo.or.id/struktural'
-  },
-};
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ periode?: string }> }): Promise<Metadata> {
+  const sp = await searchParams;
+  const periode = typeof sp?.periode === 'string' && sp.periode ? sp.periode : undefined;
+  const canonical = `https://immsolo.or.id/struktural${periode ? `?periode=${encodeURIComponent(periode)}` : ''}`;
+  const ogImage = toAbsoluteSiteUrl('/images/imm_hero_bg.jpg');
+
+  return {
+    title: 'Struktur Organisasi',
+    description: 'Susunan Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
+    alternates: {
+      canonical,
+    },
+    openGraph: {
+      title: 'Struktur Organisasi | PC IMM Kota Surakarta',
+      description: 'Susunan Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
+      url: canonical,
+      type: 'website',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: 'Struktur Organisasi PC IMM Kota Surakarta',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Struktur Organisasi | PC IMM Kota Surakarta',
+      description: 'Susunan Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
+      images: [ogImage],
+    },
+  };
+}
 
 async function getStruktural() {
   try {
@@ -20,8 +49,6 @@ async function getStruktural() {
     return [];
   }
 }
-
-export const dynamic = 'force-dynamic';
 
 import { checkMaintenance } from '@/lib/maintenance';
 import MaintenancePage from '@/components/ui/MaintenancePage';
@@ -55,25 +82,30 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
   });
 
   return (
-    <main className="min-h-screen bg-slate-50 pt-32 pb-24 font-sans">
+    <main className="min-h-screen bg-[#f8f9fa] pt-28 pb-20 font-sans">
       
       {/* Header */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 mb-16 text-center">
-        <h1 className="text-3xl md:text-5xl font-bold text-slate-900 mb-5" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-          Struktur Organisasi
-        </h1>
-        <p className="text-lg text-slate-500 leading-relaxed font-light mb-6">
-          Formasi pengurus Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta Periode {currentPeriod}.
-        </p>
+        <div data-aos="fade-up">
+          <h1 className="text-3xl md:text-5xl font-bold text-slate-900 mb-5" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+            Struktur Organisasi
+          </h1>
+        </div>
+        <div data-aos="fade-up" data-aos-delay="100">
+          <p className="text-lg text-slate-500 leading-relaxed font-light mb-6">
+            Formasi pengurus Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta Periode {currentPeriod}.
+          </p>
+        </div>
 
         {periods.length > 1 && (
           <div className="flex flex-wrap items-center justify-center gap-3 text-sm mt-2">
             <span className="text-slate-400">Lihat kepengurusan periode:</span>
             <div className="flex flex-wrap justify-center gap-4">
               {periods.map(period => (
-                <a 
-                  key={period} 
+                <Link
+                  key={period}
                   href={`/struktural?periode=${period}`}
+                  scroll={false}
                   className={`transition-all ${
                     currentPeriod === period 
                       ? 'text-[#c20000] font-bold underline underline-offset-4 decoration-2' 
@@ -81,7 +113,7 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
                   }`}
                 >
                   {period}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
@@ -145,7 +177,9 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
                             <div className="relative w-full aspect-square bg-slate-100 overflow-hidden">
                               <img 
                                 src={person.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(person.name)}&background=random`} 
-                                alt={person.name}
+                                alt={`Foto ${person.name}`}
+                                loading="lazy"
+                                decoding="async"
                                 className="w-full h-full object-cover object-top group-hover:scale-110 transition-transform duration-700 ease-in-out"
                               />
                             </div>
@@ -176,10 +210,11 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
                                         href={sm.url} 
                                         target="_blank" 
                                         rel="noopener noreferrer" 
-                                        className="hover:scale-110 transition-transform duration-300 block hover:opacity-80"
+                                        className="hover:scale-110 transition-transform duration-300 hover:opacity-80 inline-flex items-center justify-center min-w-10 min-h-10"
                                         title={sm.url}
+                                        aria-label={`Media sosial ${person.name}`}
                                       >
-                                        <img src={sm.icon} alt="Social Icon" className="w-3.5 h-3.5 object-contain" />
+                                        <img src={sm.icon} alt="" aria-hidden="true" className="w-3.5 h-3.5 object-contain" />
                                       </a>
                                     ))
                                   ) : person.instagram_url ? (
@@ -187,8 +222,9 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
                                       href={person.instagram_url} 
                                       target="_blank" 
                                       rel="noopener noreferrer" 
-                                      className="text-slate-400 hover:text-[#c20000] transition-colors"
+                                      className="text-slate-400 hover:text-[#c20000] transition-colors inline-flex items-center justify-center min-w-10 min-h-10"
                                       title="Instagram"
+                                      aria-label={`Instagram ${person.name}`}
                                     >
                                       <ArrowUpRight className="w-3.5 h-3.5" />
                                     </a>
@@ -208,8 +244,10 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
         })}
 
         {struktural.length === 0 && (
-          <div className="text-center py-16 bg-white border border-slate-200 rounded-sm shadow-sm">
-            <p className="text-slate-500 text-lg">Data struktur organisasi belum tersedia.</p>
+          <div className="text-center py-16 max-w-md mx-auto">
+            <Users className="w-12 h-12 text-slate-300 mx-auto mb-4" aria-hidden="true" />
+            <p className="text-slate-900 font-semibold text-lg mb-2">Data struktur organisasi belum tersedia.</p>
+            <p className="text-slate-500 text-sm">Silakan kembali lagi nanti.</p>
           </div>
         )}
 

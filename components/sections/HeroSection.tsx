@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'motion/react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
@@ -29,11 +28,11 @@ export default function HeroSection({ stats, events = [] }: HeroProps) {
           alt="PC IMM Surakarta Background"
           fill
           priority
-          className="object-cover object-center opacity-40 scale-105 motion-safe:animate-[slowZoom_30s_ease-in-out_infinite_alternate]"
+          className="object-cover object-center opacity-40"
         />
         {/* Solid Dark Overlay for better readability */}
         <div className="absolute inset-0 bg-[#0f172a]/80"></div>
-        <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[2px]"></div>
+        <div className="absolute inset-0 bg-slate-950/20"></div>
       </div>
 
       {/* Main Container */}
@@ -42,56 +41,50 @@ export default function HeroSection({ stats, events = [] }: HeroProps) {
           
           {/* Left: Hero Content */}
           <div className="lg:w-1/2 xl:w-3/5 flex flex-col items-center text-center lg:items-start lg:text-left shrink-0">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+            <div
+              data-aos="fade-down"
               className="inline-flex items-center gap-2.5 px-4 py-1.5 mb-8 rounded-full border border-white/10 bg-white/5 backdrop-blur-md shadow-lg"
             >
-              <span className="w-2.5 h-2.5 rounded-full bg-[#ff3333] animate-pulse shadow-[0_0_10px_rgba(255,51,51,0.8)]"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-[#ff3333] shadow-[0_0_10px_rgba(255,51,51,0.8)]"></span>
               <span className="text-white/90 font-bold text-xs sm:text-sm tracking-widest uppercase" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Website Resmi</span>
-            </motion.div>
+            </div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+            <h1
+              data-aos="fade-up"
+              data-aos-delay="100"
               className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-6 text-white leading-[1.15]"
               style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
             >
               PC IMM<br />
               <span className="text-[#c20000]">Kota Surakarta</span>
-            </motion.h1>
+            </h1>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            <p
+              data-aos="fade-up"
+              data-aos-delay="200"
               className="text-base sm:text-lg lg:text-xl text-white/70 mb-10 leading-relaxed font-light max-w-xl"
             >
               Wadah perjuangan mahasiswa Muhammadiyah untuk membentuk akademisi Islam yang berakhlak mulia demi terwujudnya tujuan persyarikatan.
-            </motion.p>
+            </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+            <div
+              data-aos="fade-up"
+              data-aos-delay="300"
               className="flex flex-wrap items-center justify-center lg:justify-start gap-4 w-full"
             >
-              <Button asChild size="lg" className="bg-[#c20000] hover:bg-[#a00000] text-white shadow-lg shadow-red-900/30 border-none rounded-full px-8 transition-all duration-300 hover:scale-105">
-                <Link href="#kontak">Hubungi Kami</Link>
+              <Button asChild size="lg" className="bg-[#c20000] hover:bg-[#a30000] text-white shadow-lg shadow-red-900/30 border-none rounded-full px-8 transition-all duration-300 hover:scale-105">
+                <Link href="/kontak">Hubungi Kami</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 hover:text-white bg-transparent rounded-full px-8 backdrop-blur-md transition-all duration-300">
                 <Link href="/tentang">Pelajari Lebih Lanjut</Link>
               </Button>
-            </motion.div>
+            </div>
           </div>
 
           {/* Right: Upcoming Events Panel */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+          <div 
+            data-aos="fade-left"
+            data-aos-delay="400"
             className="lg:w-1/2 xl:w-2/5 w-full flex flex-col min-h-0 lg:h-auto lg:max-h-full"
           >
             <div className="bg-[#0f172a]/60 backdrop-blur-2xl border border-white/10 rounded-sm p-6 sm:p-8 shadow-2xl flex flex-col h-full relative overflow-hidden group/panel">
@@ -108,7 +101,7 @@ export default function HeroSection({ stats, events = [] }: HeroProps) {
               </div>
 
               {/* Scrollable List for Events */}
-              <div className="flex flex-col gap-3.5 overflow-y-auto pr-2 relative z-10 pb-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30">
+              <div className="flex flex-col gap-3.5 overflow-y-auto pr-2 relative z-10 pb-1 max-h-[46vh] lg:max-h-full [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-white/30">
                 {displayEvents.length > 0 ? (
                   displayEvents.map((event) => (
                     <Link key={event.id} href={`/agenda/${event.slug}`} className="group relative block bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 rounded-sm p-4 transition-all duration-300 hover:border-white/10 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-0.5 shrink-0">
@@ -133,7 +126,7 @@ export default function HeroSection({ stats, events = [] }: HeroProps) {
               </div>
 
             </div>
-          </motion.div>
+          </div>
 
         </div>
       </div>

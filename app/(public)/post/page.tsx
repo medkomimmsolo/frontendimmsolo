@@ -4,32 +4,59 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { ArrowRight, Calendar, User } from 'lucide-react';
+import { ArrowRight, Calendar, User, FileSearch } from 'lucide-react';
 
-export const metadata: Metadata = {
-  title: 'Post & Artikel | PC IMM Kota Surakarta',
-  description: 'Kabar terbaru, opini, dan liputan kegiatan seputar Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
-  alternates: {
-    canonical: 'https://immsolo.or.id/post'
-  },
-  openGraph: {
-    title: 'Post & Artikel | PC IMM Kota Surakarta',
-    description: 'Kabar terbaru, opini, dan liputan kegiatan seputar Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
-    url: 'https://immsolo.or.id/post',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Post & Artikel | PC IMM Kota Surakarta',
-    description: 'Kabar terbaru, opini, dan liputan kegiatan seputar Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
-  }
+import { checkMaintenance } from '@/lib/maintenance';
+import MaintenancePage from '@/components/ui/MaintenancePage';
+import { toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
+
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 };
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const sp = await searchParams;
+  const params = new URLSearchParams();
+  if (typeof sp?.category === 'string' && sp.category) params.set('category', sp.category);
+  if (typeof sp?.page === 'string' && sp.page && sp.page !== '1') params.set('page', sp.page);
+  const qs = params.toString();
+  const canonical = `https://immsolo.or.id/post${qs ? `?${qs}` : ''}`;
+  const ogImage = toAbsoluteSiteUrl('/images/imm_hero_bg.jpg');
+
+  return {
+    title: 'Post & Artikel',
+    description: 'Kabar terbaru, opini, dan liputan kegiatan seputar Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
+    alternates: {
+      canonical,
+    },
+    openGraph: {
+      title: 'Post & Artikel | PC IMM Kota Surakarta',
+      description: 'Kabar terbaru, opini, dan liputan kegiatan seputar Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
+      url: canonical,
+      type: 'website',
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: 'Post & Artikel PC IMM Kota Surakarta',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Post & Artikel | PC IMM Kota Surakarta',
+      description: 'Kabar terbaru, opini, dan liputan kegiatan seputar Ikatan Mahasiswa Muhammadiyah Kota Surakarta.',
+      images: [ogImage],
+    }
+  };
+}
 
 async function getBlogs(category?: string, page: number = 1) {
   try {
     const params = new URLSearchParams({ page: String(page), per_page: '12' });
     if (category) params.set('category', category);
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs?${params}`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs?${params}`, { next: { revalidate: 30 } });
     if (!res.ok) return { items: [], currentPage: 1, lastPage: 1 };
     const json = await res.json();
     const payload = json.data || {};
@@ -43,13 +70,6 @@ async function getBlogs(category?: string, page: number = 1) {
     return { items: [], currentPage: 1, lastPage: 1 };
   }
 }
-
-type Props = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-};
-
-import { checkMaintenance } from '@/lib/maintenance';
-import MaintenancePage from '@/components/ui/MaintenancePage';
 
 export default async function PostPage(props: Props) {
   if (await checkMaintenance('maintenance_berita')) return <MaintenancePage />;
@@ -67,10 +87,10 @@ export default async function PostPage(props: Props) {
   // Format category name for title display if category is selected
   const displayTitle = category 
     ? `Kategori: ${category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}` 
-    : 'Index Post';
+    : 'Post & Artikel';
 
   return (
-    <main className="min-h-screen bg-[#f8f9fa] pt-24 pb-20">
+    <main className="min-h-screen bg-[#f8f9fa] pt-28 pb-20">
       
       {/* Breadcrumb & Title Section */}
       <section className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-6">
@@ -78,7 +98,7 @@ export default async function PostPage(props: Props) {
           <ul className="flex items-center text-sm text-[#0f172a]/60 space-x-2">
             <li>
               <Link href="/" className="hover:text-[#c20000] transition-colors flex items-center">
-                Home
+                Beranda
               </Link>
             </li>
             <li>
@@ -87,10 +107,12 @@ export default async function PostPage(props: Props) {
             <li className="text-[#0f172a] font-medium" aria-current="page">{category ? 'Kategori' : 'Post'}</li>
           </ul>
         </nav>
-        <div className="flex items-center justify-between border-b border-[#0f172a]/10 pb-4 mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-            {displayTitle}
-          </h1>
+        <div>
+          <div data-aos="fade-up" className="flex items-center justify-between border-b border-[#0f172a]/10 pb-4 mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+              {displayTitle}
+            </h1>
+          </div>
         </div>
       </section>
 
@@ -99,7 +121,7 @@ export default async function PostPage(props: Props) {
         {heroPost && (
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Left Column: Large Post */}
-            <div className="group bg-white rounded-md shadow-sm border border-[#0f172a]/5 overflow-hidden flex flex-col hover:shadow-lg transition-shadow duration-300">
+            <div className="group bg-white rounded-sm shadow-sm border border-[#0f172a]/5 overflow-hidden flex flex-col hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
               <div className="relative aspect-[16/9] overflow-hidden">
                 <Link href={`/post/${heroPost.slug}`} className="block w-full h-full">
                   <Image
@@ -121,12 +143,12 @@ export default async function PostPage(props: Props) {
               </div>
               <div className="p-6 flex flex-col flex-grow">
                 <Link href={`/post/${heroPost.slug}`} className="block group/link">
-                  <h3 
-                    className="text-2xl md:text-3xl font-bold text-[#0f172a] mb-3 leading-[1.3] group-hover/link:text-[#c20000] transition-colors line-clamp-3"
+                  <h2 
+                    className="text-2xl md:text-3xl font-bold text-[#0f172a] mb-3 leading-[1.3] group-hover/link:text-[#c20000] transition-colors line-clamp-2"
                     style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
                   >
                     {heroPost.title}
-                  </h3>
+                  </h2>
                 </Link>
                 <p className="text-[#0f172a]/70 text-base mb-6 line-clamp-3 leading-relaxed flex-grow">
                   {heroPost.excerpt}
@@ -148,7 +170,7 @@ export default async function PostPage(props: Props) {
             {topPosts.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {topPosts.map((post: any) => (
-                  <div key={post.id} className="group bg-white rounded-md shadow-sm border border-[#0f172a]/5 overflow-hidden flex flex-col hover:shadow-md transition-shadow duration-300">
+                  <div key={post.id} className="group bg-white rounded-sm shadow-sm border border-[#0f172a]/5 overflow-hidden flex flex-col hover:shadow-md hover:-translate-y-1 transition-all duration-300">
                     <div className="relative aspect-[16/9] overflow-hidden">
                       <Link href={`/post/${post.slug}`} className="block w-full h-full">
                         <Image
@@ -170,12 +192,12 @@ export default async function PostPage(props: Props) {
                     </div>
                     <div className="p-4 flex flex-col flex-grow">
                       <Link href={`/post/${post.slug}`} className="block group/link mb-2">
-                        <h6 
-                          className="text-base font-bold text-[#0f172a] leading-snug group-hover/link:text-[#c20000] transition-colors line-clamp-3"
+                        <h3 
+                          className="text-base font-bold text-[#0f172a] leading-snug group-hover/link:text-[#c20000] transition-colors line-clamp-2"
                           style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
                         >
                           {post.title}
-                        </h6>
+                        </h3>
                       </Link>
                       <div className="mt-auto pt-3 flex items-center text-[11px] text-[#0f172a]/50 font-medium">
                         <Calendar className="w-3 h-3 mr-1" />
@@ -201,7 +223,7 @@ export default async function PostPage(props: Props) {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {remainingPosts.map((post: any) => (
-              <Card key={post.id} className="group hover:shadow-xl transition-all duration-300 border-[#0f172a]/5 overflow-hidden flex flex-col rounded-md">
+              <Card key={post.id} className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-[#0f172a]/5 overflow-hidden flex flex-col rounded-sm">
                 <Link href={`/post/${post.slug}`} className="block relative aspect-[16/9] overflow-hidden">
                   <Image
                     
@@ -232,7 +254,7 @@ export default async function PostPage(props: Props) {
                   </div>
                   <Link href={`/post/${post.slug}`} className="block group/link">
                     <h3 
-                      className="text-lg font-bold text-[#0f172a] mb-3 leading-snug group-hover/link:text-[#c20000] transition-colors line-clamp-3"
+                      className="text-lg font-bold text-[#0f172a] mb-3 leading-snug group-hover/link:text-[#c20000] transition-colors line-clamp-2"
                       style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
                     >
                       {post.title}
@@ -258,15 +280,20 @@ export default async function PostPage(props: Props) {
       )}
       
       {posts.length === 0 && (
-        <div className="text-center py-20">
-          <p className="text-[#0f172a]/70 text-lg">Belum ada post yang dipublikasikan.</p>
+        <div className="text-center py-20 max-w-md mx-auto">
+          <FileSearch className="w-12 h-12 text-[#0f172a]/20 mx-auto mb-4" />
+          <p className="text-[#0f172a] font-semibold text-lg mb-2">Belum ada post yang dipublikasikan.</p>
+          <p className="text-[#0f172a]/70 text-sm mb-6">Coba ubah filter kategori atau kembali lagi nanti.</p>
+          <Link href="/post" className="inline-flex items-center px-5 py-2.5 rounded-sm border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors">
+            Tampilkan Semua Post
+          </Link>
         </div>
       )}
 
       {lastPage > 1 && (
         <nav className="flex items-center justify-center gap-2 mt-14" aria-label="Pagination">
           {currentPage > 1 && (
-            <Link href={`/post?page=${currentPage - 1}${category ? `&category=${category}` : ''}`} className="px-4 py-2 rounded-md border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors">
+            <Link href={`/post?page=${currentPage - 1}${category ? `&category=${category}` : ''}`} className="px-4 py-2 rounded-sm border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors">
               Sebelumnya
             </Link>
           )}
@@ -274,7 +301,7 @@ export default async function PostPage(props: Props) {
             Halaman {currentPage} dari {lastPage}
           </span>
           {currentPage < lastPage && (
-            <Link href={`/post?page=${currentPage + 1}${category ? `&category=${category}` : ''}`} className="px-4 py-2 rounded-md border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors">
+            <Link href={`/post?page=${currentPage + 1}${category ? `&category=${category}` : ''}`} className="px-4 py-2 rounded-sm border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors">
               Selanjutnya
             </Link>
           )}

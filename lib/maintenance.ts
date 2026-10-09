@@ -1,42 +1,30 @@
+import { getApiBase, isSettingEnabled, normalizeSettings, type Settings } from '@/lib/settings';
+
+async function fetchSettings(): Promise<Settings> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const res = await fetch(`${getApiBase()}/settings`, {
+      // Cache singkat: cukup segar untuk toggle maintenance (maks. 60 dtk),
+      // jauh lebih ringan daripada fetch ulang di setiap page view.
+      next: { revalidate: 60 },
+      signal: controller.signal,
+    });
+    if (!res.ok) return {};
+    const json = await res.json();
+    return normalizeSettings(json?.data);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 export async function checkMaintenance(pageKey: string): Promise<boolean> {
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, { 
-      cache: 'no-store',
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    
-    if (!res.ok) return false;
-    
-    const json = await res.json();
-    const settings = json.data || [];
-    
-    let isMaintenance = false;
-    if (Array.isArray(settings)) {
-      // First check global maintenance
-      const globalMaintenance = settings.find((s: any) => s.key === 'maintenance_mode');
-      if (globalMaintenance && globalMaintenance.value === 'true') {
-        return true;
-      }
-      
-      // Then check specific page maintenance
-      const pageMaintenance = settings.find((s: any) => s.key === pageKey);
-      if (pageMaintenance && pageMaintenance.value === 'true') {
-        return true;
-      }
-    } else if (typeof settings === 'object') {
-      if (settings.maintenance_mode === 'true') {
-        return true;
-      }
-      if (settings[pageKey] === 'true') {
-        return true;
-      }
-    }
-    
-    return isMaintenance;
+    const settings = await fetchSettings();
+
+    if (isSettingEnabled(settings, 'maintenance_mode')) return true;
+    return isSettingEnabled(settings, pageKey);
   } catch (error) {
     console.error(`Failed to check maintenance mode for ${pageKey}`, error);
     return false;

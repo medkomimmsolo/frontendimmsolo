@@ -37,6 +37,7 @@ export interface Blog {
   featured_image: string | null;
   status: 'draft' | 'published' | 'archived';
   review_status?: 'pending' | 'approved' | 'rejected';
+  review_note?: string | null;
   views_count: number;
   meta_title: string | null;
   meta_description: string | null;

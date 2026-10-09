@@ -187,7 +187,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <Link href="/dashboard/events">
-            <Button variant="outline" size="sm" type="button" className="h-9 w-9 p-0 rounded-md border-slate-200">
+            <Button variant="outline" size="sm" type="button" className="h-9 w-9 p-0 rounded-sm border-slate-200">
               <ArrowLeft className="w-4 h-4 text-slate-600" />
             </Button>
           </Link>
@@ -202,7 +202,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
         <div className="lg:col-span-2 space-y-6">
           
           {/* Title Input */}
-          <div className="bg-white border border-slate-200 rounded-md shadow-sm p-4">
+          <div className="bg-white border border-slate-200 rounded-sm shadow-sm p-4">
             <input 
               type="text" 
               name="title"
@@ -214,7 +214,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
           </div>
 
           {/* Description Editor */}
-          <div className="bg-white border border-slate-200 rounded-md shadow-sm">
+          <div className="bg-white border border-slate-200 rounded-sm shadow-sm">
             <div className="p-3 border-b border-slate-200 bg-slate-50 font-medium text-sm text-slate-700">
               Event Details & Description
             </div>
@@ -231,7 +231,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
           </div>
           
           {/* Location & Link Info */}
-          <div className="bg-white border border-slate-200 rounded-md shadow-sm">
+          <div className="bg-white border border-slate-200 rounded-sm shadow-sm">
             <div className="p-3 border-b border-slate-200 bg-slate-50 font-medium text-sm text-slate-700">
               Event Information
             </div>
@@ -246,7 +246,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
                   value={formData.location}
                   onChange={handleChange}
                   placeholder="e.g. Gedung Dakwah Muhammadiyah Surakarta" 
-                  className="w-full bg-white border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+                  className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
                 />
               </div>
 
@@ -260,7 +260,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
                   value={formData.registration_link}
                   onChange={handleChange}
                   placeholder="https://forms.gle/..." 
-                  className="w-full bg-white border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+                  className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
                 />
               </div>
             </div>
@@ -303,18 +303,18 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
                   name="event_date"
                   value={formData.event_date}
                   onChange={handleChange}
-                  className="w-full bg-white border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+                  className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
                 />
               </div>
 
             </CardContent>
             <div className="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-              <Link href="/dashboard/events" className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors">
-                Cancel
-              </Link>
-              <Button type="submit" disabled={isLoading} className="bg-[#c20000] hover:bg-[#a00000] text-white rounded-md px-5 h-9 shadow-sm">
+              <Button type="button" variant="outline" onClick={() => router.push('/dashboard/events')} className="rounded-sm text-sm border-slate-200 hover:text-[#c20000]">
+                Batal
+              </Button>
+              <Button type="submit" disabled={isLoading} className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm px-5 shadow-sm">
                 {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                Update
+                Perbarui
               </Button>
             </div>
           </Card>
@@ -326,7 +326,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
             </div>
             <CardContent className="p-4">
               {bannerPreview ? (
-                <div className="relative group rounded-md overflow-hidden border border-slate-200">
+                <div className="relative group rounded-sm overflow-hidden border border-slate-200">
                   <img src={bannerPreview} alt="Banner Preview" className="w-full h-auto object-cover" />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button 
@@ -341,7 +341,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
               ) : (
                 <div 
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-slate-300 rounded-md p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 hover:border-[#c20000] transition-colors group"
+                  className="border-2 border-dashed border-slate-200 rounded-sm p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 hover:border-[#c20000] transition-colors group"
                 >
                   <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-[#c20000]/10 transition-colors">
                     <ImageIcon className="w-5 h-5 text-slate-400 group-hover:text-[#c20000]" />

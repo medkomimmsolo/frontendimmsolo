@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 interface SectionTitleProps {
@@ -28,24 +27,24 @@ export function SectionTitle({
       )}
     >
       {subtitle && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+        <div
+         
+         
+         
           className={cn(
             "text-sm font-bold tracking-widest uppercase mb-3",
             light ? "text-[#c20000]/60" : "text-[#c20000]"
           )}
         >
           {subtitle}
-        </motion.div>
+        </div>
       )}
       
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.1 }}
+      <h2
+       
+       
+       
+       
         className={cn(
           "text-3xl md:text-4xl lg:text-5xl font-bold mb-6",
           light ? "text-white" : "text-[#0f172a]"
@@ -53,13 +52,13 @@ export function SectionTitle({
         style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
       >
         {title}
-      </motion.h2>
+      </h2>
 
-      <motion.div
-        initial={{ opacity: 0, scaleX: 0 }}
-        whileInView={{ opacity: 1, scaleX: 1 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.2, duration: 0.5 }}
+      <div
+       
+       
+       
+       
         className={cn(
           "h-1 rounded-full",
           alignment === 'center' && "mx-auto w-24",

@@ -6,7 +6,10 @@ export default function ReadingProgress() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    let ticking = false;
+
     const updateProgress = () => {
+      ticking = false;
       const article = document.querySelector('article');
       if (!article) return;
 
@@ -26,10 +29,18 @@ export default function ReadingProgress() {
       }
     };
 
-    window.addEventListener('scroll', updateProgress, { passive: true });
+    // Batasi update maksimal 1x per frame agar tidak jank saat scroll cepat.
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(updateProgress);
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
     updateProgress();
 
-    return () => window.removeEventListener('scroll', updateProgress);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   return (

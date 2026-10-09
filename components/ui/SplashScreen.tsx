@@ -1,263 +1,210 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useState, useEffect } from 'react';
 
-const smoothEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
-const slowEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
+const WORDS = ['HALO', 'ASSALAMUALAIKUM', 'SUGENG RAWUH'];
+const WORD_MS = 300;
+const LOGO_MS = 200;
+const CURTAIN_MS = 450;
 
+const SHOW_MS = LOGO_MS + WORDS.length * WORD_MS + 100;
+const FADE_MS = CURTAIN_MS + 150;
+
+const EASE_EXPO = 'cubic-bezier(0.16, 1, 0.3, 1)';
+
+/**
+ * Layar pembuka ala situs Awwwards setiap kali halaman dimuat penuh.
+ * (Root layout hanya mount ulang saat full load, jadi navigasi
+ * client-side antar halaman TIDAK memicu splash.)
+ * Alur: logo memudar masuk → kata sapaan bergantian dalam topeng
+ * (mask reveal) → tirai putih terangkat disusul tirai merah.
+ * Murni CSS + state, basis putih. Dilewati total untuk
+ * prefers-reduced-motion.
+ */
 export default function SplashScreen({ iconUrl }: { iconUrl?: string }) {
-  const [isLoading, setIsLoading] = useState(true);
+  const [phase, setPhase] = useState<'pending' | 'show' | 'leave' | 'done'>('pending');
+  const [wordIdx, setWordIdx] = useState(0);
   const [progress, setProgress] = useState(0);
-  
-  const isInitialLoad = useRef(true);
 
-  // Handle the progress animation and hiding logic
   useEffect(() => {
-    const isFirst = isInitialLoad.current;
-    if (!isFirst) return;
-    setIsLoading(true);
-    if (isFirst) {
-      isInitialLoad.current = false;
-      setProgress(0);
+    let reduced = false;
+    try {
+      reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      reduced = false;
     }
 
-    // Set durations: faster for route changes so it's not annoying
-    const counterDuration = isFirst ? 2800 : 800;
-    const hideDelay = isFirst ? 4200 : 1200;
-
-    const interval = 30;
-    const steps = counterDuration / interval;
-    let currentStep = 0;
-
-    const counterInterval = setInterval(() => {
-      currentStep++;
-      const t = currentStep / steps;
-      const easeOutExpo = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
-      const newProgress = Math.min(Math.floor(easeOutExpo * 100), 100);
-      setProgress(newProgress);
-      
-      if (currentStep >= steps) {
-        setProgress(100);
-        clearInterval(counterInterval);
+    // Jangan tampilkan di dashboard/login & hanya sekali per sesi (hemat LCP).
+    try {
+      const p = window.location.pathname;
+      if (p.startsWith('/dashboard') || p.startsWith('/login')) {
+        setPhase('done');
+        return;
       }
-    }, interval);
+      if (sessionStorage.getItem('immsolo_splash_seen')) {
+        setPhase('done');
+        return;
+      }
+    } catch {
+      // abaikan, lanjut tampil
+    }
 
-    const hideTimer = setTimeout(() => {
-      setIsLoading(false);
-    }, hideDelay);
+    if (reduced) {
+      setPhase('done');
+      return;
+    }
 
+    setPhase('show');
+
+    // Kata sapaan bergantian.
+    const wordTimer = setInterval(() => {
+      setWordIdx((i) => (i + 1) % WORDS.length);
+    }, WORD_MS);
+
+    // Counter halus 0 → 100 selama fase tampil.
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / (SHOW_MS - CURTAIN_MS), 1);
+      const eased = t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
+      setProgress(Math.min(Math.floor(eased * 100), 100));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    const t1 = setTimeout(() => {
+      clearInterval(wordTimer);
+      setPhase('leave');
+    }, SHOW_MS);
+    const t2 = setTimeout(() => {
+      try {
+        sessionStorage.setItem('immsolo_splash_seen', '1');
+      } catch {
+        // abaikan
+      }
+      setPhase('done');
+    }, SHOW_MS + FADE_MS);
     return () => {
-      clearInterval(counterInterval);
-      clearTimeout(hideTimer);
+      clearInterval(wordTimer);
+      cancelAnimationFrame(raf);
+      clearTimeout(t1);
+      clearTimeout(t2);
     };
   }, []);
 
-  const imageSource = iconUrl 
-    ? (iconUrl.startsWith('http') ? iconUrl : `${iconUrl}`) 
-    : '';
+  if (phase === 'pending' || phase === 'done') return null;
 
-  const letters = Array.from("PC IMM KOTA SURAKARTA");
-  const particles = Array.from({ length: 20 });
+  const leaving = phase === 'leave';
 
   return (
-    <AnimatePresence>
-      {isLoading && (
-        <motion.div
-          key="splash"
-          className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-white overflow-hidden"
-          exit={{ opacity: 0, filter: "blur(20px)", scale: 1.1 }}
-          transition={{ duration: 1.2, ease: smoothEase }}
+    <div
+      role="status"
+      aria-label="Memuat website PC IMM Kota Surakarta"
+      className={`fixed inset-0 z-[99999] ${leaving ? 'pointer-events-none' : ''}`}
+    >
+      {/* ── Tirai merah (di belakang, terangkat menyusul) ── */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[#c20000] transition-transform ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style={{
+          transitionDuration: `${CURTAIN_MS}ms`,
+          transitionDelay: leaving ? '130ms' : '0ms',
+          transform: leaving ? 'translateY(-100%)' : 'translateY(0)',
+        }}
+      />
+
+      {/* ── Watermark raksasa melayang ── */}
+      <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none select-none" aria-hidden="true">
+        <div className="splash-marquee whitespace-nowrap w-max font-black uppercase leading-none text-[#0f172a]/[0.045]" style={{ fontFamily: 'var(--font-poppins), sans-serif', fontSize: 'clamp(10rem, 28vw, 24rem)' }}>
+          {'IMM • '.repeat(6)}
+        </div>
+      </div>
+
+      {/* ── Panel putih (konten + terangkat duluan) ── */}
+      <div
+        className="absolute inset-0 bg-white flex flex-col items-center justify-center overflow-hidden transition-transform ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style={{
+          transitionDuration: `${CURTAIN_MS}ms`,
+          transform: leaving ? 'translateY(-100%)' : 'translateY(0)',
+        }}
+      >
+        {/* Logo hidup: mengapung + dot satelit mengorbit + glow */}
+        <div
+          className="animate-in zoom-in-95 duration-500 mb-10 relative flex items-center justify-center"
+          aria-hidden="true"
         >
-          {/* ----- COMPLEX BACKGROUND LAYER ----- */}
-          
-          {/* 1. Massive Scrolling Outline Typography */}
-          <div className="absolute inset-0 flex flex-col justify-between overflow-hidden pointer-events-none opacity-[0.03] z-0 select-none">
-            <motion.div 
-              initial={{ x: "0%" }}
-              animate={{ x: "-50%" }}
-              transition={{ duration: 20, ease: "linear", repeat: Infinity }}
-              className="whitespace-nowrap mt-10"
-            >
-              <h1 className="text-[15rem] font-black uppercase tracking-tighter text-[#0f172a]" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
-                IKATAN MAHASISWA MUHAMMADIYAH IKATAN MAHASISWA MUHAMMADIYAH
-              </h1>
-            </motion.div>
-            <motion.div 
-              initial={{ x: "-50%" }}
-              animate={{ x: "0%" }}
-              transition={{ duration: 20, ease: "linear", repeat: Infinity }}
-              className="whitespace-nowrap mb-10"
-            >
-              <h1 className="text-[15rem] font-black uppercase tracking-tighter text-transparent" style={{ WebkitTextStroke: '4px #c20000', fontFamily: 'var(--font-inter), sans-serif' }}>
-                KOTA SURAKARTA KOTA SURAKARTA KOTA SURAKARTA
-              </h1>
-            </motion.div>
+          {/* Glow lembut */}
+          <div className="splash-glow absolute w-60 h-60 rounded-full bg-[#c20000]/15 blur-3xl" />
+          {/* Orbit satelit */}
+          <div className="splash-orbit absolute w-44 h-44">
+            <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-[#c20000] shadow-[0_0_12px_rgba(194,0,0,0.9)]" />
+            <span className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-2 rounded-full bg-[#f59e0b]" />
           </div>
-
-          {/* 2. Floating Tech Particles */}
-          <div className="absolute inset-0 z-0 pointer-events-none">
-            {particles.map((_, i) => (
-              <motion.div
-                key={`particle-${i}`}
-                initial={{ 
-                  x: `${(i * 17) % 100}vw`, 
-                  y: `${(i * 23) % 100}vh`,
-                  scale: 0,
-                  opacity: 0
-                }}
-                animate={{ 
-                  y: [`${(i * 23) % 100}vh`, `${((i * 23) % 100) - 20}vh`],
-                  scale: [0, ((i * 7) % 15) / 10 + 0.5, 0],
-                  opacity: [0, ((i * 11) % 5) / 10 + 0.2, 0]
-                }}
-                transition={{ 
-                  duration: ((i * 13) % 3) + 2, 
-                  repeat: Infinity, 
-                  delay: ((i * 19) % 20) / 10,
-                  ease: "easeInOut"
-                }}
-                className={`absolute rounded-full ${i % 3 === 0 ? 'bg-[#c20000]' : 'bg-slate-300'} w-2 h-2`}
-              />
-            ))}
-          </div>
-
-          {/* 3. Complex Concentric Rings */}
-          <motion.div 
-            initial={{ scale: 0, rotate: 0 }}
-            animate={{ scale: 1, rotate: 180 }}
-            transition={{ duration: 4, ease: smoothEase }}
-            className="absolute border border-dashed border-[#c20000]/20 rounded-full w-[800px] h-[800px] z-0"
-          />
-          <motion.div 
-            initial={{ scale: 0, rotate: 0 }}
-            animate={{ scale: 1, rotate: -180 }}
-            transition={{ duration: 4, ease: smoothEase, delay: 0.2 }}
-            className="absolute border border-slate-200 rounded-full w-[600px] h-[600px] z-0"
-          >
-            {/* Crosshairs inside ring */}
-            <div className="absolute top-0 left-1/2 w-px h-8 bg-[#c20000]/30 -translate-x-1/2"></div>
-            <div className="absolute bottom-0 left-1/2 w-px h-8 bg-[#c20000]/30 -translate-x-1/2"></div>
-            <div className="absolute left-0 top-1/2 h-px w-8 bg-[#c20000]/30 -translate-y-1/2"></div>
-            <div className="absolute right-0 top-1/2 h-px w-8 bg-[#c20000]/30 -translate-y-1/2"></div>
-          </motion.div>
-
-          {/* ----- MAIN CONTENT SEQUENCE ----- */}
-          <div className="relative z-20 flex flex-col items-center justify-center">
-            
-            {/* Multi-layered Morphing Logo Reveal */}
-            <div className="relative flex items-center justify-center w-40 h-40">
-              {/* Layer 1: Background rotated square */}
-              <motion.div 
-                initial={{ scale: 0, rotate: 45, borderRadius: "100%" }}
-                animate={{ scale: 1, rotate: 135, borderRadius: "24px" }}
-                transition={{ duration: 1.5, delay: 0.2, ease: smoothEase }}
-                className="absolute inset-0 bg-[#c20000]/5 border border-[#c20000]/20"
-              />
-              
-              {/* Layer 2: Main white box */}
-              <motion.div
-                initial={{ scale: 0, rotate: -45, borderRadius: "100%" }}
-                animate={{ scale: 1, rotate: 0, borderRadius: "32px" }}
-                transition={{ duration: 1.5, delay: 0.4, ease: smoothEase }}
-                className="absolute inset-0 bg-white shadow-[0_30px_60px_rgba(194,0,0,0.15)] border border-slate-100 flex items-center justify-center overflow-hidden"
+          {/* Logo mengapung */}
+          <div className="splash-float-soft relative w-28 h-28 rounded-3xl overflow-hidden bg-white border border-slate-100 shadow-[0_16px_45px_rgba(15,23,42,0.16)]">
+            {iconUrl ? (
+              <img src={iconUrl} alt="" width={112} height={112} className="w-full h-full object-contain" />
+            ) : (
+              <div
+                className="w-full h-full bg-gradient-to-br from-[#c20000] to-[#7a0000] flex items-center justify-center text-white font-bold text-6xl"
+                style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
               >
-                {/* Logo Image */}
-                {imageSource ? (
-                  <motion.img 
-                    initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
-                    animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                    transition={{ duration: 1, delay: 1.2, ease: smoothEase }}
-                    src={imageSource} 
-                    alt="Loading Icon" 
-                    className="w-24 h-24 md:w-28 md:h-28 object-contain filter drop-shadow-xl relative z-10"
-                  />
-                ) : (
-                  <motion.span 
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 1, delay: 1.2, ease: smoothEase }}
-                    className="text-5xl font-black text-[#c20000] relative z-10"
-                  >
-                    IMM
-                  </motion.span>
-                )}
+                I
+              </div>
+            )}
+            <div className="splash-shine absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/60 to-transparent" aria-hidden="true" />
+          </div>
+        </div>
 
-                {/* Shimmer inside white box */}
-                <motion.div 
-                  initial={{ x: '-150%', skewX: -20 }}
-                  animate={{ x: '150%' }}
-                  transition={{ duration: 2, delay: 1.5, repeat: Infinity, repeatDelay: 1 }}
-                  className="absolute inset-0 w-16 bg-gradient-to-r from-transparent via-[#c20000]/10 to-transparent z-20"
-                />
-              </motion.div>
-            </div>
-
-            {/* Typography Section */}
-            <div className="mt-12 flex overflow-hidden px-4">
-              {letters.map((char, i) => (
-                <motion.h1
-                  key={i}
-                  initial={{ y: 80, opacity: 0, scale: 0.5 }}
-                  animate={{ y: 0, opacity: 1, scale: 1 }}
-                  transition={{ 
-                    duration: 1, 
-                    delay: 1.6 + (i * 0.04),
-                    ease: smoothEase
-                  }}
-                  className="text-2xl md:text-4xl font-bold text-[#c20000]"
-                  style={{ 
-                    fontFamily: 'var(--font-el-messiri), serif', 
-                    width: char === " " ? "0.4em" : "auto"
+        {/* Kata sapaan bergantian dalam topeng */}
+        <div className="w-full px-4" aria-live="polite" aria-atomic="true">
+          <p className="sr-only">{WORDS[wordIdx]}</p>
+          <div
+            aria-hidden="true"
+            className="relative overflow-hidden mx-auto text-center font-black uppercase whitespace-nowrap leading-[1.15]"
+            style={{
+              fontFamily: 'var(--font-poppins), sans-serif',
+              fontSize: 'clamp(1.9rem, 8vw, 5.5rem)',
+              letterSpacing: '0.02em',
+              height: '1.2em',
+              maxWidth: '100%',
+            }}
+          >
+            {WORDS.map((w, i) => {
+              const pos = i === wordIdx ? 'translateY(0)' : i < wordIdx ? 'translateY(-115%)' : 'translateY(115%)';
+              return (
+                <span
+                  key={w}
+                  className={`absolute inset-0 flex items-center justify-center transition-transform ${
+                    i === wordIdx ? 'text-[#c20000]' : 'text-[#0f172a]'
+                  }`}
+                  style={{
+                    transform: pos,
+                    transitionDuration: '420ms',
+                    transitionTimingFunction: EASE_EXPO,
                   }}
                 >
-                  {char}
-                </motion.h1>
-              ))}
-            </div>
-            
-            {/* Tech Loading Interface */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 2, ease: smoothEase }}
-              className="mt-8 flex flex-col items-center w-64 md:w-80"
-            >
-              {/* Progress Bar Container */}
-              <div className="w-full flex items-center justify-between mb-2 px-1">
-                <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Initializing</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-xs font-black text-[#c20000]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-                    {progress}%
-                  </p>
-                </div>
-              </div>
-              
-              {/* Progress Line */}
-              <div className="w-full h-[2px] bg-slate-100 rounded-full overflow-hidden relative">
-                <motion.div 
-                  className="absolute top-0 left-0 h-full bg-[#c20000] shadow-[0_0_15px_#c20000]"
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.1, ease: "linear" }}
-                />
-                {/* Scanning pulse */}
-                <motion.div 
-                  initial={{ left: "-100%", width: "50%" }}
-                  animate={{ left: "100%" }}
-                  transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
-                  className="absolute top-0 h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-50"
-                />
-              </div>
-
-              {/* Status Slogan */}
-              <p className="mt-4 text-[#0f172a]/60 font-medium tracking-[0.3em] uppercase text-[9px] md:text-[10px]">
-                Membangun Peradaban
-              </p>
-            </motion.div>
+                  {w}
+                </span>
+              );
+            })}
           </div>
-          
-        </motion.div>
-      )}
-    </AnimatePresence>
+        </div>
+
+        {/* Penghitung + bar tipis */}
+        <div className="absolute bottom-10 left-0 w-full px-8 md:px-14 flex items-end justify-between">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
+            Memuat Website
+          </span>
+          <span className="text-sm font-bold text-[#c20000] tabular-nums">{progress}%</span>
+        </div>
+        <div className="absolute bottom-0 left-0 w-full h-[3px] bg-slate-100">
+          <div
+            className="h-full bg-[#c20000] transition-[width] duration-100 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

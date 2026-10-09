@@ -4,13 +4,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
-import { 
+import {
+  Plus,
   Search, 
   Loader2,
   CalendarDays,
   MapPin,
   Edit,
-  Trash2
+  Trash2,
+  Eye
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
@@ -146,57 +148,34 @@ export default function EventsManagement() {
     }
   };
 
-  const PaginationControls = () => {
-    if (totalPages <= 1) return <div className="text-xs text-[#0f172a]/60 font-medium">Menampilkan {totalItems} data</div>;
-    return (
-      <div className="flex items-center gap-3 text-sm text-[#0f172a]/60 font-medium">
-        <span>Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} data</span>
-        <div className="flex items-center gap-1">
-          <button 
-            disabled={currentPage === 1 || isLoading}
-            onClick={() => setCurrentPage(1)}
-            className="w-8 h-8 flex items-center justify-center rounded-md border border-slate-200 bg-white hover:bg-slate-50 hover:text-[#c20000] disabled:opacity-50 text-slate-600 transition-colors"
-          >«</button>
-          <button 
-            disabled={currentPage === 1 || isLoading}
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            className="w-8 h-8 flex items-center justify-center rounded-md border border-slate-200 bg-white hover:bg-slate-50 hover:text-[#c20000] disabled:opacity-50 text-slate-600 transition-colors"
-          >‹</button>
-          <span className="mx-1 flex items-center gap-2">
-            <input 
-              type="text" 
-              value={currentPage} 
-              readOnly 
-              className="w-10 text-center border border-slate-200 rounded-md py-1 px-2 text-sm outline-none bg-white focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" 
-            />
-            <span className="text-sm">dari {totalPages}</span>
-          </span>
-          <button 
-            disabled={currentPage === totalPages || isLoading}
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            className="w-8 h-8 flex items-center justify-center rounded-md border border-slate-200 bg-white hover:bg-slate-50 hover:text-[#c20000] disabled:opacity-50 text-slate-600 transition-colors"
-          >›</button>
-          <button 
-            disabled={currentPage === totalPages || isLoading}
-            onClick={() => setCurrentPage(totalPages)}
-            className="w-8 h-8 flex items-center justify-center rounded-md border border-slate-200 bg-white hover:bg-slate-50 hover:text-[#c20000] disabled:opacity-50 text-slate-600 transition-colors"
-          >»</button>
-        </div>
+  const PaginationControls = () => (
+    <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
+      <p className="text-xs text-slate-500 font-medium">
+        Menampilkan {totalItems === 0 ? 0 : (currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} agenda
+      </p>
+      <div className="flex items-center gap-2">
+        <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
+        <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
+        <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
       </div>
-    );
-  };
+    </div>
+  );
 
   return (
     <div className="space-y-6 w-full">
       
       {/* IMM-Style Header but WP Layout */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
-        <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-          Agendas
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+            Agenda Kegiatan
+          </h1>
+          <p className="text-[#0f172a]/70 text-sm mt-1">Kelola jadwal dan informasi kegiatan organisasi</p>
+        </div>
         <Link href="/dashboard/events/create">
-          <Button variant="outline" size="sm" className="h-9 bg-[#c20000] hover:bg-[#a30000] text-white rounded-md text-sm font-medium px-4 shadow-sm">
-            Add New Agenda
+          <Button className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm text-sm font-semibold shadow-sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Buat Agenda
           </Button>
         </Link>
       </div>
@@ -208,7 +187,7 @@ export default function EventsManagement() {
             onClick={() => setStatusFilter('all')} 
             className={`transition-colors pb-1 ${statusFilter === 'all' ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
           >
-            All
+            Semua
           </button>
           <span className="text-slate-300 mx-2">|</span>
         </li>
@@ -217,7 +196,7 @@ export default function EventsManagement() {
             onClick={() => setStatusFilter('upcoming')} 
             className={`transition-colors pb-1 ${statusFilter === 'upcoming' ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
           >
-            Upcoming
+            Mendatang
           </button>
           <span className="text-slate-300 mx-2">|</span>
         </li>
@@ -226,7 +205,7 @@ export default function EventsManagement() {
             onClick={() => setStatusFilter('ongoing')} 
             className={`transition-colors pb-1 ${statusFilter === 'ongoing' ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
           >
-            Ongoing
+            Berlangsung
           </button>
           <span className="text-slate-300 mx-2">|</span>
         </li>
@@ -235,7 +214,7 @@ export default function EventsManagement() {
             onClick={() => setStatusFilter('completed')} 
             className={`transition-colors pb-1 ${statusFilter === 'completed' ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
           >
-            Completed
+            Selesai
           </button>
         </li>
       </ul>
@@ -246,53 +225,52 @@ export default function EventsManagement() {
           <select 
             value={bulkAction}
             onChange={(e) => setBulkAction(e.target.value)}
-            className="bg-white border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none h-9 min-w-[140px] shadow-sm"
+            className="bg-white border border-slate-200 rounded-sm px-3 py-1.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none h-10 min-w-[140px] shadow-sm"
           >
-            <option value="">Bulk actions</option>
-            <option value="trash">Move to Trash</option>
+            <option value="">Aksi massal</option>
+            <option value="trash">Pindah ke sampah</option>
           </select>
           <button 
             onClick={applyBulkAction}
             disabled={!bulkAction || isBulkLoading}
-            className="h-9 px-4 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 hover:text-[#c20000] disabled:opacity-50 rounded-md text-sm font-medium shadow-sm transition-colors"
+            className="h-10 px-4 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 hover:text-[#c20000] disabled:opacity-50 rounded-sm text-sm font-medium shadow-sm transition-colors"
           >
-            {isBulkLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Apply'}
+            {isBulkLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Terapkan'}
           </button>
         </div>
 
         <div className="flex items-center gap-6">
-          <PaginationControls />
           <div className="flex items-center gap-2 relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input 
               type="text" 
-              placeholder="Search agendas..." 
+              placeholder="Cari agenda..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 bg-white border border-slate-200 rounded-md pl-9 pr-3 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none shadow-sm w-48 transition-all"
+              className="bg-white border border-slate-200 rounded-sm pl-10 pr-3 py-2.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none shadow-sm w-48 transition-all"
             />
           </div>
         </div>
       </div>
 
       {/* WP-Style Data Table with IMM Theme */}
-      <div className="bg-white border border-slate-200 rounded-md shadow-sm overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-semibold">
-                <th className="p-3 pl-4 w-10">
+              <tr className="bg-white border-b border-[#0f172a]/5 text-[#0f172a]/70 text-sm font-semibold uppercase tracking-wider">
+                <th className="p-4 pl-6 w-10">
                   <input 
                     type="checkbox" 
                     onChange={handleSelectAll}
                     checked={events.length > 0 && selectedEvents.length === events.length}
-                    className="rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" 
+                    className="rounded border-slate-200 text-[#c20000] focus:ring-[#c20000]" 
                   />
                 </th>
                 <th className="p-3">Agenda</th>
-                <th className="p-3 w-48">Location</th>
-                <th className="p-3 w-32">Status</th>
-                <th className="p-3 w-48 pr-4">Event Date</th>
+                <th className="p-4 w-48">Lokasi</th>
+                <th className="p-4 w-32">Status</th>
+                <th className="p-4 w-48 pr-6">Tanggal</th>
               </tr>
             </thead>
             
@@ -301,7 +279,7 @@ export default function EventsManagement() {
                 <tr>
                   <td colSpan={5} className="p-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-500">
-                      <Loader2 className="w-6 h-6 animate-spin text-[#c20000] mb-2" />
+                      <Loader2 className="w-8 h-8 animate-spin text-[#c20000] mb-2" />
                       <span className="text-sm">Memuat data...</span>
                     </div>
                   </td>
@@ -315,45 +293,47 @@ export default function EventsManagement() {
               ) : (
                 events.map((event) => (
                   <tr key={event.id} className="group hover:bg-slate-50/80 transition-colors">
-                    <td className="p-3 pl-4 align-top">
+                    <td className="p-4 pl-6 align-top">
                       <input 
                         type="checkbox" 
                         checked={selectedEvents.includes(event.id)}
                         onChange={() => handleSelectOne(event.id)}
-                        className="rounded border-slate-300 text-[#c20000] focus:ring-[#c20000] mt-1" 
+                        className="rounded border-slate-200 text-[#c20000] focus:ring-[#c20000] mt-1" 
                       />
                     </td>
-                    <td className="p-3 align-top">
+                    <td className="p-4\1align-top">
                       <div className="flex items-center gap-2">
                         <Link href={`/dashboard/events/${event.id}`} className="font-semibold text-[#0f172a] hover:text-[#c20000] transition-colors text-base line-clamp-1">
                           {event.title}
                         </Link>
                       </div>
                       
-                      {/* Hover Actions */}
-                      <div className="flex items-center gap-3 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-xs font-medium">
-                        <Link href={`/dashboard/events/${event.id}`} className="text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1">
-                          <Edit className="w-3 h-3" /> Edit
+                      {/* Aksi */}
+                      <div className="flex items-center gap-2 mt-2">
+                        <Link href={`/dashboard/events/${event.id}`} title="Edit" className="h-9 w-9 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors">
+                          <Edit className="w-4 h-4" />
                         </Link>
-                        <span className="text-slate-300">|</span>
-                        <button onClick={() => handleDelete(event.id)} className="text-red-600 hover:text-red-800 transition-colors flex items-center gap-1">
-                          <Trash2 className="w-3 h-3" /> Trash
+                        <button onClick={() => handleDelete(event.id)} title="Hapus" className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors">
+                          <Trash2 className="w-4 h-4" />
                         </button>
+                        <Link href={`/agenda/${event.slug}`} target="_blank" title="Lihat" className="h-9 w-9 inline-flex items-center justify-center text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-sm transition-colors">
+                          <Eye className="w-4 h-4" />
+                        </Link>
                       </div>
                     </td>
-                    <td className="p-3 align-top text-slate-600">
+                    <td className="p-4\1align-top text-slate-600">
                       <div className="flex items-start text-xs mt-0.5">
                         <MapPin className="w-3.5 h-3.5 mr-1 text-slate-400 shrink-0 mt-0.5" />
                         <span className="line-clamp-2">{event.location}</span>
                       </div>
                     </td>
-                    <td className="p-3 align-top">
-                      {event.status === 'upcoming' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200">Upcoming</span>}
-                      {event.status === 'ongoing' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-600 border border-amber-200">Ongoing</span>}
-                      {event.status === 'completed' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-200">Completed</span>}
-                      {event.status === 'cancelled' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-600 border border-red-200">Cancelled</span>}
+                    <td className="p-4\1align-top">
+                      {event.status === 'upcoming' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200">Mendatang</span>}
+                      {event.status === 'ongoing' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-600 border border-amber-200">Berlangsung</span>}
+                      {event.status === 'completed' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-200">Selesai</span>}
+                      {event.status === 'cancelled' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-600 border border-red-200">Dibatalkan</span>}
                     </td>
-                    <td className="p-3 align-top pr-4">
+                    <td className="p-4\1align-top pr-4">
                       <div className="text-[#0f172a] font-medium text-xs flex items-center">
                          <CalendarDays className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
                          {formatDateTime(event.event_date).split(' ')[0]}
@@ -368,19 +348,19 @@ export default function EventsManagement() {
             </tbody>
             
             <tfoot>
-              <tr className="bg-slate-50 border-t border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-semibold">
-                <th className="p-3 pl-4 w-10">
+              <tr className="bg-white border-b border-[#0f172a]/5 text-[#0f172a]/70 text-sm font-semibold uppercase tracking-wider">
+                <th className="p-4 pl-6 w-10">
                   <input 
                     type="checkbox" 
                     onChange={handleSelectAll}
                     checked={events.length > 0 && selectedEvents.length === events.length}
-                    className="rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" 
+                    className="rounded border-slate-200 text-[#c20000] focus:ring-[#c20000]" 
                   />
                 </th>
                 <th className="p-3">Agenda</th>
                 <th className="p-3">Location</th>
                 <th className="p-3">Status</th>
-                <th className="p-3 pr-4">Event Date</th>
+                <th className="p-4 pr-6">Tanggal</th>
               </tr>
             </tfoot>
           </table>
@@ -388,7 +368,7 @@ export default function EventsManagement() {
       </div>
       
       {/* Bottom Pagination */}
-      <div className="flex justify-end mt-4">
+      <div className="bg-white border border-[#0f172a]/10 rounded-sm mt-4">
         <PaginationControls />
       </div>
 

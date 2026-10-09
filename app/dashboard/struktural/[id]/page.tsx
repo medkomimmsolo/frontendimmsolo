@@ -32,8 +32,20 @@ export default function EditStruktural({ params }: { params: Promise<{ id: strin
     urutan: 0,
   });
   const [foto, setFoto] = useState<File | null>(null);
+  // One object URL per selected file, revoked when it changes or is cleared.
+  const [fotoUrl, setFotoUrl] = useState<string | null>(null);
   const [currentFoto, setCurrentFoto] = useState<string | null>(null);
   const [socialMedia, setSocialMedia] = useState<SocialMedia[]>([]);
+
+  useEffect(() => {
+    if (!foto) {
+      setFotoUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(foto);
+    setFotoUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [foto]);
 
   useEffect(() => {
     const fetchStruktural = async () => {
@@ -167,7 +179,7 @@ export default function EditStruktural({ params }: { params: Promise<{ id: strin
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <Link href="/dashboard/struktural">
-            <Button variant="outline" size="sm" className="h-9 w-9 p-0 rounded-md border-slate-200 hover:text-[#c20000]">
+            <Button variant="outline" size="sm" className="h-9 w-9 p-0 rounded-sm border-slate-200 hover:text-[#c20000]">
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
@@ -206,7 +218,7 @@ export default function EditStruktural({ params }: { params: Promise<{ id: strin
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Masukkan nama lengkap beserta gelar..." 
-                    className="w-full bg-white border border-slate-200 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors text-sm"
+                    className="w-full bg-white border border-slate-200 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors text-sm"
                   />
                 </div>
 
@@ -219,7 +231,7 @@ export default function EditStruktural({ params }: { params: Promise<{ id: strin
                     value={formData.jabatan}
                     onChange={handleChange}
                     placeholder="Contoh: Ketua Umum"
-                    className="w-full bg-white border border-slate-200 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500 transition-colors text-sm"
+                    className="w-full bg-white border border-slate-200 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors text-sm"
                   />
                 </div>
               </div>
@@ -251,7 +263,7 @@ export default function EditStruktural({ params }: { params: Promise<{ id: strin
                           placeholder="Link Logo (CDN SVG) contoh: https://thesvg.org/..."
                           value={sm.icon}
                           onChange={(e) => handleSocialMediaChange(idx, 'icon', e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500"
+                          className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -261,7 +273,7 @@ export default function EditStruktural({ params }: { params: Promise<{ id: strin
                           placeholder="URL Profil Sosial Media"
                           value={sm.url}
                           onChange={(e) => handleSocialMediaChange(idx, 'url', e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-imm-red-500 focus:ring-1 focus:ring-imm-red-500"
+                          className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
                         />
                       </div>
                     </div>
@@ -287,18 +299,18 @@ export default function EditStruktural({ params }: { params: Promise<{ id: strin
                   <div className="flex flex-col items-center justify-center p-6 text-center">
                     {foto ? (
                       <>
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="absolute inset-0 bg-[#0f172a]/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <span className="text-white text-sm font-medium">Ganti Foto</span>
                         </div>
-                        <img 
-                          src={URL.createObjectURL(foto)} 
+                        {fotoUrl && <img 
+                          src={fotoUrl} 
                           alt="Preview" 
                           className="absolute inset-0 w-full h-full object-cover"
-                        />
+                        />}
                       </>
                     ) : currentFoto ? (
                       <>
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+                        <div className="absolute inset-0 bg-[#0f172a]/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
                           <span className="text-white text-sm font-medium">Ganti Foto</span>
                         </div>
                         <img 

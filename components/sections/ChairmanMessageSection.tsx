@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'motion/react';
 import { Quote } from 'lucide-react';
 import Image from 'next/image';
 
@@ -20,18 +19,12 @@ export default function ChairmanMessageSection({ name, period, message, photo }:
   const photoUrl = photo ? `${photo}` : 'https://placehold.co/600x800/e2e8f0/64748b?text=Foto+Ketua';
 
   return (
-    <section className="py-24 bg-white relative overflow-hidden border-t border-[#0f172a]/5">
+    <section className="py-20 md:py-28 bg-white relative overflow-hidden border-t border-[#0f172a]/5">
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           
           {/* Photo Section */}
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="lg:col-span-5 relative max-w-sm mx-auto lg:max-w-none w-full"
-          >
+          <div data-aos="fade-right" className="lg:col-span-5 relative max-w-sm mx-auto lg:max-w-none w-full">
             <div className="relative z-10 aspect-square md:aspect-[4/5] rounded-sm overflow-hidden border border-[#0f172a]/10 shadow-lg bg-white group">
               <div className="absolute inset-0 bg-[#0f172a]/5 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
               <Image 
@@ -51,16 +44,10 @@ export default function ChairmanMessageSection({ name, period, message, photo }:
             {/* Decorative block behind photo */}
             <div className="absolute -bottom-2 -right-2 md:-bottom-4 md:-right-4 w-3/4 h-3/4 bg-[#c20000]/10 rounded-sm -z-10"></div>
             <div className="absolute -top-2 -left-2 md:-top-4 md:-left-4 w-16 h-16 md:w-24 md:h-24 border-t-2 border-l-2 border-[#c20000]/30 -z-10"></div>
-          </motion.div>
+          </div>
 
           {/* Text/Message Section */}
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="lg:col-span-7 flex flex-col justify-center"
-          >
+          <div data-aos="fade-left" data-aos-delay="150" className="lg:col-span-7 flex flex-col justify-center">
             <div className="flex items-center gap-4 mb-6">
               <span className="text-[#c20000] font-bold uppercase tracking-widest text-sm">Sambutan</span>
             </div>
@@ -75,7 +62,7 @@ export default function ChairmanMessageSection({ name, period, message, photo }:
                 "{chairmanMessage}"
               </p>
             </div>
-          </motion.div>
+          </div>
 
         </div>
       </div>
