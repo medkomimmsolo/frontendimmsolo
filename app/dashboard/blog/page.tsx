@@ -126,10 +126,12 @@ export default function BlogManagement() {
   };
 
   const handleReject = async (id: number) => {
-    if (!(await confirm({ message: 'Tolak post ini?', tone: 'danger' }))) return;
+    const noteInput = window.prompt('Catatan revisi untuk penulis (opsional, maks 2000 karakter):');
+    if (noteInput === null) return; // batal
+    if (!(await confirm({ message: 'Tolak post ini dan kirim catatan revisi?', tone: 'danger' }))) return;
     try {
-      await api.post(`/blogs/${id}/reject`);
-      toast.success('Post ditolak');
+      await api.post(`/blogs/${id}/reject`, noteInput ? { review_note: noteInput } : {});
+      toast.success('Post ditolak dengan catatan revisi');
       fetchBlogs();
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Gagal menolak');
@@ -176,69 +178,34 @@ export default function BlogManagement() {
   };
 
   // Helper for Pagination controls
-  const PaginationControls = () => {
-    if (totalPages <= 1) return <div className="text-xs text-[#0f172a]/60 font-medium">Menampilkan {totalItems} data</div>;
-    return (
-      <div className="flex items-center gap-3 text-sm text-[#0f172a]/60 font-medium">
-        <span>Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} data</span>
-        <div className="flex items-center gap-1">
-          <button 
-            disabled={currentPage === 1 || isLoading}
-            onClick={() => setCurrentPage(1)}
-            className="w-8 h-8 flex items-center justify-center rounded-md border border-slate-200 bg-white hover:bg-slate-50 hover:text-[#c20000] disabled:opacity-50 text-slate-600 transition-colors"
-            title="Halaman Pertama"
-          >
-            «
-          </button>
-          <button 
-            disabled={currentPage === 1 || isLoading}
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            className="w-8 h-8 flex items-center justify-center rounded-md border border-slate-200 bg-white hover:bg-slate-50 hover:text-[#c20000] disabled:opacity-50 text-slate-600 transition-colors"
-            title="Halaman Sebelumnya"
-          >
-            ‹
-          </button>
-          <span className="mx-1 flex items-center gap-2">
-            <input 
-              type="text" 
-              value={currentPage} 
-              readOnly 
-              className="w-10 text-center border border-slate-200 rounded-md py-1 px-2 text-sm outline-none bg-white focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" 
-            />
-            <span className="text-sm">dari {totalPages}</span>
-          </span>
-          <button 
-            disabled={currentPage === totalPages || isLoading}
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            className="w-8 h-8 flex items-center justify-center rounded-md border border-slate-200 bg-white hover:bg-slate-50 hover:text-[#c20000] disabled:opacity-50 text-slate-600 transition-colors"
-            title="Halaman Berikutnya"
-          >
-            ›
-          </button>
-          <button 
-            disabled={currentPage === totalPages || isLoading}
-            onClick={() => setCurrentPage(totalPages)}
-            className="w-8 h-8 flex items-center justify-center rounded-md border border-slate-200 bg-white hover:bg-slate-50 hover:text-[#c20000] disabled:opacity-50 text-slate-600 transition-colors"
-            title="Halaman Terakhir"
-          >
-            »
-          </button>
-        </div>
+  const PaginationControls = () => (
+    <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
+      <p className="text-xs text-slate-500 font-medium">
+        Menampilkan {totalItems === 0 ? 0 : (currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} post
+      </p>
+      <div className="flex items-center gap-2">
+        <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
+        <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
+        <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
       </div>
-    );
-  };
+    </div>
+  );
 
   return (
     <div className="space-y-6 w-full">
       
       {/* IMM-Style Header but WP Layout */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
-        <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-          Posts
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+            Post & Artikel
+          </h1>
+          <p className="text-[#0f172a]/70 text-sm mt-1">Kelola berita, artikel, dan publikasi website</p>
+        </div>
         <Link href="/dashboard/blog/create">
-          <Button variant="outline" size="sm" className="h-9 bg-[#c20000] hover:bg-[#a30000] text-white rounded-md text-sm font-medium px-4 shadow-sm">
-            Add New Post
+          <Button className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm text-sm font-semibold shadow-sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Tulis Post
           </Button>
         </Link>
       </div>
@@ -250,7 +217,7 @@ export default function BlogManagement() {
             onClick={() => setStatusFilter('all')} 
             className={`transition-colors pb-1 ${statusFilter === 'all' ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
           >
-            All
+            Semua
           </button>
           <span className="text-slate-300 mx-2">|</span>
         </li>
@@ -259,7 +226,7 @@ export default function BlogManagement() {
             onClick={() => setStatusFilter('published')} 
             className={`transition-colors pb-1 ${statusFilter === 'published' ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
           >
-            Published
+            Terbit
           </button>
           <span className="text-slate-300 mx-2">|</span>
         </li>
@@ -268,7 +235,7 @@ export default function BlogManagement() {
             onClick={() => setStatusFilter('draft')} 
             className={`transition-colors pb-1 ${statusFilter === 'draft' ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
           >
-            Drafts
+            Draf
           </button>
           <span className="text-slate-300 mx-2">|</span>
         </li>
@@ -288,23 +255,23 @@ export default function BlogManagement() {
           <select 
             value={bulkAction}
             onChange={(e) => setBulkAction(e.target.value)}
-            className="bg-white border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none h-9 min-w-[140px] shadow-sm"
+            className="bg-white border border-slate-200 rounded-sm px-3 py-1.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none h-10 min-w-[140px] shadow-sm"
           >
-            <option value="">Bulk actions</option>
-            <option value="trash">Move to Trash</option>
+            <option value="">Aksi massal</option>
+            <option value="trash">Pindah ke sampah</option>
           </select>
           <button 
             onClick={applyBulkAction}
             disabled={!bulkAction || isBulkLoading}
-            className="h-9 px-4 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 hover:text-[#c20000] disabled:opacity-50 rounded-md text-sm font-medium shadow-sm transition-colors"
+            className="h-10 px-4 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 hover:text-[#c20000] disabled:opacity-50 rounded-sm text-sm font-medium shadow-sm transition-colors"
           >
-            {isBulkLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Apply'}
+            {isBulkLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Terapkan'}
           </button>
           
           <select 
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="ml-2 bg-white border border-slate-200 rounded-md px-3 py-1.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none h-9 shadow-sm"
+            className="ml-2 bg-white border border-slate-200 rounded-sm px-3 py-1.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none h-9 shadow-sm"
           >
             <option value="">All categories</option>
             {categories.map(c => (
@@ -314,41 +281,40 @@ export default function BlogManagement() {
         </div>
 
         <div className="flex items-center gap-6">
-          <PaginationControls />
           <div className="flex items-center gap-2 relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input 
               type="text" 
-              placeholder="Search posts..." 
+              placeholder="Cari post..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 bg-white border border-slate-200 rounded-md pl-9 pr-3 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none shadow-sm w-48 transition-all"
+              className="bg-white border border-slate-200 rounded-sm pl-10 pr-3 py-2.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none shadow-sm w-48 transition-all"
             />
           </div>
         </div>
       </div>
 
       {/* WP-Style Data Table with IMM Theme */}
-      <div className="bg-white border border-slate-200 rounded-md shadow-sm overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-semibold">
-                <th className="p-3 pl-4 w-10">
+              <tr className="bg-white border-b border-[#0f172a]/5 text-[#0f172a]/70 text-sm font-semibold uppercase tracking-wider">
+                <th className="p-4 pl-6 w-10">
                   <input 
                     type="checkbox" 
                     onChange={handleSelectAll}
                     checked={blogs.length > 0 && selectedBlogs.length === blogs.length}
-                    className="rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" 
+                    className="rounded border-slate-200 text-[#c20000] focus:ring-[#c20000]" 
                   />
                 </th>
-                <th className="p-3">Title</th>
-                <th className="p-3 w-36">Author</th>
-                <th className="p-3 w-48">Categories</th>
-                <th className="p-3 w-24 text-center">
+                <th className="p-4">Judul</th>
+                <th className="p-4 w-36">Penulis</th>
+                <th className="p-4 w-48">Kategori</th>
+                <th className="p-4\1w-24 text-center">
                   <MessageSquare className="w-4 h-4 text-slate-400 mx-auto" />
                 </th>
-                <th className="p-3 w-40 pr-4">Date</th>
+                <th className="p-4 w-40 pr-6">Tanggal</th>
               </tr>
             </thead>
             
@@ -357,7 +323,7 @@ export default function BlogManagement() {
                 <tr>
                   <td colSpan={6} className="p-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-500">
-                      <Loader2 className="w-6 h-6 animate-spin text-[#c20000] mb-2" />
+                      <Loader2 className="w-8 h-8 animate-spin text-[#c20000] mb-2" />
                       <span className="text-sm">Memuat data...</span>
                     </div>
                   </td>
@@ -371,15 +337,15 @@ export default function BlogManagement() {
               ) : (
                 blogs.map((blog) => (
                   <tr key={blog.id} className="group hover:bg-slate-50/80 transition-colors">
-                    <td className="p-3 pl-4 align-top">
+                    <td className="p-4 pl-6 align-top">
                       <input 
                         type="checkbox" 
                         checked={selectedBlogs.includes(blog.id)}
                         onChange={() => handleSelectOne(blog.id)}
-                        className="rounded border-slate-300 text-[#c20000] focus:ring-[#c20000] mt-1" 
+                        className="rounded border-slate-200 text-[#c20000] focus:ring-[#c20000] mt-1" 
                       />
                     </td>
-                    <td className="p-3 align-top">
+                    <td className="p-4\1align-top">
                       <div className="flex items-center gap-2">
                         <Link href={`/dashboard/blog/${blog.id}`} className="font-semibold text-[#0f172a] hover:text-[#c20000] transition-colors text-base">
                           {blog.title}
@@ -405,48 +371,49 @@ export default function BlogManagement() {
                           </span>
                         )}
                       </div>
+                      {(blog as any).review_note && (
+                        <p className="mt-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-sm px-2 py-1 max-w-xl">
+                          <span className="font-semibold">Catatan revisi:</span> {(blog as any).review_note}
+                        </p>
+                      )}
                       
-                      {/* Hover Actions */}
-                      <div className="flex items-center gap-3 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-xs font-medium">
-                        <Link href={`/dashboard/blog/${blog.id}`} className="text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1">
-                          <Edit className="w-3 h-3" /> Edit
+                      {/* Aksi */}
+                      <div className="flex items-center gap-2 mt-2">
+                        <Link href={`/dashboard/blog/${blog.id}`} title="Edit" className="h-9 w-9 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors">
+                          <Edit className="w-4 h-4" />
                         </Link>
-                        <span className="text-slate-300">|</span>
                         {isAdmin && blog.review_status === 'pending' && (
                           <>
-                            <button onClick={() => handleApprove(blog.id)} className="text-emerald-600 hover:text-emerald-800 transition-colors flex items-center gap-1">
-                              <Check className="w-3 h-3" /> Setujui
+                            <button onClick={() => handleApprove(blog.id)} title="Setujui" className="h-9 w-9 inline-flex items-center justify-center text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-sm transition-colors">
+                              <Check className="w-4 h-4" />
                             </button>
-                            <span className="text-slate-300">|</span>
-                            <button onClick={() => handleReject(blog.id)} className="text-amber-600 hover:text-amber-800 transition-colors flex items-center gap-1">
-                              <X className="w-3 h-3" /> Tolak
+                            <button onClick={() => handleReject(blog.id)} title="Tolak" className="h-9 w-9 inline-flex items-center justify-center text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-sm transition-colors">
+                              <X className="w-4 h-4" />
                             </button>
-                            <span className="text-slate-300">|</span>
                           </>
                         )}
-                        <button onClick={() => handleDelete(blog.id)} className="text-red-600 hover:text-red-800 transition-colors flex items-center gap-1">
-                          <Trash2 className="w-3 h-3" /> Trash
+                        <button onClick={() => handleDelete(blog.id)} title="Hapus" className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors">
+                          <Trash2 className="w-4 h-4" />
                         </button>
-                        <span className="text-slate-300">|</span>
-                        <Link href={`/post/${blog.slug}`} target="_blank" className="text-emerald-600 hover:text-emerald-800 transition-colors flex items-center gap-1">
-                          <Eye className="w-3 h-3" /> View
+                        <Link href={`/post/${blog.slug}`} target="_blank" title="Lihat" className="h-9 w-9 inline-flex items-center justify-center text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-sm transition-colors">
+                          <Eye className="w-4 h-4" />
                         </Link>
                       </div>
                     </td>
-                    <td className="p-3 align-top text-slate-600 hover:text-[#c20000] transition-colors cursor-pointer">
+                    <td className="p-4\1align-top text-slate-600 hover:text-[#c20000] transition-colors cursor-pointer">
                       {blog.user?.name || 'Admin'}
                     </td>
-                    <td className="p-3 align-top text-slate-600 hover:text-[#c20000] transition-colors cursor-pointer">
-                      {blog.category?.name || 'Uncategorized'}
+                    <td className="p-4\1align-top text-slate-600 hover:text-[#c20000] transition-colors cursor-pointer">
+                      {blog.category?.name || 'Tanpa Kategori'}
                     </td>
-                    <td className="p-3 align-top text-center text-slate-600">
+                    <td className="p-4\1align-top text-center text-slate-600">
                       <div className="inline-flex items-center justify-center bg-slate-100 border border-slate-200 rounded-full px-2.5 py-0.5 text-xs font-medium group-hover:bg-white group-hover:border-[#c20000]/30 transition-all" title={`${blog.views_count} Views`}>
                         {blog.views_count || 0}
                       </div>
                     </td>
-                    <td className="p-3 align-top pr-4">
+                    <td className="p-4\1align-top pr-4">
                       <div className="text-[#0f172a] font-medium text-xs">
-                        {blog.status === 'published' ? 'Published' : 'Last Modified'}
+                        {blog.status === 'published' ? 'Terbit' : 'Terakhir Diubah'}
                       </div>
                       <div className="text-slate-500 text-xs mt-0.5">
                         {new Date(blog.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -458,22 +425,22 @@ export default function BlogManagement() {
             </tbody>
             
             <tfoot>
-              <tr className="bg-slate-50 border-t border-slate-200 text-slate-500 text-xs uppercase tracking-wider font-semibold">
-                <th className="p-3 pl-4 w-10">
+              <tr className="bg-white border-b border-[#0f172a]/5 text-[#0f172a]/70 text-sm font-semibold uppercase tracking-wider">
+                <th className="p-4 pl-6 w-10">
                   <input 
                     type="checkbox" 
                     onChange={handleSelectAll}
                     checked={blogs.length > 0 && selectedBlogs.length === blogs.length}
-                    className="rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" 
+                    className="rounded border-slate-200 text-[#c20000] focus:ring-[#c20000]" 
                   />
                 </th>
-                <th className="p-3">Title</th>
+                <th className="p-4">Judul</th>
                 <th className="p-3">Author</th>
                 <th className="p-3">Categories</th>
-                <th className="p-3 text-center">
+                <th className="p-4\1text-center">
                   <MessageSquare className="w-4 h-4 text-slate-400 mx-auto" />
                 </th>
-                <th className="p-3 pr-4">Date</th>
+                <th className="p-4\1pr-4">Date</th>
               </tr>
             </tfoot>
           </table>
@@ -481,7 +448,7 @@ export default function BlogManagement() {
       </div>
       
       {/* Bottom Pagination */}
-      <div className="flex justify-end mt-4">
+      <div className="bg-white border border-[#0f172a]/10 rounded-sm mt-4">
         <PaginationControls />
       </div>
 

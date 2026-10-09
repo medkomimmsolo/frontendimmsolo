@@ -2,12 +2,16 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { ArrowLeft, Calendar, MapPin, Share2, Globe, MessageSquare, ChevronRight, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, ChevronRight, ExternalLink, Download } from 'lucide-react';
+import ShareIconButtons from '@/components/post/ShareIconButtons';
+import AddToCalendarButtons from '@/components/agenda/AddToCalendarButtons';
 import { notFound } from 'next/navigation';
+
+export const revalidate = 60;
 
 async function getEvent(slug: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${slug}`, { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${slug}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     const json = await res.json();
     return json.data;
@@ -27,8 +31,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
+  const ogImage = toAbsoluteMediaUrl(event.banner_image) || toAbsoluteSiteUrl('/images/imm_hero_bg.jpg');
+
   return {
-    title: `${event.title} | PC IMM Kota Surakarta`,
+    title: event.title,
     description: event.meta_description || event.description || `Agenda Kegiatan PC IMM Kota Surakarta: ${event.title}`,
     alternates: {
       canonical: `https://immsolo.or.id/agenda/${resolvedParams.slug}`
@@ -38,9 +44,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: event.meta_description || event.description || `Agenda Kegiatan PC IMM Kota Surakarta: ${event.title}`,
       url: `https://immsolo.or.id/agenda/${resolvedParams.slug}`,
       type: 'website',
-      images: event.banner_image ? [
+      images: ogImage ? [
         {
-          url: event.banner_image,
+          url: ogImage,
           width: 1200,
           height: 630,
           alt: event.title,
@@ -51,13 +57,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       card: 'summary_large_image',
       title: event.title,
       description: event.meta_description || event.description,
-      images: event.banner_image ? [event.banner_image] : [],
+      images: ogImage ? [ogImage] : [],
     }
   };
 }
 
 import { checkMaintenance } from '@/lib/maintenance';
 import MaintenancePage from '@/components/ui/MaintenancePage';
+import { toAbsoluteMediaUrl, toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
 
 export default async function AgendaDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   if (await checkMaintenance('maintenance_agenda')) return <MaintenancePage />;
@@ -73,8 +80,43 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ s
   const time = eventDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }).replace(/\./g, ':') + ' WIB';
   const dateStr = eventDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' });
 
+  const eventUrl = toAbsoluteSiteUrl(`/agenda/${resolvedParams.slug}`);
+  const eventJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: event.title,
+    description: event.meta_description || event.description?.replace(/<[^>]*>?/gm, '').slice(0, 300) || undefined,
+    startDate: eventDate.toISOString(),
+    location: event.location
+      ? { '@type': 'Place', name: event.location }
+      : undefined,
+    url: eventUrl,
+    organizer: {
+      '@type': 'Organization',
+      name: 'PC IMM Kota Surakarta',
+      url: 'https://immsolo.or.id',
+    },
+  };
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Beranda', item: toAbsoluteSiteUrl('/') },
+      { '@type': 'ListItem', position: 2, name: 'Agenda', item: toAbsoluteSiteUrl('/agenda') },
+      { '@type': 'ListItem', position: 3, name: event.title, item: eventUrl },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-white pt-24 pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       
       {/* Article Header */}
       <article className="max-w-4xl mx-auto px-4 md:px-6 mt-10">
@@ -85,18 +127,28 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ s
             <ArrowLeft className="w-4 h-4 mr-2" />
             Kembali ke Agenda
           </Link>
-          <div className="hidden sm:flex items-center text-sm text-[#0f172a]/70">
-            <Link href="/" className="hover:text-[#0f172a]/90">Beranda</Link>
-            <ChevronRight className="w-4 h-4 mx-1" />
-            <Link href="/agenda" className="hover:text-[#0f172a]/90">Agenda</Link>
-            <ChevronRight className="w-4 h-4 mx-1" />
-            <span className="text-[#0f172a]/80 truncate max-w-[200px]">{event.title}</span>
-          </div>
+          <nav aria-label="breadcrumb" className="flex items-center text-sm text-[#0f172a]/70">
+            <ul className="flex items-center space-x-2">
+              <li>
+                <Link href="/" className="hover:text-[#0f172a]/90">Beranda</Link>
+              </li>
+              <li aria-hidden="true">
+                <ChevronRight className="w-4 h-4" />
+              </li>
+              <li>
+                <Link href="/agenda" className="hover:text-[#0f172a]/90">Agenda</Link>
+              </li>
+              <li aria-hidden="true">
+                <ChevronRight className="w-4 h-4" />
+              </li>
+              <li className="text-[#0f172a]/80 truncate max-w-[200px]" aria-current="page">{event.title}</li>
+            </ul>
+          </nav>
         </div>
 
         <Badge className={
           event.status === 'upcoming' ? "bg-[#c20000]/5 text-[#c20000] hover:bg-[#c20000]/10 border-none px-4 py-1.5 mb-6 text-sm" : 
-          event.status === 'ongoing' ? "bg-[#fcd34d]/10 text-[#fcd34d] hover:bg-[#fcd34d]/20 border-none px-4 py-1.5 mb-6 text-sm" :
+          event.status === 'ongoing' ? "bg-amber-100 text-amber-800 hover:bg-amber-200 border-none px-4 py-1.5 mb-6 text-sm" :
           "bg-[#0f172a]/5 text-[#0f172a]/80 hover:bg-[#0f172a]/10 border-none px-4 py-1.5 mb-6 text-sm"
         }>
           {event.status === 'upcoming' ? 'Mendatang' : 
@@ -135,15 +187,12 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ s
           {/* Share Buttons */}
           <div className="ml-auto flex items-center gap-2">
             <span className="text-sm font-semibold text-[#0f172a]/70 mr-2 hidden sm:block">Bagikan:</span>
-            <Button variant="outline" size="icon" className="w-10 h-10 rounded-full border-[#0f172a]/10 text-[#0f172a]/70 hover:text-blue-600 hover:border-blue-600 hover:bg-blue-50">
-              <Globe className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" size="icon" className="w-10 h-10 rounded-full border-[#0f172a]/10 text-[#0f172a]/70 hover:text-sky-500 hover:border-sky-500 hover:bg-sky-50">
-              <MessageSquare className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" size="icon" className="w-10 h-10 rounded-full border-[#0f172a]/10 text-[#0f172a]/70 hover:text-[#c20000] hover:border-[#c20000] hover:bg-[#c20000]/5">
-              <Share2 className="w-4 h-4" />
-            </Button>
+            <ShareIconButtons title={event.title} slug={event.slug} basePath="/agenda" />
+            <a href={`${process.env.NEXT_PUBLIC_API_URL}/events/${event.slug}/ics`} download>
+              <Button variant="outline" size="icon" className="w-10 h-10 rounded-full border-[#0f172a]/10 text-[#0f172a]/70 hover:text-emerald-600 hover:border-emerald-600 hover:bg-emerald-50" title="Tambah ke Kalender (.ics)">
+                <Download className="w-4 h-4" />
+              </Button>
+            </a>
           </div>
         </div>
 
@@ -153,6 +202,8 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ s
             src={event.banner_image || '/images/imm_hero_bg.jpg'} 
             alt={event.title} 
             className="w-full h-full object-cover"
+            fetchPriority="high"
+            decoding="async"
           />
         </div>
 
@@ -162,15 +213,24 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ s
           dangerouslySetInnerHTML={{ __html: event.description }}
         />
 
+        {/* Tambah ke Kalender — Google Calendar + .ics */}
+        <AddToCalendarButtons
+          title={event.title}
+          description={event.meta_description || event.description}
+          location={event.location}
+          startInput={event.event_date}
+          slug={event.slug}
+        />
+
         {/* Registration Banner */}
         {event.registration_link && event.status === 'upcoming' && (
           <div className="mt-16 bg-white border border-[#c20000]/10 rounded-sm p-8 md:p-12 text-center shadow-lg shadow-[#c20000]/5">
             <div className="w-16 h-16 rounded-full bg-[#c20000]/5 flex items-center justify-center mx-auto mb-6 text-[#c20000]">
               <Calendar className="w-8 h-8" />
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold text-[#0f172a] mb-4" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#0f172a] mb-4" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
               Tertarik Mengikuti Kegiatan Ini?
-            </h3>
+            </h2>
             <p className="text-[#0f172a]/80 mb-8 max-w-lg mx-auto text-lg">
               Segera daftarkan diri Anda sebelum kuota pendaftaran ditutup.
             </p>

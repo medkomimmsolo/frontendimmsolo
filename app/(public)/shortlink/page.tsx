@@ -6,6 +6,10 @@ import ShortlinkClient from './ShortlinkClient';
 export const metadata: Metadata = {
   title: 'Pengajuan Shortlink',
   description: 'Pengajuan dan pengecekan status shortlink immsolo.or.id.',
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 export default async function ShortlinkPage() {

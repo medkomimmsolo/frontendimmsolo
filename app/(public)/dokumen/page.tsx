@@ -23,17 +23,42 @@ const getFileIcon = (type: string) => {
   }
 };
 
+import { checkMaintenance } from '@/lib/maintenance';
+import MaintenancePage from '@/components/ui/MaintenancePage';
+import { toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
+
 export const metadata: Metadata = {
   title: 'Dokumen',
   description: 'Pusat unduhan dokumen resmi, materi kajian, dan panduan organisasi PC IMM Kota Surakarta.',
+  alternates: {
+    canonical: 'https://immsolo.or.id/dokumen',
+  },
+  openGraph: {
+    title: 'Dokumen | PC IMM Kota Surakarta',
+    description: 'Pusat unduhan dokumen resmi, materi kajian, dan panduan organisasi PC IMM Kota Surakarta.',
+    url: 'https://immsolo.or.id/dokumen',
+    type: 'website',
+    images: [
+      {
+        url: toAbsoluteSiteUrl('/images/imm_hero_bg.jpg'),
+        width: 1200,
+        height: 630,
+        alt: 'Dokumen PC IMM Kota Surakarta',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Dokumen | PC IMM Kota Surakarta',
+    description: 'Pusat unduhan dokumen resmi, materi kajian, dan panduan organisasi PC IMM Kota Surakarta.',
+    images: [toAbsoluteSiteUrl('/images/imm_hero_bg.jpg')],
+  },
 };
-
-export const dynamic = 'force-dynamic';
 
 async function getDocuments() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/documents?public=true`, {
-      cache: 'no-store'
+      next: { revalidate: 60 },
     });
     if (!res.ok) return [];
     const json = await res.json();
@@ -44,16 +69,13 @@ async function getDocuments() {
   }
 }
 
-import { checkMaintenance } from '@/lib/maintenance';
-import MaintenancePage from '@/components/ui/MaintenancePage';
-
 export default async function DokumenPage() {
   if (await checkMaintenance('maintenance_dokumen')) return <MaintenancePage />;
   
   const documents = await getDocuments();
 
   return (
-    <main className="min-h-screen bg-[#f8f9fa] pt-24 pb-20">
+    <main className="min-h-screen bg-[#f8f9fa] pt-28 pb-20">
       
       {/* Breadcrumb & Title Section */}
       <section className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-6">
@@ -61,7 +83,7 @@ export default async function DokumenPage() {
           <ul className="flex items-center text-sm text-[#0f172a]/60 space-x-2">
             <li>
               <Link href="/" className="hover:text-[#c20000] transition-colors flex items-center">
-                Home
+                Beranda
               </Link>
             </li>
             <li>
@@ -70,13 +92,15 @@ export default async function DokumenPage() {
             <li className="text-[#0f172a] font-medium" aria-current="page">Dokumen</li>
           </ul>
         </nav>
-        <div className="flex flex-col border-b border-[#0f172a]/10 pb-4 mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-            Dokumen Resmi
-          </h1>
-          <p className="text-[#0f172a]/60 mt-2">
-            Kumpulan peraturan, materi kajian, form, dan panduan administrasi organisasi.
-          </p>
+        <div>
+          <div data-aos="fade-up" className="flex flex-col border-b border-[#0f172a]/10 pb-4 mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+              Dokumen Resmi
+            </h1>
+            <p className="text-[#0f172a]/60 mt-2">
+              Kumpulan peraturan, materi kajian, form, dan panduan administrasi organisasi.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -85,12 +109,12 @@ export default async function DokumenPage() {
         {documents.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {documents.map((doc: any) => (
-              <Card key={doc.id} className="border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 bg-white rounded-xl overflow-hidden flex flex-col h-full group">
+              <Card key={doc.id} className="border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 bg-white rounded-sm overflow-hidden flex flex-col h-full group">
                 <CardContent className="p-5 flex flex-col flex-1">
                   
                   {/* Icon & Meta */}
                   <div className="flex items-start justify-between mb-4 gap-3">
-                    <div className="w-12 h-12 shrink-0 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center text-slate-500 group-hover:bg-[#c20000]/5 group-hover:border-[#c20000]/10 transition-colors">
+                    <div className="w-12 h-12 shrink-0 bg-slate-50 border border-slate-100 rounded-sm flex items-center justify-center text-slate-500 group-hover:bg-[#c20000]/5 group-hover:border-[#c20000]/10 transition-colors">
                       {getFileIcon(doc.file_type)}
                     </div>
                     {doc.file_type && (
@@ -101,9 +125,9 @@ export default async function DokumenPage() {
                   </div>
                   
                   {/* Content */}
-                  <h3 className="text-base font-semibold text-[#0f172a] leading-snug line-clamp-2 group-hover:text-[#c20000] transition-colors mb-2">
+                  <h2 className="text-base font-semibold text-[#0f172a] leading-snug line-clamp-2 group-hover:text-[#c20000] transition-colors mb-2">
                     {doc.title}
-                  </h3>
+                  </h2>
                   
                   {doc.description && (
                     <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed mb-4">
@@ -129,28 +153,27 @@ export default async function DokumenPage() {
                       )}
                     </div>
                     
-                    <a 
-                      href={`${process.env.NEXT_PUBLIC_API_URL}/documents/${doc.id}/download`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="shrink-0"
-                    >
-                      <Button size="sm" className="bg-[#c20000] text-white hover:bg-[#a00000] border-none rounded-lg px-4 h-8 shadow-sm transition-colors text-xs font-medium">
+                    <Button asChild size="sm" className="bg-[#c20000] text-white hover:bg-[#a30000] border-none rounded-sm px-4 h-8 shadow-sm transition-colors text-xs font-medium shrink-0">
+                      <a 
+                        href={`${process.env.NEXT_PUBLIC_API_URL}/documents/${doc.id}/download`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                      >
                         <Download className="w-3.5 h-3.5 mr-1.5" />
                         {doc.file_path ? 'Unduh' : 'Buka'}
-                      </Button>
-                    </a>
+                      </a>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white rounded-xl border border-slate-200">
+          <div className="text-center py-20 bg-white rounded-sm border border-slate-200">
             <div className="w-16 h-16 bg-slate-50 border border-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4">
               <Archive className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-semibold text-[#0f172a] mb-2">Belum Ada Dokumen</h3>
+            <h2 className="text-lg font-semibold text-[#0f172a] mb-2">Belum Ada Dokumen</h2>
             <p className="text-slate-500 max-w-md mx-auto text-sm">
               Saat ini belum ada dokumen yang dipublikasikan. Silakan periksa kembali nanti.
             </p>

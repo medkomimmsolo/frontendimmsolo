@@ -8,12 +8,14 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Plus, Search, Edit, Trash2, Loader2, Layers, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
+import { useDebounce } from 'use-debounce';
 
 export default function LinksManagement() {
   const { confirm } = useConfirm();
   const [pages, setPages] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch] = useDebounce(searchQuery, 800);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -32,7 +34,7 @@ export default function LinksManagement() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const fetchPages = useCallback(async (page = currentPage, search = searchQuery) => {
+  const fetchPages = useCallback(async (page = currentPage, search = debouncedSearch) => {
     setIsLoading(true);
     try {
       const res = await api.get('/link-pages', { params: { page, per_page: 15, search: search || undefined } });
@@ -49,7 +51,7 @@ export default function LinksManagement() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, searchQuery]);
+  }, [currentPage, debouncedSearch]);
 
   useEffect(() => {
     fetchPages();
@@ -109,16 +111,16 @@ export default function LinksManagement() {
           <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Linktree</h1>
           <p className="text-[#0f172a]/70 text-sm mt-1">Kelola halaman tautan ala Linktree di immsolo.or.id/links</p>
         </div>
-        <Button onClick={() => openModal()} className="h-9 bg-[#c20000] hover:bg-[#a30000] text-white rounded-md text-sm font-medium px-4 shadow-sm">
+        <Button onClick={() => openModal()} className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm text-sm font-semibold shadow-sm">
           <Plus className="w-4 h-4 mr-2" /> Buat Halaman
         </Button>
       </div>
 
-      <form onSubmit={(e) => { e.preventDefault(); setCurrentPage(1); fetchPages(1, searchQuery); }} className="bg-white border border-[#0f172a]/10 rounded-sm p-4 shadow-sm">
+      <form onSubmit={(e) => { e.preventDefault(); setCurrentPage(1); fetchPages(1, searchQuery); }} className="bg-white border border-[#0f172a]/10 rounded-sm p-4 sm:p-6 shadow-sm">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input type="text" placeholder="Cari judul atau slug... (Enter)" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border border-slate-200 rounded-md pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
+            className="w-full border border-slate-200 rounded-sm pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
         </div>
       </form>
 
@@ -179,26 +181,26 @@ export default function LinksManagement() {
         <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
           <p className="text-xs text-slate-500 font-medium">Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} halaman</p>
           <div className="flex items-center gap-2">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
             <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
+            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
           </div>
         </div>
       </Card>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setIsModalOpen(false)}>
-          <form onSubmit={handleSave} className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4" onClick={() => setIsModalOpen(false)}>
+          <form onSubmit={handleSave} className="bg-white rounded-sm shadow-xl max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-bold text-slate-800 mb-5">{editing ? 'Edit Halaman' : 'Buat Halaman Link'}</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Judul Halaman</label>
                 <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Link Resmi PC IMM" className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
+                  placeholder="Link Resmi PC IMM" className="w-full border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Slug Kustom <span className="text-slate-400 font-normal">(kosongkan = otomatis dari judul)</span></label>
-                <div className="flex items-center border border-slate-200 rounded-md overflow-hidden focus-within:border-[#c20000] focus-within:ring-1 focus-within:ring-[#c20000]">
+                <div className="flex items-center border border-slate-200 rounded-sm overflow-hidden focus-within:border-[#c20000] focus-within:ring-1 focus-within:ring-[#c20000]">
                   <span className="px-3 py-2 text-sm text-slate-400 bg-slate-50 border-r border-slate-200">/links/</span>
                   <input type="text" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '') })}
                     placeholder="resmi" className="flex-1 px-3 py-2 text-sm focus:outline-none font-mono" />
@@ -207,12 +209,12 @@ export default function LinksManagement() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Deskripsi</label>
                 <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={2}
-                  placeholder="Semua tautan resmi PC IMM Kota Surakarta" className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
+                  placeholder="Semua tautan resmi PC IMM Kota Surakarta" className="w-full border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Avatar / Logo</label>
                 <input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
-                  className="w-full text-sm text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200" />
+                  className="w-full text-sm text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-sm file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Tema Warna</label>
@@ -241,11 +243,11 @@ export default function LinksManagement() {
                   </button>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <label className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 rounded-md px-3 py-2">
+                  <label className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 rounded-sm px-3 py-2">
                     <input type="color" value={formData.bg_color || '#0b1120'} onChange={(e) => setFormData({ ...formData, bg_color: e.target.value })} className="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0" />
                     Latar
                   </label>
-                  <label className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 rounded-md px-3 py-2">
+                  <label className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 rounded-sm px-3 py-2">
                     <input type="color" value={formData.accent_color || '#c20000'} onChange={(e) => setFormData({ ...formData, accent_color: e.target.value })} className="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0" />
                     Aksen
                   </label>

@@ -133,7 +133,7 @@ export default function AccountRequestsPage() {
           <button
             key={t.key}
             onClick={() => changeFilter(t.key)}
-            className={`px-4 py-2 rounded-md text-sm font-semibold border transition-colors ${filter === t.key ? 'bg-[#c20000] text-white border-[#c20000]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}
+            className={`px-4 py-2 rounded-sm text-sm font-semibold border transition-colors ${filter === t.key ? 'bg-[#c20000] text-white border-[#c20000]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}
           >
             {t.label} ({t.count})
           </button>
@@ -189,20 +189,20 @@ export default function AccountRequestsPage() {
         <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
           <p className="text-xs text-slate-500 font-medium">Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} pengajuan</p>
           <div className="flex items-center gap-2">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
             <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-md border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
+            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
           </div>
         </div>
       </Card>
 
       {approveId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setApproveId(null)}>
-          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4" onClick={() => setApproveId(null)}>
+          <div className="bg-white rounded-sm shadow-xl max-w-sm w-full p-6" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2"><UserPlus className="w-5 h-5 text-emerald-600" /> Setujui Akun</h2>
             <p className="text-xs text-slate-500 mb-4">Pilih role final untuk akun ini.</p>
             <select value={approveRole} onChange={(e) => setApproveRole(e.target.value)}
-              className="w-full border border-slate-200 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]">
+              className="w-full border border-slate-200 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]">
               <option value="komisariat">Komisariat (Kontributor Lokal)</option>
               <option value="bidang">Bidang (Cabang)</option>
               <option value="admin">Admin</option>

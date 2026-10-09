@@ -7,8 +7,68 @@ import LatestNews from '@/components/sections/LatestNews';
 import CTASection from '@/components/sections/CTASection';
 import { checkMaintenance } from '@/lib/maintenance';
 import MaintenancePage from '@/components/ui/MaintenancePage';
+import { getApiBase, normalizeSettings, type Settings } from '@/lib/settings';
+import { Metadata } from 'next';
+import { toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
 
-export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {
+  title: 'Beranda',
+  description: 'Website resmi Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah (IMM) Kota Surakarta — berita, agenda, struktural, dokumen, dan layanan kader.',
+  alternates: {
+    canonical: 'https://immsolo.or.id',
+  },
+  openGraph: {
+    title: 'PC IMM Kota Surakarta',
+    description: 'Website resmi Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah (IMM) Kota Surakarta.',
+    url: 'https://immsolo.or.id',
+    type: 'website',
+    images: [
+      {
+        url: toAbsoluteSiteUrl('/images/imm_hero_bg.jpg'),
+        width: 1200,
+        height: 630,
+        alt: 'PC IMM Kota Surakarta',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PC IMM Kota Surakarta',
+    description: 'Website resmi Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah (IMM) Kota Surakarta.',
+    images: [toAbsoluteSiteUrl('/images/imm_hero_bg.jpg')],
+  },
+};
+
+async function fetchSettings(): Promise<Settings> {
+  const res = await fetch(`${getApiBase()}/settings`, { next: { revalidate: 60 } });
+  if (!res.ok) return {};
+  const json = await res.json();
+  return normalizeSettings(json?.data);
+}
+
+async function fetchLatestPosts(): Promise<any[]> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs?per_page=6`, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data?.data || json.data || [];
+  } catch (error) {
+    console.error("Failed to fetch latest posts", error);
+    return [];
+  }
+}
+
+async function fetchLatestEvents(): Promise<any[]> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events?per_page=3`, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data?.data || json.data || [];
+  } catch (error) {
+    console.error("Failed to fetch latest events", error);
+    return [];
+  }
+}
 
 export default async function Home() {
   if (await checkMaintenance('maintenance_beranda')) return <MaintenancePage />;
@@ -26,51 +86,24 @@ export default async function Home() {
     photo: '',
   };
 
+  const [settingsMap, latestPosts, latestEvents] = await Promise.all([
+    fetchSettings().catch(() => ({} as Settings)),
+    fetchLatestPosts(),
+    fetchLatestEvents(),
+  ]);
+
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, { cache: 'no-store' });
-    const json = await res.json();
-    const settings = json.data || [];
-    
-    let settingsMap: Record<string, string> = {};
-    if (Array.isArray(settings)) {
-      settings.forEach((s: any) => { settingsMap[s.key] = s.value; });
-    } else if (typeof settings === 'object') {
-      settingsMap = settings;
-    }
-    
     if (settingsMap.stat_kader) statsData.stat_kader = settingsMap.stat_kader;
     if (settingsMap.stat_komisariat) statsData.stat_komisariat = settingsMap.stat_komisariat;
     if (settingsMap.stat_lembaga) statsData.stat_lembaga = settingsMap.stat_lembaga;
     if (settingsMap.stat_universitas) statsData.stat_universitas = settingsMap.stat_universitas;
-    
+
     if (settingsMap.chairman_name) chairmanData.name = settingsMap.chairman_name;
     if (settingsMap.chairman_period) chairmanData.period = settingsMap.chairman_period;
     if (settingsMap.chairman_message) chairmanData.message = settingsMap.chairman_message;
     if (settingsMap.chairman_photo) chairmanData.photo = settingsMap.chairman_photo;
   } catch (error) {
-    console.error("Failed to fetch settings for homepage stats", error);
-  }
-
-  let latestPosts: any[] = [];
-  try {
-    const resPosts = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs`, { cache: 'no-store' });
-    if (resPosts.ok) {
-      const jsonPosts = await resPosts.json();
-      latestPosts = jsonPosts.data?.data || jsonPosts.data || [];
-    }
-  } catch (error) {
-    console.error("Failed to fetch latest posts", error);
-  }
-
-  let latestEvents: any[] = [];
-  try {
-    const resEvents = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events?limit=3`, { cache: 'no-store' });
-    if (resEvents.ok) {
-      const jsonEvents = await resEvents.json();
-      latestEvents = jsonEvents.data?.data || jsonEvents.data || [];
-    }
-  } catch (error) {
-    console.error("Failed to fetch latest events", error);
+    console.error("Failed to map settings for homepage stats", error);
   }
 
   const jsonLd = {

@@ -19,10 +19,20 @@ async function getPage(slug: string) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const page = await getPage(slug);
-  if (!page) return { title: 'Tidak Ditemukan | PC IMM Kota Surakarta' };
+  if (!page) return { title: 'Tidak Ditemukan' };
+  const canonical = `https://immsolo.or.id/links/${slug}`;
   return {
-    title: `${page.title} | PC IMM Kota Surakarta`,
+    title: page.title,
     description: page.description || `Tautan resmi ${page.title} — PC IMM Kota Surakarta.`,
+    alternates: {
+      canonical,
+    },
+    openGraph: {
+      title: `${page.title} | PC IMM Kota Surakarta`,
+      description: page.description || `Tautan resmi ${page.title} — PC IMM Kota Surakarta.`,
+      url: canonical,
+      type: 'website',
+    },
   };
 }
 
@@ -85,7 +95,7 @@ export default async function LinktreePage({ params }: { params: Promise<{ slug:
           <h1 className="text-[26px] leading-tight font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
             {page.title}
           </h1>
-          {page.description && <p className="text-sm text-white/55 mt-2 leading-relaxed max-w-[19rem] mx-auto font-light">{page.description}</p>}
+          {page.description && <p className="text-sm text-white/80 mt-2 leading-relaxed max-w-[19rem] mx-auto font-light">{page.description}</p>}
         </div>
 
         <div className="flex items-center gap-3 mb-7" aria-hidden="true">
@@ -96,35 +106,35 @@ export default async function LinktreePage({ params }: { params: Promise<{ slug:
 
         {items.length === 0 ? (
           <div className="text-center bg-white/5 border border-white/10 rounded-2xl py-10 px-6">
-            <p className="text-white/50 text-sm">Belum ada tautan di halaman ini.</p>
+            <p className="text-white/70 text-sm">Belum ada tautan di halaman ini.</p>
           </div>
         ) : (
-          <div className="space-y-3.5">
+          <ul className="space-y-3.5">
             {items.map((item: any, idx: number) => (
+              <li key={item.id}>
               <a
-                key={item.id}
                 href={`${process.env.NEXT_PUBLIC_API_URL}/links/go/${item.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ animationDelay: `${Math.min(idx * 70, 500)}ms` }}
-                className="animate-[linktree-in_0.5s_ease-out_both] group relative flex items-center gap-4 bg-gradient-to-b from-white/[0.09] to-white/[0.04] hover:from-white/[0.14] hover:to-white/[0.07] border border-white/10 hover:border-white/25 backdrop-blur-xl rounded-2xl pl-4 pr-4 py-[15px] text-white shadow-[0_10px_35px_rgba(0,0,0,0.4)] transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_18px_45px_rgba(0,0,0,0.5)] overflow-hidden"
+                className="group relative flex items-center gap-4 bg-gradient-to-b from-white/[0.09] to-white/[0.04] hover:from-white/[0.14] hover:to-white/[0.07] border border-white/10 hover:border-white/25 backdrop-blur-xl rounded-2xl pl-4 pr-4 py-[15px] text-white shadow-[0_10px_35px_rgba(0,0,0,0.4)] transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_18px_45px_rgba(0,0,0,0.5)] overflow-hidden"
               >
                 <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                 <span className="w-11 h-11 shrink-0 inline-flex items-center justify-center rounded-xl border border-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_4px_12px_rgba(0,0,0,0.3)]" style={{ background: `linear-gradient(135deg, ${accent}d9, ${accent}59)` }}>
                   {item.icon ? <LinkItemIcon id={item.icon} className="w-[22px] h-[22px]" /> : <span className="text-[15px] font-bold">{item.title.charAt(0).toUpperCase()}</span>}
                 </span>
                 <span className="flex-1 min-w-0">
-                  <span className="block font-semibold text-[15px] tracking-wide truncate">{item.title}</span>
-                  <span className="block text-[11px] text-white/40 truncate font-normal mt-0.5">
+                  <span className="block font-semibold text-[15px] tracking-wide truncate" title={item.title}>{item.title}</span>
+                  <span className="block text-[11px] text-white/70 truncate font-normal mt-0.5">
                     {item.url.replace(/^https?:\/\//, '').split('/')[0]}
                   </span>
                 </span>
-                <span className="w-8 h-8 shrink-0 inline-flex items-center justify-center rounded-full border border-white/10 text-white/40 group-hover:text-white transition-all duration-300 group-hover:border-white/30">
+                <span className="w-8 h-8 shrink-0 inline-flex items-center justify-center rounded-full border border-white/10 text-white/70 group-hover:text-white transition-all duration-300 group-hover:border-white/30">
                   <ArrowUpRight className="w-4 h-4 group-hover:translate-x-[1px] group-hover:-translate-y-[1px] transition-transform" />
                 </span>
               </a>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
 
       </div>

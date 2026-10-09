@@ -4,11 +4,14 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Share2, MessageSquare, Link as LinkIcon, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
 
 interface ShareButtonsProps {
   title: string;
   slug: string;
   layout?: 'horizontal' | 'vertical';
+  /** Base path konten, mis. "/post" atau "/agenda". */
+  basePath?: string;
 }
 
 // Inline SVG icons for social platforms (lucide-react doesn't include brand icons)
@@ -28,9 +31,11 @@ function XIcon({ className }: { className?: string }) {
   );
 }
 
-export default function ShareButtons({ title, slug, layout = 'vertical' }: ShareButtonsProps) {
+export default function ShareButtons({ title, slug, layout = 'vertical', basePath = '/post' }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
-  const url = typeof window !== 'undefined' ? `${window.location.origin}/post/${slug}` : `/post/${slug}`;
+  // URL absolut penuh sejak render pertama (tanpa window) agar hasil salin
+  // selalu benar dan bisa di-render di server.
+  const url = toAbsoluteSiteUrl(`${basePath}/${slug}`);
 
   const handleCopyLink = async () => {
     try {

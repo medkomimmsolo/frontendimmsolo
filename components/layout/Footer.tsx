@@ -3,26 +3,69 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MapPin, Mail, Phone } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { getApiBase, normalizeSettings, type Settings } from '@/lib/settings';
+
+/** Bangun URL sosmed dari value settings (bisa URL penuh atau handle). */
+function socialUrl(kind: 'instagram' | 'youtube' | 'tiktok', value: string | undefined): string | null {
+  if (!value) return null;
+  const v = value.trim();
+  if (!v) return null;
+  if (/^https?:\/\//i.test(v)) return v;
+  const handle = v.replace(/^@/, '');
+  if (!handle) return null;
+  if (kind === 'instagram') return `https://instagram.com/${handle}`;
+  if (kind === 'tiktok') return `https://tiktok.com/@${handle}`;
+  // YouTube: handle tanpa spasi dianggap @handle, nama channel difallback ke pencarian.
+  if (!/\s/.test(handle)) return `https://youtube.com/${handle.startsWith('@') ? handle : `@${handle}`}`;
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(v)}`;
+}
 
 export default function Footer() {
-  const [siteLogoWhite, setSiteLogoWhite] = useState<string | null>(null);
+  const [settings, setSettings] = useState<Settings>({});
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`);
+        const response = await fetch(`${getApiBase()}/settings`);
         const data = await response.json();
-        if (data.success && data.data) {
-          if (data.data.site_logo_white) setSiteLogoWhite(data.data.site_logo_white);
-          else if (data.data.site_logo) setSiteLogoWhite(data.data.site_logo);
-        }
+        // Backend returns a flat { key: value } map under `data`; normalizeSettings
+        // also tolerates the legacy array-of-{key,value} shape.
+        setSettings(normalizeSettings(data?.data));
       } catch (e) {
         console.error('Failed to fetch site settings', e);
       }
     };
     fetchSettings();
   }, []);
+
+  const siteLogoWhite = settings.site_logo_white || settings.site_logo || null;
+  const email = settings.contact_email || 'solo.imm@gmail.com';
+  const phone = settings.contact_phone || '+62 85879136568';
+  const address = settings.address || 'Gedung Dakwah Balai Muhammadiyah, Jl. Teuku Umar No.5, Keprabon, Surakarta';
+
+  const socials = [
+    {
+      label: 'Instagram',
+      href: socialUrl('instagram', settings.social_instagram),
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+      ),
+    },
+    {
+      label: 'Youtube',
+      href: socialUrl('youtube', settings.social_youtube),
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+      ),
+    },
+    {
+      label: 'Tiktok',
+      href: socialUrl('tiktok', settings.social_tiktok),
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 12a4 4 0 1 0 4 4V4c.6 2.5 2.4 4.3 5 4.6"/></svg>
+      ),
+    },
+  ].filter((s) => s.href);
 
   return (
     <footer className="bg-[#0f172a] border-t border-white/10 pt-20 pb-10 relative overflow-hidden">
@@ -38,7 +81,10 @@ export default function Footer() {
               {siteLogoWhite ? (
                 <img
                   src={`${siteLogoWhite}`}
-                  alt="PC IMM Logo"
+                  alt="Logo PC IMM Kota Surakarta"
+                  width={160}
+                  height={48}
+                  loading="lazy"
                   className="h-12 w-auto object-contain transition-transform group-hover:scale-105"
                 />
               ) : (
@@ -60,22 +106,20 @@ export default function Footer() {
             <p className="text-white/80 leading-relaxed pr-4 text-base">
               Wadah perjuangan mahasiswa Muhammadiyah untuk membentuk akademisi Islam yang berakhlak mulia demi terwujudnya tujuan persyarikatan.
             </p>
-            <div className="flex gap-3 pt-2">
-              <a href="#" aria-label="Instagram" className="w-10 h-10 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-[#c20000] hover:border-[#c20000] transition-all duration-300 shadow-sm">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-              </a>
-              <a href="#" aria-label="Youtube" className="w-10 h-10 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-[#c20000] hover:border-[#c20000] transition-all duration-300 shadow-sm">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
-              </a>
-              <a href="#" aria-label="Facebook" className="w-10 h-10 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-[#c20000] hover:border-[#c20000] transition-all duration-300 shadow-sm">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-              </a>
-            </div>
+            {socials.length > 0 && (
+              <div className="flex gap-3 pt-2">
+                {socials.map((s) => (
+                  <a key={s.label} href={s.href as string} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="w-10 h-10 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-[#c20000] hover:border-[#c20000] transition-all duration-300 shadow-sm">
+                    {s.icon}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Quick Links */}
           <div className="lg:col-span-2">
-            <h3 className="text-white font-bold text-lg mb-6 tracking-wide">Tautan Cepat</h3>
+            <h2 className="text-white font-bold text-lg mb-6 tracking-wide">Tautan Cepat</h2>
             <ul className="space-y-4 text-white/80">
               <li><Link href="/tentang" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Tentang IMM</Link></li>
               <li><Link href="/post" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Post & Artikel</Link></li>
@@ -87,46 +131,39 @@ export default function Footer() {
 
           {/* Contact */}
           <div className="lg:col-span-3">
-            <h3 className="text-white font-bold text-lg mb-6 tracking-wide">Hubungi Kami</h3>
+            <h2 className="text-white font-bold text-lg mb-6 tracking-wide">Hubungi Kami</h2>
             <ul className="space-y-5 text-white/80">
               <li className="flex items-start gap-4 group">
                 <div className="w-10 h-10 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-[#c20000] group-hover:border-[#c20000] transition-colors duration-300 shadow-sm">
                   <MapPin className="w-5 h-5 text-white group-hover:text-white transition-colors" />
                 </div>
-                <span className="text-base leading-relaxed pt-1">Gedung Dakwah Balai Muhammadiyah, Jl. Teuku Umar No.5, Keprabon, Surakarta</span>
+                <span className="text-base leading-relaxed pt-1">{address}</span>
               </li>
               <li className="flex items-center gap-4 group">
                 <div className="w-10 h-10 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-[#c20000] group-hover:border-[#c20000] transition-colors duration-300 shadow-sm">
                   <Mail className="w-5 h-5 text-white group-hover:text-white transition-colors" />
                 </div>
-                <span className="text-base">solo.imm@gmail.com</span>
+                <a href={`mailto:${email}`} className="text-base hover:text-white transition-colors break-all">{email}</a>
               </li>
               <li className="flex items-center gap-4 group">
                 <div className="w-10 h-10 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-[#c20000] group-hover:border-[#c20000] transition-colors duration-300 shadow-sm">
                   <Phone className="w-5 h-5 text-white group-hover:text-white transition-colors" />
                 </div>
-                <span className="text-base">+62 85879136568</span>
+                <a href={`tel:${phone.replace(/[^+\d]/g, '')}`} className="text-base hover:text-white transition-colors">{phone}</a>
               </li>
             </ul>
           </div>
 
-          {/* Newsletter */}
+          {/* Layanan */}
           <div className="lg:col-span-3">
-            <h3 className="text-white font-bold text-lg mb-6 tracking-wide">Buletin Gerakan</h3>
-            <p className="text-base text-white/80 mb-5 leading-relaxed">
-              Dapatkan pembaruan langsung ke kotak masuk Anda mengenai kajian dan aksi kami.
-            </p>
-            <form className="flex flex-col gap-3" action="#">
-              <input
-                type="email"
-                placeholder="Alamat Email Anda"
-                className="bg-white/5 border border-white/20 rounded-sm px-4 py-3 text-base text-white placeholder:text-white/50 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all shadow-sm"
-                required
-              />
-              <Button type="submit" className="w-full py-3">
-                Berlangganan
-              </Button>
-            </form>
+            <h2 className="text-white font-bold text-lg mb-6 tracking-wide">Layanan</h2>
+            <ul className="space-y-4 text-white/80">
+              <li><Link href="/shortlink" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Shortlink</Link></li>
+              <li><Link href="/form" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Formulir Pendaftaran</Link></li>
+              <li><Link href="/links" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Tautan Resmi</Link></li>
+              <li><Link href="/dokumen" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Dokumen</Link></li>
+              <li><Link href="/kontak" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Kontak</Link></li>
+            </ul>
           </div>
         </div>
 
@@ -136,8 +173,8 @@ export default function Footer() {
             © {new Date().getFullYear()} PC IMM Kota Surakarta. Hak cipta dilindungi.
           </p>
           <div className="flex gap-6 text-sm text-white/60 font-medium">
-            <Link href="#" className="hover:text-white transition-colors duration-300">Kebijakan Privasi</Link>
-            <Link href="#" className="hover:text-white transition-colors duration-300">Syarat & Ketentuan</Link>
+            <Link href="/kebijakan-privasi" className="hover:text-white transition-colors duration-300">Kebijakan Privasi</Link>
+            <Link href="/syarat-ketentuan" className="hover:text-white transition-colors duration-300">Syarat & Ketentuan</Link>
           </div>
         </div>
       </div>

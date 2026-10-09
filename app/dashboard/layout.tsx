@@ -22,10 +22,11 @@ import {
   UserPlus,
   History,
   Inbox,
+  ClipboardList,
   ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { motion, AnimatePresence } from 'motion/react';
+import { getApiBase, isSettingEnabled, normalizeSettings } from '@/lib/settings';
 
 export default function DashboardLayout({
   children,
@@ -38,6 +39,24 @@ export default function DashboardLayout({
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [siteLogo, setSiteLogo] = useState<string | null>(null);
+
+  // Ambil logo situs dari settings (seperti Navbar/Footer publik).
+  // Tanpa ini logo asli tidak akan pernah tampil di sidebar.
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const res = await fetch(`${getApiBase()}/settings`);
+        if (!res.ok) return;
+        const json = await res.json();
+        const settings = normalizeSettings(json?.data);
+        if (settings.site_logo) setSiteLogo(settings.site_logo);
+      } catch (e) {
+        console.error('Failed to fetch site logo', e);
+      }
+    };
+    fetchLogo();
+  }, []);
   
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -65,23 +84,12 @@ export default function DashboardLayout({
   useEffect(() => {
     const checkMaintenance = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`);
+        const res = await fetch(`${getApiBase()}/settings`);
         if (res.ok) {
           const json = await res.json();
-          const settings = json.data || [];
-          
-          let isMaintenance = false;
-          if (Array.isArray(settings)) {
-            const maintenanceSetting = settings.find((s: any) => s.key === 'maintenance_mode');
-            if (maintenanceSetting && maintenanceSetting.value === 'true') {
-              isMaintenance = true;
-            }
-          } else if (typeof settings === 'object') {
-            if (settings.maintenance_mode === 'true') {
-              isMaintenance = true;
-            }
-          }
-          
+          const settings = normalizeSettings(json?.data);
+          const isMaintenance = isSettingEnabled(settings, 'maintenance_mode');
+
           const isSuperAdmin = user?.roles?.some((r: any) => r.name === 'super-admin');
           if (isMaintenance && user && !isSuperAdmin) {
             await logout();
@@ -125,6 +133,7 @@ export default function DashboardLayout({
         { name: 'Dokumen', href: '/dashboard/documents', icon: <FileText className="w-5 h-5 shrink-0" />, permission: 'manage-document' },
         { name: 'Tautan Pendek', href: '/dashboard/shortlinks', icon: <LinkIcon className="w-5 h-5 shrink-0" />, permission: 'manage-shortlinks' },
         { name: 'Linktree', href: '/dashboard/links', icon: <Layers className="w-5 h-5 shrink-0" />, permission: 'manage-links' },
+        { name: 'Formulir', href: '/dashboard/forms', icon: <ClipboardList className="w-5 h-5 shrink-0" />, permission: 'manage-forms' },
       ],
     },
     {
@@ -162,24 +171,31 @@ export default function DashboardLayout({
           ${sidebarWidth}
         `}
       >
-        {/* Logo Area */}
-        <div className={`h-16 flex items-center bg-white border-b border-slate-100 transition-all ${isDesktopCollapsed ? 'justify-center px-0' : 'px-6'}`}>
-          <div className="w-8 h-8 rounded-sm bg-gradient-to-br from-[#c20000] to-[#a30000] flex items-center justify-center text-white font-bold text-lg shadow-sm shadow-[#c20000]/20 shrink-0">
-            I
-          </div>
-          {!isDesktopCollapsed && (
-            <span className="font-bold text-[#0f172a] tracking-wide ml-3 whitespace-nowrap overflow-hidden" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-              PC IMM
-            </span>
-          )}
-          <button className="ml-auto lg:hidden text-slate-400 hover:text-slate-800" onClick={() => setIsMobileSidebarOpen(false)}>
+        {/* Logo Area — hanya logo, menempel kiri */}
+        <div className="h-16 flex items-center justify-start px-4 bg-white border-b border-slate-100 shrink-0">
+          <Link href="/dashboard" className="flex items-center" aria-label="PC IMM Admin Panel - Dashboard">
+            {siteLogo ? (
+              <img
+                src={siteLogo}
+                alt="Logo PC IMM Kota Surakarta"
+                width={132}
+                height={32}
+                className="h-8 w-auto max-w-[132px] object-contain object-left"
+              />
+            ) : (
+              <span className="w-8 h-8 rounded-sm bg-gradient-to-br from-[#c20000] to-[#a30000] flex items-center justify-center text-white font-bold text-lg shadow-sm shadow-[#c20000]/20">
+                I
+              </span>
+            )}
+          </Link>
+          <button className="ml-auto lg:hidden p-2 -mr-2 text-slate-400 hover:text-slate-800" onClick={() => setIsMobileSidebarOpen(false)} aria-label="Tutup menu">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-6 px-4 custom-scrollbar">
-          {menuGroups.map((group) => {
+          {menuGroups.map((group, groupIdx) => {
             const visibleItems = group.items.filter((item: any) => can(item.permission));
             if (visibleItems.length === 0) return null;
             return (
@@ -188,7 +204,7 @@ export default function DashboardLayout({
                   <div className="px-2 mb-2 text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.15em]">{group.label}</div>
                 )}
                 <div className="space-y-1.5">
-                  {visibleItems.map((item: any) => {
+                  {visibleItems.map((item: any, itemIdx: number) => {
                     const isActive = item.href === '/dashboard'
                       ? pathname === '/dashboard'
                       : pathname === item.href || pathname?.startsWith(`${item.href}/`);
@@ -196,11 +212,13 @@ export default function DashboardLayout({
                       <Link
                         key={item.name}
                         href={item.href}
-                        className={`flex items-center rounded-xl text-sm font-semibold transition-all group ${
+                        onClick={() => setIsMobileSidebarOpen(false)}
+                        className={`animate-in fade-in slide-in-from-left duration-300 relative flex items-center rounded-sm text-sm font-semibold transition-all group ${
                           isActive
-                          ? 'bg-red-50 text-[#c20000] shadow-sm border border-red-100'
-                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                        } ${isDesktopCollapsed ? 'w-11 h-11 justify-center mx-auto' : 'px-4 py-3.5'}`}
+                          ? 'bg-red-50 text-[#c20000] shadow-sm border border-red-100 before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:rounded-full before:bg-[#c20000]'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent'
+                        } ${isDesktopCollapsed ? 'w-11 h-11 justify-center mx-auto' : 'px-4 py-3'}`}
+                        style={{ animationDelay: `${groupIdx * 70 + itemIdx * 45}ms` }}
                         title={isDesktopCollapsed ? item.name : undefined}
                       >
                         <span className={`${isActive ? 'text-[#c20000]' : 'text-slate-400 group-hover:text-slate-700'} transition-colors flex items-center justify-center`}>
@@ -260,13 +278,12 @@ export default function DashboardLayout({
                 <ChevronDown className="w-4 h-4 text-slate-400 hidden md:block" />
               </button>
 
-              <AnimatePresence>
                 {isProfileDropdownOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
+                  <div
+                   
+                   
+                   
+                   
                     className="absolute right-0 mt-2 w-56 bg-white rounded-sm shadow-xl border border-slate-100 py-1 z-50"
                   >
                     <div className="px-4 py-3 border-b border-slate-100 md:hidden">
@@ -295,9 +312,8 @@ export default function DashboardLayout({
                       <LogOut className="w-4 h-4 mr-3" />
                       Keluar Sistem
                     </button>
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
             </div>
           </div>
         </header>
@@ -312,7 +328,7 @@ export default function DashboardLayout({
 
       {/* Mobile Overlay */}
       {isMobileSidebarOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsMobileSidebarOpen(false)}></div>
+        <div className="fixed inset-0 bg-[#0f172a]/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsMobileSidebarOpen(false)}></div>
       )}
     </div>
   );

@@ -3,7 +3,6 @@
 
 @theme inline {
   --font-sans: var(--font-inter);
-  --font-poppins: var(--font-poppins);
   
   /* STRICT COLOR PALETTE ENFORCEMENT */
   
@@ -31,18 +30,18 @@
   --color-imm-accent-700: #fbbf24;
 
   /* 3. Third Color: #0f172a (Dark) */
-  /* Overriding Tailwind's slate to strictly use #0f172a and #ffffff */
-  --color-slate-50: #ffffff;
-  --color-slate-100: #ffffff;
-  --color-slate-200: color-mix(in srgb, #0f172a 15%, transparent); /* For borders */
-  --color-slate-300: color-mix(in srgb, #0f172a 30%, transparent);
-  --color-slate-400: #0f172a; /* Text starts getting fully dark */
-  --color-slate-500: #0f172a;
-  --color-slate-600: #0f172a;
-  --color-slate-700: #0f172a;
-  --color-slate-800: #0f172a;
-  --color-slate-900: #0f172a; /* Main Dark */
-  --color-slate-950: #020617; /* Hover (slightly darker) */
+  /* Neutrals: tuned slate ramp anchored on #0f172a (dark) and #ffffff (light) */
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
 
   /* 4. Secondary Color: #ffffff (White) */
   --color-white: #ffffff;
@@ -53,6 +52,17 @@
   --animate-float: float 6s ease-in-out infinite;
   --animate-pulse-slow: pulse 3s ease-in-out infinite;
   --animate-slow-zoom: slowZoom 20s ease-in-out infinite alternate;
+  --animate-splash-bar: splash-bar 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  /* Entrance animations — see the `enter` keyframe below. These tokens
+     produce the standalone `animate-zoom-in-95`, `animate-slide-in-from-*`
+     variants; the bare `animate-in fade-in slide-in-from-*` classes used in
+     the components are registered with @utility further down this file. */
+  --animate-zoom-in-95: zoom-in-95 0.15s ease-out both;
+  --animate-slide-in-from-top: slide-in-from-top 0.2s ease-out both;
+  --animate-slide-in-from-right: slide-in-from-right 0.2s ease-out both;
+  --animate-slide-in-from-bottom: slide-in-from-bottom 0.2s ease-out both;
+  --animate-slide-in-from-left: slide-in-from-left 0.2s ease-out both;
 }
 
 @layer utilities {
@@ -80,6 +90,103 @@
     0% { transform: scale(1.05); }
     100% { transform: scale(1.15); }
   }
+
+  /* Shared keyframe for the `animate-in …` classes below. Every modifier only
+     sets a custom property, so `animate-in fade-in slide-in-from-top-2
+     duration-200` composes without each combination needing its own keyframe.
+     The individual `translate` / `scale` properties are used (instead of
+     `transform`) so an element's own transform is never clobbered. */
+  @keyframes enter {
+    from {
+      opacity: var(--tw-enter-opacity, 0);
+      translate: var(--tw-enter-translate-x, 0) var(--tw-enter-translate-y, 0);
+      scale: var(--tw-enter-scale, 1);
+    }
+    to {
+      opacity: var(--tw-enter-opacity-final, 1);
+      translate: 0 0;
+      scale: 1;
+    }
+  }
+
+  @keyframes zoom-in-95 {
+    from { opacity: 0; scale: 0.95; }
+    to { opacity: 1; scale: 1; }
+  }
+
+  @keyframes splash-bar {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
+  @keyframes slide-in-from-top {
+    from { opacity: 0; translate: 0 -0.5rem; }
+    to { opacity: 1; translate: 0 0; }
+  }
+
+  @keyframes slide-in-from-right {
+    from { opacity: 0; translate: 0.5rem 0; }
+    to { opacity: 1; translate: 0 0; }
+  }
+
+  @keyframes slide-in-from-bottom {
+    from { opacity: 0; translate: 0 0.5rem; }
+    to { opacity: 1; translate: 0 0; }
+  }
+
+  @keyframes slide-in-from-left {
+    from { opacity: 0; translate: -0.5rem 0; }
+    to { opacity: 1; translate: 0 0; }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ENTRANCE ANIMATION UTILITIES
+   Hand-written, dependency-free equivalents of the classes used in
+   components/layout/Navbar.tsx, app/dashboard/struktural/page.tsx and
+   app/(public)/shortlink/ShortlinkClient.tsx.
+   `duration-*` keeps working: it only sets `transition-duration`, so the
+   duration is read from `--tw-duration` (the same variable Tailwind's own
+   `transition` utility reads) with a sensible fallback.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@utility animate-in {
+  animation-name: enter;
+  animation-duration: var(--tw-duration, 150ms);
+  animation-timing-function: var(--tw-ease, cubic-bezier(0.4, 0, 0.2, 1));
+  animation-fill-mode: backwards;
+}
+
+@utility fade-in {
+  --tw-enter-opacity: 0;
+  --tw-enter-opacity-final: 1;
+}
+
+@utility zoom-in-95 {
+  --tw-enter-scale: 0.95;
+}
+
+/* Offsets follow the spacing scale: `-2` on `slide-in-from-top-*` means the
+   element starts 2 × 0.25rem above its resting position. */
+@utility slide-in-from-top-* {
+  --tw-enter-translate-y: calc(var(--spacing) * --value(integer) * -1);
+}
+
+@utility slide-in-from-right-* {
+  --tw-enter-translate-x: calc(var(--spacing) * --value(integer));
+}
+
+@utility slide-in-from-bottom-* {
+  --tw-enter-translate-y: calc(var(--spacing) * --value(integer));
+}
+
+@utility slide-in-from-left-* {
+  --tw-enter-translate-x: calc(var(--spacing) * --value(integer) * -1);
+}
+
+::selection {
+  background: #c20000;
+  color: #ffffff;
 }
 
 body {
@@ -87,6 +194,17 @@ body {
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Cincin fokus seragam di seluruh situs (aksesibilitas keyboard) */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #c20000;
+  outline-offset: 2px;
 }
 
 ::-webkit-scrollbar {
@@ -103,6 +221,48 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background: #a30000;
+}
+
+/* ── Scrollbar utilities ──
+   Deliberately plain, unlayered CSS: the ::-webkit-scrollbar rules above are
+   unlayered too, so anything emitted into the `utilities` cascade layer (e.g.
+   via @utility) would lose to them no matter how specific it was. Being
+   unlayered as well, these win on class specificity instead. */
+
+/* app/(public)/agenda/page.tsx — scrollable row with no visible scrollbar. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* app/dashboard/layout.tsx — thin, visible, theme-coloured scrollbar. */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #c20000 #ffffff;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #c20000;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #a30000;
 }
 
@@ -477,8 +637,157 @@ body {
   background-color: #f1f5f9;
 }
 
+/* Logo mengapung lembut (naik-turun + oleng kecil) */
+@keyframes splash-float-soft {
+  0%, 100% { transform: translateY(0) rotate(-2.5deg); }
+  50% { transform: translateY(-10px) rotate(2.5deg); }
+}
+.splash-float-soft {
+  animation: splash-float-soft 4s ease-in-out infinite;
+  will-change: transform;
+}
+/* Orbit 360° untuk dot satelit */
+@keyframes splash-orbit {
+  to { transform: rotate(360deg); }
+}
+.splash-orbit {
+  animation: splash-orbit 6s linear infinite;
+  will-change: transform;
+}
 /* ── Animasi masuk tombol linktree ── */
 @keyframes linktree-in {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SPLASH LOADING PAGE — murni CSS, tanpa library animasi.
+   ═══════════════════════════════════════════════════════════════════════ */
+@keyframes splash-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.splash-marquee {
+  animation: splash-marquee 30s linear infinite;
+  will-change: transform;
+}
+.splash-marquee-rev {
+  animation: splash-marquee 38s linear infinite reverse;
+  will-change: transform;
+}
+@keyframes splash-letter {
+  from { opacity: 0; transform: translateY(70%) rotate(5deg); filter: blur(8px); }
+  to { opacity: 1; transform: translateY(0) rotate(0deg); filter: blur(0); }
+}
+.splash-letter {
+  display: inline-block;
+  opacity: 0;
+  animation: splash-letter 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, filter;
+}
+/* Logo masuk berputar 3D: flip + membesar + tajam dari blur */
+@keyframes splash-logo-in {
+  0% { opacity: 0; transform: perspective(900px) rotateY(-180deg) scale(0.55); filter: blur(12px); }
+  55% { opacity: 1; filter: blur(0); }
+  75% { transform: perspective(900px) rotateY(12deg) scale(1.04); }
+  100% { opacity: 1; transform: perspective(900px) rotateY(0deg) scale(1); filter: blur(0); }
+}
+.splash-logo-in {
+  animation: splash-logo-in 1.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter;
+}
+@keyframes splash-ring {
+  to { transform: rotate(360deg); }
+}
+.splash-ring {
+  animation: splash-ring 10s linear infinite;
+}
+@keyframes splash-glow {
+  0%, 100% { transform: scale(0.92); opacity: 0.55; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+.splash-glow {
+  animation: splash-glow 2.6s ease-in-out infinite;
+}
+@keyframes splash-shine {
+  from { transform: translateX(-160%) skewX(-18deg); }
+  to { transform: translateX(260%) skewX(-18deg); }
+}
+.splash-shine {
+  animation: splash-shine 1.7s cubic-bezier(0.4, 0, 0.2, 1) 0.35s both;
+}
+@keyframes splash-particle {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
+  50% { transform: translateY(-26px) scale(1.25); opacity: 1; }
+}
+.splash-particle {
+  animation: splash-particle 6s ease-in-out infinite;
+}
+.splash-text-stroke {
+  -webkit-text-stroke: 2px rgba(194, 0, 0, 0.28);
+  color: transparent;
+}
+.splash-text-stroke-light {
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.14);
+  color: transparent;
+}
+/* Cincin gradien conic berputar (dibentuk via mask cincin) */
+@keyframes splash-spin {
+  to { transform: rotate(360deg); }
+}
+.splash-conic {
+  background: conic-gradient(from 0deg, #c20000, #f59e0b, #ff4d4d, transparent 45%, transparent 75%, #c20000);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  animation: splash-spin 3.2s linear infinite;
+}
+.splash-conic-rev {
+  background: conic-gradient(from 180deg, transparent 10%, #0f172a55, transparent 55%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+  animation: splash-spin 7s linear infinite reverse;
+}
+/* Mask-reveal untuk judul */
+@keyframes splash-mask-up {
+  from { transform: translateY(112%); }
+  to { transform: translateY(0); }
+}
+.splash-mask-line {
+  display: block;
+  animation: splash-mask-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform;
+}
+/* Kursor mesin ketik */
+@keyframes splash-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.splash-caret {
+  animation: splash-blink 0.9s step-end infinite;
+}
+/* Kilau bergerak di progress bar */
+@keyframes splash-stripe {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(220%); }
+}
+.splash-stripe {
+  animation: splash-stripe 1.4s ease-in-out infinite;
+}
+/* Orb gradien melayang */
+@keyframes splash-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, -30px) scale(1.12); }
+}
+.splash-orb {
+  animation: splash-drift 9s ease-in-out infinite;
+}
+/* Grid samar latar */
+.splash-grid {
+  background-image:
+    linear-gradient(to right, rgb(15 23 42 / 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(15 23 42 / 0.055) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, black 25%, transparent 78%);
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, black 25%, transparent 78%);
 }

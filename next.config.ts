@@ -4,26 +4,30 @@ import path from 'path';
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  poweredByHeader: false,
   webpack(config) {
     // Pastikan "quill" selalu resolve ke satu salinan yang sama di semua package
     // (quill-table-up dan react-quill-new harus berbagi instance yang identik)
+    // NOTE: pakai process.cwd() agar tidak pecah di Docker/standalone (path relatif CWD).
     config.resolve.alias = {
       ...config.resolve.alias,
-      quill: path.resolve('./node_modules/quill'),
+      quill: path.resolve(process.cwd(), 'node_modules/quill'),
     };
     return config;
   },
   images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60,
     remotePatterns: [
       {
         protocol: 'http',
         hostname: '127.0.0.1',
-        port: '8000',
+        port: '8010',
       },
       {
         protocol: 'http',
         hostname: 'localhost',
-        port: '8000',
+        port: '8010',
       },
       {
         protocol: 'https',
@@ -38,17 +42,32 @@ const nextConfig: NextConfig = {
         hostname: 'immsolo.or.id',
       },
       {
-        protocol: 'http',
-        hostname: 'immsolo.or.id',
-      },
-      {
         protocol: 'https',
         hostname: 'placehold.co',
       }
     ],
   },
+  experimental: {
+    optimizePackageImports: ['recharts', 'lucide-react', 'aos'],
+  },
+  async headers() {
+    return [
+      {
+        source: '/sw.js',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
+      },
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        ],
+      },
+    ];
+  },
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000';
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8010';
     return [
       {
         source: '/api/:path*',

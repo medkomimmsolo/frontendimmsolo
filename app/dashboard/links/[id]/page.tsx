@@ -111,7 +111,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/dashboard/links">
-          <Button variant="outline" size="sm" className="h-9 w-9 p-0 rounded-md border-slate-200 hover:text-[#c20000]">
+          <Button variant="outline" size="sm" className="h-9 w-9 p-0 rounded-sm border-slate-200 hover:text-[#c20000]">
             <ArrowLeft className="w-4 h-4" />
           </Button>
         </Link>
@@ -124,7 +124,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
             {page ? `/links/${page.slug}` : ''} <ExternalLink className="w-3 h-3" />
           </a>
         </div>
-        <Button onClick={() => openModal()} className="h-11 bg-[#c20000] hover:bg-[#a30000] text-white rounded-md px-6 shadow-sm shrink-0">
+        <Button onClick={() => openModal()} className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm text-sm font-semibold shadow-sm shrink-0">
           <Plus className="w-4 h-4 mr-2" /> Tambah Tautan
         </Button>
       </div>
@@ -180,7 +180,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
                 <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                   <td className="p-4 pl-6">
                     <div className="flex items-center gap-1">
-                      <span className="w-7 h-7 inline-flex items-center justify-center rounded-md bg-slate-100 text-slate-600 text-xs font-bold mr-1">{idx + 1}</span>
+                      <span className="w-7 h-7 inline-flex items-center justify-center rounded-sm bg-slate-100 text-slate-600 text-xs font-bold mr-1">{idx + 1}</span>
                       <button onClick={() => moveItem(idx, -1)} disabled={idx === 0} title="Naik" className="p-1.5 text-slate-500 hover:text-[#c20000] hover:bg-slate-100 rounded disabled:opacity-30">
                         <ArrowUp className="w-3.5 h-3.5" />
                       </button>
@@ -220,31 +220,31 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
       </Card>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setIsModalOpen(false)}>
-          <form onSubmit={handleSave} className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4" onClick={() => setIsModalOpen(false)}>
+          <form onSubmit={handleSave} className="bg-white rounded-sm shadow-xl max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-bold text-slate-800 mb-5">{editing ? 'Edit Tautan' : 'Tambah Tautan'}</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Judul Tautan</label>
                 <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Pendaftaran Anggota Baru" className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
+                  placeholder="Pendaftaran Anggota Baru" className="w-full border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">URL Tujuan</label>
                 <input type="url" required value={formData.url} onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                  placeholder="https://..." className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
+                  placeholder="https://..." className="w-full border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
                 <p className="text-xs text-slate-500 mt-1.5">
                   Tempel URL tujuan di sini — klik pengunjung tercatat otomatis.
                 </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Icon <span className="text-slate-400 font-normal">(opsional, tinggal pilih)</span></label>
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-48 overflow-y-auto border border-slate-200 rounded-md p-2">
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-48 overflow-y-auto border border-slate-200 rounded-sm p-2">
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, icon: '' })}
                     title="Tanpa icon"
-                    className={`flex flex-col items-center gap-1 p-2 rounded-md border text-[10px] font-medium transition-colors ${!formData.icon ? 'border-[#c20000] bg-[#c20000]/5 text-[#c20000]' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}
+                    className={`flex flex-col items-center gap-1 p-2 rounded-sm border text-[10px] font-medium transition-colors ${!formData.icon ? 'border-[#c20000] bg-[#c20000]/5 text-[#c20000]' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}
                   >
                     <span className="w-5 h-5 inline-flex items-center justify-center font-bold">–</span>
                     Tanpa
@@ -257,7 +257,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
                         type="button"
                         onClick={() => setFormData({ ...formData, icon: opt.id })}
                         title={opt.label}
-                        className={`flex flex-col items-center gap-1 p-2 rounded-md border text-[10px] font-medium transition-colors ${active ? 'border-[#c20000] bg-[#c20000]/5 text-[#c20000]' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}
+                        className={`flex flex-col items-center gap-1 p-2 rounded-sm border text-[10px] font-medium transition-colors ${active ? 'border-[#c20000] bg-[#c20000]/5 text-[#c20000]' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}
                       >
                         <LinkItemIcon id={opt.id} className="w-5 h-5" />
                         {opt.label}

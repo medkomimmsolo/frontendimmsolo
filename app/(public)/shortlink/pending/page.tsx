@@ -2,13 +2,14 @@ import { Metadata } from 'next';
 import { ShieldAlert, MessageCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { checkMaintenance } from '@/lib/maintenance';
+import { getApiBase, normalizeSettings } from '@/lib/settings';
 
 async function getAdminWa(): Promise<string> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/settings`, { cache: 'no-store' });
+    const res = await fetch(`${getApiBase()}/settings`, { cache: 'no-store' });
+    if (!res.ok) return '6282226252923';
     const data = await res.json();
-    const raw = data?.data;
-    const val = Array.isArray(raw) ? raw.find((i: any) => i.key === 'shortlink_admin_wa')?.value : raw?.shortlink_admin_wa;
+    const val = normalizeSettings(data?.data).shortlink_admin_wa;
     return val ? String(val).replace(/[^0-9]/g, '') : '6282226252923';
   } catch {
     return '6282226252923';
@@ -19,6 +20,10 @@ import MaintenancePage from '@/components/ui/MaintenancePage';
 export const metadata: Metadata = {
   title: 'Shortlink Belum Aktif',
   description: 'Tautan pendek yang Anda tuju belum diaktifkan oleh Admin.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function PendingShortlinkPage({
@@ -32,7 +37,7 @@ export default async function PendingShortlinkPage({
   
   return (
     <main className="min-h-screen bg-slate-50 pt-32 pb-24 px-4 flex items-center justify-center">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-8 text-center border border-slate-100">
+      <div className="max-w-md w-full bg-white rounded-sm shadow-xl shadow-slate-200/50 p-8 text-center border border-slate-100">
         
         <div className="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-6">
           <ShieldAlert className="w-10 h-10 text-yellow-500" />
@@ -46,7 +51,7 @@ export default async function PendingShortlinkPage({
           Tautan pendek <span className="font-semibold text-[#c20000]">/{slug || '...'}</span> yang Anda tuju <strong>belum dikonfirmasi</strong> atau <strong>masih menunggu persetujuan</strong> dari Admin PC IMM Kota Surakarta.
         </p>
 
-        <div className="bg-slate-50 rounded-xl p-5 mb-8 border border-slate-100 text-left">
+        <div className="bg-slate-50 rounded-sm p-5 mb-8 border border-slate-100 text-left">
           <p className="text-sm text-slate-500 font-medium mb-2">Jika Anda adalah pembuat tautan ini:</p>
           <p className="text-sm text-slate-700 leading-relaxed mb-4">
             Silakan hubungi Admin untuk konfirmasi agar tautan segera diaktifkan. Anda bisa langsung chat tanpa format khusus.
@@ -55,7 +60,7 @@ export default async function PendingShortlinkPage({
             href={`https://wa.me/${adminWa}`} 
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebd5a] text-white py-2.5 rounded-lg font-medium transition-colors"
+            className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1ebd5a] text-white py-2.5 rounded-sm font-medium transition-colors"
           >
             <MessageCircle className="w-4 h-4" />
             Hubungi Admin via WhatsApp

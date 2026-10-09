@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Save, Loader2, User as UserIcon, Lock, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 
 export default function ProfileSettings() {
@@ -92,33 +91,33 @@ export default function ProfileSettings() {
     );
   }
 
-  const inputClass = "w-full bg-slate-50 hover:bg-slate-100/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-[#c20000] focus:ring-4 focus:ring-[#c20000]/10 transition-all text-sm font-medium placeholder:text-slate-400";
+  const inputClass = "w-full bg-slate-50 hover:bg-slate-100/50 border border-slate-200 rounded-sm px-4 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-[#c20000] focus:ring-4 focus:ring-[#c20000]/10 transition-all text-sm font-medium placeholder:text-slate-400";
   const labelClass = "block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2";
 
   return (
     <div className="w-full pb-20">
       {/* Header Section */}
-      <motion.div 
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
+      <div 
+       
+       
         className="flex items-center gap-4 mb-8 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5"
       >
-        <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center border border-red-100">
+        <div className="w-12 h-12 rounded-sm bg-red-50 flex items-center justify-center border border-red-100">
           <UserIcon className="w-6 h-6 text-[#c20000]" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Pengaturan Profil</h1>
           <p className="text-[#0f172a]/70 text-sm mt-1">Kelola informasi akun Anda seperti nama, email, dan kata sandi.</p>
         </div>
-      </motion.div>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-12 max-w-4xl">
         
         {/* Section 1: Data Diri */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+        <div 
+         
+         
+         
           className="flex flex-col md:flex-row gap-8"
         >
           <div className="md:w-72 shrink-0">
@@ -134,7 +133,7 @@ export default function ProfileSettings() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-2xl border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
                 <div>
@@ -166,15 +165,15 @@ export default function ProfileSettings() {
               </CardContent>
             </Card>
           </div>
-        </motion.div>
+        </div>
 
         <div className="h-px bg-slate-200 w-full"></div>
 
         {/* Section 2: Keamanan */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+        <div 
+         
+         
+         
           className="flex flex-col md:flex-row gap-8"
         >
           <div className="md:w-72 shrink-0">
@@ -190,7 +189,7 @@ export default function ProfileSettings() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-2xl border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
                 <div>
@@ -220,13 +219,13 @@ export default function ProfileSettings() {
               </CardContent>
             </Card>
           </div>
-        </motion.div>
+        </div>
 
         <div className="pt-6 flex justify-end">
           <Button 
             type="submit" 
             disabled={isLoading} 
-            className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl px-8 py-6 shadow-xl shadow-[#c20000]/20 transition-all text-base font-bold flex items-center gap-3 w-full sm:w-auto"
+            className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm px-8 py-6 shadow-xl shadow-[#c20000]/20 transition-all text-base font-bold flex items-center gap-3 w-full sm:w-auto"
           >
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
             {isLoading ? 'Menyimpan...' : 'Simpan Profil'}

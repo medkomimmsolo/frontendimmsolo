@@ -7,29 +7,63 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Loader2, CheckCircle2, UserPlus, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getApiBase } from '@/lib/settings';
 
 export default function AjukanAkunClient() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', passwordConfirm: '', requested_role: 'komisariat', reason: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  
+  // Real-time validation state
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    const newData = { ...formData, [name]: value };
+    setFormData(newData);
+    
+    // Clear error for this field when typing
+    if (validationErrors[name]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+    
+    // Real-time password match check
+    if (name === 'password' || name === 'passwordConfirm') {
+      if (name === 'passwordConfirm' && value !== newData.password) {
+        setValidationErrors(prev => ({ ...prev, passwordConfirm: 'Password tidak cocok' }));
+      } else {
+        setValidationErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.passwordConfirm;
+          return newErrors;
+        });
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate all fields
+    const errors: Record<string, string> = {};
     if (formData.password.length < 8) {
-      toast.error('Password minimal 8 karakter');
-      return;
+      errors.password = 'Password minimal 8 karakter';
     }
     if (formData.password !== formData.passwordConfirm) {
-      toast.error('Konfirmasi password tidak cocok');
+      errors.passwordConfirm = 'Konfirmasi password tidak cocok';
+    }
+    if (errors.password || errors.passwordConfirm) {
+      setValidationErrors(errors);
       return;
     }
+    
     setIsLoading(true);
     try {
-      const base = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8010/api/v1';
+      const base = getApiBase();
       await axios.post(`${base}/account-requests`, {
         name: formData.name,
         email: formData.email,
@@ -47,7 +81,7 @@ export default function AjukanAkunClient() {
     }
   };
 
-  const inputClass = "w-full border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]";
+  const inputClass = "w-full border border-slate-200 rounded-sm px-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]";
 
   if (isSuccess) {
     return (
@@ -87,26 +121,29 @@ export default function AjukanAkunClient() {
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
-                <input type="text" name="name" required value={formData.name} onChange={handleChange} placeholder="Nama lengkap" className={inputClass} />
+                <label htmlFor="ajnama" className="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
+                <input id="ajnama" type="text" name="name" autoComplete="name" required value={formData.name} onChange={handleChange} placeholder="Nama lengkap" className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                <input type="email" name="email" required value={formData.email} onChange={handleChange} placeholder="email@contoh.id" className={inputClass} />
+                <label htmlFor="ajemail" className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <input id="ajemail" type="email" name="email" autoComplete="email" required value={formData.email} onChange={handleChange} placeholder="email@contoh.id" className={inputClass} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                  <input type="password" name="password" required value={formData.password} onChange={handleChange} placeholder="Min. 8 karakter" className={inputClass} />
+                  <label htmlFor="ajpassword" className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                  <input id="ajpassword" type="password" name="password" autoComplete="new-password" minLength={8} required aria-invalid={formData.password.length > 0 && formData.password.length < 8} aria-describedby="ajpassword-hint ajpassword-error" value={formData.password} onChange={handleChange} placeholder="Min. 8 karakter" className={inputClass} />
+                  <p id="ajpassword-hint" className="text-xs text-slate-400 mt-1">Minimal 8 karakter.</p>
+                  {validationErrors.password && <p id="ajpassword-error" role="alert" className="text-xs text-red-600 font-medium mt-1">{validationErrors.password}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Konfirmasi Password</label>
-                  <input type="password" name="passwordConfirm" required value={formData.passwordConfirm} onChange={handleChange} placeholder="Ulangi password" className={inputClass} />
+                  <label htmlFor="ajpasswordconfirm" className="block text-sm font-medium text-slate-700 mb-1">Konfirmasi Password</label>
+                  <input id="ajpasswordconfirm" type="password" name="passwordConfirm" autoComplete="new-password" required aria-invalid={formData.passwordConfirm.length > 0 && formData.passwordConfirm !== formData.password} aria-describedby="ajpasswordconfirm-error" value={formData.passwordConfirm} onChange={handleChange} placeholder="Ulangi password" className={inputClass} />
+                  {validationErrors.passwordConfirm && <p id="ajpasswordconfirm-error" role="alert" className="text-xs text-red-600 font-medium mt-1">{validationErrors.passwordConfirm}</p>}
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Role yang Diajukan</label>
-                <select name="requested_role" value={formData.requested_role} onChange={handleChange} className={inputClass}>
+                <label htmlFor="ajrole" className="block text-sm font-medium text-slate-700 mb-1">Role yang Diajukan</label>
+                <select id="ajrole" name="requested_role" value={formData.requested_role} onChange={handleChange} className={inputClass}>
                   <option value="komisariat">Komisariat (Kontributor Lokal)</option>
                   <option value="bidang">Bidang (Cabang)</option>
                   <option value="admin">Admin</option>
@@ -114,8 +151,8 @@ export default function AjukanAkunClient() {
                 <p className="text-xs text-slate-400 mt-1">Keputusan akhir tetap di tangan Super Admin.</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Alasan / Keterangan <span className="text-slate-400 font-normal">(opsional)</span></label>
-                <textarea name="reason" value={formData.reason} onChange={handleChange} rows={3} placeholder="Contoh: Kader komisariat UMS, butuh akses publikasi..." className={`${inputClass} resize-none`} />
+                <label htmlFor="ajalasan" className="block text-sm font-medium text-slate-700 mb-1">Alasan / Keterangan <span className="text-slate-400 font-normal">(opsional)</span></label>
+                <textarea id="ajalasan" name="reason" value={formData.reason} onChange={handleChange} rows={3} placeholder="Contoh: Kader komisariat UMS, butuh akses publikasi..." className={`${inputClass} resize-none`} />
               </div>
               <Button type="submit" disabled={isLoading} className="w-full h-11 bg-[#c20000] hover:bg-[#a30000] text-white font-bold">
                 {isLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}

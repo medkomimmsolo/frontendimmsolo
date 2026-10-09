@@ -5,8 +5,10 @@ import axios from 'axios';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
-import { LinkIcon, Loader2, ArrowRight, ShieldCheck, CheckCircle2, Copy, Key, Search, AlertCircle } from 'lucide-react';
+import { LinkIcon, Loader2, ArrowRight, ShieldCheck, CheckCircle2, Copy, Key, Search, AlertCircle, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getApiBase, normalizeSettings } from '@/lib/settings';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function PengajuanShortlink() {
   const [activeTab, setActiveTab] = useState<'pengajuan' | 'aktivasi' | 'status'>('pengajuan');
@@ -34,30 +36,66 @@ export default function PengajuanShortlink() {
   const [statusResult, setStatusResult] = useState<any>(null);
   const [adminWa, setAdminWa] = useState('6282226252923');
 
-  // Captcha State
-  const [captchaNum1, setCaptchaNum1] = useState(0);
-  const [captchaNum2, setCaptchaNum2] = useState(0);
+  // Captcha gambar (server-side)
+  const [captcha, setCaptcha] = useState<{ id: string; image: string } | null>(null);
+  const [captchaLoading, setCaptchaLoading] = useState(false);
   const [captchaAnswer, setCaptchaAnswer] = useState('');
 
+  // Cek ketersediaan alias secara live (debounce).
+  const [slugStatus, setSlugStatus] = useState<'idle' | 'checking' | 'taken' | 'available' | 'reserved'>('idle');
+
   useEffect(() => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/settings`)
+    const slug = formData.slug.trim().toLowerCase();
+    if (slug.length < 3) {
+      setSlugStatus('idle');
+      return;
+    }
+    const reserved = ['admin', 'api', 'dashboard', 'login', 'logout', 'links', 'form', 'post', 'agenda', 'dokumen', 'shortlink', 'kontak', 'profil', 'tentang', 'sejarah', 'struktural', 'lembaga', 'cari', 's', 'sanctum', 'storage', 'ajukan-akun', 'offline'];
+    if (reserved.includes(slug)) {
+      setSlugStatus('reserved');
+      return;
+    }
+    setSlugStatus('checking');
+    const t = setTimeout(async () => {
+      try {
+        await axios.get(`${getApiBase()}/shortlinks/status/${slug}`);
+        setSlugStatus('taken');
+      } catch (err: any) {
+        setSlugStatus(err.response?.status === 404 ? 'available' : 'idle');
+      }
+    }, 600);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.slug]);
+
+  useEffect(() => {
+    axios.get(`${getApiBase()}/settings`)
       .then((res) => {
-        const data = res.data?.data;
-        const val = Array.isArray(data) ? data.find((i: any) => i.key === 'shortlink_admin_wa')?.value : data?.shortlink_admin_wa;
+        // Backend returns a flat { key: value } map under `data`; normalizeSettings
+        // also tolerates the legacy array-of-{key,value} shape.
+        const val = normalizeSettings(res.data?.data).shortlink_admin_wa;
         if (val) setAdminWa(val.replace(/[^0-9]/g, ''));
       })
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    generateCaptcha();
-  }, []);
-
-  const generateCaptcha = () => {
-    setCaptchaNum1(Math.floor(Math.random() * 10) + 1);
-    setCaptchaNum2(Math.floor(Math.random() * 10) + 1);
-    setCaptchaAnswer('');
+  const fetchCaptcha = async () => {
+    setCaptchaLoading(true);
+    try {
+      const res = await axios.get(`${getApiBase()}/captcha`);
+      setCaptcha(res.data.data);
+      setCaptchaAnswer('');
+    } catch {
+      toast.error('Gagal memuat captcha, silakan coba lagi.');
+    } finally {
+      setCaptchaLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchCaptcha();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const generateSlug = () => {
     const randomString = Math.random().toString(36).substring(2, 8);
@@ -72,11 +110,10 @@ export default function PengajuanShortlink() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Captcha Validation
-    if (parseInt(captchaAnswer) !== (captchaNum1 + captchaNum2)) {
-      toast.error('Jawaban verifikasi angka salah. Silakan coba lagi.');
-      generateCaptcha();
+
+    if (!captcha) {
+      toast.error('Captcha belum dimuat. Silakan tunggu atau muat ulang gambar.');
+      fetchCaptcha();
       return;
     }
 
@@ -88,10 +125,12 @@ export default function PengajuanShortlink() {
     }
 
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shortlinks/public`, {
+      await axios.post(`${getApiBase()}/shortlinks/public`, {
         slug: formData.slug,
         target_url: finalUrl,
         phone_number: formData.phone_number,
+        captcha_id: captcha.id,
+        captcha_answer: captchaAnswer,
       });
 
       setIsSuccess(true);
@@ -105,8 +144,13 @@ export default function PengajuanShortlink() {
       }, 1500);
 
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Terjadi kesalahan, silakan coba lagi');
-      generateCaptcha();
+      const status = error.response?.status;
+      if (status === 429) {
+        toast.error(error.response?.data?.message || 'Batas pengajuan harian tercapai. Coba lagi besok.');
+      } else {
+        toast.error(error.response?.data?.message || 'Terjadi kesalahan, silakan coba lagi');
+      }
+      fetchCaptcha();
     } finally {
       setIsSubmitting(false);
     }
@@ -116,7 +160,7 @@ export default function PengajuanShortlink() {
     e.preventDefault();
     setIsActivating(true);
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shortlinks/activate`, activationData);
+      const res = await axios.post(`${getApiBase()}/shortlinks/activate`, activationData);
       toast.success(res.data.message);
       setActivationData({ slug: '', phone_number: '', token: '' });
       setActiveTab('status');
@@ -137,7 +181,7 @@ export default function PengajuanShortlink() {
     setIsChecking(true);
     setStatusResult(null);
     try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/shortlinks/status/${slugToCheck}`);
+      const res = await axios.get(`${getApiBase()}/shortlinks/status/${slugToCheck}`);
       setStatusResult(res.data.data);
     } catch (error: any) {
       if (error.response?.status === 404) {
@@ -175,7 +219,7 @@ export default function PengajuanShortlink() {
 
             <div className="space-y-3 pt-2">
               <Button 
-                className="w-full h-14 text-base font-bold bg-[#25D366] hover:bg-[#1da851] text-white shadow-md shadow-[#25D366]/20 rounded-sm"
+                className="w-full h-12 text-base font-bold bg-[#25D366] hover:bg-[#1da851] text-white shadow-md shadow-[#25D366]/20 rounded-sm"
                 onClick={() => {
                   const text = `Halo Admin PC IMM Kota Surakarta,%0A%0ASaya telah mengajukan pembuatan tautan pendek (Shortlink) baru dengan rincian berikut:%0A%0A- *Tautan Akhir*: immsolo.or.id/${formData.slug}%0A- *URL Tujuan*: ${formData.target_url}%0A- *No. HP Pengaju*: ${formData.phone_number}%0A%0AMohon bantuannya untuk mengecek dan memberikan token aktivasi untuk tautan tersebut. Terima kasih!`;
                   window.open(`https://wa.me/${adminWa}?text=${text}`, '_blank');
@@ -184,7 +228,7 @@ export default function PengajuanShortlink() {
                 Minta Token via WhatsApp
               </Button>
 
-              <Button variant="outline" className="w-full h-14 rounded-sm font-semibold border-slate-200 text-slate-600 hover:bg-slate-50" onClick={() => { setIsSuccess(false); setActiveTab('aktivasi'); }}>
+              <Button variant="outline" className="w-full h-12 rounded-sm font-semibold border-slate-200 text-slate-600 hover:bg-slate-50" onClick={() => { setIsSuccess(false); setActiveTab('aktivasi'); }}>
                 Lanjut ke Halaman Aktivasi
               </Button>
             </div>
@@ -203,7 +247,7 @@ export default function PengajuanShortlink() {
           <ul className="flex items-center text-sm text-[#0f172a]/60 space-x-2">
             <li>
               <Link href="/" className="hover:text-[#c20000] transition-colors flex items-center">
-                Home
+                Beranda
               </Link>
             </li>
             <li>
@@ -231,26 +275,32 @@ export default function PengajuanShortlink() {
             <Card className="border-0 shadow-lg shadow-slate-200/50 rounded-sm bg-white overflow-hidden">
               
               {/* Tabs */}
-              <div className="flex border-b border-slate-200 bg-slate-50">
+              <div className="flex border-b border-slate-200 bg-slate-50" role="tablist" aria-label="Layanan shortlink">
                 <button 
+                  role="tab"
+                  aria-selected={activeTab === 'pengajuan'}
                   className={`flex-1 py-4 text-sm font-bold text-center transition-colors ${activeTab === 'pengajuan' ? 'bg-white text-[#c20000] border-b-2 border-[#c20000]' : 'text-slate-500 hover:text-slate-800'}`}
                   onClick={() => setActiveTab('pengajuan')}
                 >
-                  <ShieldCheck className="w-4 h-4 inline-block mr-2" />
+                  <ShieldCheck className="w-4 h-4 inline-block mr-2" aria-hidden="true" />
                   Pengajuan Baru
                 </button>
                 <button 
+                  role="tab"
+                  aria-selected={activeTab === 'aktivasi'}
                   className={`flex-1 py-4 text-sm font-bold text-center transition-colors ${activeTab === 'aktivasi' ? 'bg-white text-[#c20000] border-b-2 border-[#c20000]' : 'text-slate-500 hover:text-slate-800'}`}
                   onClick={() => setActiveTab('aktivasi')}
                 >
-                  <Key className="w-4 h-4 inline-block mr-2" />
+                  <Key className="w-4 h-4 inline-block mr-2" aria-hidden="true" />
                   Aktivasi
                 </button>
                 <button 
+                  role="tab"
+                  aria-selected={activeTab === 'status'}
                   className={`flex-1 py-4 text-sm font-bold text-center transition-colors ${activeTab === 'status' ? 'bg-white text-[#c20000] border-b-2 border-[#c20000]' : 'text-slate-500 hover:text-slate-800'}`}
                   onClick={() => setActiveTab('status')}
                 >
-                  <Search className="w-4 h-4 inline-block mr-2" />
+                  <Search className="w-4 h-4 inline-block mr-2" aria-hidden="true" />
                   Cek Status
                 </button>
               </div>
@@ -261,7 +311,7 @@ export default function PengajuanShortlink() {
                 {activeTab === 'pengajuan' && (
                   <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="space-y-3">
-                      <label className="flex items-center text-sm font-bold text-slate-800">
+                      <label htmlFor="shortlink-slug" className="flex items-center text-sm font-bold text-slate-800">
                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-[#c20000] mr-2 text-xs">1</span>
                         Tautan Akhir (Custom Link) <span className="text-red-500 ml-1">*</span>
                       </label>
@@ -270,6 +320,7 @@ export default function PengajuanShortlink() {
                           immsolo.or.id/
                         </span>
                         <input 
+                          id="shortlink-slug"
                           type="text"
                           required
                           value={formData.slug}
@@ -286,12 +337,27 @@ export default function PengajuanShortlink() {
                         </button>
                       </div>
                       <p className="text-xs text-slate-500 font-medium ml-8">
-                        Tidak membedakan huruf besar/kecil. Kombinasi huruf, angka, strip (-), dan garis bawah (_).
+                        Tidak membedakan huruf besar/kecil. Kombinasi huruf, angka, strip (-), dan garis bawah (_). Minimal 3 karakter.
+                      </p>
+                      {slugStatus === 'checking' && (
+                        <p className="text-xs text-slate-500 ml-8">Mengecek ketersediaan alias...</p>
+                      )}
+                      {slugStatus === 'available' && (
+                        <p className="text-xs font-semibold text-emerald-600 ml-8">Alias tersedia, silakan lanjutkan.</p>
+                      )}
+                      {slugStatus === 'taken' && (
+                        <p className="text-xs font-semibold text-red-600 ml-8">Alias sudah dipakai, pilih alias lain atau tekan Acak.</p>
+                      )}
+                      {slugStatus === 'reserved' && (
+                        <p className="text-xs font-semibold text-red-600 ml-8">Alias dicadangkan sistem, pilih alias lain.</p>
+                      )}
+                      <p className="text-xs text-slate-400 ml-8">
+                        Batas pengajuan: maks 5 per nomor HP per hari.
                       </p>
                     </div>
 
                     <div className="space-y-3">
-                      <label className="flex items-center text-sm font-bold text-slate-800">
+                      <label htmlFor="shortlink-target" className="flex items-center text-sm font-bold text-slate-800">
                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-[#c20000] mr-2 text-xs">2</span>
                         URL Tujuan / Tautan Asli <span className="text-red-500 ml-1">*</span>
                       </label>
@@ -300,8 +366,10 @@ export default function PengajuanShortlink() {
                           <LinkIcon className="h-5 w-5 text-slate-400 group-focus-within:text-[#c20000] transition-colors" />
                         </div>
                         <input 
+                          id="shortlink-target"
                           type="url"
                           required
+                          autoComplete="url"
                           value={formData.target_url}
                           onChange={(e) => setFormData({...formData, target_url: e.target.value})}
                           placeholder="https://docs.google.com/forms/d/e/..."
@@ -311,14 +379,16 @@ export default function PengajuanShortlink() {
                     </div>
 
                     <div className="space-y-3">
-                      <label className="flex items-center text-sm font-bold text-slate-800">
+                      <label htmlFor="shortlink-phone" className="flex items-center text-sm font-bold text-slate-800">
                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-[#c20000] mr-2 text-xs">3</span>
                         Nomor WhatsApp Pengaju <span className="text-red-500 ml-1">*</span>
                       </label>
                       <div className="ml-8">
                         <input 
+                          id="shortlink-phone"
                           type="tel"
                           required
+                          autoComplete="tel"
                           value={formData.phone_number}
                           onChange={(e) => setFormData({...formData, phone_number: e.target.value})}
                           placeholder="Contoh: 081234567890"
@@ -328,30 +398,61 @@ export default function PengajuanShortlink() {
                     </div>
 
                     <div className="space-y-3">
-                      <label className="flex items-center text-sm font-bold text-slate-800">
+                      <label htmlFor="shortlink-captcha" className="flex items-center text-sm font-bold text-slate-800">
                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-[#c20000] mr-2 text-xs">4</span>
-                        Verifikasi Keamanan (Anti-Bot) <span className="text-red-500 ml-1">*</span>
+                        Verifikasi Keamanan (Captcha) <span className="text-red-500 ml-1">*</span>
                       </label>
-                      <div className="ml-8 flex items-center space-x-4">
-                        <div className="bg-slate-100 px-4 py-3 rounded-sm font-bold text-lg text-slate-700 tracking-wider">
-                          {captchaNum1} + {captchaNum2} =
+                      <div className="ml-8 flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div className="relative shrink-0 border border-slate-200 rounded-sm overflow-hidden bg-white">
+                          {captcha?.image ? (
+                            <img src={captcha.image} alt="Kode captcha" width={190} height={64} className="block" />
+                          ) : (
+                            <div className="w-[190px] h-[64px] flex items-center justify-center text-xs text-slate-400">
+                              {captchaLoading ? 'Memuat...' : 'Gagal dimuat'}
+                            </div>
+                          )}
+                          {captchaLoading && (
+                            <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                              <Loader2 className="w-5 h-5 animate-spin text-[#c20000]" />
+                            </div>
+                          )}
                         </div>
-                        <input 
-                          type="number"
-                          required
-                          value={captchaAnswer}
-                          onChange={(e) => setCaptchaAnswer(e.target.value)}
-                          placeholder="Hasil"
-                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] font-bold text-slate-900 transition-colors"
-                        />
+                        <div className="flex items-center gap-2 flex-1">
+                          <input
+                            id="shortlink-captcha"
+                            type="text"
+                            required
+                            maxLength={5}
+                            autoComplete="off"
+                            autoCapitalize="characters"
+                            value={captchaAnswer}
+                            onChange={(e) => setCaptchaAnswer(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                            placeholder="Ketik kode di atas"
+                            aria-label="Ketik kode captcha yang terlihat pada gambar"
+                            className="flex-1 min-w-0 px-4 py-3 bg-white border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] font-bold tracking-[0.2em] text-slate-900 transition-colors"
+                          />
+                          <button
+                            type="button"
+                            onClick={fetchCaptcha}
+                            disabled={captchaLoading}
+                            title="Muat gambar baru"
+                            aria-label="Muat gambar captcha baru"
+                            className="shrink-0 p-3 border border-slate-200 rounded-sm text-slate-500 hover:text-[#c20000] hover:border-[#c20000] transition-colors disabled:opacity-40"
+                          >
+                            <RefreshCw className={`w-5 h-5 ${captchaLoading ? 'animate-spin' : ''}`} />
+                          </button>
+                        </div>
                       </div>
+                      <p className="text-xs text-slate-500 font-medium ml-8">
+                        Huruf besar semua, abaikan spasi. Gambar tidak jelas? Klik tombol muat ulang.
+                      </p>
                     </div>
 
                     <div className="pt-8 border-t border-slate-100">
                       <Button 
                         type="submit" 
                         disabled={isSubmitting}
-                        className="w-full h-14 text-base font-bold bg-[#0f172a] hover:bg-[#c20000] text-white rounded-sm shadow-md transition-colors"
+                        className="w-full h-12 text-base font-bold bg-[#0f172a] hover:bg-[#c20000] text-white rounded-sm shadow-md transition-colors"
                       >
                         {isSubmitting ? (
                           <>
@@ -377,8 +478,9 @@ export default function PengajuanShortlink() {
                     </div>
                     
                     <div className="space-y-3">
-                      <label className="text-sm font-bold text-slate-800">Slug Tautan <span className="text-red-500">*</span></label>
+                      <label htmlFor="aktivasi-slug" className="text-sm font-bold text-slate-800">Slug Tautan <span className="text-red-500">*</span></label>
                       <input 
+                        id="aktivasi-slug"
                         type="text"
                         required
                         value={activationData.slug}
@@ -389,10 +491,12 @@ export default function PengajuanShortlink() {
                     </div>
 
                     <div className="space-y-3">
-                      <label className="text-sm font-bold text-slate-800">Nomor WhatsApp Pengaju <span className="text-red-500">*</span></label>
+                      <label htmlFor="aktivasi-phone" className="text-sm font-bold text-slate-800">Nomor WhatsApp Pengaju <span className="text-red-500">*</span></label>
                       <input 
+                        id="aktivasi-phone"
                         type="tel"
                         required
+                        autoComplete="tel"
                         value={activationData.phone_number}
                         onChange={(e) => setActivationData({...activationData, phone_number: e.target.value})}
                         placeholder="Sesuai saat mendaftar"
@@ -401,10 +505,12 @@ export default function PengajuanShortlink() {
                     </div>
 
                     <div className="space-y-3">
-                      <label className="text-sm font-bold text-slate-800">Token Aktivasi <span className="text-red-500">*</span></label>
+                      <label htmlFor="aktivasi-token" className="text-sm font-bold text-slate-800">Token Aktivasi <span className="text-red-500">*</span></label>
                       <input 
+                        id="aktivasi-token"
                         type="text"
                         required
+                        autoComplete="one-time-code"
                         value={activationData.token}
                         onChange={(e) => setActivationData({...activationData, token: e.target.value})}
                         placeholder="Contoh: A8F9K2J1"
@@ -416,7 +522,7 @@ export default function PengajuanShortlink() {
                       <Button 
                         type="submit" 
                         disabled={isActivating}
-                        className="w-full h-14 text-base font-bold bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm shadow-md transition-colors"
+                        className="w-full h-12 text-base font-bold bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm shadow-md transition-colors"
                       >
                         {isActivating ? (
                           <Loader2 className="w-5 h-5 mr-3 animate-spin" />
@@ -433,11 +539,13 @@ export default function PengajuanShortlink() {
                 {activeTab === 'status' && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <form onSubmit={handleCheckStatus} className="flex gap-2">
+                      <label htmlFor="status-slug" className="sr-only">Slug shortlink yang ingin dicek</label>
                       <div className="flex-1 rounded-sm overflow-hidden border border-slate-200 focus-within:border-[#c20000] bg-white flex">
-                        <span className="flex items-center px-4 bg-slate-50 text-slate-500 font-semibold border-r border-slate-200">
+                        <span className="flex items-center px-4 bg-slate-50 text-slate-500 font-semibold border-r border-slate-200" aria-hidden="true">
                           immsolo.or.id/
                         </span>
                         <input 
+                          id="status-slug"
                           type="text"
                           required
                           value={statusQuery}
@@ -456,11 +564,11 @@ export default function PengajuanShortlink() {
                     </form>
 
                     {statusResult && (
-                      <div className="mt-8 border-t border-slate-100 pt-8">
+                      <div className="mt-8 border-t border-slate-100 pt-8" aria-live="polite">
                         {statusResult.not_found ? (
                           <div className="text-center p-6 bg-red-50 rounded-sm border border-red-100">
-                            <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" />
-                            <h4 className="font-bold text-red-800 text-lg mb-1">Tautan Tidak Ditemukan</h4>
+                            <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" aria-hidden="true" />
+                            <h2 className="font-bold text-red-800 text-lg mb-1">Tautan Tidak Ditemukan</h2>
                             <p className="text-red-600 text-sm">Pastikan slug yang Anda masukkan sudah benar.</p>
                           </div>
                         ) : (
@@ -482,6 +590,15 @@ export default function PengajuanShortlink() {
                               <span className="text-sm font-bold text-slate-500 block mb-1">Tautan Anda:</span>
                               <div className="font-mono text-[#c20000] font-bold text-lg">immsolo.or.id/{statusResult.slug}</div>
                             </div>
+                            {statusResult.is_active && (
+                              <div className="p-4 border border-slate-200 rounded-sm bg-white flex flex-col sm:flex-row items-center gap-4">
+                                <QRCodeSVG value={`https://immsolo.or.id/${statusResult.slug}`} size={120} level="M" />
+                                <div className="text-sm text-slate-600">
+                                  <p className="font-bold text-slate-800 mb-1">QR Code tautan</p>
+                                  <p>Pindai untuk membuka tautan, atau bagikan gambar ini ke pamflet/poster kegiatan.</p>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -501,9 +618,9 @@ export default function PengajuanShortlink() {
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-sm bg-red-100 text-[#c20000] shrink-0">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
-                <h3 className="font-bold text-slate-800 text-xl" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+                <h2 className="font-bold text-slate-800 text-xl" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
                   Mekanisme Layanan
-                </h3>
+                </h2>
               </div>
               
               <ul className="space-y-4">
