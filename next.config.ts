@@ -51,11 +51,16 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['recharts', 'lucide-react', 'aos'],
   },
   async headers() {
+    const noIndex = { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive, nosnippet' };
     return [
       {
         source: '/sw.js',
         headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
       },
+      // Proxy ke backend (rewrites /api, /storage, /sanctum) tidak boleh ter-index.
+      { source: '/api/:path*', headers: [noIndex] },
+      { source: '/storage/:path*', headers: [noIndex] },
+      { source: '/sanctum/:path*', headers: [noIndex] },
       {
         source: '/:path*',
         headers: [
