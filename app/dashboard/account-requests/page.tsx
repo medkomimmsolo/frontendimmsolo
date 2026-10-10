@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { Check, X, Loader2, UserPlus, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 type StatusFilter = 'pending' | 'approved' | 'rejected';
 
@@ -121,12 +122,12 @@ export default function AccountRequestsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
-        <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-          Pengajuan Akun
-        </h1>
-        <p className="text-[#0f172a]/70 text-sm mt-1">Tinjau dan setujui permohonan akun pengelola website.</p>
-      </div>
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Pengajuan Akun"
+        description="Tinjau, verifikasi, dan setujui permohonan akun pengelola dari kader atau komisariat"
+        badge="Akses"
+      />
 
       <div className="flex gap-2">
         {tabs.map((t) => (
@@ -140,7 +141,7 @@ export default function AccountRequestsPage() {
         ))}
       </div>
 
-      <Card className="border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -204,12 +205,12 @@ export default function AccountRequestsPage() {
         <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
           <p className="text-xs text-slate-500 font-medium">Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} pengajuan</p>
           <div className="flex items-center gap-2">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
-            <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors">Prev</button>
+            <span className="text-xs text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
+            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors">Next</button>
           </div>
         </div>
-      </Card>
+      </div>
 
       {approveId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4" onClick={() => setApproveId(null)}>

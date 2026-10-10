@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { useDebounce } from 'use-debounce';
 import { PaginationControls } from '@/components/ui/PaginationControls';
 import { TransferOwnershipModal } from '@/components/ui/TransferOwnershipModal';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 export default function DocumentsManagement() {
   const { user } = useAuth();
@@ -140,20 +141,19 @@ export default function DocumentsManagement() {
 
   return (
     <div className="space-y-6 w-full">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
-        <div>
-          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-            Dokumen
-          </h1>
-          <p className="text-[#0f172a]/70 text-sm mt-1">Kelola dokumen, materi, dan berkas unduhan publik</p>
-        </div>
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Dokumen & Materi"
+        description="Kelola dokumen, materi perkaderan, dan berkas unduhan publik PC IMM Kota Surakarta"
+        badge="Dokumen"
+      >
         <Link href="/dashboard/documents/create">
-          <Button className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm text-sm font-semibold shadow-sm">
-            <Plus className="w-4 h-4 mr-2" />
+          <Button className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
             Tambah Dokumen
           </Button>
         </Link>
-      </div>
+      </PageHeader>
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <div className="flex items-center gap-2">

@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Loader2, Search, Inbox, Trash2, MailOpen, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 export default function MessagesPage() {
   const { confirm } = useConfirm();
@@ -65,12 +66,12 @@ export default function MessagesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
-        <h1 className="text-2xl font-bold text-[#0f172a] flex items-center gap-2" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-          <Inbox className="w-6 h-6 text-[#c20000]" /> Kotak Masuk
-        </h1>
-        <p className="text-[#0f172a]/70 text-sm mt-1">Pesan dari formulir kontak website.</p>
-      </div>
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Kotak Masuk"
+        description="Pesan dan aspirasi yang dikirimkan pengunjung melalui formulir kontak website"
+        badge="Komunikasi"
+      />
 
       <div className="flex gap-2">
         <button onClick={() => { setUnreadOnly(false); setCurrentPage(1); }}
