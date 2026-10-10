@@ -58,5 +58,15 @@ export const uploadInlineImage = async (file: File): Promise<string> => {
   });
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
   const url: string = res.data.data.url;
-  return url.startsWith('http') ? url : `${backendUrl}${url}`;
+  return resolveMediaUrl(url);
+};
+
+export const resolveMediaUrl = (url?: string | null): string => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:')) {
+    return url;
+  }
+  const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || '').replace(/\/$/, '');
+  const cleanPath = url.startsWith('/') ? url : `/${url}`;
+  return `${backendUrl}${cleanPath}`;
 };

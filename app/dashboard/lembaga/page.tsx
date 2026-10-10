@@ -22,6 +22,7 @@ import {
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
+import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 
 interface LembagaItem {
   id: number;
@@ -63,8 +64,7 @@ export default function LembagaManagementPage() {
     sejarah: '',
     visi_misi: '',
   });
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoValue, setLogoValue] = useState<File | string | null>(null);
 
   const fetchLembaga = useCallback(async () => {
     setIsLoading(true);
@@ -92,8 +92,7 @@ export default function LembagaManagementPage() {
       sejarah: '',
       visi_misi: '',
     });
-    setLogoFile(null);
-    setLogoPreview(null);
+    setLogoValue(null);
     setIsModalOpen(true);
   };
 
@@ -106,8 +105,7 @@ export default function LembagaManagementPage() {
       sejarah: item.sejarah || '',
       visi_misi: item.visi_misi || '',
     });
-    setLogoFile(null);
-    setLogoPreview(item.logo || null);
+    setLogoValue(item.logo || null);
     setIsModalOpen(true);
   };
 
@@ -126,7 +124,7 @@ export default function LembagaManagementPage() {
       if (formData.website_url.trim()) payload.append('website_url', formData.website_url.trim());
       if (formData.sejarah.trim()) payload.append('sejarah', formData.sejarah.trim());
       if (formData.visi_misi.trim()) payload.append('visi_misi', formData.visi_misi.trim());
-      if (logoFile) payload.append('logo', logoFile);
+      if (logoValue) payload.append('logo', logoValue);
 
       if (editingItem) {
         payload.append('_method', 'PUT');
@@ -432,34 +430,14 @@ export default function LembagaManagementPage() {
 
               {/* Logo Lembaga */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Logo Lembaga <span className="text-slate-400 font-normal">(WebP, PNG, JPG maks 2MB)</span>
-                </label>
-                <div className="flex items-center gap-3">
-                  {logoPreview ? (
-                    <img
-                      src={logoPreview}
-                      alt="Preview Logo"
-                      className="w-14 h-14 object-contain rounded border border-slate-200 bg-white p-1 shrink-0"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded border border-dashed border-slate-300 flex items-center justify-center text-slate-400 shrink-0">
-                      <Upload className="w-5 h-5" />
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setLogoFile(file);
-                        setLogoPreview(URL.createObjectURL(file));
-                      }
-                    }}
-                    className="text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"
-                  />
-                </div>
+                <ImageUploadPicker
+                  label="Logo Lembaga"
+                  value={logoValue}
+                  onChange={(val) => setLogoValue(val)}
+                  aspectRatio="square"
+                  allowedFolder="lembaga"
+                  description="Pilih dari Media Library atau unggah file logo baru dari perangkat."
+                />
               </div>
 
               <div>

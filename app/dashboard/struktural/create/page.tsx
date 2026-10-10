@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { ArrowLeft, Save, Loader2, Image as ImageIcon, Plus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { convertToWebP } from '@/lib/imageUtils';
+import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 import Link from 'next/link';
 
 interface SocialMedia {
@@ -32,20 +33,8 @@ export default function CreateStruktural() {
     kategori: 'BPH',
     urutan: 0,
   });
-  const [foto, setFoto] = useState<File | null>(null);
-  // One object URL per selected file, revoked when it changes or is cleared.
-  const [fotoUrl, setFotoUrl] = useState<string | null>(null);
+  const [foto, setFoto] = useState<File | string | null>(null);
   const [socialMedia, setSocialMedia] = useState<SocialMedia[]>([]);
-
-  useEffect(() => {
-    if (!foto) {
-      setFotoUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(foto);
-    setFotoUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [foto]);
 
   // Sync searchParams into state on client side
   useEffect(() => {
@@ -59,28 +48,6 @@ export default function CreateStruktural() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('File harus berupa gambar');
-      return;
-    }
-
-    try {
-      const webpFile = await convertToWebP(file);
-      if (webpFile.size > 2 * 1024 * 1024) {
-        toast.error('Setelah dikonversi, ukuran gambar masih lebih dari 2MB. Silakan pilih gambar dengan resolusi lebih kecil.');
-        return;
-      }
-      setFoto(webpFile);
-    } catch (error) {
-      console.error('Failed to process image:', error);
-      toast.error('Gagal memproses gambar');
-    }
   };
 
   const handleAddSocialMedia = () => {
@@ -265,36 +232,13 @@ export default function CreateStruktural() {
               <h3 className="text-sm font-semibold text-[#0f172a]">Foto Profil</h3>
             </div>
             <CardContent className="p-5">
-              <div className="space-y-4">
-                <label className="flex flex-col items-center justify-center w-full aspect-square border-2 border-slate-200 border-dashed rounded-sm cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors relative overflow-hidden group">
-                  <div className="flex flex-col items-center justify-center p-6 text-center">
-                    {foto ? (
-                      <>
-                        <div className="absolute inset-0 bg-[#0f172a]/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <span className="text-white text-sm font-medium">Ganti Foto</span>
-                        </div>
-                        {fotoUrl && <img 
-                          src={fotoUrl} 
-                          alt="Preview" 
-                          className="absolute inset-0 w-full h-full object-cover"
-                        />}
-                      </>
-                    ) : (
-                      <>
-                        <ImageIcon className="w-10 h-10 mb-3 text-slate-400 group-hover:text-[#c20000] transition-colors" />
-                        <p className="mb-1 text-sm text-slate-600 font-medium">Upload foto</p>
-                        <p className="text-xs text-slate-400">PNG, JPG, WEBP (Max. 2MB)</p>
-                      </>
-                    )}
-                  </div>
-                  <input 
-                    type="file" 
-                    className="hidden" 
-                    accept="image/png, image/jpeg, image/jpg, image/webp"
-                    onChange={handleFileChange}
-                  />
-                </label>
-              </div>
+              <ImageUploadPicker
+                value={foto}
+                onChange={(val) => setFoto(val)}
+                aspectRatio="square"
+                allowedFolder="struktural"
+                description="Pilih dari Media Library atau unggah dari perangkat. Rasio 1:1 (persegi) disarankan."
+              />
             </CardContent>
           </Card>
         </div>

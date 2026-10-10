@@ -16,6 +16,7 @@ import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
+import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 
 const THEME_PRESETS = [
   { name: 'Midnight', bg: '#0b1120', accent: '#c20000', text: '#ffffff', btnBg: '', btnText: '#ffffff' },
@@ -58,7 +59,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
     btn_text_color: '',
     is_active: true,
   });
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarValue, setAvatarValue] = useState<File | string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isPageSaving, setIsPageSaving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -87,6 +88,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
         is_active: data.is_active ?? true,
       });
       if (data.avatar) {
+        setAvatarValue(data.avatar);
         setAvatarPreview(data.avatar);
       }
     } catch {
@@ -115,7 +117,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
       if (pageFormData.text_color) data.append('text_color', pageFormData.text_color);
       if (pageFormData.btn_bg_color) data.append('btn_bg_color', pageFormData.btn_bg_color);
       if (pageFormData.btn_text_color) data.append('btn_text_color', pageFormData.btn_text_color);
-      if (avatarFile) data.append('avatar', avatarFile);
+      if (avatarValue) data.append('avatar', avatarValue);
 
       data.append('_method', 'PUT');
       const res = await api.post(`/link-pages/${pageId}`, data);
@@ -125,15 +127,6 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
       toast.error(err.response?.data?.message || 'Gagal menyimpan tampilan');
     } finally {
       setIsPageSaving(false);
-    }
-  };
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      const url = URL.createObjectURL(file);
-      setAvatarPreview(url);
     }
   };
 
@@ -653,12 +646,16 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Foto Profil / Avatar</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-sm file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
+                  <ImageUploadPicker
+                    label="Foto Profil / Avatar"
+                    value={avatarValue}
+                    onChange={(val, preview) => {
+                      setAvatarValue(val);
+                      setAvatarPreview(preview);
+                    }}
+                    aspectRatio="square"
+                    allowedFolder="links"
+                    description="Pilih dari Media Library atau unggah file baru dari perangkat."
                   />
                 </div>
               </div>

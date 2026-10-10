@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { Category, Blog } from '@/types';
 import { convertToWebP, uploadInlineImage } from '@/lib/imageUtils';
+import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -45,38 +46,7 @@ export default function EditBlog({ params }: { params: Promise<{ id: string }> }
     meta_title: '',
     meta_description: '',
   });
-  const [featuredImage, setFeaturedImage] = useState<File | null>(null);
-  const [currentImage, setCurrentImage] = useState<string | null>(null);
-  // One object URL per selected file, revoked when it changes or is cleared.
-  const [featuredImageUrl, setFeaturedImageUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!featuredImage) {
-      setFeaturedImageUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(featuredImage);
-    setFeaturedImageUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [featuredImage]);
-
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      try {
-        const webpFile = await convertToWebP(file);
-
-      if (webpFile.size > 2 * 1024 * 1024) {
-        toast.error('Setelah dikonversi, ukuran gambar masih lebih dari 2MB. Silakan pilih gambar dengan resolusi lebih kecil.');
-        return;
-      }
-        setFeaturedImage(webpFile);
-      } catch (error) {
-        console.error("Gagal konversi ke WebP", error);
-        toast.error("Gagal memproses gambar");
-      }
-    }
-  };
+  const [featuredImage, setFeaturedImage] = useState<File | string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,7 +88,7 @@ export default function EditBlog({ params }: { params: Promise<{ id: string }> }
           meta_description: blog.meta_description || '',
         });
         if (blog.featured_image) {
-          setCurrentImage(blog.featured_image);
+          setFeaturedImage(blog.featured_image);
         }
       } catch (err: any) {
         console.error(err);
@@ -674,44 +644,16 @@ export default function EditBlog({ params }: { params: Promise<{ id: string }> }
           {/* Featured Image Box */}
           <Card className="border-slate-200 shadow-sm rounded-sm">
             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
-              <CardTitle className="text-sm font-semibold text-[#0f172a]">Featured image</CardTitle>
+              <CardTitle className="text-sm font-semibold text-[#0f172a]">Gambar Utama (Featured Image)</CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              {(featuredImage || currentImage) ? (
-                <div className="space-y-2">
-                  <div className="relative w-full aspect-video rounded-sm overflow-hidden border border-slate-200 bg-slate-50 group">
-                    <img 
-                      src={featuredImageUrl ?? (currentImage?.startsWith('http') ? currentImage : `/storage/${currentImage?.replace(/^\/?storage\//, '')}`)} 
-                      alt="Preview" 
-                      className="w-full h-full object-cover" 
-                    />
-                    <div className="absolute inset-0 bg-[#0f172a]/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button 
-                        type="button" 
-                        onClick={() => {
-                          setFeaturedImage(null);
-                          setCurrentImage(null);
-                        }}
-                        className="text-white hover:text-red-400 bg-black/50 hover:bg-black/80 px-3 py-1.5 rounded-sm text-sm font-medium transition-colors"
-                      >
-                        Remove image
-                      </button>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-500">Click the image to remove it. (Max 2MB)</p>
-                </div>
-              ) : (
-                <label className="w-full aspect-video rounded-sm bg-slate-50 border border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors">
-                  <ImageIcon className="w-8 h-8 text-slate-400 mb-2" />
-                  <span className="text-sm text-[#c20000] hover:underline font-medium">Set featured image</span>
-                  <input 
-                    type="file"
-                    accept="image/png, image/jpeg, image/jpg, image/webp"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                </label>
-              )}
+              <ImageUploadPicker
+                value={featuredImage}
+                onChange={(val) => setFeaturedImage(val)}
+                aspectRatio="video"
+                allowedFolder="blogs"
+                description="Pilih foto dari Media Library atau unggah file baru dari perangkat (rasio 16:9 disarankan)."
+              />
             </CardContent>
           </Card>
 

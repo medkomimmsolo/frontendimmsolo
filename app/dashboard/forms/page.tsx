@@ -11,6 +11,7 @@ import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
 import { useDebounce } from 'use-debounce';
+import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 
 export default function FormsManagement() {
   const { user } = useAuth();
@@ -39,7 +40,7 @@ export default function FormsManagement() {
     limit_one_response: false,
     is_active: true,
   });
-  const [headerFile, setHeaderFile] = useState<File | null>(null);
+  const [headerImageValue, setHeaderImageValue] = useState<File | string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchForms = useCallback(async (page = currentPage, search = debouncedSearch) => {
@@ -75,7 +76,7 @@ export default function FormsManagement() {
 
   const openModal = (item: any = null) => {
     setEditing(item);
-    setHeaderFile(null);
+    setHeaderImageValue(item?.header_image || null);
     setFormData(item ? {
       title: item.title,
       slug: item.slug,
@@ -101,6 +102,7 @@ export default function FormsManagement() {
       limit_one_response: false,
       is_active: true,
     });
+    setHeaderImageValue(item?.header_image || null);
     setIsModalOpen(true);
   };
 
@@ -120,9 +122,11 @@ export default function FormsManagement() {
       fd.append('limit_one_response', formData.limit_one_response ? '1' : '0');
       fd.append('is_active', formData.is_active ? '1' : '0');
 
-      if (headerFile) {
-        fd.append('header_image', headerFile);
-      } else if (formData.header_image === '' && editing?.header_image) {
+      if (headerImageValue instanceof File) {
+        fd.append('header_image', headerImageValue);
+      } else if (typeof headerImageValue === 'string') {
+        fd.append('header_image', headerImageValue);
+      } else if (!headerImageValue && editing?.header_image) {
         fd.append('header_image', '');
       }
 
@@ -312,30 +316,14 @@ export default function FormsManagement() {
                 <input type="number" min={1} value={formData.max_responses} onChange={(e) => setFormData({ ...formData, max_responses: e.target.value })} placeholder="cth: 100" className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Gambar Header (Banner Google Form) <span className="text-slate-400 font-normal">(opsional)</span>
-                </label>
-                <div className="space-y-2">
-                  {formData.header_image && !headerFile && (
-                    <div className="relative w-full h-24 rounded border border-slate-200 overflow-hidden bg-slate-50">
-                      <img src={formData.header_image} alt="Header Preview" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, header_image: '' })}
-                        className="absolute top-1.5 right-1.5 bg-red-600 text-white rounded px-2 py-0.5 text-xs font-semibold shadow hover:bg-red-700"
-                      >
-                        Hapus Banner
-                      </button>
-                    </div>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setHeaderFile(e.target.files?.[0] || null)}
-                    className="w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-sm file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"
-                  />
-                  <p className="text-[11px] text-slate-400">Rekomendasi rasio banner memanjang (misal 1200x300 atau 800x200), maks 3MB.</p>
-                </div>
+                <ImageUploadPicker
+                  label="Gambar Header (Banner Formulir)"
+                  value={headerImageValue}
+                  onChange={(val) => setHeaderImageValue(val)}
+                  aspectRatio="banner"
+                  allowedFolder="forms"
+                  description="Pilih dari Media Library atau unggah dari perangkat. Rekomendasi rasio banner memanjang 4:1 atau 1200x300px."
+                />
               </div>
 
               {/* Pengaturan Email & Anti-Spam */}

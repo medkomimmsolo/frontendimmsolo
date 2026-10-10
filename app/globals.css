@@ -266,6 +266,29 @@ textarea:focus-visible,
   background: #a30000;
 }
 
+.custom-scrollbar-dark {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 #111827;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-track {
+  background: #111827;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
 .glass {
   background: #ffffff;
   border: 1px solid color-mix(in srgb, #0f172a 15%, transparent);
