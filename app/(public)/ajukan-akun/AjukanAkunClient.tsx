@@ -1,18 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
-import { Loader2, CheckCircle2, UserPlus, ArrowLeft } from 'lucide-react';
+import { Loader2, CheckCircle2, UserPlus, ArrowLeft, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getApiBase } from '@/lib/settings';
+import { getApiBase, normalizeSettings } from '@/lib/settings';
 
 export default function AjukanAkunClient() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', passwordConfirm: '', requested_role: 'komisariat', reason: '' });
+  const [submittedData, setSubmittedData] = useState({ name: '', email: '', requested_role: 'komisariat' });
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [adminWa, setAdminWa] = useState('6282226252923');
+
+  useEffect(() => {
+    axios.get(`${getApiBase()}/settings`)
+      .then((res) => {
+        const settings = normalizeSettings(res.data?.data);
+        const wa = settings.shortlink_admin_wa || settings.contact_phone;
+        if (wa) {
+          const cleaned = wa.replace(/[^0-9]/g, '');
+          setAdminWa(cleaned.startsWith('0') ? `62${cleaned.slice(1)}` : cleaned);
+        }
+      })
+      .catch(() => {});
+  }, []);
   
   // Real-time validation state
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -71,6 +86,11 @@ export default function AjukanAkunClient() {
         requested_role: formData.requested_role,
         reason: formData.reason || undefined,
       });
+      setSubmittedData({
+        name: formData.name,
+        email: formData.email,
+        requested_role: formData.requested_role,
+      });
       setIsSuccess(true);
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Gagal mengirim pengajuan';
@@ -84,6 +104,14 @@ export default function AjukanAkunClient() {
   const inputClass = "w-full border border-slate-200 rounded-sm px-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]";
 
   if (isSuccess) {
+    const roleLabels: Record<string, string> = {
+      komisariat: 'Komisariat (Kontributor Lokal)',
+      bidang: 'Bidang (Cabang)',
+      admin: 'Admin',
+    };
+    const roleText = roleLabels[submittedData.requested_role] || submittedData.requested_role;
+    const waText = `Halo Admin PC IMM Kota Surakarta,%0A%0ASaya telah mengajukan pendaftaran akun di website immsolo.or.id dengan rincian berikut:%0A%0A- *Nama Lengkap*: ${encodeURIComponent(submittedData.name)}%0A- *Email*: ${encodeURIComponent(submittedData.email)}%0A- *Role*: ${encodeURIComponent(roleText)}%0A%0AMohon bantuannya untuk verifikasi dan persetujuan akun saya. Terima kasih!`;
+
     return (
       <main className="min-h-screen bg-slate-50 pt-32 pb-20 px-4 flex items-start justify-center">
         <Card className="max-w-md w-full border-slate-200 shadow-lg">
@@ -93,11 +121,27 @@ export default function AjukanAkunClient() {
               Pengajuan Terkirim
             </h1>
             <p className="text-sm text-slate-600 leading-relaxed mb-6">
-              Pengajuan akun Anda sudah diterima dan menunggu persetujuan Super Admin. Silakan cek email atau coba login kembali nanti.
+              Pengajuan akun Anda sudah diterima dan menunggu persetujuan Super Admin. Anda dapat mengonfirmasi langsung ke Admin agar akun lebih cepat diverifikasi.
             </p>
-            <Link href="/login">
-              <Button className="bg-[#c20000] hover:bg-[#a30000] text-white">Kembali ke Login</Button>
-            </Link>
+            <div className="space-y-3">
+              <Button
+                asChild
+                className="w-full h-11 bg-[#25D366] hover:bg-[#1da851] text-white font-bold flex items-center justify-center gap-2 shadow-sm"
+              >
+                <a
+                  href={`https://wa.me/${adminWa}?text=${waText}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MessageCircle className="w-4 h-4" /> Konfirmasi via WhatsApp
+                </a>
+              </Button>
+              <Link href="/login" className="block">
+                <Button variant="outline" className="w-full h-11 border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold">
+                  Kembali ke Login
+                </Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </main>
