@@ -43,6 +43,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: '**.immsolo.or.id',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.vercel.app',
+      },
+      {
+        protocol: 'https',
         hostname: 'placehold.co',
       }
     ],
