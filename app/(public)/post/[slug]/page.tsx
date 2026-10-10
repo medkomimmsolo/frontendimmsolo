@@ -201,9 +201,11 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
               <header className="mb-8">
                 {/* Category Badge */}
                 <div className="flex items-center gap-3 mb-5">
-                  <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] px-3.5 py-1 text-[11px] font-bold tracking-[0.12em] uppercase rounded-sm border-none shadow-none">
-                    {post.category?.name || 'Berita'}
-                  </Badge>
+                  <Link href={post.category?.slug ? `/post?category=${post.category.slug}` : '/post'}>
+                    <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] px-3.5 py-1 text-[11px] font-bold tracking-[0.12em] uppercase rounded-sm border-none shadow-none cursor-pointer transition-colors">
+                      {post.category?.name || 'Berita'}
+                    </Badge>
+                  </Link>
                   {post.views_count > 0 && (
                     <span className="flex items-center gap-1.5 text-[11px] text-[#0f172a]/40 font-medium">
                       <Eye className="w-3.5 h-3.5" />
@@ -347,21 +349,32 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs font-bold text-[#0f172a]/40 uppercase tracking-wider mr-1">Topik:</span>
-                    <Badge variant="outline" className="bg-white text-[#0f172a]/70 hover:bg-[#0f172a] hover:text-white transition-colors cursor-pointer rounded-sm px-3 py-1.5 text-xs font-semibold border-[#0f172a]/10">
-                      {post.category?.name || 'Umum'}
-                    </Badge>
-                    <Badge variant="outline" className="bg-white text-[#0f172a]/70 hover:bg-[#0f172a] hover:text-white transition-colors cursor-pointer rounded-sm px-3 py-1.5 text-xs font-semibold border-[#0f172a]/10">
-                      PC IMM
-                    </Badge>
-                    {post.keywords && post.keywords.split(',').slice(0, 3).map((keyword: string) => (
-                      <Badge 
-                        key={keyword.trim()} 
-                        variant="outline" 
-                        className="bg-white text-[#0f172a]/70 hover:bg-[#0f172a] hover:text-white transition-colors cursor-pointer rounded-sm px-3 py-1.5 text-xs font-semibold border-[#0f172a]/10"
-                      >
-                        {keyword.trim()}
+                    {post.category && (
+                      <Link href={`/post?category=${post.category.slug}`}>
+                        <Badge variant="outline" className="bg-white text-[#0f172a]/70 hover:bg-[#c20000] hover:text-white hover:border-[#c20000] transition-colors cursor-pointer rounded-sm px-3 py-1.5 text-xs font-semibold border-[#0f172a]/10">
+                          {post.category.name}
+                        </Badge>
+                      </Link>
+                    )}
+                    <Link href="/post">
+                      <Badge variant="outline" className="bg-white text-[#0f172a]/70 hover:bg-[#0f172a] hover:text-white transition-colors cursor-pointer rounded-sm px-3 py-1.5 text-xs font-semibold border-[#0f172a]/10">
+                        PC IMM
                       </Badge>
-                    ))}
+                    </Link>
+                    {post.keywords && post.keywords.split(',').slice(0, 4).map((keyword: string) => {
+                      const trimmed = keyword.trim();
+                      if (!trimmed) return null;
+                      return (
+                        <Link key={trimmed} href={`/cari?q=${encodeURIComponent(trimmed)}`}>
+                          <Badge 
+                            variant="outline" 
+                            className="bg-white text-[#0f172a]/70 hover:bg-[#c20000] hover:text-white hover:border-[#c20000] transition-colors cursor-pointer rounded-sm px-3 py-1.5 text-xs font-semibold border-[#0f172a]/10"
+                          >
+                            #{trimmed}
+                          </Badge>
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
 

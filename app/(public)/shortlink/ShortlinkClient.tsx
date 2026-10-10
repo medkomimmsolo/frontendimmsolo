@@ -516,7 +516,7 @@ export default function PengajuanShortlink() {
                       />
                     </div>
 
-                    <div className="pt-4">
+                    <div className="pt-4 space-y-3">
                       <Button 
                         type="submit" 
                         disabled={isActivating}
@@ -529,6 +529,20 @@ export default function PengajuanShortlink() {
                         )}
                         Aktifkan Tautan Sekarang
                       </Button>
+
+                      <div className="text-center pt-2">
+                        <p className="text-xs text-slate-500 mb-2">Belum menerima Token Aktivasi dari admin?</p>
+                        <a
+                          href={`https://wa.me/${adminWa}?text=${encodeURIComponent(
+                            `Halo Admin PC IMM Kota Surakarta, saya ingin meminta Token Aktivasi untuk tautan pendek ${activationData.slug ? `immsolo.or.id/${activationData.slug}` : 'yang baru saja saya ajukan'}. Mohon bantuannya, terima kasih!`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#25D366] hover:text-[#1da851] transition-colors"
+                        >
+                          Hubungi Admin via WhatsApp →
+                        </a>
+                      </div>
                     </div>
                   </form>
                 )}
@@ -588,13 +602,29 @@ export default function PengajuanShortlink() {
                               <span className="text-sm font-bold text-slate-500 block mb-1">Tautan Anda:</span>
                               <div className="font-mono text-[#c20000] font-bold text-lg">immsolo.or.id/{statusResult.slug}</div>
                             </div>
-                            {statusResult.is_active && (
+                            {statusResult.is_active ? (
                               <div className="p-4 border border-slate-200 rounded-sm bg-white flex flex-col sm:flex-row items-center gap-4">
                                 <QRCodeSVG value={`https://immsolo.or.id/${statusResult.slug}`} size={120} level="M" />
                                 <div className="text-sm text-slate-600">
                                   <p className="font-bold text-slate-800 mb-1">QR Code tautan</p>
                                   <p>Pindai untuk membuka tautan, atau bagikan gambar ini ke pamflet/poster kegiatan.</p>
                                 </div>
+                              </div>
+                            ) : (
+                              <div className="p-4 bg-amber-50 border border-amber-200 rounded-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+                                <p className="text-xs text-amber-800">
+                                  Tautan ini belum aktif. Minta token kepada admin untuk mengaktifkannya.
+                                </p>
+                                <Button
+                                  size="sm"
+                                  className="bg-[#25D366] hover:bg-[#1da851] text-white shrink-0 text-xs font-bold"
+                                  onClick={() => {
+                                    const text = `Halo Admin PC IMM Kota Surakarta,%0A%0ASaya ingin meminta Token Aktivasi untuk tautan pendek immsolo.or.id/${statusResult.slug}. Terima kasih!`;
+                                    window.open(`https://wa.me/${adminWa}?text=${text}`, '_blank');
+                                  }}
+                                >
+                                  Minta Token via WhatsApp
+                                </Button>
                               </div>
                             )}
                           </div>
@@ -641,6 +671,17 @@ export default function PengajuanShortlink() {
                   </p>
                 </li>
               </ul>
+
+              <div className="mt-8 pt-6 border-t border-slate-100">
+                <a
+                  href={`https://wa.me/${adminWa}?text=${encodeURIComponent('Halo Admin PC IMM Kota Surakarta, saya ingin bertanya mengenai layanan shortlink immsolo.or.id')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-sm bg-slate-100 hover:bg-[#25D366] hover:text-white text-slate-700 text-xs font-bold transition-all"
+                >
+                  Bantuan Admin WhatsApp
+                </a>
+              </div>
             </div>
           </div>
 
