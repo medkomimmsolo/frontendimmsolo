@@ -26,7 +26,9 @@ export default function LinksManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [transferItem, setTransferItem] = useState<any>(null);
+  const [usersList, setUsersList] = useState<any[]>([]);
   const [formData, setFormData] = useState({
+    user_id: '',
     title: '',
     slug: '',
     description: '',
@@ -37,6 +39,15 @@ export default function LinksManagement() {
     btn_bg_color: '',
     btn_text_color: '',
   });
+
+  useEffect(() => {
+    if (isSuperAdmin) {
+      api.get('/users', { params: { per_page: 100 } }).then((res) => {
+        const list = res.data?.data?.data || res.data?.data || [];
+        setUsersList(Array.isArray(list) ? list : []);
+      }).catch(() => {});
+    }
+  }, [isSuperAdmin]);
 
   const THEME_PRESETS = [
     { name: 'Midnight', bg: '#0b1120', accent: '#c20000', text: '#ffffff', btnBg: '', btnText: '#ffffff' },
@@ -78,6 +89,7 @@ export default function LinksManagement() {
     setFormData(
       item
         ? {
+            user_id: item.user_id ? String(item.user_id) : '',
             title: item.title,
             slug: item.slug,
             description: item.description || '',
@@ -89,6 +101,7 @@ export default function LinksManagement() {
             btn_text_color: item.btn_text_color || '',
           }
         : {
+            user_id: '',
             title: '',
             slug: '',
             description: '',
@@ -110,6 +123,7 @@ export default function LinksManagement() {
     try {
       const data = new FormData();
       data.append('title', formData.title);
+      if (formData.user_id) data.append('user_id', formData.user_id);
       if (formData.slug) data.append('slug', formData.slug);
       if (formData.description) data.append('description', formData.description);
       data.append('is_active', formData.is_active ? '1' : '0');
@@ -257,6 +271,28 @@ export default function LinksManagement() {
                 <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Link Resmi PC IMM" className="w-full border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
               </div>
+              {isSuperAdmin && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Pemilik / Pengelola Halaman
+                  </label>
+                  <select
+                    value={formData.user_id}
+                    onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
+                    className="w-full border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] bg-white"
+                  >
+                    <option value="">Saya Sendiri ({user?.name || 'Super Admin'})</option>
+                    {usersList.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name} ({u.roles?.map((r: any) => r.name).join(', ') || u.role || 'User'})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Pilih akun user/pengurus yang akan mengelola Linktree ini.
+                  </p>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Slug Kustom <span className="text-slate-400 font-normal">(kosongkan = otomatis dari judul)</span></label>
                 <div className="flex items-center border border-slate-200 rounded-sm overflow-hidden focus-within:border-[#c20000] focus-within:ring-1 focus-within:ring-[#c20000]">

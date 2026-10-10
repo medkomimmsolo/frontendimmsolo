@@ -26,7 +26,20 @@ export default function FormsManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [transferItem, setTransferItem] = useState<any>(null);
-  const [formData, setFormData] = useState({ title: '', slug: '', description: '', success_message: '', starts_at: '', ends_at: '', max_responses: '', is_active: true });
+  const [formData, setFormData] = useState({
+    title: '',
+    slug: '',
+    description: '',
+    header_image: '',
+    success_message: '',
+    starts_at: '',
+    ends_at: '',
+    max_responses: '',
+    require_email: false,
+    limit_one_response: false,
+    is_active: true,
+  });
+  const [headerFile, setHeaderFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchForms = useCallback(async (page = currentPage, search = debouncedSearch) => {
@@ -62,11 +75,32 @@ export default function FormsManagement() {
 
   const openModal = (item: any = null) => {
     setEditing(item);
+    setHeaderFile(null);
     setFormData(item ? {
-      title: item.title, slug: item.slug, description: item.description || '', success_message: item.success_message || '',
-      starts_at: toLocalInput(item.starts_at), ends_at: toLocalInput(item.ends_at),
-      max_responses: item.max_responses ? String(item.max_responses) : '', is_active: item.is_active,
-    } : { title: '', slug: '', description: '', success_message: '', starts_at: '', ends_at: '', max_responses: '', is_active: true });
+      title: item.title,
+      slug: item.slug,
+      description: item.description || '',
+      header_image: item.header_image || '',
+      success_message: item.success_message || '',
+      starts_at: toLocalInput(item.starts_at),
+      ends_at: toLocalInput(item.ends_at),
+      max_responses: item.max_responses ? String(item.max_responses) : '',
+      require_email: !!item.require_email,
+      limit_one_response: !!item.limit_one_response,
+      is_active: item.is_active,
+    } : {
+      title: '',
+      slug: '',
+      description: '',
+      header_image: '',
+      success_message: '',
+      starts_at: '',
+      ends_at: '',
+      max_responses: '',
+      require_email: false,
+      limit_one_response: false,
+      is_active: true,
+    });
     setIsModalOpen(true);
   };
 
@@ -74,21 +108,30 @@ export default function FormsManagement() {
     e.preventDefault();
     setIsSaving(true);
     try {
-      const payload: any = {
-        title: formData.title,
-        slug: formData.slug || undefined,
-        description: formData.description || undefined,
-        success_message: formData.success_message || undefined,
-        starts_at: formData.starts_at || undefined,
-        ends_at: formData.ends_at || undefined,
-        max_responses: formData.max_responses ? parseInt(formData.max_responses) : undefined,
-        is_active: formData.is_active,
-      };
+      const fd = new FormData();
+      fd.append('title', formData.title);
+      if (formData.slug) fd.append('slug', formData.slug);
+      if (formData.description) fd.append('description', formData.description);
+      if (formData.success_message) fd.append('success_message', formData.success_message);
+      if (formData.starts_at) fd.append('starts_at', formData.starts_at);
+      if (formData.ends_at) fd.append('ends_at', formData.ends_at);
+      if (formData.max_responses) fd.append('max_responses', formData.max_responses);
+      fd.append('require_email', formData.require_email ? '1' : '0');
+      fd.append('limit_one_response', formData.limit_one_response ? '1' : '0');
+      fd.append('is_active', formData.is_active ? '1' : '0');
+
+      if (headerFile) {
+        fd.append('header_image', headerFile);
+      } else if (formData.header_image === '' && editing?.header_image) {
+        fd.append('header_image', '');
+      }
+
       if (editing) {
-        await api.put(`/form-admin/${editing.id}`, payload);
+        fd.append('_method', 'PUT');
+        await api.post(`/form-admin/${editing.id}`, fd);
         toast.success('Formulir diperbarui');
       } else {
-        await api.post('/form-admin', payload);
+        await api.post('/form-admin', fd);
         toast.success('Formulir dibuat');
       }
       setIsModalOpen(false);
@@ -253,6 +296,64 @@ export default function FormsManagement() {
                 <label className="block text-sm font-medium text-slate-700 mb-1">Kuota Pendaftar <span className="text-slate-400 font-normal">(kosongkan = tanpa batas)</span></label>
                 <input type="number" min={1} value={formData.max_responses} onChange={(e) => setFormData({ ...formData, max_responses: e.target.value })} placeholder="cth: 100" className={inputClass} />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Gambar Header (Banner Google Form) <span className="text-slate-400 font-normal">(opsional)</span>
+                </label>
+                <div className="space-y-2">
+                  {formData.header_image && !headerFile && (
+                    <div className="relative w-full h-24 rounded border border-slate-200 overflow-hidden bg-slate-50">
+                      <img src={formData.header_image} alt="Header Preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, header_image: '' })}
+                        className="absolute top-1.5 right-1.5 bg-red-600 text-white rounded px-2 py-0.5 text-xs font-semibold shadow hover:bg-red-700"
+                      >
+                        Hapus Banner
+                      </button>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setHeaderFile(e.target.files?.[0] || null)}
+                    className="w-full text-sm text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-sm file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"
+                  />
+                  <p className="text-[11px] text-slate-400">Rekomendasi rasio banner memanjang (misal 1200x300 atau 800x200), maks 3MB.</p>
+                </div>
+              </div>
+
+              {/* Pengaturan Email & Anti-Spam */}
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-sm space-y-3">
+                <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">Verifikasi Email & Anti-Spam</p>
+                
+                <label className="flex items-start gap-2.5 text-xs text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.require_email}
+                    onChange={(e) => setFormData({ ...formData, require_email: e.target.checked })}
+                    className="w-4 h-4 mt-0.5 accent-[#c20000] cursor-pointer"
+                  />
+                  <div>
+                    <span className="font-semibold text-slate-800">Wajibkan Pengisian Email (Anti-Spam)</span>
+                    <p className="text-slate-500 mt-0.5">Memerlukan alamat email aktif pendaftar yang diverifikasi untuk mencegah bot dan spam.</p>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-2.5 text-xs text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.limit_one_response}
+                    onChange={(e) => setFormData({ ...formData, limit_one_response: e.target.checked })}
+                    className="w-4 h-4 mt-0.5 accent-[#c20000] cursor-pointer"
+                  />
+                  <div>
+                    <span className="font-semibold text-slate-800">Batasi 1 Tanggapan per Email</span>
+                    <p className="text-slate-500 mt-0.5">Mencegah pengisian berulang kali dengan alamat email yang sama.</p>
+                  </div>
+                </label>
+              </div>
+
               <label className="flex items-center gap-2 text-sm text-slate-700">
                 <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="w-4 h-4 accent-[#c20000]" />
                 Tampilkan formulir ke publik
