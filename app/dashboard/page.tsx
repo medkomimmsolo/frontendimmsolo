@@ -289,7 +289,7 @@ export default function DashboardOverview() {
               </div>
               <CardContent className="p-4 space-y-3">
                 {shortlinkAnalytics.top_shortlinks.slice(0, 5).map((item, idx) => (
-                  <div key={item.slug} className="flex items-center justify-between text-sm">
+                  <div key={`shortlink-${item.slug}-${idx}`} className="flex items-center justify-between text-sm">
                     <span className="font-mono text-[#c20000] font-semibold">
                       {idx + 1}. immsolo.or.id/{item.slug}
                     </span>
@@ -310,7 +310,7 @@ export default function DashboardOverview() {
               </div>
               <CardContent className="p-4 space-y-3">
                 {linkAnalytics.top_items.slice(0, 5).map((item, idx) => (
-                  <div key={item.title} className="flex items-center justify-between text-sm">
+                  <div key={`link-item-${item.title}-${idx}`} className="flex items-center justify-between text-sm">
                     <span className="truncate max-w-[160px] font-medium text-[#0f172a]">
                       {idx + 1}. {item.title}
                     </span>

@@ -81,29 +81,66 @@ export default function AuditLogsPage() {
         </select>
       </div>
 
-      <Card className="border-[#0f172a]/10 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+      <Card className="border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+        <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-white border-b border-[#0f172a]/5 text-[#0f172a]/70 text-sm font-semibold uppercase tracking-wider">
-                <th className="p-4 pl-6">Waktu</th>
-                <th className="p-4">Pengguna</th>
-                <th className="p-4 text-center">Aksi</th>
-                <th className="p-4">Keterangan</th>
-                <th className="p-4 pr-6">IP</th>
+              <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                <th className="py-3.5 px-4 pl-6">Waktu</th>
+                <th className="py-3.5 px-4">Pengguna</th>
+                <th className="py-3.5 px-4 text-center">Aksi</th>
+                <th className="py-3.5 px-4">Keterangan</th>
+                <th className="py-3.5 px-4 pr-6">IP</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
               {isLoading ? (
-                <tr><td colSpan={5} className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#c20000]" /></td></tr>
+                <tr>
+                  <td colSpan={5} className="py-16 text-center">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#c20000] mb-2" />
+                    <span className="text-sm font-medium text-slate-500">Memuat log aktivitas...</span>
+                  </td>
+                </tr>
               ) : logs.length === 0 ? (
-                <tr><td colSpan={5} className="p-12 text-center text-slate-500">Belum ada aktivitas tercatat</td></tr>
+                <tr>
+                  <td colSpan={5} className="py-16 text-center">
+                    <div className="flex flex-col items-center justify-center text-slate-400">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3 text-slate-300">
+                        <History className="w-6 h-6" />
+                      </div>
+                      <p className="text-sm font-semibold text-slate-700">Belum ada aktivitas tercatat</p>
+                      <p className="text-xs text-slate-400 mt-1">Aktivitas sistem dan pengguna akan muncul di sini</p>
+                    </div>
+                  </td>
+                </tr>
               ) : logs.map((l: any) => (
-                <tr key={l.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="p-4 pl-6 whitespace-nowrap text-slate-600 text-xs">
+                <tr key={l.id} className="hover:bg-slate-50/70 transition-colors">
+                  <td className="p-4 pl-6 whitespace-nowrap text-slate-600 text-xs font-mono">
                     {new Date(l.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </td>
-                  <td className="p-4 font-semibold text-[#0f172a]">{l.user?.name || <span className="text-slate-400 font-normal">sistem</span>}</td>
+                  <td className="p-4">
+                    {l.user?.name || l.user_name ? (
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-red-50 text-[#c20000] font-bold text-xs flex items-center justify-center shrink-0 border border-red-100">
+                          {(l.user?.name || l.user_name).charAt(0).toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-[#0f172a] text-xs leading-tight truncate">
+                            {l.user?.name || l.user_name}
+                          </p>
+                          {l.user?.username && (
+                            <p className="text-[11px] font-mono text-slate-400 truncate mt-0.5">
+                              @{l.user.username}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-500">
+                        Sistem
+                      </span>
+                    )}
+                  </td>
                   <td className="p-4 text-center">
                     <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold border capitalize ${actionBadge(l.action)}`}>{l.action}</span>
                   </td>
@@ -114,12 +151,12 @@ export default function AuditLogsPage() {
             </tbody>
           </table>
         </div>
-        <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
+        <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4 bg-slate-50/40">
           <p className="text-xs text-slate-500 font-medium">Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} log</p>
           <div className="flex items-center gap-2">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
-            <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors">Prev</button>
+            <span className="text-xs text-slate-600 font-bold px-2">{currentPage} / {totalPages}</span>
+            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors">Next</button>
           </div>
         </div>
       </Card>

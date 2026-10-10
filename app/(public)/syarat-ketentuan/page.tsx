@@ -28,7 +28,7 @@ export default async function SyaratKetentuanPage() {
         </Link>
 
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 rounded-sm bg-[#c20000]/5 flex items-center justify-center text-[#c20000]">
+          <div className="w-12 h-12 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-[#c20000]">
             <FileText className="w-6 h-6" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>

@@ -238,30 +238,36 @@ export default function LembagaManagementPage() {
       </div>
 
       {/* Tabel Data Lembaga */}
-      <Card className="border-[#0f172a]/10 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+      <Card className="border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+        <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-white border-b border-[#0f172a]/5 text-[#0f172a]/70 text-xs font-semibold uppercase tracking-wider">
-                <th className="p-4 pl-6">Lembaga / Komisariat</th>
-                <th className="p-4">Tipe</th>
-                <th className="p-4">Tautan Publik</th>
-                <th className="p-4">Website Resmi</th>
-                <th className="p-4 pr-6 text-right">Aksi</th>
+              <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                <th className="py-3.5 px-4 pl-6">Lembaga / Komisariat</th>
+                <th className="py-3.5 px-4">Tipe</th>
+                <th className="py-3.5 px-4">Tautan Publik</th>
+                <th className="py-3.5 px-4">Website Resmi</th>
+                <th className="py-3.5 px-4 pr-6 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="p-12 text-center">
-                    <Loader2 className="w-7 h-7 animate-spin mx-auto text-[#c20000]" />
-                    <p className="text-xs text-slate-400 mt-2">Memuat daftar lembaga...</p>
+                  <td colSpan={5} className="py-16 text-center">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#c20000] mb-2" />
+                    <p className="text-sm font-medium text-slate-500">Memuat daftar lembaga...</p>
                   </td>
                 </tr>
               ) : filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-12 text-center text-slate-400 text-sm">
-                    {searchQuery ? 'Tidak ada lembaga yang cocok dengan kata kunci pencarian.' : 'Belum ada data lembaga.'}
+                  <td colSpan={5} className="py-16 text-center">
+                    <div className="flex flex-col items-center justify-center text-slate-400">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3 text-slate-300">
+                        <GraduationCap className="w-6 h-6" />
+                      </div>
+                      <p className="text-sm font-semibold text-slate-700">Tidak ada lembaga ditemukan</p>
+                      <p className="text-xs text-slate-400 mt-1">{searchQuery ? 'Coba gunakan kata kunci pencarian lain' : 'Belum ada data lembaga atau komisariat terdaftar'}</p>
+                    </div>
                   </td>
                 </tr>
               ) : (

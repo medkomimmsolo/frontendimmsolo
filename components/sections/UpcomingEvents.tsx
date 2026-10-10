@@ -146,7 +146,7 @@ export default function UpcomingEvents() {
                             <div className="flex flex-wrap items-center gap-2 mt-2">
                               <span className="text-xs uppercase tracking-wider text-white/40">Oleh:</span>
                               {event.organizers.split(',').map((org, idx) => (
-                                <span key={idx} className="bg-white/10 text-white/80 px-2 py-0.5 rounded-sm text-xs">
+                                <span key={idx} className="bg-white/10 text-white/80 px-2.5 py-0.5 rounded-full text-xs font-medium">
                                   {org.trim()}
                                 </span>
                               ))}

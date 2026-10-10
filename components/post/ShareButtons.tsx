@@ -81,7 +81,7 @@ export default function ShareButtons({ title, slug, layout = 'vertical', basePat
       <Button
         variant="outline"
         onClick={handleWhatsApp}
-        className="w-full justify-start rounded-sm text-[#0f172a]/70 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 transition-all group/wa"
+        className="w-full justify-start rounded-xl text-[#0f172a]/70 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 transition-all group/wa"
       >
         <MessageSquare className="w-4 h-4 mr-3 group-hover/wa:scale-110 transition-transform" />
         <span className={isVertical ? 'hidden lg:inline font-bold' : 'font-bold'}>WhatsApp</span>
@@ -90,7 +90,7 @@ export default function ShareButtons({ title, slug, layout = 'vertical', basePat
       <Button
         variant="outline"
         onClick={handleFacebook}
-        className="w-full justify-start rounded-sm text-[#0f172a]/70 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-all group/fb"
+        className="w-full justify-start rounded-xl text-[#0f172a]/70 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-all group/fb"
       >
         <FacebookIcon className="w-4 h-4 mr-3 group-hover/fb:scale-110 transition-transform" />
         <span className={isVertical ? 'hidden lg:inline font-bold' : 'font-bold'}>Facebook</span>
@@ -99,7 +99,7 @@ export default function ShareButtons({ title, slug, layout = 'vertical', basePat
       <Button
         variant="outline"
         onClick={handleTwitter}
-        className="w-full justify-start rounded-sm text-[#0f172a]/70 hover:text-[#0f172a] hover:bg-slate-50 hover:border-[#0f172a]/20 transition-all group/tw"
+        className="w-full justify-start rounded-xl text-[#0f172a]/70 hover:text-[#0f172a] hover:bg-slate-50 hover:border-[#0f172a]/20 transition-all group/tw"
       >
         <XIcon className="w-3.5 h-3.5 mr-3 group-hover/tw:scale-110 transition-transform" />
         <span className={isVertical ? 'hidden lg:inline font-bold' : 'font-bold'}>X (Twitter)</span>
@@ -108,7 +108,7 @@ export default function ShareButtons({ title, slug, layout = 'vertical', basePat
       <Button
         variant="outline"
         onClick={handleCopyLink}
-        className={`w-full justify-start rounded-sm transition-all group/copy ${
+        className={`w-full justify-start rounded-xl transition-all group/copy ${
           copied
             ? 'text-emerald-600 border-emerald-200 bg-emerald-50'
             : 'text-[#0f172a]/70 hover:text-[#c20000] hover:bg-[#c20000]/5 hover:border-[#c20000]/30'
@@ -128,7 +128,7 @@ export default function ShareButtons({ title, slug, layout = 'vertical', basePat
       <Button
         variant="outline"
         onClick={handleNativeShare}
-        className="w-full justify-start rounded-sm text-[#0f172a]/70 hover:text-[#c20000] hover:bg-[#c20000]/5 hover:border-[#c20000]/30 transition-all lg:hidden group/share"
+        className="w-full justify-start rounded-xl text-[#0f172a]/70 hover:text-[#c20000] hover:bg-[#c20000]/5 hover:border-[#c20000]/30 transition-all lg:hidden group/share"
       >
         <Share2 className="w-4 h-4 mr-3 group-hover/share:scale-110 transition-transform" />
         <span className="font-bold">Bagikan Lainnya</span>

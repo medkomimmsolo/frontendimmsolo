@@ -82,34 +82,38 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
   });
 
   return (
-    <main className="min-h-screen bg-[#f8f9fa] pt-28 pb-20 font-sans">
+    <main className="min-h-screen bg-slate-50/70 pt-28 pb-20 font-sans">
       
       {/* Header */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 mb-16 text-center">
-        <div data-aos="fade-up">
-          <h1 className="text-3xl md:text-5xl font-bold text-slate-900 mb-5" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+        <div data-aos="fade-up" className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-[#c20000] border border-red-100 text-xs font-bold uppercase tracking-wider mb-4">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#c20000]"></span>
+          Kepengurusan Cabang
+        </div>
+        <div data-aos="fade-up" data-aos-delay="50">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-[#0f172a] mb-5 tracking-tight" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
             Struktur Organisasi
           </h1>
         </div>
         <div data-aos="fade-up" data-aos-delay="100">
-          <p className="text-lg text-slate-500 leading-relaxed font-light mb-6">
-            Formasi pengurus Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta Periode {currentPeriod}.
+          <p className="text-base md:text-lg text-slate-500 leading-relaxed font-normal max-w-2xl mx-auto mb-6">
+            Formasi kepemimpinan Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah Kota Surakarta Periode {currentPeriod}.
           </p>
         </div>
 
         {periods.length > 1 && (
-          <div className="flex flex-wrap items-center justify-center gap-3 text-sm mt-2">
-            <span className="text-slate-400">Lihat kepengurusan periode:</span>
-            <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-2 text-sm mt-4">
+            <span className="text-slate-400 font-medium mr-2">Pilih Periode:</span>
+            <div className="flex flex-wrap justify-center gap-2">
               {periods.map(period => (
                 <Link
                   key={period}
                   href={`/struktural?periode=${period}`}
                   scroll={false}
-                  className={`transition-all ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
                     currentPeriod === period 
-                      ? 'text-[#c20000] font-bold underline underline-offset-4 decoration-2' 
-                      : 'text-slate-500 hover:text-[#c20000] hover:underline underline-offset-4 decoration-slate-300 hover:decoration-[#c20000]/50'
+                      ? 'bg-[#c20000] text-white shadow-sm' 
+                      : 'bg-white text-slate-600 border border-slate-200 hover:border-red-200 hover:text-[#c20000]'
                   }`}
                 >
                   {period}
@@ -142,8 +146,8 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
           return (
             <div key={kategori} className="mb-20">
               
-              <div className="mb-8 border-b border-slate-200/80 pb-3">
-                <h2 className="text-xl md:text-2xl font-bold text-slate-900" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+              <div className="mb-8 border-b border-slate-200/80 pb-4">
+                <h2 className="text-2xl md:text-3xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
                   {kategori === 'BPH' ? 'Badan Pimpinan Harian' : kategori}
                 </h2>
               </div>
@@ -155,7 +159,7 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
                   <div key={groupName} className="mb-12 last:mb-0">
                     {groupName && (
                       <div className="flex items-center gap-4 mb-6">
-                        <h3 className="text-sm font-bold text-slate-500 uppercase tracking-[0.15em] shrink-0">
+                        <h3 className="text-xs font-bold text-[#c20000] uppercase tracking-[0.2em] shrink-0 bg-red-50/70 border border-red-100/80 px-3 py-1 rounded-full">
                           {groupName}
                         </h3>
                         <div className="h-px bg-slate-200/80 w-full"></div>
@@ -171,7 +175,7 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
                         return (
                           <div 
                             key={person.id} 
-                            className="group bg-white rounded-sm shadow-sm border border-slate-200/60 overflow-hidden flex flex-col hover:shadow-xl hover:-translate-y-1.5 hover:border-[#c20000]/30 transition-all duration-300 w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)]"
+                            className="group bg-white rounded-2xl shadow-sm border border-slate-200/90 overflow-hidden flex flex-col hover:shadow-xl hover:-translate-y-1.5 hover:border-red-200 transition-all duration-300 w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)]"
                           >
                             {/* Area Foto */}
                             <div className="relative w-full aspect-square bg-slate-100 overflow-hidden">
@@ -180,7 +184,7 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
                                 alt={`Foto ${person.name}`}
                                 loading="lazy"
                                 decoding="async"
-                                className="w-full h-full object-cover object-top group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                                className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-in-out"
                               />
                             </div>
                             

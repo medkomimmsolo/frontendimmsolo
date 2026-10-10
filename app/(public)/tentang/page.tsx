@@ -66,38 +66,38 @@ export default async function TentangPage() {
       <section className="relative z-20 -mt-24 mb-32 max-w-7xl mx-auto px-4 md:px-6">
         <div className="grid md:grid-cols-3 gap-8">
           
-          <div data-aos="fade-up" className="bg-white rounded-sm shadow-2xl shadow-slate-200/50 p-8 hover:-translate-y-2 transition-transform duration-500 group relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-200 to-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
-            <div className="w-16 h-16 bg-[#0f172a]/5 rounded-sm flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500">
+          <div data-aos="fade-up" className="bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/90 p-8 hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-200 to-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
+            <div className="w-16 h-16 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500 shadow-sm">
               <MapPin className="w-8 h-8" />
             </div>
-            <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Basis Gerakan</h2>
-            <p className="text-[#0f172a]/70 leading-relaxed">
+            <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Basis Gerakan</h2>
+            <p className="text-slate-600 leading-relaxed text-base">
               Berpusat di Kota Surakarta (Solo), PC IMM membawahi belasan komisariat yang tersebar di berbagai Perguruan Tinggi, baik Perguruan Tinggi Muhammadiyah (PTM) maupun Perguruan Tinggi Negeri (PTN) di Solo Raya.
             </p>
           </div>
 
           {/* Middle Card: Pushed slightly up for a staggered layout */}
-          <div data-aos="fade-up" data-aos-delay="100" className="bg-[#0f172a] text-white rounded-sm shadow-2xl shadow-[#0f172a]/30 p-8 md:-translate-y-8 hover:-translate-y-10 transition-transform duration-500 group relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
-            <div className="absolute -right-10 -top-10 w-40 h-40 bg-[#c20000]/10 rounded-full blur-2xl group-hover:bg-[#c20000]/30 transition-colors duration-500"></div>
+          <div data-aos="fade-up" data-aos-delay="100" className="bg-[#0f172a] text-white rounded-2xl shadow-2xl shadow-slate-900/40 p-8 md:-translate-y-8 hover:-translate-y-10 transition-all duration-500 group relative overflow-hidden border border-slate-800">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-[#c20000]/20 rounded-full blur-2xl group-hover:bg-[#c20000]/40 transition-colors duration-500"></div>
             
-            <div className="w-16 h-16 bg-white/10 rounded-sm flex items-center justify-center text-white mb-8 group-hover:bg-[#c20000] transition-colors duration-500 relative z-10">
+            <div className="w-16 h-16 bg-white/10 border border-white/10 rounded-2xl flex items-center justify-center text-white mb-8 group-hover:bg-[#c20000] transition-colors duration-500 relative z-10 shadow-sm">
               <Target className="w-8 h-8" />
             </div>
-            <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'var(--font-playfair), serif' }}>Fokus Eksekusi</h2>
-            <p className="text-white/80 leading-relaxed relative z-10">
+            <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Fokus Eksekusi</h2>
+            <p className="text-slate-300 leading-relaxed relative z-10 text-base">
               Selain berfokus pada dialektika keilmuan, kami bergerak progresif dalam ranah advokasi kebijakan publik, pendampingan sosial ekonomi warga, hingga respon cepat isu-isu kemanusiaan lokal.
             </p>
           </div>
 
-          <div data-aos="fade-up" data-aos-delay="200" className="bg-white rounded-sm shadow-2xl shadow-slate-200/50 p-8 hover:-translate-y-2 transition-transform duration-500 group relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-200 to-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
-            <div className="w-16 h-16 bg-[#0f172a]/5 rounded-sm flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500">
+          <div data-aos="fade-up" data-aos-delay="200" className="bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/90 p-8 hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-200 to-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
+            <div className="w-16 h-16 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500 shadow-sm">
               <Building className="w-8 h-8" />
             </div>
-            <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Struktur Organisasi</h2>
-            <p className="text-[#0f172a]/70 leading-relaxed">
+            <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Struktur Organisasi</h2>
+            <p className="text-slate-600 leading-relaxed text-base">
               Didukung oleh pimpinan cabang yang terstruktur, berbagai Lembaga Otonom (LO) dan Lembaga Semi Otonom (LSO) untuk memfasilitasi minat dan bakat kader secara profesional.
             </p>
           </div>
@@ -106,9 +106,9 @@ export default async function TentangPage() {
       </section>
 
       {/* 3. PROFIL CABANG */}
-      <section className="py-20 md:py-28 bg-[#f8fafc] relative overflow-hidden">
+      <section className="py-20 md:py-28 bg-slate-50/70 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
             
             {/* Text Side */}
             <div data-aos="fade-right">
@@ -117,7 +117,7 @@ export default async function TentangPage() {
                 subtitle="TENTANG CABANG" 
                 alignment="left" 
               />
-              <div className="space-y-6 text-[#0f172a]/70 text-lg leading-relaxed mt-8">
+              <div className="space-y-6 text-slate-600 text-base md:text-lg leading-relaxed mt-8">
                 <p>
                   Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah (PC IMM) Kota Surakarta merupakan salah satu cabang percontohan di Jawa Tengah yang memiliki dinamika pergerakan yang sangat kaya dan progresif.
                 </p>
@@ -133,15 +133,15 @@ export default async function TentangPage() {
             {/* Image Side */}
             <div data-aos="fade-left" data-aos-delay="150" className="relative">
               {/* Offset decorative box */}
-              <div className="absolute inset-0 bg-[#0f172a] translate-x-6 translate-y-6 rounded-sm"></div>
+              <div className="absolute inset-0 bg-red-100/60 translate-x-4 translate-y-4 rounded-2xl"></div>
               {/* Image itself */}
-              <div className="relative h-64 sm:h-80 md:h-[500px] rounded-sm overflow-hidden shadow-xl">
+              <div className="relative h-64 sm:h-80 md:h-[500px] rounded-2xl overflow-hidden shadow-xl border border-slate-200/90 bg-slate-100">
                 <img 
                   src="/images/imm_hero_bg.jpg" 
                   alt="Kegiatan PC IMM Surakarta" 
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-1000"
+                  className="w-full h-full object-cover opacity-95 hover:scale-105 transition-transform duration-700"
                 />
               </div>
             </div>

@@ -77,32 +77,36 @@ export default async function DokumenPage() {
   const documents = await getDocuments();
 
   return (
-    <main className="min-h-screen bg-[#f8f9fa] pt-28 pb-20">
+    <main className="min-h-screen bg-slate-50/70 pt-28 pb-20">
       
       {/* Breadcrumb & Title Section */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-6">
+      <section className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-8">
         <nav aria-label="breadcrumb" className="mb-4">
-          <ul className="flex items-center text-sm text-[#0f172a]/60 space-x-2">
+          <ul className="flex items-center text-sm text-slate-500 space-x-2">
             <li>
-              <Link href="/" className="hover:text-[#c20000] transition-colors flex items-center">
+              <Link href="/" className="hover:text-[#c20000] transition-colors flex items-center font-medium">
                 Beranda
               </Link>
             </li>
             <li>
-              <span className="text-[#0f172a]/40 mx-1">/</span>
+              <span className="text-slate-300 mx-1">/</span>
             </li>
-            <li className="text-[#0f172a] font-medium" aria-current="page">Dokumen</li>
+            <li className="text-[#0f172a] font-semibold" aria-current="page">Dokumen</li>
           </ul>
         </nav>
-        <div>
-          <div data-aos="fade-up" className="flex flex-col border-b border-[#0f172a]/10 pb-4 mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+        <div data-aos="fade-up" className="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-200/80 pb-6 mb-8 gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-[#c20000] border border-red-100 text-xs font-bold uppercase tracking-wider mb-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c20000]"></span>
+              Arsip & Regulasi
+            </div>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-[#0f172a] tracking-tight" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
               Dokumen Resmi
             </h1>
-            <p className="text-[#0f172a]/60 mt-2">
-              Kumpulan peraturan, materi kajian, form, dan panduan administrasi organisasi.
-            </p>
           </div>
+          <p className="text-slate-500 text-sm md:text-base max-w-md">
+            Pusat unduhan peraturan organisasi, materi kajian, dan panduan administrasi PC IMM Kota Surakarta.
+          </p>
         </div>
       </section>
 

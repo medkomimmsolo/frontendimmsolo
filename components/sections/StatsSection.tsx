@@ -1,6 +1,6 @@
 'use client';
 
-import { Users, Building2, School, BookOpen } from 'lucide-react';
+import { Users, Building2, School, BookOpen, BarChart3 } from 'lucide-react';
 
 type StatsProps = {
   stats: {
@@ -18,115 +18,116 @@ export default function StatsSection({ stats }: StatsProps) {
       name: 'Kader Aktif',
       value: stats?.stat_kader || '2.000+',
       icon: Users,
-      description: 'Tersebar di berbagai penjuru kota Surakarta'
+      description: 'Tersebar di berbagai penjuru kota Surakarta',
     },
     {
       id: 2,
       name: 'Komisariat',
       value: stats?.stat_komisariat || '14',
       icon: Building2,
-      description: 'Wadah pergerakan di tingkat fakultas dan kampus'
+      description: 'Wadah pergerakan di tingkat fakultas dan kampus',
     },
     {
       id: 3,
-      name: 'Lembaga',
+      name: 'Lembaga Khusus',
       value: stats?.stat_lembaga || '5',
       icon: BookOpen,
-      description: 'Fokus pada pengembangan minat dan bakat'
+      description: 'Fokus pada pengembangan minat dan bakat kader',
     },
     {
       id: 4,
       name: 'Perguruan Tinggi',
       value: stats?.stat_universitas || '4',
       icon: School,
-      description: 'Basis pergerakan keilmuan dan akademik'
-    }
+      description: 'Basis pergerakan keilmuan dan akademik kampus',
+    },
   ];
 
   return (
-    <section className="py-20 md:py-28 bg-[#0f172a] relative overflow-hidden text-white border-y border-slate-800">
-      
+    <section className="py-20 md:py-28 bg-[#0a0f1a] relative overflow-hidden text-white border-y border-slate-800/80">
       {/* Decorative Map Silhouette Background */}
-      <div className="absolute inset-0 z-0 pointer-events-none select-none opacity-40 mix-blend-screen">
-        <div 
-          className="absolute inset-0 bg-[url('/images/map-surakarta.jpg')] bg-center bg-no-repeat bg-cover filter grayscale contrast-125"
-        ></div>
-        {/* Vignette Gradients to blend image edges into the dark navy background */}
-        <div className="absolute inset-0 bg-[#0f172a]/60"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-[#0f172a] opacity-90"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] via-transparent to-[#0f172a] opacity-90"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_20%,_#0f172a_70%)]"></div>
+      <div className="absolute inset-0 z-0 pointer-events-none select-none opacity-30 mix-blend-screen">
+        <div className="absolute inset-0 bg-[url('/images/map-surakarta.jpg')] bg-center bg-no-repeat bg-cover filter grayscale contrast-125" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0f1a] via-[#0a0f1a]/70 to-[#0a0f1a]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0f1a] via-transparent to-[#0a0f1a]" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
-        
-        {/* Top: Heading */}
-        <div className="mb-16 max-w-7xl">
-          <div data-aos="fade-up" className="flex items-center gap-4 mb-6">
-            <span className="text-[#c20000]/80 font-bold uppercase tracking-widest text-sm">
-              Jejak Langkah Organisasi
-            </span>
+      {/* Ambient Red Glow in Background */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#c20000]/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Top: Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 md:mb-18 gap-6">
+          <div className="max-w-2xl">
+            <div data-aos="fade-up" className="flex items-center gap-2 mb-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-950/60 border border-red-500/20 text-[#ff4d4d] text-xs font-bold uppercase tracking-wider">
+                <BarChart3 className="w-3.5 h-3.5" /> Jejak Langkah Organisasi
+              </span>
+            </div>
+            
+            <h2 
+              data-aos="fade-up"
+              data-aos-delay="100"
+              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight"
+              style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
+            >
+              IMM Surakarta Dalam{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff4d4d] to-[#ff8080]">
+                Angka
+              </span>
+            </h2>
           </div>
-          
-          <h2 
-            data-aos="fade-up"
-            data-aos-delay="100"
-            className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight"
-            style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
-          >
-            IMM Solo Dalam <span className="text-[#c20000] italic">Angka</span>
-          </h2>
-          
-          <p data-aos="fade-up" data-aos-delay="200" className="text-white/70 text-lg max-w-sm">
-            Statistik pergerakan, kekuatan kader, dan jejak penyebaran Ikatan Mahasiswa Muhammadiyah di Kota Surakarta.
+
+          <p data-aos="fade-up" data-aos-delay="200" className="text-slate-400 text-sm sm:text-base max-w-md leading-relaxed">
+            Statistik kekuatan kader, jangkauan komisariat, dan jejak penyebaran Ikatan Mahasiswa Muhammadiyah di Kota Surakarta.
           </p>
         </div>
 
-        {/* Grid: Stats Side by Side */}
+        {/* Grid Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {statsList.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <div key={stat.id} data-aos="fade-up" data-aos-delay={index * 100} className="flex-1">
-                <div className="h-full border border-slate-800 bg-slate-900/50 p-6 md:p-8 hover:border-slate-600 transition-all duration-300 flex flex-col relative overflow-hidden group rounded-sm">
+              <div 
+                key={stat.id} 
+                data-aos="fade-up" 
+                data-aos-delay={index * 100}
+                className="group relative"
+              >
+                <div className="h-full bg-slate-900/60 backdrop-blur-md border border-slate-800/90 hover:border-red-500/40 rounded-xl p-6 sm:p-7 transition-all duration-300 flex flex-col justify-between shadow-lg hover:shadow-red-950/20 hover:-translate-y-1 relative overflow-hidden">
                   
-                  {/* Hover Reveal Background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#c20000]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                  {/* Hover Accent Top Line */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#c20000] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   
-                  {/* Animated Bottom Border */}
-                  <div className="absolute left-0 bottom-0 w-full h-1 bg-[#c20000] transform scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></div>
-
-                  <div className="relative z-10 flex flex-col h-full">
-                    
-                    {/* Top: Name & Icon */}
-                    <div className="flex justify-between items-start mb-8">
-                      <div className="text-[#c20000]/80 font-bold text-sm tracking-widest uppercase w-1/2">
-                        {stat.name}
-                      </div>
-                      <div className="shrink-0 w-12 h-12 rounded-full border border-slate-700 flex items-center justify-center group-hover:bg-[#c20000] group-hover:border-[#c20000] transition-all duration-300">
-                        <Icon className="w-5 h-5 text-white/70 group-hover:text-white group-hover:scale-110 transition-transform" />
-                      </div>
+                  <div>
+                    {/* Icon Container */}
+                    <div className="w-12 h-12 rounded-lg bg-slate-800/80 border border-slate-700/60 flex items-center justify-center text-[#ff4d4d] mb-6 group-hover:bg-red-950/40 group-hover:border-red-500/30 group-hover:scale-110 transition-all duration-300 shadow-sm">
+                      <Icon className="w-6 h-6" />
                     </div>
 
-                    {/* Middle: Number Value */}
-                    <div className="mt-auto mb-4">
-                      <div className="text-5xl md:text-6xl font-light text-white group-hover:text-[#c20000] transition-colors duration-300" style={{ fontFamily: 'var(--font-playfair), serif' }}>
-                        {stat.value}
-                      </div>
+                    {/* Number Value */}
+                    <div 
+                      className="text-4xl sm:text-5xl font-black text-white tracking-tight mb-2 group-hover:text-red-100 transition-colors"
+                      style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
+                    >
+                      {stat.value}
                     </div>
 
-                    {/* Bottom: Description */}
-                    <p className="text-sm text-white/60 leading-relaxed group-hover:text-white/80 transition-colors">
-                      {stat.description}
-                    </p>
-
+                    {/* Label */}
+                    <div className="text-sm sm:text-base font-bold text-slate-200 mb-1">
+                      {stat.name}
+                    </div>
                   </div>
+
+                  {/* Description */}
+                  <p className="text-xs text-slate-400 leading-relaxed mt-4 pt-3 border-t border-slate-800/70">
+                    {stat.description}
+                  </p>
                 </div>
               </div>
             );
           })}
         </div>
-
       </div>
     </section>
   );

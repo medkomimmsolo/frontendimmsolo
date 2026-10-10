@@ -202,12 +202,12 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                 {/* Category Badge */}
                 <div className="flex items-center gap-3 mb-5">
                   <Link href={post.category?.slug ? `/post?category=${post.category.slug}` : '/post'}>
-                    <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] px-3.5 py-1 text-[11px] font-bold tracking-[0.12em] uppercase rounded-sm border-none shadow-none cursor-pointer transition-colors">
+                    <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] px-3.5 py-1 text-[11px] font-bold tracking-[0.12em] uppercase rounded-full border-none shadow-sm cursor-pointer transition-colors">
                       {post.category?.name || 'Berita'}
                     </Badge>
                   </Link>
                   {post.views_count > 0 && (
-                    <span className="flex items-center gap-1.5 text-[11px] text-[#0f172a]/40 font-medium">
+                    <span className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
                       <Eye className="w-3.5 h-3.5" />
                       {post.views_count.toLocaleString('id-ID')} dilihat
                     </span>
@@ -222,8 +222,6 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                   {post.title}
                 </h1>
 
-                
-
                 {/* Author + Meta Row */}
                 <div className="flex flex-col gap-4 pt-2">
                   
@@ -231,7 +229,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                   <div className="flex flex-wrap items-center gap-4 sm:gap-6">
                     {/* Author Block */}
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#c20000]/10 to-[#c20000]/5 border border-[#0f172a]/8 flex items-center justify-center text-[#0f172a]/40 overflow-hidden shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#c20000]/10 to-[#c20000]/5 border border-red-100 flex items-center justify-center text-[#c20000] overflow-hidden shrink-0">
                         {post.user?.profile_photo_path ? (
                           <img src={post.user.profile_photo_path} alt={`Foto ${post.user.name}`} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                         ) : (
@@ -239,14 +237,14 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                         )}
                       </div>
                       <div className="flex flex-col min-w-0">
-                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#0f172a]/35 leading-none mb-0.5">
+                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 leading-none mb-0.5">
                               Penulis
                             </span>
                         <span className="text-[13px] sm:text-sm font-bold text-[#0f172a] leading-tight truncate">
                           {post.author_name || post.user?.name || 'Admin IMM'}
                         </span>
                         {post.author_role && (
-                          <span className="text-[10px] sm:text-[11px] font-medium text-[#0f172a]/45 mt-0.5 truncate">
+                          <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 mt-0.5 truncate">
                             {post.author_role}
                           </span>
                         )}
@@ -256,20 +254,20 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                     {/* Editor Block */}
                     {post.editor_name && (
                       <>
-                        <div className="hidden sm:block w-px h-9 bg-[#0f172a]/10" />
+                        <div className="hidden sm:block w-px h-9 bg-slate-200" />
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-slate-50 border border-[#0f172a]/8 flex items-center justify-center text-[#0f172a]/30 overflow-hidden shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 overflow-hidden shrink-0">
                             <User className="w-3.5 h-3.5" />
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#0f172a]/35 leading-none mb-0.5">
+                            <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 leading-none mb-0.5">
                               Editor
                             </span>
                             <span className="text-[13px] sm:text-sm font-bold text-[#0f172a] leading-tight truncate">
                               {post.editor_name}
                             </span>
                             {post.editor_role && (
-                              <span className="text-[10px] sm:text-[11px] font-medium text-[#0f172a]/45 mt-0.5 truncate">
+                              <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 mt-0.5 truncate">
                                 {post.editor_role}
                               </span>
                             )}
@@ -280,21 +278,21 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                   </div>
 
                   {/* Date + Time + Reading Time */}
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3.5 text-[11px] sm:text-xs font-medium text-[#0f172a]/50">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3.5 text-[11px] sm:text-xs font-medium text-slate-500">
                     <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-[#c20000]/70" />
-                      <time dateTime={publishDate.toISOString()} className="text-[#0f172a]/65">
+                      <Calendar className="w-3.5 h-3.5 text-[#c20000]" />
+                      <time dateTime={publishDate.toISOString()} className="text-slate-600">
                         {formattedDate}
                       </time>
                     </div>
-                    <span className="w-1 h-1 rounded-full bg-[#0f172a]/20" aria-hidden="true" />
+                    <span className="w-1 h-1 rounded-full bg-slate-300" aria-hidden="true" />
                     <div className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-[#c20000]/70" />
-                      <span className="text-[#0f172a]/65">{formattedTime} WIB</span>
+                      <Clock className="w-3.5 h-3.5 text-[#c20000]" />
+                      <span className="text-slate-600">{formattedTime} WIB</span>
                     </div>
-                    <span className="w-1 h-1 rounded-full bg-[#0f172a]/20" aria-hidden="true" />
+                    <span className="w-1 h-1 rounded-full bg-slate-300" aria-hidden="true" />
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[#0f172a]/65">{readingTime} menit baca</span>
+                      <span className="text-slate-600">{readingTime} menit baca</span>
                     </div>
                   </div>
                 </div>
@@ -302,7 +300,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
 
               {/* ── Featured Image ── */}
               <figure className="relative w-full mb-10">
-                <div className="relative aspect-[16/9] rounded-sm overflow-hidden bg-slate-100 border border-[#0f172a]/8">
+                <div className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-slate-100 border border-slate-200/90 shadow-sm">
                   <Image
                     src={imageUrl}
                     alt={post.title}
@@ -314,13 +312,11 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                 </div>
                 {/* Image caption area */}
                 {post.image_caption && (
-                  <figcaption className="mt-2.5 text-[11px] sm:text-xs text-[#0f172a]/45 text-center italic font-medium">
+                  <figcaption className="mt-2.5 text-[11px] sm:text-xs text-slate-400 text-center italic font-medium">
                     {post.image_caption}
                   </figcaption>
                 )}
               </figure>
-
-
 
               {/* ── Article Content (Rich Text from CMS) ── */}
               <div 
@@ -342,22 +338,21 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                 }}
               />
 
-
               {/* ── Bottom Section: Tags + Share (Mobile) ── */}
-              <div className="mt-14 pt-8 border-t border-[#0f172a]/10">
+              <div className="mt-14 pt-8 border-t border-slate-200">
                 {/* Tags */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-bold text-[#0f172a]/40 uppercase tracking-wider mr-1">Topik:</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">Topik:</span>
                     {post.category && (
                       <Link href={`/post?category=${post.category.slug}`}>
-                        <Badge variant="outline" className="bg-white text-[#0f172a]/70 hover:bg-[#c20000] hover:text-white hover:border-[#c20000] transition-colors cursor-pointer rounded-sm px-3 py-1.5 text-xs font-semibold border-[#0f172a]/10">
+                        <Badge variant="outline" className="bg-white text-slate-600 hover:bg-[#c20000] hover:text-white hover:border-[#c20000] transition-colors cursor-pointer rounded-full px-3.5 py-1 text-xs font-semibold border-slate-200">
                           {post.category.name}
                         </Badge>
                       </Link>
                     )}
                     <Link href="/post">
-                      <Badge variant="outline" className="bg-white text-[#0f172a]/70 hover:bg-[#0f172a] hover:text-white transition-colors cursor-pointer rounded-sm px-3 py-1.5 text-xs font-semibold border-[#0f172a]/10">
+                      <Badge variant="outline" className="bg-white text-slate-600 hover:bg-[#0f172a] hover:text-white transition-colors cursor-pointer rounded-full px-3.5 py-1 text-xs font-semibold border-slate-200">
                         PC IMM
                       </Badge>
                     </Link>
@@ -368,7 +363,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                         <Link key={trimmed} href={`/cari?q=${encodeURIComponent(trimmed)}`}>
                           <Badge 
                             variant="outline" 
-                            className="bg-white text-[#0f172a]/70 hover:bg-[#c20000] hover:text-white hover:border-[#c20000] transition-colors cursor-pointer rounded-sm px-3 py-1.5 text-xs font-semibold border-[#0f172a]/10"
+                            className="bg-white text-slate-600 hover:bg-[#c20000] hover:text-white hover:border-[#c20000] transition-colors cursor-pointer rounded-full px-3.5 py-1 text-xs font-semibold border-slate-200"
                           >
                             #{trimmed}
                           </Badge>
@@ -379,8 +374,8 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                 </div>
 
                 {/* Mobile Share Row */}
-                <div className="lg:hidden mt-8 pt-6 border-t border-[#0f172a]/8">
-                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#0f172a]/40 mb-4">Bagikan Artikel</p>
+                <div className="lg:hidden mt-8 pt-6 border-t border-slate-200">
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400 mb-4">Bagikan Artikel</p>
                   <ShareButtons title={post.title} slug={resolvedParams.slug} layout="horizontal" />
                 </div>
               </div>
@@ -389,7 +384,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
               <div className="mt-8">
                 <Link 
                   href="/post" 
-                  className="inline-flex items-center gap-2 text-sm font-bold text-[#0f172a]/60 hover:text-[#c20000] transition-colors duration-200 group/back"
+                  className="inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-[#c20000] transition-colors duration-200 group/back"
                 >
                   <ArrowLeft className="w-4 h-4 group-hover/back:-translate-x-1 transition-transform" />
                   Kembali ke semua post
@@ -404,14 +399,14 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                 
                 {/* ── Trending / Baca Juga ── */}
                 {recentPosts.length > 0 && (
-                  <div className="bg-white rounded-sm border border-[#0f172a]/8 overflow-hidden">
-                    <div className="bg-slate-50/80 px-5 py-4 border-b border-[#0f172a]/6 flex items-center gap-2.5">
+                  <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+                    <div className="bg-slate-50/80 px-5 py-4 border-b border-slate-100 flex items-center gap-2.5">
                       <TrendingUp className="w-4 h-4 text-[#c20000]" />
-                      <h3 className="text-[13px] font-bold uppercase tracking-[0.1em] text-[#0f172a]">
+                      <h3 className="text-xs font-bold uppercase tracking-[0.1em] text-[#0f172a]">
                         Baca Juga
                       </h3>
                     </div>
-                    <div className="divide-y divide-[#0f172a]/5">
+                    <div className="divide-y divide-slate-100">
                       {recentPosts.map((rPost: any, idx: number) => {
                         const rImageUrl = rPost.featured_image
                           ? (rPost.featured_image.startsWith('http') ? rPost.featured_image : `/storage/${rPost.featured_image.replace(/^\/?storage\//, '')}`)
@@ -421,10 +416,10 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                           <Link 
                             href={`/post/${rPost.slug}`} 
                             key={rPost.id} 
-                            className="group flex gap-3.5 p-4 hover:bg-slate-50/60 transition-colors duration-200"
+                            className="group flex gap-3.5 p-4 hover:bg-slate-50/70 transition-colors duration-200"
                           >
                             {/* Thumbnail */}
-                            <div className="w-24 aspect-[16/9] rounded overflow-hidden bg-slate-100 border border-[#0f172a]/5 shrink-0">
+                            <div className="w-24 aspect-[16/9] rounded-xl overflow-hidden bg-slate-100 border border-slate-200/60 shrink-0">
                               {rImageUrl ? (
                                 <img 
                                   src={rImageUrl} 
@@ -434,7 +429,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
-                                  <span className="text-2xl font-extrabold text-[#0f172a]/8">
+                                  <span className="text-2xl font-extrabold text-[#0f172a]/10">
                                     0{idx + 1}
                                   </span>
                                 </div>
@@ -443,12 +438,12 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                             {/* Title + Date */}
                             <div className="flex-1 min-w-0 flex flex-col justify-center">
                               <h4 
-                                className="text-[13px] font-bold text-[#0f172a]/80 group-hover:text-[#c20000] leading-snug mb-1.5 transition-colors duration-200 line-clamp-2" 
+                                className="text-[13px] font-bold text-[#0f172a] group-hover:text-[#c20000] leading-snug mb-1.5 transition-colors duration-200 line-clamp-2" 
                                 style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
                               >
                                 {rPost.title}
                               </h4>
-                              <span className="text-[11px] font-medium text-[#0f172a]/40">
+                              <span className="text-[11px] font-medium text-slate-400">
                                 {new Date(rPost.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })}
                               </span>
                             </div>
@@ -457,7 +452,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                       })}
                     </div>
                     {/* See all link */}
-                    <div className="px-5 py-3.5 border-t border-[#0f172a]/6">
+                    <div className="px-5 py-3.5 border-t border-slate-100 bg-slate-50/50">
                       <Link 
                         href="/post" 
                         className="text-xs font-bold text-[#c20000] hover:text-[#a30000] transition-colors flex items-center gap-1.5 justify-center"
@@ -470,8 +465,8 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                 )}
 
                 {/* ── Share Box (Desktop) ── */}
-                <div className="hidden lg:block bg-slate-50/80 rounded-sm p-5 border border-[#0f172a]/6">
-                  <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#0f172a]/40 mb-4 text-center">
+                <div className="hidden lg:block bg-slate-50/80 rounded-2xl p-6 border border-slate-200/90 shadow-sm">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400 mb-4 text-center">
                     Bagikan Artikel
                   </h3>
                   <ShareButtons title={post.title} slug={resolvedParams.slug} layout="vertical" />

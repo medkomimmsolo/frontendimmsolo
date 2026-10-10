@@ -478,15 +478,15 @@ export default function StrukturalManagement() {
                               ref={providedBidang.innerRef}
                               {...providedBidang.droppableProps}
                             >
-                              <Card className="border-[#0f172a]/10 shadow-sm overflow-hidden">
-                                <div className="overflow-x-auto">
+                              <Card className="border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+                                <div className="overflow-x-auto custom-scrollbar">
                                   <table className="w-full text-left border-collapse">
                                     <thead>
-                                      <tr className="bg-[#f8fafc] border-b border-[#0f172a]/5 text-[#0f172a]/70 text-xs font-semibold uppercase tracking-wider">
-                                        <th className="p-4 w-10"></th>
-                                        <th className="p-4">Nama Bidang / Lembaga</th>
-                                        <th className="p-4 text-center">Jumlah Anggota</th>
-                                        <th className="p-4 pr-6 text-right">Aksi</th>
+                                      <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                                        <th className="py-3.5 px-4 w-10"></th>
+                                        <th className="py-3.5 px-4">Nama Bidang / Lembaga</th>
+                                        <th className="py-3.5 px-4 text-center">Jumlah Anggota</th>
+                                        <th className="py-3.5 px-4 pr-6 text-right">Aksi</th>
                                       </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 text-sm">
@@ -502,7 +502,7 @@ export default function StrukturalManagement() {
                                                 <tr 
                                                   ref={providedBidangDrag.innerRef}
                                                   {...providedBidangDrag.draggableProps}
-                                                  className="hover:bg-slate-50/50 transition-colors bg-white"
+                                                  className="hover:bg-slate-50/70 transition-colors bg-white"
                                                 >
                                                   <td className="p-4 w-10">
                                                     <div 
@@ -516,7 +516,7 @@ export default function StrukturalManagement() {
                                                     {bidang.name}
                                                   </td>
                                                   <td className="p-4 text-center text-[#0f172a]/80 cursor-pointer" onClick={() => toggleBidang(groupKey)}>
-                                                    <span className="inline-flex items-center justify-center bg-slate-100 text-slate-700 px-2 py-1 rounded-sm text-xs font-medium min-w-[2rem]">
+                                                    <span className="inline-flex items-center justify-center bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-semibold min-w-[2rem]">
                                                       {filteredMembers.length}
                                                     </span>
                                                   </td>
@@ -524,7 +524,7 @@ export default function StrukturalManagement() {
                                                     <Button 
                                                       variant="outline" 
                                                       size="sm"
-                                                      className="h-8 text-xs border-[#0f172a]/10 text-[#0f172a]/80 hover:bg-[#0f172a]/5 transition-colors"
+                                                      className="h-8 text-xs border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
                                                       onClick={(e) => { e.stopPropagation(); toggleBidang(groupKey); }}
                                                     >
                                                       Aksi Detail 
@@ -542,18 +542,18 @@ export default function StrukturalManagement() {
                                                             Data Anggota: {bidang.name}
                                                           </h4>
                                                           <Link href={`/dashboard/struktural/create?periode=${selectedPeriod}&bidang=${encodeURIComponent(bidang.name)}&kategori=${encodeURIComponent(kategori.name)}`}>
-                                                            <Button className="bg-[#c20000] hover:bg-[#a30000] text-white h-8 text-xs rounded-sm shadow-sm transition-colors">
+                                                            <Button className="bg-[#c20000] hover:bg-[#a30000] text-white h-8 text-xs rounded-xl shadow-xs transition-colors">
                                                               <Plus className="w-3 h-3 mr-1" /> Tambah Anggota
                                                             </Button>
                                                           </Link>
                                                         </div>
                                                         
-                                                        <div className="border border-[#0f172a]/10 rounded-sm overflow-hidden bg-white shadow-sm">
+                                                        <div className="border border-slate-200/90 rounded-xl overflow-hidden bg-white shadow-2xs">
                                                           <Droppable droppableId={`anggota-${kategori.id}|${bidang.id}`} type={`ANGGOTA-${kategori.id}|${bidang.id}`}>
                                                             {(providedAnggota) => (
                                                               <table className="w-full text-left border-collapse">
                                                                 <thead>
-                                                                  <tr className="bg-white border-b border-[#0f172a]/5 text-[#0f172a]/70 text-[11px] font-semibold uppercase tracking-wider">
+                                                                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-[11px] font-bold uppercase tracking-wider">
                                                                     <th className="p-3 w-8"></th>
                                                                     <th className="p-3 pl-2">Nama Pengurus</th>
                                                                     <th className="p-3">Jabatan</th>

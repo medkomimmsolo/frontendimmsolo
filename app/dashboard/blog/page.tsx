@@ -285,43 +285,49 @@ export default function BlogManagement() {
       </div>
 
       {/* WP-Style Data Table with IMM Theme */}
-      <div className="bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+        <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-white border-b border-[#0f172a]/5 text-[#0f172a]/70 text-sm font-semibold uppercase tracking-wider">
-                <th className="p-4 pl-6 w-10">
+              <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                <th className="py-3.5 px-4 pl-6 w-10">
                   <input 
                     type="checkbox" 
                     onChange={handleSelectAll}
                     checked={blogs.length > 0 && selectedBlogs.length === blogs.length}
-                    className="rounded border-slate-200 text-[#c20000] focus:ring-[#c20000]" 
+                    className="rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" 
                   />
                 </th>
-                <th className="p-4">Judul</th>
-                <th className="p-4 w-36">Penulis</th>
-                <th className="p-4 w-48">Kategori</th>
-                <th className="p-4\1w-24 text-center">
+                <th className="py-3.5 px-4">Judul</th>
+                <th className="py-3.5 px-4 w-36">Penulis</th>
+                <th className="py-3.5 px-4 w-48">Kategori</th>
+                <th className="py-3.5 px-4 w-24 text-center">
                   <MessageSquare className="w-4 h-4 text-slate-400 mx-auto" />
                 </th>
-                <th className="p-4 w-40 pr-6">Tanggal</th>
+                <th className="py-3.5 px-4 w-40 pr-6">Tanggal</th>
               </tr>
             </thead>
             
             <tbody className="divide-y divide-slate-100 text-sm bg-white">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="p-16 text-center">
+                  <td colSpan={6} className="py-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-500">
                       <Loader2 className="w-8 h-8 animate-spin text-[#c20000] mb-2" />
-                      <span className="text-sm">Memuat data...</span>
+                      <span className="text-sm font-medium">Memuat data artikel...</span>
                     </div>
                   </td>
                 </tr>
               ) : blogs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-12 text-slate-500 text-center">
-                    Tidak ada post yang ditemukan.
+                  <td colSpan={6} className="py-16 text-center">
+                    <div className="flex flex-col items-center justify-center text-slate-400">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3 text-slate-300">
+                        <FileText className="w-6 h-6" />
+                      </div>
+                      <p className="text-sm font-semibold text-slate-700">Tidak ada post ditemukan</p>
+                      <p className="text-xs text-slate-400 mt-1">Coba sesuaikan kata kunci atau filter status</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -424,22 +430,22 @@ export default function BlogManagement() {
             </tbody>
             
             <tfoot>
-              <tr className="bg-white border-b border-[#0f172a]/5 text-[#0f172a]/70 text-sm font-semibold uppercase tracking-wider">
-                <th className="p-4 pl-6 w-10">
+              <tr className="bg-slate-50/80 border-t border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                <th className="py-3 px-4 pl-6 w-10">
                   <input 
                     type="checkbox" 
                     onChange={handleSelectAll}
                     checked={blogs.length > 0 && selectedBlogs.length === blogs.length}
-                    className="rounded border-slate-200 text-[#c20000] focus:ring-[#c20000]" 
+                    className="rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" 
                   />
                 </th>
-                <th className="p-4">Judul</th>
-                <th className="p-3">Author</th>
-                <th className="p-3">Categories</th>
-                <th className="p-4\1text-center">
+                <th className="py-3 px-4">Judul</th>
+                <th className="py-3 px-4">Penulis</th>
+                <th className="py-3 px-4">Kategori</th>
+                <th className="py-3 px-4 text-center">
                   <MessageSquare className="w-4 h-4 text-slate-400 mx-auto" />
                 </th>
-                <th className="p-4\1pr-4">Date</th>
+                <th className="py-3 px-4 pr-6">Tanggal</th>
               </tr>
             </tfoot>
           </table>
@@ -447,7 +453,7 @@ export default function BlogManagement() {
       </div>
       
       {/* Bottom Pagination */}
-      <div className="bg-white border border-[#0f172a]/10 rounded-sm mt-4">
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs mt-4 overflow-hidden">
         <PaginationControls
           currentPage={currentPage}
           totalPages={totalPages}

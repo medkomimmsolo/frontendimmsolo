@@ -16,12 +16,12 @@ export default function OfflineClient() {
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={() => window.location.reload()}
-            className="inline-flex items-center px-6 py-2.5 rounded-sm bg-[#c20000] hover:bg-[#a30000] text-white text-sm font-bold transition-colors"
+            className="inline-flex items-center px-6 py-2.5 rounded-xl bg-[#c20000] hover:bg-[#a30000] text-white text-sm font-bold shadow-sm transition-colors"
           >
             <RotateCw className="w-4 h-4 mr-2" />
             Muat Ulang
           </button>
-          <Link href="/" className="inline-flex items-center px-6 py-2.5 rounded-sm border border-slate-200 bg-white text-slate-700 text-sm font-bold hover:border-[#c20000] hover:text-[#c20000] transition-colors">
+          <Link href="/" className="inline-flex items-center px-6 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-bold hover:border-[#c20000] hover:text-[#c20000] shadow-sm transition-colors">
             <Home className="w-4 h-4 mr-2" />
             Beranda
           </Link>

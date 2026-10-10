@@ -90,42 +90,48 @@ export default async function PostPage(props: Props) {
     : 'Post & Artikel';
 
   return (
-    <main className="min-h-screen bg-[#f8f9fa] pt-28 pb-20">
+    <main className="min-h-screen bg-slate-50/70 pt-28 pb-20">
       
       {/* Breadcrumb & Title Section */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-6">
+      <section className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-8">
         <nav aria-label="breadcrumb" className="mb-4">
-          <ul className="flex items-center text-sm text-[#0f172a]/60 space-x-2">
+          <ul className="flex items-center text-sm text-slate-500 space-x-2">
             <li>
-              <Link href="/" className="hover:text-[#c20000] transition-colors flex items-center">
+              <Link href="/" className="hover:text-[#c20000] transition-colors flex items-center font-medium">
                 Beranda
               </Link>
             </li>
             <li>
-              <span className="text-[#0f172a]/40 mx-1">/</span>
+              <span className="text-slate-300 mx-1">/</span>
             </li>
-            <li className="text-[#0f172a] font-medium" aria-current="page">{category ? 'Kategori' : 'Post'}</li>
+            <li className="text-[#0f172a] font-semibold" aria-current="page">{category ? 'Kategori' : 'Post & Artikel'}</li>
           </ul>
         </nav>
-        <div>
-          <div data-aos="fade-up" className="flex items-center justify-between border-b border-[#0f172a]/10 pb-4 mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+        <div data-aos="fade-up" className="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-200/80 pb-6 mb-8 gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-[#c20000] border border-red-100 text-xs font-bold uppercase tracking-wider mb-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c20000]"></span>
+              Warta & Opini
+            </div>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-[#0f172a] tracking-tight" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
               {displayTitle}
             </h1>
           </div>
+          <p className="text-slate-500 text-sm md:text-base max-w-md">
+            Informasi terkini, tulisan pemikiran, dan kabar pergerakan PC IMM Kota Surakarta.
+          </p>
         </div>
       </section>
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 mb-16">
         {/* Hero Section: 1 Large Left, 4 Small Right */}
         {heroPost && (
-          <div className="grid lg:grid-cols-2 gap-6">
+          <div className="grid lg:grid-cols-2 gap-8">
             {/* Left Column: Large Post */}
-            <div className="group bg-white rounded-sm shadow-sm border border-[#0f172a]/5 overflow-hidden flex flex-col hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <div className="relative aspect-[16/9] overflow-hidden">
+            <div className="group bg-white rounded-2xl shadow-sm border border-slate-200/90 overflow-hidden flex flex-col hover:shadow-xl hover:border-red-200 transition-all duration-300">
+              <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
                 <Link href={`/post/${heroPost.slug}`} className="block w-full h-full">
                   <Image
-                    
                     src={heroPost.featured_image 
                       ? (heroPost.featured_image.startsWith('http') ? heroPost.featured_image : `/storage/${heroPost.featured_image.replace(/^\/?storage\//, '')}`)
                       : '/images/imm_hero_bg.jpg'} 
@@ -136,12 +142,12 @@ export default async function PostPage(props: Props) {
                   />
                 </Link>
                 <div className="absolute bottom-4 left-4">
-                  <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] border-none shadow-sm font-semibold rounded-sm">
+                  <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] border-none shadow-md font-semibold rounded-full px-3 py-1 text-xs">
                     {heroPost.category?.name || 'Artikel'}
                   </Badge>
                 </div>
               </div>
-              <div className="p-6 flex flex-col flex-grow">
+              <div className="p-6 md:p-8 flex flex-col flex-grow">
                 <Link href={`/post/${heroPost.slug}`} className="block group/link">
                   <h2 
                     className="text-2xl md:text-3xl font-bold text-[#0f172a] mb-3 leading-[1.3] group-hover/link:text-[#c20000] transition-colors line-clamp-2"
@@ -150,16 +156,16 @@ export default async function PostPage(props: Props) {
                     {heroPost.title}
                   </h2>
                 </Link>
-                <p className="text-[#0f172a]/70 text-base mb-6 line-clamp-3 leading-relaxed flex-grow">
+                <p className="text-slate-600 text-base mb-6 line-clamp-3 leading-relaxed flex-grow">
                   {heroPost.excerpt}
                 </p>
-                <div className="flex items-center text-xs text-[#0f172a]/60 font-medium pt-4 border-t border-[#0f172a]/5">
+                <div className="flex items-center text-xs text-slate-500 font-medium pt-4 border-t border-slate-100">
                   <div className="flex items-center mr-4">
-                    <User className="w-3.5 h-3.5 mr-1.5" />
+                    <User className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
                     {heroPost.user?.name || 'Admin'}
                   </div>
                   <div className="flex items-center">
-                    <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                    <Calendar className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
                     {new Date(heroPost.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}
                   </div>
                 </div>
@@ -170,11 +176,10 @@ export default async function PostPage(props: Props) {
             {topPosts.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {topPosts.map((post: any) => (
-                  <div key={post.id} className="group bg-white rounded-sm shadow-sm border border-[#0f172a]/5 overflow-hidden flex flex-col hover:shadow-md hover:-translate-y-1 transition-all duration-300">
-                    <div className="relative aspect-[16/9] overflow-hidden">
+                  <div key={post.id} className="group bg-white rounded-2xl shadow-sm border border-slate-200/90 overflow-hidden flex flex-col hover:shadow-lg hover:border-red-200 hover:-translate-y-1 transition-all duration-300">
+                    <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
                       <Link href={`/post/${post.slug}`} className="block w-full h-full">
                         <Image
-                    
                           src={post.featured_image 
                             ? (post.featured_image.startsWith('http') ? post.featured_image : `/storage/${post.featured_image.replace(/^\/?storage\//, '')}`)
                             : '/images/imm_hero_bg.jpg'} 
@@ -185,12 +190,12 @@ export default async function PostPage(props: Props) {
                         />
                       </Link>
                       <div className="absolute bottom-3 left-3">
-                        <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] border-none shadow-sm text-[10px] px-2 py-0.5 rounded-sm">
+                        <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] border-none shadow-sm text-[10px] px-2.5 py-0.5 rounded-full font-semibold">
                           {post.category?.name || 'Artikel'}
                         </Badge>
                       </div>
                     </div>
-                    <div className="p-4 flex flex-col flex-grow">
+                    <div className="p-5 flex flex-col flex-grow">
                       <Link href={`/post/${post.slug}`} className="block group/link mb-2">
                         <h3 
                           className="text-base font-bold text-[#0f172a] leading-snug group-hover/link:text-[#c20000] transition-colors line-clamp-2"
@@ -199,7 +204,7 @@ export default async function PostPage(props: Props) {
                           {post.title}
                         </h3>
                       </Link>
-                      <div className="mt-auto pt-3 flex items-center text-[11px] text-[#0f172a]/50 font-medium">
+                      <div className="mt-auto pt-3 flex items-center text-[11px] text-slate-400 font-medium">
                         <Calendar className="w-3 h-3 mr-1" />
                         {new Date(post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}
                       </div>
@@ -215,18 +220,17 @@ export default async function PostPage(props: Props) {
       {/* Remaining Posts Grid */}
       {remainingPosts.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="flex items-center justify-between border-b border-[#0f172a]/10 pb-3 mb-8">
-            <h2 className="text-xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+          <div className="flex items-center justify-between border-b border-slate-200/80 pb-3 mb-8">
+            <h2 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
               Berita Terkini
             </h2>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {remainingPosts.map((post: any) => (
-              <Card key={post.id} className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-[#0f172a]/5 overflow-hidden flex flex-col rounded-sm">
-                <Link href={`/post/${post.slug}`} className="block relative aspect-[16/9] overflow-hidden">
+              <Card key={post.id} className="group hover:shadow-xl hover:border-red-200 hover:-translate-y-1 transition-all duration-300 border border-slate-200/90 overflow-hidden flex flex-col rounded-2xl bg-white shadow-sm">
+                <Link href={`/post/${post.slug}`} className="block relative aspect-[16/9] overflow-hidden bg-slate-100">
                   <Image
-                    
                     src={post.featured_image 
                       ? (post.featured_image.startsWith('http') ? post.featured_image : `/storage/${post.featured_image.replace(/^\/?storage\//, '')}`)
                       : '/images/imm_hero_bg.jpg'} 
@@ -236,19 +240,19 @@ export default async function PostPage(props: Props) {
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
                   <div className="absolute bottom-4 left-4">
-                    <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] border-none shadow-sm rounded-sm">
+                    <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] border-none shadow-md rounded-full px-3 py-0.5 text-xs font-semibold">
                       {post.category?.name || 'Artikel'}
                     </Badge>
                   </div>
                 </Link>
                 <CardContent className="p-6 flex flex-col flex-grow">
-                  <div className="flex items-center text-xs text-[#0f172a]/60 mb-3 font-medium gap-4">
+                  <div className="flex items-center text-xs text-slate-500 mb-3 font-medium gap-4">
                     <span className="flex items-center">
-                      <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                      <Calendar className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
                       {new Date(post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}
                     </span>
                     <span className="flex items-center">
-                      <User className="w-3.5 h-3.5 mr-1.5" />
+                      <User className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
                       {post.user?.name || 'Admin'}
                     </span>
                   </div>
@@ -260,10 +264,10 @@ export default async function PostPage(props: Props) {
                       {post.title}
                     </h3>
                   </Link>
-                  <p className="text-[#0f172a]/70 text-sm mb-6 line-clamp-2 leading-relaxed flex-grow">
+                  <p className="text-slate-600 text-sm mb-6 line-clamp-2 leading-relaxed flex-grow">
                     {post.excerpt}
                   </p>
-                  <div className="mt-auto pt-4 border-t border-[#0f172a]/5">
+                  <div className="mt-auto pt-4 border-t border-slate-100">
                     <Link 
                       href={`/post/${post.slug}`} 
                       className="inline-flex items-center text-sm font-bold text-[#c20000] hover:text-[#a30000] transition-colors group/read"
@@ -280,11 +284,13 @@ export default async function PostPage(props: Props) {
       )}
       
       {posts.length === 0 && (
-        <div className="text-center py-20 max-w-md mx-auto">
-          <FileSearch className="w-12 h-12 text-[#0f172a]/20 mx-auto mb-4" />
-          <p className="text-[#0f172a] font-semibold text-lg mb-2">Belum ada post yang dipublikasikan.</p>
-          <p className="text-[#0f172a]/70 text-sm mb-6">Coba ubah filter kategori atau kembali lagi nanti.</p>
-          <Link href="/post" className="inline-flex items-center px-5 py-2.5 rounded-sm border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors">
+        <div className="text-center py-20 max-w-md mx-auto bg-white rounded-2xl border border-slate-200/90 p-8 shadow-sm">
+          <div className="w-16 h-16 rounded-full bg-red-50 text-[#c20000] flex items-center justify-center mx-auto mb-4 border border-red-100">
+            <FileSearch className="w-8 h-8" />
+          </div>
+          <p className="text-[#0f172a] font-bold text-lg mb-2">Belum ada post yang dipublikasikan.</p>
+          <p className="text-slate-500 text-sm mb-6">Coba ubah filter kategori atau kembali lagi nanti.</p>
+          <Link href="/post" className="inline-flex items-center px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors shadow-sm">
             Tampilkan Semua Post
           </Link>
         </div>
@@ -293,15 +299,15 @@ export default async function PostPage(props: Props) {
       {lastPage > 1 && (
         <nav className="flex items-center justify-center gap-2 mt-14" aria-label="Pagination">
           {currentPage > 1 && (
-            <Link href={`/post?page=${currentPage - 1}${category ? `&category=${category}` : ''}`} className="px-4 py-2 rounded-sm border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors">
+            <Link href={`/post?page=${currentPage - 1}${category ? `&category=${category}` : ''}`} className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors shadow-sm">
               Sebelumnya
             </Link>
           )}
-          <span className="px-4 py-2 text-sm font-semibold text-slate-500">
+          <span className="px-4 py-2 text-sm font-semibold text-slate-500 bg-white rounded-xl border border-slate-200/80 shadow-sm">
             Halaman {currentPage} dari {lastPage}
           </span>
           {currentPage < lastPage && (
-            <Link href={`/post?page=${currentPage + 1}${category ? `&category=${category}` : ''}`} className="px-4 py-2 rounded-sm border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors">
+            <Link href={`/post?page=${currentPage + 1}${category ? `&category=${category}` : ''}`} className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-[#c20000] hover:text-[#c20000] transition-colors shadow-sm">
               Selanjutnya
             </Link>
           )}

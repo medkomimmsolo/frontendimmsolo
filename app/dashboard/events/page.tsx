@@ -244,40 +244,46 @@ export default function EventsManagement() {
       </div>
 
       {/* WP-Style Data Table with IMM Theme */}
-      <div className="bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+        <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-white border-b border-[#0f172a]/5 text-[#0f172a]/70 text-sm font-semibold uppercase tracking-wider">
-                <th className="p-4 pl-6 w-10">
+              <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                <th className="py-3.5 px-4 pl-6 w-10">
                   <input 
                     type="checkbox" 
                     onChange={handleSelectAll}
                     checked={events.length > 0 && selectedEvents.length === events.length}
-                    className="rounded border-slate-200 text-[#c20000] focus:ring-[#c20000]" 
+                    className="rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" 
                   />
                 </th>
-                <th className="p-3">Agenda</th>
-                <th className="p-4 w-48">Lokasi</th>
-                <th className="p-4 w-32">Status</th>
-                <th className="p-4 w-48 pr-6">Tanggal</th>
+                <th className="py-3.5 px-4">Agenda</th>
+                <th className="py-3.5 px-4 w-48">Lokasi</th>
+                <th className="py-3.5 px-4 w-32">Status</th>
+                <th className="py-3.5 px-4 w-48 pr-6">Tanggal</th>
               </tr>
             </thead>
             
             <tbody className="divide-y divide-slate-100 text-sm bg-white">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="p-16 text-center">
+                  <td colSpan={5} className="py-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-500">
                       <Loader2 className="w-8 h-8 animate-spin text-[#c20000] mb-2" />
-                      <span className="text-sm">Memuat data...</span>
+                      <span className="text-sm font-medium">Memuat data agenda...</span>
                     </div>
                   </td>
                 </tr>
               ) : events.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-12 text-slate-500 text-center">
-                    Tidak ada agenda yang ditemukan.
+                  <td colSpan={5} className="py-16 text-center">
+                    <div className="flex flex-col items-center justify-center text-slate-400">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3 text-slate-300">
+                        <CalendarDays className="w-6 h-6" />
+                      </div>
+                      <p className="text-sm font-semibold text-slate-700">Tidak ada agenda ditemukan</p>
+                      <p className="text-xs text-slate-400 mt-1">Coba sesuaikan kata kunci atau filter status</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -352,19 +358,19 @@ export default function EventsManagement() {
             </tbody>
             
             <tfoot>
-              <tr className="bg-white border-b border-[#0f172a]/5 text-[#0f172a]/70 text-sm font-semibold uppercase tracking-wider">
-                <th className="p-4 pl-6 w-10">
+              <tr className="bg-slate-50/80 border-t border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                <th className="py-3 px-4 pl-6 w-10">
                   <input 
                     type="checkbox" 
                     onChange={handleSelectAll}
                     checked={events.length > 0 && selectedEvents.length === events.length}
-                    className="rounded border-slate-200 text-[#c20000] focus:ring-[#c20000]" 
+                    className="rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" 
                   />
                 </th>
-                <th className="p-3">Agenda</th>
-                <th className="p-3">Location</th>
-                <th className="p-3">Status</th>
-                <th className="p-4 pr-6">Tanggal</th>
+                <th className="py-3 px-4">Agenda</th>
+                <th className="py-3 px-4">Lokasi</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 pr-6">Tanggal</th>
               </tr>
             </tfoot>
           </table>
@@ -372,7 +378,7 @@ export default function EventsManagement() {
       </div>
       
       {/* Bottom Pagination */}
-      <div className="bg-white border border-[#0f172a]/10 rounded-sm mt-4">
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs mt-4 overflow-hidden">
         <PaginationControls
           currentPage={currentPage}
           totalPages={totalPages}

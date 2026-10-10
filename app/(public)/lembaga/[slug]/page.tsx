@@ -71,28 +71,28 @@ export default async function LembagaDetailPage({ params }: { params: Promise<{ 
       />
       <article className="max-w-3xl mx-auto px-4 md:px-6 mt-10">
         <div className="flex items-center justify-between mb-8">
-          <Link href="/lembaga" className="inline-flex items-center text-sm font-semibold text-[#0f172a]/70 hover:text-[#c20000] transition-colors">
+          <Link href="/lembaga" className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-[#c20000] transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Kembali ke Daftar
           </Link>
-          <nav aria-label="breadcrumb" className="flex items-center text-sm text-[#0f172a]/70">
-            <Link href="/" className="hover:text-[#0f172a]/90">Beranda</Link>
-            <ChevronRight className="w-4 h-4 mx-1" />
-            <Link href="/lembaga" className="hover:text-[#0f172a]/90">Komisariat & Lembaga</Link>
-            <ChevronRight className="w-4 h-4 mx-1" />
-            <span className="text-[#0f172a]/80 truncate max-w-[200px]">{item.name}</span>
+          <nav aria-label="breadcrumb" className="flex items-center text-sm text-slate-400">
+            <Link href="/" className="hover:text-slate-700 transition-colors">Beranda</Link>
+            <ChevronRight className="w-3.5 h-3.5 mx-1.5" />
+            <Link href="/lembaga" className="hover:text-slate-700 transition-colors">Komisariat & Lembaga</Link>
+            <ChevronRight className="w-3.5 h-3.5 mx-1.5" />
+            <span className="text-slate-800 font-medium truncate max-w-[200px]">{item.name}</span>
           </nav>
         </div>
 
         <div className="flex items-center gap-4 mb-6">
-          <span className="w-14 h-14 rounded-sm bg-[#c20000]/5 text-[#c20000] inline-flex items-center justify-center shrink-0">
+          <span className="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 text-[#c20000] inline-flex items-center justify-center shrink-0 shadow-sm">
             <Building2 className="w-7 h-7" />
           </span>
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-[#c20000]">
               {TIPE_LABEL[item.tipe] || 'Lembaga'}
             </p>
-            <h1 className="text-2xl md:text-4xl font-bold text-[#0f172a] leading-tight" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+            <h1 className="text-2xl md:text-4xl font-extrabold text-[#0f172a] leading-tight tracking-tight" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
               {item.name}
             </h1>
           </div>
@@ -115,16 +115,16 @@ export default async function LembagaDetailPage({ params }: { params: Promise<{ 
             <h2 className="text-xl font-bold text-[#0f172a] mb-3" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
               Sejarah
             </h2>
-            <p className="text-[#0f172a]/80 leading-relaxed whitespace-pre-line">{item.sejarah}</p>
+            <p className="text-slate-600 leading-relaxed whitespace-pre-line text-base">{item.sejarah}</p>
           </section>
         )}
 
         {item.visi_misi && (
-          <section className="bg-[#f8f9fa] border border-[#0f172a]/10 rounded-sm p-6 md:p-8">
+          <section className="bg-slate-50/80 border border-slate-200/90 rounded-2xl p-6 md:p-8 shadow-sm">
             <h2 className="text-xl font-bold text-[#0f172a] mb-3" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
               Visi & Misi
             </h2>
-            <p className="text-[#0f172a]/80 leading-relaxed whitespace-pre-line">{item.visi_misi}</p>
+            <p className="text-slate-600 leading-relaxed whitespace-pre-line text-base">{item.visi_misi}</p>
           </section>
         )}
       </article>

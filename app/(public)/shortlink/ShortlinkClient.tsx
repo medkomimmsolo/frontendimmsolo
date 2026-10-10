@@ -196,7 +196,7 @@ export default function PengajuanShortlink() {
     return (
       <main className="min-h-screen bg-[#f8f9fa] pt-24 pb-20 flex flex-col items-center justify-center">
         <div className="max-w-lg w-full px-4">
-          <div className="bg-white rounded-sm shadow-xl shadow-slate-200/50 border border-slate-100 p-8 md:p-10 text-center space-y-6">
+          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200/90 p-8 md:p-10 text-center space-y-6">
             <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-10 h-10" />
             </div>
@@ -204,11 +204,11 @@ export default function PengajuanShortlink() {
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a] mb-3" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Pengajuan Berhasil!</h1>
               <p className="text-slate-600 leading-relaxed">
-                Tautan pendek Anda <span className="font-bold text-[#0f172a] bg-slate-100 px-2 py-0.5 rounded-sm">immsolo.or.id/{formData.slug}</span> telah kami terima dan berstatus <span className="text-yellow-600 font-bold bg-yellow-50 px-2 py-0.5 rounded-sm">Pending</span>.
+                Tautan pendek Anda <span className="font-bold text-[#0f172a] bg-slate-100 px-2 py-0.5 rounded-md">immsolo.or.id/{formData.slug}</span> telah kami terima dan berstatus <span className="text-yellow-700 font-bold bg-yellow-50 px-2.5 py-0.5 rounded-full border border-yellow-200 text-xs">Pending</span>.
               </p>
             </div>
             
-            <div className="p-5 bg-blue-50 border border-blue-100 rounded-sm text-sm text-left">
+            <div className="p-5 bg-blue-50 border border-blue-100 rounded-xl text-sm text-left">
               <div className="font-bold text-blue-900 mb-1">Tindakan Selanjutnya:</div>
               <p className="text-blue-800 leading-relaxed">
                 Silakan hubungi Admin untuk meminta <strong>Token Aktivasi</strong>. Setelah Anda mendapatkan Token, masukkan Token tersebut di halaman <strong>Aktivasi</strong> untuk menghidupkan tautan Anda.
@@ -217,7 +217,7 @@ export default function PengajuanShortlink() {
 
             <div className="space-y-3 pt-2">
               <Button 
-                className="w-full h-12 text-base font-bold bg-[#25D366] hover:bg-[#1da851] text-white shadow-md shadow-[#25D366]/20 rounded-sm"
+                className="w-full h-12 text-base font-bold bg-[#25D366] hover:bg-[#1da851] text-white shadow-md shadow-[#25D366]/20 rounded-xl"
                 onClick={() => {
                   const text = `Halo Admin PC IMM Kota Surakarta,%0A%0ASaya telah mengajukan pembuatan tautan pendek (Shortlink) baru dengan rincian berikut:%0A%0A- *Tautan Akhir*: immsolo.or.id/${formData.slug}%0A- *URL Tujuan*: ${formData.target_url}%0A- *No. HP Pengaju*: ${formData.phone_number}%0A%0AMohon bantuannya untuk mengecek dan memberikan token aktivasi untuk tautan tersebut. Terima kasih!`;
                   window.open(`https://wa.me/${adminWa}?text=${text}`, '_blank');
@@ -226,7 +226,7 @@ export default function PengajuanShortlink() {
                 Minta Token via WhatsApp
               </Button>
 
-              <Button variant="outline" className="w-full h-12 rounded-sm font-semibold border-slate-200 text-slate-600 hover:bg-slate-50" onClick={() => { setIsSuccess(false); setActiveTab('aktivasi'); }}>
+              <Button variant="outline" className="w-full h-12 rounded-xl font-semibold border-slate-200 text-slate-600 hover:bg-slate-50" onClick={() => { setIsSuccess(false); setActiveTab('aktivasi'); }}>
                 Lanjut ke Halaman Aktivasi
               </Button>
             </div>
@@ -270,7 +270,7 @@ export default function PengajuanShortlink() {
           
           {/* Form Column */}
           <div className="lg:col-span-2">
-            <Card className="border-0 shadow-lg shadow-slate-200/50 rounded-sm bg-white overflow-hidden">
+            <Card className="border border-slate-200/90 shadow-xl shadow-slate-200/50 rounded-2xl bg-white overflow-hidden">
               
               {/* Tabs */}
               <div className="flex border-b border-slate-200 bg-slate-50" role="tablist" aria-label="Layanan shortlink">
@@ -313,7 +313,7 @@ export default function PengajuanShortlink() {
                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-[#c20000] mr-2 text-xs">1</span>
                         Tautan Akhir (Custom Link) <span className="text-red-500 ml-1">*</span>
                       </label>
-                      <div className="flex rounded-sm overflow-hidden border border-slate-200 focus-within:border-[#c20000] bg-slate-50 group">
+                      <div className="flex rounded-xl overflow-hidden border border-slate-200 focus-within:border-[#c20000] bg-slate-50 group">
                         <span className="flex items-center px-4 bg-slate-50 text-slate-500 font-semibold border-r border-slate-200 select-none group-focus-within:bg-red-50 group-focus-within:text-[#c20000] group-focus-within:border-[#c20000] transition-colors">
                           immsolo.or.id/
                         </span>
@@ -371,7 +371,7 @@ export default function PengajuanShortlink() {
                           value={formData.target_url}
                           onChange={(e) => setFormData({...formData, target_url: e.target.value})}
                           placeholder="https://docs.google.com/forms/d/e/..."
-                          className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] font-medium text-slate-900 placeholder:font-normal transition-colors"
+                          className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000] font-medium text-slate-900 placeholder:font-normal transition-colors"
                         />
                       </div>
                     </div>
@@ -390,7 +390,7 @@ export default function PengajuanShortlink() {
                           value={formData.phone_number}
                           onChange={(e) => setFormData({...formData, phone_number: e.target.value})}
                           placeholder="Contoh: 081234567890"
-                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] font-medium text-slate-900 placeholder:font-normal transition-colors"
+                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000] font-medium text-slate-900 placeholder:font-normal transition-colors"
                         />
                       </div>
                     </div>
@@ -401,7 +401,7 @@ export default function PengajuanShortlink() {
                         Verifikasi Keamanan (Captcha) <span className="text-red-500 ml-1">*</span>
                       </label>
                       <div className="ml-8 flex flex-col sm:flex-row sm:items-center gap-3">
-                        <div className="relative shrink-0 border border-slate-200 rounded-sm overflow-hidden bg-white">
+                        <div className="relative shrink-0 border border-slate-200 rounded-xl overflow-hidden bg-white">
                           {captcha?.image ? (
                             <img src={captcha.image} alt="Kode captcha" width={190} height={64} className="block" />
                           ) : (
@@ -427,7 +427,7 @@ export default function PengajuanShortlink() {
                             onChange={(e) => setCaptchaAnswer(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
                             placeholder="Ketik kode di atas"
                             aria-label="Ketik kode captcha yang terlihat pada gambar"
-                            className="flex-1 min-w-0 px-4 py-3 bg-white border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] font-bold tracking-[0.2em] text-slate-900 transition-colors"
+                            className="flex-1 min-w-0 px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000] font-bold tracking-[0.2em] text-slate-900 transition-colors"
                           />
                           <button
                             type="button"
@@ -435,7 +435,7 @@ export default function PengajuanShortlink() {
                             disabled={captchaLoading}
                             title="Muat gambar baru"
                             aria-label="Muat gambar captcha baru"
-                            className="shrink-0 p-3 border border-slate-200 rounded-sm text-slate-500 hover:text-[#c20000] hover:border-[#c20000] transition-colors disabled:opacity-40"
+                            className="shrink-0 p-3 border border-slate-200 rounded-xl text-slate-500 hover:text-[#c20000] hover:border-[#c20000] transition-colors disabled:opacity-40"
                           >
                             <RefreshCw className={`w-5 h-5 ${captchaLoading ? 'animate-spin' : ''}`} />
                           </button>
@@ -450,7 +450,7 @@ export default function PengajuanShortlink() {
                       <Button 
                         type="submit" 
                         disabled={isSubmitting}
-                        className="w-full h-12 text-base font-bold bg-[#0f172a] hover:bg-[#c20000] text-white rounded-sm shadow-md transition-colors"
+                        className="w-full h-12 text-base font-bold bg-[#0f172a] hover:bg-[#c20000] text-white rounded-xl shadow-md transition-colors"
                       >
                         {isSubmitting ? (
                           <>
@@ -471,7 +471,7 @@ export default function PengajuanShortlink() {
                 {/* TAB: AKTIVASI */}
                 {activeTab === 'aktivasi' && (
                   <form onSubmit={handleActivate} className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="bg-blue-50 border border-blue-100 p-4 rounded-sm text-sm text-blue-800 mb-6">
+                    <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-sm text-blue-800 mb-6">
                       Masukkan rincian data pengajuan Anda dan <strong>Token</strong> yang telah diberikan oleh Admin untuk mengaktifkan tautan Anda.
                     </div>
                     
@@ -484,7 +484,7 @@ export default function PengajuanShortlink() {
                         value={activationData.slug}
                         onChange={(e) => setActivationData({...activationData, slug: e.target.value.replace(/[^a-zA-Z0-9-_]/g, '')})}
                         placeholder="RegisPIDNAS26"
-                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] font-medium"
+                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000] font-medium"
                       />
                     </div>
 
@@ -498,7 +498,7 @@ export default function PengajuanShortlink() {
                         value={activationData.phone_number}
                         onChange={(e) => setActivationData({...activationData, phone_number: e.target.value})}
                         placeholder="Sesuai saat mendaftar"
-                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] font-medium"
+                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000] font-medium"
                       />
                     </div>
 
@@ -512,7 +512,7 @@ export default function PengajuanShortlink() {
                         value={activationData.token}
                         onChange={(e) => setActivationData({...activationData, token: e.target.value})}
                         placeholder="Contoh: A8F9K2J1"
-                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] font-bold text-center tracking-[0.3em] uppercase"
+                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000] font-bold text-center tracking-[0.3em] uppercase"
                       />
                     </div>
 
@@ -520,7 +520,7 @@ export default function PengajuanShortlink() {
                       <Button 
                         type="submit" 
                         disabled={isActivating}
-                        className="w-full h-12 text-base font-bold bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm shadow-md transition-colors"
+                        className="w-full h-12 text-base font-bold bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl shadow-md transition-colors"
                       >
                         {isActivating ? (
                           <Loader2 className="w-5 h-5 mr-3 animate-spin" />
@@ -552,7 +552,7 @@ export default function PengajuanShortlink() {
                   <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <form onSubmit={handleCheckStatus} className="flex gap-2">
                       <label htmlFor="status-slug" className="sr-only">Slug shortlink yang ingin dicek</label>
-                      <div className="flex-1 rounded-sm overflow-hidden border border-slate-200 focus-within:border-[#c20000] bg-white flex">
+                      <div className="flex-1 rounded-xl overflow-hidden border border-slate-200 focus-within:border-[#c20000] bg-white flex">
                         <span className="flex items-center px-4 bg-slate-50 text-slate-500 font-semibold border-r border-slate-200" aria-hidden="true">
                           immsolo.or.id/
                         </span>
@@ -569,7 +569,7 @@ export default function PengajuanShortlink() {
                       <Button 
                         type="submit" 
                         disabled={isChecking || !statusQuery}
-                        className="h-auto bg-[#0f172a] hover:bg-[#c20000] px-6 rounded-sm"
+                        className="h-auto bg-[#0f172a] hover:bg-[#c20000] px-6 rounded-xl"
                       >
                         {isChecking ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Cek'}
                       </Button>
@@ -578,14 +578,14 @@ export default function PengajuanShortlink() {
                     {statusResult && (
                       <div className="mt-8 border-t border-slate-100 pt-8" aria-live="polite">
                         {statusResult.not_found ? (
-                          <div className="text-center p-6 bg-red-50 rounded-sm border border-red-100">
+                          <div className="text-center p-6 bg-red-50 rounded-xl border border-red-100">
                             <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-3" aria-hidden="true" />
                             <h2 className="font-bold text-red-800 text-lg mb-1">Tautan Tidak Ditemukan</h2>
                             <p className="text-red-600 text-sm">Pastikan slug yang Anda masukkan sudah benar.</p>
                           </div>
                         ) : (
                           <div className="space-y-4">
-                            <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-slate-50">
+                            <div className="flex items-center justify-between p-4 border border-slate-200 rounded-xl bg-slate-50">
                               <span className="text-sm font-bold text-slate-500">Status Aktif:</span>
                               {statusResult.is_active ? (
                                 <span className="px-3 py-1 bg-green-100 text-green-700 font-bold text-sm rounded-full flex items-center gap-1.5">
@@ -598,12 +598,12 @@ export default function PengajuanShortlink() {
                               )}
                             </div>
                             
-                            <div className="p-4 border border-slate-200 rounded-sm bg-slate-50">
+                            <div className="p-4 border border-slate-200 rounded-xl bg-slate-50">
                               <span className="text-sm font-bold text-slate-500 block mb-1">Tautan Anda:</span>
                               <div className="font-mono text-[#c20000] font-bold text-lg">immsolo.or.id/{statusResult.slug}</div>
                             </div>
                             {statusResult.is_active ? (
-                              <div className="p-4 border border-slate-200 rounded-sm bg-white flex flex-col sm:flex-row items-center gap-4">
+                              <div className="p-4 border border-slate-200 rounded-xl bg-white flex flex-col sm:flex-row items-center gap-4">
                                 <QRCodeSVG value={`https://immsolo.or.id/${statusResult.slug}`} size={120} level="M" />
                                 <div className="text-sm text-slate-600">
                                   <p className="font-bold text-slate-800 mb-1">QR Code tautan</p>
@@ -611,13 +611,13 @@ export default function PengajuanShortlink() {
                                 </div>
                               </div>
                             ) : (
-                              <div className="p-4 bg-amber-50 border border-amber-200 rounded-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+                              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
                                 <p className="text-xs text-amber-800">
                                   Tautan ini belum aktif. Minta token kepada admin untuk mengaktifkannya.
                                 </p>
                                 <Button
                                   size="sm"
-                                  className="bg-[#25D366] hover:bg-[#1da851] text-white shrink-0 text-xs font-bold"
+                                  className="bg-[#25D366] hover:bg-[#1da851] text-white shrink-0 text-xs font-bold rounded-xl"
                                   onClick={() => {
                                     const text = `Halo Admin PC IMM Kota Surakarta,%0A%0ASaya ingin meminta Token Aktivasi untuk tautan pendek immsolo.or.id/${statusResult.slug}. Terima kasih!`;
                                     window.open(`https://wa.me/${adminWa}?text=${text}`, '_blank');
@@ -640,10 +640,10 @@ export default function PengajuanShortlink() {
 
           {/* Sidebar Info Column */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white rounded-sm p-8 shadow-lg shadow-slate-200/50 border border-slate-100">
+            <div className="bg-white rounded-2xl p-8 shadow-xl shadow-slate-200/50 border border-slate-200/90">
               
               <div className="flex items-center gap-4 mb-6">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-sm bg-red-100 text-[#c20000] shrink-0">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-red-100 text-[#c20000] shrink-0">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <h2 className="font-bold text-slate-800 text-xl" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
@@ -677,7 +677,7 @@ export default function PengajuanShortlink() {
                   href={`https://wa.me/${adminWa}?text=${encodeURIComponent('Halo Admin PC IMM Kota Surakarta, saya ingin bertanya mengenai layanan shortlink immsolo.or.id')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-sm bg-slate-100 hover:bg-[#25D366] hover:text-white text-slate-700 text-xs font-bold transition-all"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-100 hover:bg-[#25D366] hover:text-white text-slate-700 text-xs font-bold transition-all"
                 >
                   Bantuan Admin WhatsApp
                 </a>

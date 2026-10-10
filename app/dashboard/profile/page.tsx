@@ -15,6 +15,7 @@ export default function ProfileSettings() {
   
   const [profile, setProfile] = useState({
     name: '',
+    username: '',
     email: '',
     password: '',
     password_confirmation: '',
@@ -27,6 +28,7 @@ export default function ProfileSettings() {
         const user = response.data.data;
         setProfile({
           name: user.name || '',
+          username: user.username || '',
           email: user.email || '',
           password: '',
           password_confirmation: '',
@@ -59,6 +61,7 @@ export default function ProfileSettings() {
     try {
       await api.put('/profile', {
         name: profile.name,
+        username: profile.username || undefined,
         email: profile.email,
         password: profile.password || undefined,
         password_confirmation: profile.password_confirmation || undefined,
@@ -147,6 +150,24 @@ export default function ProfileSettings() {
                     placeholder="Nama Anda"
                     required
                   />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Username</label>
+                    <span className="text-xs text-slate-400 font-normal">Dapat digunakan untuk masuk/login</span>
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-mono font-medium">@</span>
+                    <input 
+                      type="text" 
+                      name="username"
+                      value={profile.username}
+                      onChange={handleChange}
+                      className={`${inputClass} pl-8.5 font-mono`}
+                      placeholder="nama_pengguna"
+                    />
+                  </div>
                 </div>
 
                 <div>

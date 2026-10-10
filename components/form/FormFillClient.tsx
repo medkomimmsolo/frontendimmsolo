@@ -199,7 +199,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
           </p>
           <Link
             href="/"
-            className="inline-flex items-center px-5 py-2.5 rounded-sm bg-[#c20000] text-white text-sm font-semibold hover:bg-[#a30000] transition-colors"
+            className="inline-flex items-center px-5 py-2.5 rounded-xl bg-[#c20000] text-white text-sm font-semibold hover:bg-[#a30000] transition-colors"
           >
             Kembali ke Beranda
           </Link>
@@ -224,7 +224,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
 
       {/* ── HEADER IMAGE (Google Form Banner Cover) ── */}
       {form.header_image && (
-        <div className="w-full h-44 sm:h-56 md:h-64 rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
+        <div className="w-full h-44 sm:h-56 md:h-64 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
           <img
             src={form.header_image}
             alt={form.title}
@@ -234,7 +234,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
       )}
 
       {/* ── HEADER CARD (Google Form Style Top Card) ── */}
-      <div className="bg-white rounded-lg border-t-8 border-t-[#c20000] border-x border-b border-slate-200 p-6 sm:p-8 shadow-sm">
+      <div className="bg-white rounded-2xl border-t-8 border-t-[#c20000] border-x border-b border-slate-200 p-6 sm:p-8 shadow-sm">
         <h1
           className="text-2xl sm:text-3xl font-bold text-[#0f172a] tracking-tight leading-snug"
           style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
@@ -251,7 +251,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
         {(form.ends_at || form.max_responses) && (
           <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-500 font-medium">
             {form.ends_at && (
-              <span className="px-2.5 py-1 bg-slate-100 rounded-sm">
+              <span className="px-2.5 py-1 bg-slate-100 rounded-full">
                 Batas:{' '}
                 {new Date(form.ends_at).toLocaleString('id-ID', {
                   day: 'numeric',
@@ -264,7 +264,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
               </span>
             )}
             {form.max_responses && (
-              <span className="px-2.5 py-1 bg-slate-100 rounded-sm">
+              <span className="px-2.5 py-1 bg-slate-100 rounded-full">
                 Kuota: {form.max_responses} peserta
               </span>
             )}
@@ -274,7 +274,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
         <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
           <span className="text-red-500 font-semibold">* Menunjukkan pertanyaan yang wajib diisi</span>
           {preview && (
-            <span className="px-2 py-0.5 bg-amber-100 text-amber-800 font-bold rounded-sm">MODE PRATINJAU</span>
+            <span className="px-2.5 py-0.5 bg-amber-100 text-amber-800 font-bold rounded-full">MODE PRATINJAU</span>
           )}
         </div>
       </div>
@@ -284,7 +284,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
         <div
           id="form-card-email"
           onFocus={() => setFocusedField('email')}
-          className={`bg-white rounded-lg border p-6 transition-all duration-200 shadow-sm ${
+          className={`bg-white rounded-2xl border p-6 transition-all duration-200 shadow-sm ${
             focusedField === 'email'
               ? 'border-l-4 border-l-[#c20000] border-slate-300 ring-1 ring-[#c20000]/10'
               : 'border-slate-200'
@@ -299,7 +299,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
                 Alamat email aktif untuk verifikasi identitas pendaftar & mencegah spam.
               </p>
             </div>
-            <span className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold shrink-0">
+            <span className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold shrink-0">
               <ShieldCheck className="w-3 h-3 text-emerald-600" /> Wajib Email
             </span>
           </div>
@@ -327,7 +327,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
 
       {/* Progress Bar Multi Section */}
       {hasSections && sections.length > 1 && (
-        <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-sm flex items-center gap-4">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex items-center gap-4">
           <div className="flex-1 bg-slate-100 h-2 rounded-full overflow-hidden">
             <div
               className="bg-[#c20000] h-full transition-all duration-300"
@@ -344,7 +344,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
 
       {/* Section Title Banner jika ada */}
       {activeSection.title && (
-        <div className="bg-white rounded-lg border-l-8 border-l-[#0f172a] border-y border-r border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border-l-8 border-l-[#0f172a] border-y border-r border-slate-200 p-6 shadow-sm">
           <h2 className="text-lg font-bold text-[#0f172a]">{activeSection.title}</h2>
           {activeSection.description && (
             <p className="text-sm text-slate-600 mt-1.5 leading-relaxed">{activeSection.description}</p>
@@ -360,7 +360,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
             id={`form-card-${field.id}`}
             key={field.id}
             onFocus={() => setFocusedField(field.id)}
-            className={`bg-white rounded-lg border p-6 transition-all duration-200 shadow-sm ${
+            className={`bg-white rounded-2xl border p-6 transition-all duration-200 shadow-sm ${
               isFocused
                 ? 'border-l-4 border-l-[#c20000] border-slate-300 ring-1 ring-[#c20000]/10'
                 : 'border-slate-200'
@@ -418,7 +418,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
                   value={answers[field.id] || ''}
                   onChange={(e) => setAnswer(field.id, e.target.value)}
                   required={field.required}
-                  className="w-full sm:max-w-xs border border-slate-200 rounded-sm px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-[#c20000]"
+                  className="w-full sm:max-w-xs border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-[#c20000]"
                 />
               )}
 
@@ -430,7 +430,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
                   value={answers[field.id] || ''}
                   onChange={(e) => setAnswer(field.id, e.target.value)}
                   required={field.required}
-                  className="w-full sm:max-w-xs border border-slate-200 rounded-sm px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-[#c20000]"
+                  className="w-full sm:max-w-xs border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-[#c20000]"
                 />
               )}
 
@@ -441,7 +441,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
                   value={answers[field.id] || ''}
                   onChange={(e) => setAnswer(field.id, e.target.value)}
                   required={field.required}
-                  className="w-full sm:max-w-md border border-slate-200 rounded-sm px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-[#c20000] bg-white cursor-pointer"
+                  className="w-full sm:max-w-md border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-[#c20000] bg-white cursor-pointer"
                 >
                   <option value="">Pilih opsi</option>
                   {(field.options || []).map((opt: string, i: number) => (
@@ -518,7 +518,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
                           key={val}
                           type="button"
                           onClick={() => setAnswer(field.id, val)}
-                          className={`flex-1 py-3 text-center rounded text-sm font-semibold border transition-all ${
+                          className={`flex-1 py-3 text-center rounded-xl text-sm font-semibold border transition-all ${
                             selected
                               ? 'bg-[#c20000] text-white border-[#c20000] shadow-sm'
                               : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-100'
@@ -536,7 +536,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
               {field.type === 'file' && (
                 <div className="pt-1">
                   {answers[field.id] instanceof File ? (
-                    <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
+                    <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
                       <div className="flex items-center gap-2 text-xs text-slate-700 truncate">
                         <FileUp className="w-4 h-4 text-[#c20000] shrink-0" />
                         <span className="font-semibold truncate">{answers[field.id].name}</span>
@@ -553,7 +553,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
                       </button>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-[#c20000] hover:bg-red-50/20 transition-all text-center">
+                    <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:border-[#c20000] hover:bg-red-50/20 transition-all text-center">
                       <FileUp className="w-8 h-8 text-slate-400 mb-2" />
                       <span className="text-sm font-semibold text-slate-700">Pilih berkas dari perangkat Anda</span>
                       <span className="text-xs text-slate-400 mt-1">
