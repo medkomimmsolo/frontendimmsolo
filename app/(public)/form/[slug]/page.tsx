@@ -43,24 +43,8 @@ export default async function FormFillPage({ params }: { params: Promise<{ slug:
   if (!form) notFound();
 
   return (
-    <main className="min-h-screen bg-[#f8f9fa] pt-28 pb-20 px-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#c20000] mb-2">Formulir Pendaftaran</p>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-            {form.title}
-          </h1>
-          {form.description && <p className="text-slate-500 mt-2 leading-relaxed">{form.description}</p>}
-          {(form.ends_at || form.max_responses) && (
-            <p className="text-xs text-slate-400 mt-2">
-              {form.ends_at ? `Ditutup ${new Date(form.ends_at).toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}` : ''}
-              {form.ends_at && form.max_responses ? ' • ' : ''}
-              {form.max_responses ? `Kuota ${form.max_responses} pendaftar` : ''}
-            </p>
-          )}
-        </div>
-        <FormFillClient form={form} />
-      </div>
+    <main className="min-h-screen bg-[#f0f4f9] pt-28 pb-20 px-4">
+      <FormFillClient form={form} />
     </main>
   );
 }

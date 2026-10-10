@@ -44,15 +44,37 @@ export default async function LinktreePage({ params }: { params: Promise<{ slug:
   const items = page.active_items || page.items?.filter((i: any) => i.is_active) || [];
   const bg = page.bg_color || '#0b1120';
   const accent = page.accent_color || '#c20000';
-  const bgIsLight = (() => {
-    const hex = bg.replace('#', '');
-    if (!/^[0-9a-fA-F]{6}$/.test(hex)) return false;
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
+
+  /** Cek apakah warna hex terang atau gelap menggunakan rumus relative luminance */
+  const isLightColor = (hexColor?: string | null): boolean => {
+    if (!hexColor) return false;
+    const clean = hexColor.replace('#', '');
+    if (!/^[0-9a-fA-F]{6}$/.test(clean)) return false;
+    const r = parseInt(clean.slice(0, 2), 16);
+    const g = parseInt(clean.slice(2, 4), 16);
+    const b = parseInt(clean.slice(4, 6), 16);
+    // Relative luminance
     return (0.299 * r + 0.587 * g + 0.114 * b) > 150;
-  })();
-  const footColor = bgIsLight ? 'rgba(15,23,42,0.55)' : 'rgba(255,255,255,0.55)';
+  };
+
+  const bgIsLight = isLightColor(bg);
+
+  // Jika text_color tidak ditentukan secara manual, otomatis beri warna kontras:
+  // Background Terang -> Teks Hitam Gelap (#0f172a)
+  // Background Gelap  -> Teks Putih Bersih (#ffffff)
+  const textColor = page.text_color || (bgIsLight ? '#0f172a' : '#ffffff');
+  const subTextColor = page.text_color 
+    ? `${page.text_color}bb` 
+    : (bgIsLight ? 'rgba(15,23,42,0.72)' : 'rgba(255,255,255,0.78)');
+
+  const btnBg = page.btn_bg_color || null;
+  
+  // Jika btn_bg_color diisi tapi btn_text_color kosong, otomatis sesuaikan teks tombol
+  // terhadap warna latar tombolnya sendiri:
+  const btnIsLight = btnBg ? isLightColor(btnBg) : false;
+  const btnText = page.btn_text_color || (btnBg ? (btnIsLight ? '#0f172a' : '#ffffff') : (bgIsLight ? '#0f172a' : '#ffffff'));
+
+  const footColor = bgIsLight ? 'rgba(15,23,42,0.6)' : 'rgba(255,255,255,0.6)';
   const avatarSrc = page.avatar
     ? (page.avatar.startsWith('http') ? page.avatar : page.avatar)
     : '/images/imm_hero_bg.jpg';
@@ -92,43 +114,53 @@ export default async function LinktreePage({ params }: { params: Promise<{ slug:
               <BadgeCheck className="w-4 h-4" style={{ color: accent }} />
             </span>
           </div>
-          <h1 className="text-[26px] leading-tight font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+          <h1 className="text-[26px] leading-tight font-bold tracking-tight" style={{ fontFamily: 'var(--font-poppins), sans-serif', color: textColor }}>
             {page.title}
           </h1>
-          {page.description && <p className="text-sm text-white/80 mt-2 leading-relaxed max-w-[19rem] mx-auto font-light">{page.description}</p>}
+          {page.description && <p className="text-sm mt-2 leading-relaxed max-w-[19rem] mx-auto font-light" style={{ color: subTextColor }}>{page.description}</p>}
         </div>
 
         <div className="flex items-center gap-3 mb-7" aria-hidden="true">
-          <span className="h-px flex-1 bg-gradient-to-r from-transparent to-white/15" />
-          <span className="w-1.5 h-1.5 rotate-45 border border-white/25" />
-          <span className="h-px flex-1 bg-gradient-to-l from-transparent to-white/15" />
+          <span className={`h-px flex-1 ${bgIsLight ? 'bg-black/10' : 'bg-gradient-to-r from-transparent to-white/15'}`} />
+          <span className={`w-1.5 h-1.5 rotate-45 border ${bgIsLight ? 'border-black/25' : 'border-white/25'}`} />
+          <span className={`h-px flex-1 ${bgIsLight ? 'bg-black/10' : 'bg-gradient-to-l from-transparent to-white/15'}`} />
         </div>
 
         {items.length === 0 ? (
-          <div className="text-center bg-white/5 border border-white/10 rounded-2xl py-10 px-6">
-            <p className="text-white/70 text-sm">Belum ada tautan di halaman ini.</p>
+          <div className={`text-center rounded-2xl py-10 px-6 ${bgIsLight ? 'bg-black/5 border border-black/10' : 'bg-white/5 border border-white/10'}`}>
+            <p className="text-sm font-medium" style={{ color: subTextColor }}>Belum ada tautan di halaman ini.</p>
           </div>
         ) : (
           <ul className="space-y-3.5">
-            {items.map((item: any, idx: number) => (
+            {items.map((item: any) => (
               <li key={item.id}>
               <a
                 href={`${process.env.NEXT_PUBLIC_API_URL}/links/go/${item.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative flex items-center gap-4 bg-gradient-to-b from-white/[0.09] to-white/[0.04] hover:from-white/[0.14] hover:to-white/[0.07] border border-white/10 hover:border-white/25 backdrop-blur-xl rounded-2xl pl-4 pr-4 py-[15px] text-white shadow-[0_10px_35px_rgba(0,0,0,0.4)] transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_18px_45px_rgba(0,0,0,0.5)] overflow-hidden"
+                style={{
+                  backgroundColor: btnBg ? btnBg : undefined,
+                  color: btnText,
+                }}
+                className={`group relative flex items-center gap-4 ${
+                  btnBg
+                    ? 'border border-black/10 shadow-lg'
+                    : bgIsLight
+                    ? 'bg-white/80 hover:bg-white border border-black/10 hover:border-black/20 shadow-md backdrop-blur-md'
+                    : 'bg-gradient-to-b from-white/[0.09] to-white/[0.04] hover:from-white/[0.14] hover:to-white/[0.07] border border-white/10 hover:border-white/25 backdrop-blur-xl shadow-[0_10px_35px_rgba(0,0,0,0.4)]'
+                } rounded-2xl pl-4 pr-4 py-[15px] transition-all duration-300 hover:-translate-y-[3px] hover:shadow-[0_18px_45px_rgba(0,0,0,0.5)] overflow-hidden`}
               >
                 <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                 <span className="w-11 h-11 shrink-0 inline-flex items-center justify-center rounded-xl border border-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_4px_12px_rgba(0,0,0,0.3)]" style={{ background: `linear-gradient(135deg, ${accent}d9, ${accent}59)` }}>
                   {item.icon ? <LinkItemIcon id={item.icon} className="w-[22px] h-[22px]" /> : <span className="text-[15px] font-bold">{item.title.charAt(0).toUpperCase()}</span>}
                 </span>
                 <span className="flex-1 min-w-0">
-                  <span className="block font-semibold text-[15px] tracking-wide truncate" title={item.title}>{item.title}</span>
-                  <span className="block text-[11px] text-white/70 truncate font-normal mt-0.5">
+                  <span className="block font-semibold text-[15px] tracking-wide truncate" style={{ color: btnText }} title={item.title}>{item.title}</span>
+                  <span className="block text-[11px] truncate font-normal mt-0.5 opacity-75" style={{ color: btnText }}>
                     {item.url.replace(/^https?:\/\//, '').split('/')[0]}
                   </span>
                 </span>
-                <span className="w-8 h-8 shrink-0 inline-flex items-center justify-center rounded-full border border-white/10 text-white/70 group-hover:text-white transition-all duration-300 group-hover:border-white/30">
+                <span className={`w-8 h-8 shrink-0 inline-flex items-center justify-center rounded-full border ${bgIsLight && !btnBg ? 'border-black/15 group-hover:border-black/30' : 'border-white/10 group-hover:border-white/30'} transition-all duration-300`} style={{ color: btnText }}>
                   <ArrowUpRight className="w-4 h-4 group-hover:translate-x-[1px] group-hover:-translate-y-[1px] transition-transform" />
                 </span>
               </a>

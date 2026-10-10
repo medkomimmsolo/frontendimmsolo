@@ -26,15 +26,26 @@ export default function LinksManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [transferItem, setTransferItem] = useState<any>(null);
-  const [formData, setFormData] = useState({ title: '', slug: '', description: '', is_active: true, bg_color: '', accent_color: '' });
+  const [formData, setFormData] = useState({
+    title: '',
+    slug: '',
+    description: '',
+    is_active: true,
+    bg_color: '',
+    accent_color: '',
+    text_color: '',
+    btn_bg_color: '',
+    btn_text_color: '',
+  });
 
   const THEME_PRESETS = [
-    { name: 'Midnight', bg: '#0b1120', accent: '#c20000' },
-    { name: 'Crimson', bg: '#1a0505', accent: '#e11d48' },
-    { name: 'Ocean', bg: '#082f49', accent: '#0ea5e9' },
-    { name: 'Forest', bg: '#052e1b', accent: '#10b981' },
-    { name: 'Royal', bg: '#1e1b4b', accent: '#8b5cf6' },
-    { name: 'Sand', bg: '#451a03', accent: '#f59e0b' },
+    { name: 'Midnight', bg: '#0b1120', accent: '#c20000', text: '#ffffff', btnBg: '', btnText: '#ffffff' },
+    { name: 'Crimson', bg: '#1a0505', accent: '#e11d48', text: '#ffffff', btnBg: '#e11d48', btnText: '#ffffff' },
+    { name: 'Ocean', bg: '#082f49', accent: '#0ea5e9', text: '#ffffff', btnBg: '#0284c7', btnText: '#ffffff' },
+    { name: 'Forest', bg: '#052e1b', accent: '#10b981', text: '#ffffff', btnBg: '#059669', btnText: '#ffffff' },
+    { name: 'Royal', bg: '#1e1b4b', accent: '#8b5cf6', text: '#ffffff', btnBg: '#7c3aed', btnText: '#ffffff' },
+    { name: 'Sand Light', bg: '#fef3c7', accent: '#b45309', text: '#78350f', btnBg: '#ffffff', btnText: '#92400e' },
+    { name: 'Clean White', bg: '#ffffff', accent: '#c20000', text: '#0f172a', btnBg: '#0f172a', btnText: '#ffffff' },
   ];
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -64,7 +75,31 @@ export default function LinksManagement() {
 
   const openModal = (item: any = null) => {
     setEditing(item);
-    setFormData(item ? { title: item.title, slug: item.slug, description: item.description || '', is_active: item.is_active, bg_color: item.bg_color || '', accent_color: item.accent_color || '' } : { title: '', slug: '', description: '', is_active: true, bg_color: '', accent_color: '' });
+    setFormData(
+      item
+        ? {
+            title: item.title,
+            slug: item.slug,
+            description: item.description || '',
+            is_active: item.is_active,
+            bg_color: item.bg_color || '',
+            accent_color: item.accent_color || '',
+            text_color: item.text_color || '',
+            btn_bg_color: item.btn_bg_color || '',
+            btn_text_color: item.btn_text_color || '',
+          }
+        : {
+            title: '',
+            slug: '',
+            description: '',
+            is_active: true,
+            bg_color: '',
+            accent_color: '',
+            text_color: '',
+            btn_bg_color: '',
+            btn_text_color: '',
+          }
+    );
     setAvatarFile(null);
     setIsModalOpen(true);
   };
@@ -80,6 +115,9 @@ export default function LinksManagement() {
       data.append('is_active', formData.is_active ? '1' : '0');
       if (formData.bg_color) data.append('bg_color', formData.bg_color);
       if (formData.accent_color) data.append('accent_color', formData.accent_color);
+      if (formData.text_color) data.append('text_color', formData.text_color);
+      if (formData.btn_bg_color) data.append('btn_bg_color', formData.btn_bg_color);
+      if (formData.btn_text_color) data.append('btn_text_color', formData.btn_text_color);
       if (avatarFile) data.append('avatar', avatarFile);
       if (editing) {
         data.append('_method', 'PUT');
@@ -263,14 +301,38 @@ export default function LinksManagement() {
                     Default
                   </button>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3 mb-3">
                   <label className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 rounded-sm px-3 py-2">
                     <input type="color" value={formData.bg_color || '#0b1120'} onChange={(e) => setFormData({ ...formData, bg_color: e.target.value })} className="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0" />
-                    Latar
+                    Latar Halaman
                   </label>
                   <label className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 rounded-sm px-3 py-2">
                     <input type="color" value={formData.accent_color || '#c20000'} onChange={(e) => setFormData({ ...formData, accent_color: e.target.value })} className="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0" />
-                    Aksen
+                    Aksen Cahaya
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-600 border border-slate-200 rounded-sm p-2">
+                    <span>Warna Teks</span>
+                    <div className="flex items-center gap-1.5">
+                      <input type="color" value={formData.text_color || '#ffffff'} onChange={(e) => setFormData({ ...formData, text_color: e.target.value })} className="w-7 h-7 rounded cursor-pointer bg-transparent border-0 p-0" />
+                      <span className="text-[10px] font-mono text-slate-400 truncate">{formData.text_color || 'Default'}</span>
+                    </div>
+                  </label>
+                  <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-600 border border-slate-200 rounded-sm p-2">
+                    <span>Latar Tombol</span>
+                    <div className="flex items-center gap-1.5">
+                      <input type="color" value={formData.btn_bg_color || '#ffffff'} onChange={(e) => setFormData({ ...formData, btn_bg_color: e.target.value })} className="w-7 h-7 rounded cursor-pointer bg-transparent border-0 p-0" />
+                      <span className="text-[10px] font-mono text-slate-400 truncate">{formData.btn_bg_color || 'Transparan'}</span>
+                    </div>
+                  </label>
+                  <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-600 border border-slate-200 rounded-sm p-2">
+                    <span>Teks Tombol</span>
+                    <div className="flex items-center gap-1.5">
+                      <input type="color" value={formData.btn_text_color || '#ffffff'} onChange={(e) => setFormData({ ...formData, btn_text_color: e.target.value })} className="w-7 h-7 rounded cursor-pointer bg-transparent border-0 p-0" />
+                      <span className="text-[10px] font-mono text-slate-400 truncate">{formData.btn_text_color || '#ffffff'}</span>
+                    </div>
                   </label>
                 </div>
               </div>
