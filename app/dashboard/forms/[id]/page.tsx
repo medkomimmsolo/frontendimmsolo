@@ -10,6 +10,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import FormFillClient from '@/components/form/FormFillClient';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
+import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 
 const FILE_PRESETS: Record<string, { label: string; exts: string[] }> = {
   images: { label: 'Gambar (jpg, png, webp — maks 2MB)', exts: ['jpg', 'jpeg', 'png', 'webp'] },
@@ -67,9 +68,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
   const [settingsRequireEmail, setSettingsRequireEmail] = useState(false);
   const [settingsLimitOneResponse, setSettingsLimitOneResponse] = useState(false);
   const [settingsIsOpen, setSettingsIsOpen] = useState(true);
-  const [headerImageFile, setHeaderImageFile] = useState<File | null>(null);
-  const [headerImagePreview, setHeaderImagePreview] = useState<string | null>(null);
-  const [removeHeaderImage, setRemoveHeaderImage] = useState(false);
+  const [headerImageVal, setHeaderImageVal] = useState<File | string | null>(null);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   useEffect(() => {
@@ -89,9 +88,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       setSettingsRequireEmail(Boolean(data.require_email));
       setSettingsLimitOneResponse(Boolean(data.limit_one_response));
       setSettingsIsOpen(Boolean(data.is_open ?? data.is_active));
-      setHeaderImagePreview(data.header_image || null);
-      setHeaderImageFile(null);
-      setRemoveHeaderImage(false);
+      setHeaderImageVal(data.header_image || null);
     } catch {
       toast.error('Gagal memuat formulir');
     } finally {
@@ -217,17 +214,6 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
     }
   };
 
-  const handleHeaderImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Ukuran gambar maksimal 2MB');
-      return;
-    }
-    setHeaderImageFile(file);
-    setHeaderImagePreview(URL.createObjectURL(file));
-    setRemoveHeaderImage(false);
-  };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -246,9 +232,11 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       formData.append('limit_one_response', settingsLimitOneResponse ? '1' : '0');
       formData.append('is_active', settingsIsOpen ? '1' : '0');
 
-      if (headerImageFile) {
-        formData.append('header_image', headerImageFile);
-      } else if (removeHeaderImage) {
+      if (headerImageVal instanceof File) {
+        formData.append('header_image', headerImageVal);
+      } else if (typeof headerImageVal === 'string') {
+        formData.append('header_image', headerImageVal);
+      } else if (!headerImageVal && form?.header_image) {
         formData.append('header_image', '');
       }
 
@@ -259,9 +247,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       toast.success('Pengaturan formulir berhasil disimpan');
       const updated = res.data.data;
       setForm(updated);
-      setHeaderImagePreview(updated.header_image || null);
-      setHeaderImageFile(null);
-      setRemoveHeaderImage(false);
+      setHeaderImageVal(updated.header_image || null);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Gagal menyimpan pengaturan formulir');
     } finally {
@@ -817,39 +803,13 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                 </div>
               </div>
 
-              {headerImagePreview ? (
-                <div className="relative rounded-sm overflow-hidden border border-slate-300 bg-slate-100 max-h-48 group">
-                  <img
-                    src={headerImagePreview}
-                    alt="Header Preview"
-                    className="w-full h-40 object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                    <label className="cursor-pointer bg-white text-slate-800 px-3 py-1.5 rounded-sm text-xs font-semibold shadow hover:bg-slate-100 flex items-center gap-1.5">
-                      <Upload className="w-3.5 h-3.5" /> Ganti Gambar
-                      <input type="file" accept="image/*" onChange={handleHeaderImageChange} className="hidden" />
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setHeaderImageFile(null);
-                        setHeaderImagePreview(null);
-                        setRemoveHeaderImage(true);
-                      }}
-                      className="bg-red-600 text-white px-3 py-1.5 rounded-sm text-xs font-semibold shadow hover:bg-red-700 flex items-center gap-1.5"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" /> Hapus Banner
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <label className="border-2 border-dashed border-slate-300 rounded-sm p-6 flex flex-col items-center justify-center cursor-pointer hover:border-[#c20000] hover:bg-red-50/20 transition-all text-center">
-                  <Upload className="w-8 h-8 text-slate-400 mb-2" />
-                  <span className="text-sm font-medium text-slate-700">Pilih atau unggah gambar banner header</span>
-                  <span className="text-xs text-slate-400 mt-1">PNG, JPG, atau WebP (Maksimal 2MB)</span>
-                  <input type="file" accept="image/*" onChange={handleHeaderImageChange} className="hidden" />
-                </label>
-              )}
+              <ImageUploadPicker
+                value={headerImageVal}
+                onChange={(val) => setHeaderImageVal(val)}
+                aspectRatio="banner"
+                allowedFolder="forms"
+                description="Pilih dari Media Library atau unggah file baru dari perangkat (rasio 4:1 atau 16:5 direkomendasikan)."
+              />
             </div>
 
             {/* Section 2: Judul & Deskripsi */}

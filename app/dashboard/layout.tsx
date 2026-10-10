@@ -14,9 +14,12 @@ import {
   Settings, 
   LogOut, 
   Menu, 
+  PanelLeftClose,
+  PanelLeftOpen,
   X,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   User,
   FolderOpen,
   Link as LinkIcon,
@@ -57,7 +60,14 @@ export default function DashboardLayout({
 
   // UX & HCI Optimization States
   const [menuSearch, setMenuSearch] = useState('');
-  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({
+    main: true,
+    content: true,
+    services: true,
+    organization: true,
+    system: true,
+  });
+  const [siteLogo, setSiteLogo] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Floating Portal Tooltip State (untuk mode collapsed agar bebas dari overflow clipping)
@@ -94,6 +104,17 @@ export default function DashboardLayout({
     setActiveTooltip(null);
   };
 
+  const handleGroupMouseEnter = (e: React.MouseEvent<HTMLElement>, group: any) => {
+    if (!isDesktopCollapsed) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    setActiveTooltip({
+      text: group.label,
+      category: `${group.items.length} Modul (Klik untuk buka/tutup)`,
+      top: rect.top + rect.height / 2,
+      left: rect.right + 12,
+    });
+  };
+
   // Load preferences from localStorage on mount
   useEffect(() => {
     try {
@@ -101,9 +122,17 @@ export default function DashboardLayout({
       if (savedCollapsedState !== null) {
         setIsDesktopCollapsed(savedCollapsedState === 'true');
       }
-      const savedGroupsState = localStorage.getItem('imm_dashboard_collapsed_groups');
+      const savedGroupsState = localStorage.getItem('imm_dashboard_collapsed_groups_v3');
       if (savedGroupsState) {
         setCollapsedGroups(JSON.parse(savedGroupsState));
+      } else {
+        setCollapsedGroups({
+          main: true,
+          content: true,
+          services: true,
+          organization: true,
+          system: true,
+        });
       }
     } catch {}
   }, []);
@@ -124,7 +153,7 @@ export default function DashboardLayout({
     setCollapsedGroups((prev) => {
       const next = { ...prev, [groupId]: !prev[groupId] };
       try {
-        localStorage.setItem('imm_dashboard_collapsed_groups', JSON.stringify(next));
+        localStorage.setItem('imm_dashboard_collapsed_groups_v3', JSON.stringify(next));
       } catch {}
       return next;
     });
@@ -181,7 +210,7 @@ export default function DashboardLayout({
     }
   }, [isLoading, user, router]);
 
-  // Maintenance mode check for non-Super Admin
+  // Maintenance mode check for non-Super Admin & load settings
   useEffect(() => {
     const checkMaintenance = async () => {
       try {
@@ -189,6 +218,9 @@ export default function DashboardLayout({
         if (res.ok) {
           const json = await res.json();
           const settings = normalizeSettings(json?.data);
+          if (settings.site_logo) {
+            setSiteLogo(settings.site_logo);
+          }
           const isMaintenance = isSettingEnabled(settings, 'maintenance_mode');
 
           const isSuperAdmin = user?.roles?.some((r: any) => r.name === 'super-admin');
@@ -198,7 +230,7 @@ export default function DashboardLayout({
           }
         }
       } catch (e) {
-        console.error("Failed to check maintenance mode", e);
+        console.error("Failed to check maintenance mode & settings", e);
       }
     };
 
@@ -282,14 +314,14 @@ export default function DashboardLayout({
 
   // Toggle all groups at once
   const toggleAllGroups = () => {
-    const allCollapsed = menuGroups.every((g) => collapsedGroups[g.id]);
+    const allCollapsed = menuGroups.every((g) => (collapsedGroups[g.id] ?? true));
     const newState: Record<string, boolean> = {};
     menuGroups.forEach((g) => {
       newState[g.id] = !allCollapsed;
     });
     setCollapsedGroups(newState);
     try {
-      localStorage.setItem('imm_dashboard_collapsed_groups', JSON.stringify(newState));
+      localStorage.setItem('imm_dashboard_collapsed_groups_v3', JSON.stringify(newState));
     } catch {}
   };
 
@@ -305,7 +337,7 @@ export default function DashboardLayout({
         />
       )}
 
-      {/* Sidebar Desktop & Mobile */}
+      {/* Sidebar Desktop & Mobile (Light White Style Sesuai Gambar) */}
       <aside 
         className={`fixed inset-y-0 left-0 z-50 bg-white text-slate-700 transition-all duration-300 ease-in-out transform 
           ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
@@ -313,35 +345,50 @@ export default function DashboardLayout({
           ${sidebarWidth}
         `}
       >
-        {/* Header Sidebar: Branding "Panel CMS" */}
-        <div className={`h-16 flex items-center bg-white border-b border-slate-100 shrink-0 ${isDesktopCollapsed ? 'justify-center px-2' : 'justify-between px-5'}`}>
+        {/* Header Sidebar: Branding "Portal CMS" & Logo (White Style) */}
+        <div className={`h-16 flex items-center bg-white border-b border-slate-100 shrink-0 ${isDesktopCollapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
           {isDesktopCollapsed ? (
             <Link 
               href="/dashboard" 
-              title="Panel CMS - Dashboard"
-              className="text-[#0f172a] hover:text-[#c20000] font-black text-sm tracking-wider select-none transition-colors"
-              style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
+              title="Portal CMS - PC IMM Kota Surakarta"
+              className="w-10 h-10 rounded-2xl bg-white border border-slate-200 shadow-2xs flex items-center justify-center p-1.5 shrink-0 overflow-hidden hover:border-[#c20000]/40 transition-colors"
             >
-              CMS
+              <img 
+                src={siteLogo || '/icon-192.png'} 
+                alt="Logo IMM" 
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/icon-192.png';
+                }}
+              />
             </Link>
           ) : (
             <Link 
               href="/dashboard" 
-              className="flex flex-col min-w-0 select-none group" 
-              aria-label="Panel CMS - Dashboard"
+              className="flex items-center gap-3 min-w-0 select-none group" 
+              aria-label="Portal CMS - PC IMM Kota Surakarta"
             >
-              <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200 shadow-2xs flex items-center justify-center p-1.5 shrink-0 overflow-hidden group-hover:border-[#c20000]/40 transition-colors">
+                <img 
+                  src={siteLogo || '/icon-192.png'} 
+                  alt="Logo IMM" 
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/icon-192.png';
+                  }}
+                />
+              </div>
+              <div className="flex flex-col min-w-0">
                 <span 
-                  className="font-extrabold text-[#0f172a] text-lg tracking-tight leading-tight group-hover:text-[#c20000] transition-colors" 
+                  className="font-extrabold text-[#0f172a] text-base leading-tight tracking-tight group-hover:text-[#c20000] transition-colors" 
                   style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
                 >
-                  Panel CMS
+                  Portal CMS
                 </span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Sistem Aktif" />
+                <span className="text-[11px] font-medium text-slate-500 leading-tight truncate mt-0.5">
+                  PC IMM Kota Surakarta
+                </span>
               </div>
-              <span className="text-[10px] font-mono font-bold text-slate-400 tracking-wider uppercase truncate mt-0.5">
-                PC IMM SURAKARTA
-              </span>
             </Link>
           )}
 
@@ -357,8 +404,8 @@ export default function DashboardLayout({
         </div>
 
         {/* Quick Search Menu & Modul Control Bar */}
-        {!isDesktopCollapsed && (
-          <div className="px-3 pt-3 pb-2 border-b border-slate-100/80 shrink-0 space-y-2">
+        {!isDesktopCollapsed ? (
+          <div className="px-3 pt-3 pb-2 border-b border-slate-100/90 shrink-0 space-y-2 bg-white">
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
@@ -390,7 +437,7 @@ export default function DashboardLayout({
               {menuSearch.trim() ? (
                 <span>Hasil pencarian modul</span>
               ) : (
-                <span>5 Kategori Modul</span>
+                <span className="font-semibold text-slate-500">5 Kategori Modul</span>
               )}
               {menuSearch.trim() ? (
                 <button
@@ -406,17 +453,31 @@ export default function DashboardLayout({
                   onClick={toggleAllGroups}
                   className="text-slate-500 hover:text-[#c20000] font-semibold hover:underline transition-colors"
                 >
-                  {menuGroups.every((g) => collapsedGroups[g.id]) ? 'Buka Semua' : 'Tutup Semua'}
+                  {menuGroups.every((g) => (collapsedGroups[g.id] ?? true)) ? 'Buka Semua' : 'Tutup Semua'}
                 </button>
               )}
             </div>
+          </div>
+        ) : (
+          <div className="py-2.5 flex justify-center border-b border-slate-100 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                toggleDesktopCollapsed();
+                setTimeout(() => searchInputRef.current?.focus(), 150);
+              }}
+              className="w-9 h-9 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-50 flex items-center justify-center transition-colors"
+              title="Cari modul (Ctrl+K)"
+            >
+              <Search className="w-4.5 h-4.5" />
+            </button>
           </div>
         )}
 
         {/* Navigation Bar dengan Scroll Halus & Akordeon */}
         <nav 
           onScroll={handleItemMouseLeave}
-          className="flex-1 overflow-y-auto py-3 px-3 custom-scrollbar space-y-4"
+          className={`flex-1 overflow-y-auto py-3 custom-scrollbar ${isDesktopCollapsed ? 'px-1.5 space-y-1' : 'px-3 space-y-3'}`}
         >
           {(() => {
             let totalRenderedItems = 0;
@@ -435,92 +496,142 @@ export default function DashboardLayout({
               const hasActiveRoute = visibleItems.some((item) => 
                 item.href === '/dashboard' ? pathname === '/dashboard' : pathname === item.href || pathname?.startsWith(`${item.href}/`)
               );
-              const isGroupCollapsed = !menuSearch && Boolean(collapsedGroups[group.id]);
+              const isGroupCollapsed = !menuSearch && (collapsedGroups[group.id] ?? true);
 
               // Hitung akumulasi badge notifikasi dalam grup
               const groupBadgeTotal = visibleItems.reduce((acc: number, item: any) => acc + (Number((item as any).badge) || 0), 0);
 
               return (
                 <div key={group.id} className="last:mb-0">
-                  {/* Header Grup Akordeon (Interactive Accordion) */}
-                  {!isDesktopCollapsed && (
-                    <button
-                      type="button"
-                      onClick={() => toggleGroup(group.id)}
-                      className="w-full flex items-center justify-between px-2.5 py-1.5 text-[11px] font-bold text-slate-500 hover:text-slate-800 uppercase tracking-wider rounded-xl hover:bg-slate-100/70 transition-colors group select-none"
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <span className="text-slate-400 group-hover:text-[#c20000] transition-colors">
+                  {/* Mode Expanded: Header Grup Teks Lengkap */}
+                  {!isDesktopCollapsed ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => toggleGroup(group.id)}
+                        className="w-full flex items-center justify-between px-2.5 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 uppercase tracking-wider rounded-xl hover:bg-slate-100/70 transition-colors group select-none"
+                      >
+                        <div className="flex items-center gap-2.5 truncate">
+                          <span className="text-slate-400 group-hover:text-[#c20000] transition-colors">
+                            {group.icon}
+                          </span>
+                          <span className="truncate group-hover:text-[#c20000] transition-colors">{group.label}</span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {isGroupCollapsed && groupBadgeTotal > 0 && (
+                            <span className="min-w-4 h-4 px-1 bg-[#c20000] text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none shadow-xs">
+                              {groupBadgeTotal}
+                            </span>
+                          )}
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-semibold border border-slate-200/60">
+                            {visibleItems.length}
+                          </span>
+                          <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isGroupCollapsed ? '-rotate-90 text-slate-400' : 'rotate-0 text-slate-600'}`} />
+                        </div>
+                      </button>
+
+                      {/* Daftar Item Menu (Mode Expanded saat grup terbuka) */}
+                      {!isGroupCollapsed && (
+                        <div className="mt-1 space-y-1">
+                          {visibleItems.map((item: any) => {
+                            const isActive = item.href === '/dashboard'
+                              ? pathname === '/dashboard'
+                              : pathname === item.href || pathname?.startsWith(`${item.href}/`);
+
+                            return (
+                              <div key={item.name} className="relative">
+                                <Link
+                                  href={item.href}
+                                  prefetch={false}
+                                  onClick={() => {
+                                    setIsMobileSidebarOpen(false);
+                                    setActiveTooltip(null);
+                                  }}
+                                  className={`relative flex items-center rounded-xl text-xs font-semibold transition-all ${
+                                    isActive
+                                      ? 'bg-gradient-to-r from-red-50 to-red-50/40 text-[#c20000] font-bold border border-red-200/80 shadow-2xs before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:rounded-r-full before:bg-[#c20000]'
+                                      : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent hover:translate-x-0.5'
+                                  } px-3 py-2.5`}
+                                >
+                                  <span className={`${isActive ? 'text-[#c20000]' : 'text-slate-400 group-hover:text-slate-700'} transition-colors flex items-center justify-center shrink-0`}>
+                                    {item.icon}
+                                  </span>
+                                  <span className="ml-3 truncate flex-1">{item.name}</span>
+                                  {(item as any).badge > 0 && (
+                                    <span className="ml-auto shrink-0 min-w-5 h-4.5 px-1.5 bg-[#c20000] text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none shadow-sm">
+                                      {(item as any).badge > 99 ? '99+' : (item as any).badge}
+                                    </span>
+                                  )}
+                                </Link>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    /* Mode Collapsed: Persis Gambar 1 (Tertutup) dan Gambar 2 (Terbuka dengan Jalur Pohon Vertikal) */
+                    <div className="flex flex-col items-center">
+                      {/* Tombol Utama Icon Grup */}
+                      <button
+                        type="button"
+                        onClick={() => toggleGroup(group.id)}
+                        onMouseEnter={(e) => handleGroupMouseEnter(e, group)}
+                        onMouseLeave={handleItemMouseLeave}
+                        className={`w-10 h-10 rounded-2xl relative flex items-center justify-center transition-all ${
+                          hasActiveRoute
+                            ? 'bg-red-50 text-[#c20000] border border-red-200/90 shadow-2xs'
+                            : 'bg-white hover:bg-slate-100/80 text-slate-500 hover:text-slate-900 border border-transparent'
+                        }`}
+                        title={group.label}
+                      >
+                        <span className="w-5 h-5 flex items-center justify-center">
                           {group.icon}
                         </span>
-                        <span className="truncate group-hover:text-[#c20000] transition-colors">{group.label}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {isGroupCollapsed && groupBadgeTotal > 0 && (
-                          <span className="min-w-4 h-4 px-1 bg-[#c20000] text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none shadow-xs">
-                            {groupBadgeTotal}
-                          </span>
-                        )}
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-slate-100 text-slate-500 font-semibold">
-                          {visibleItems.length}
+
+                        {/* Bulatan Badge Count di Pojok Kanan Atas (Sesuai Gambar 1 & 2) */}
+                        <span className={`absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full text-[9px] font-bold flex items-center justify-center leading-none border border-white shadow-2xs ${
+                          groupBadgeTotal > 0
+                            ? 'bg-[#c20000] text-white'
+                            : 'bg-slate-200/90 text-slate-600'
+                        }`}>
+                          {groupBadgeTotal > 0 ? groupBadgeTotal : visibleItems.length}
                         </span>
-                        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isGroupCollapsed ? '-rotate-90 text-slate-300' : 'rotate-0 text-slate-400 group-hover:text-slate-600'}`} />
-                      </div>
-                    </button>
-                  )}
+                      </button>
 
-                  {/* Daftar Item Menu */}
-                  {(!isGroupCollapsed || isDesktopCollapsed) && (
-                    <div className={`mt-1 space-y-1 ${isDesktopCollapsed ? 'border-t border-slate-100/70 pt-2 first:border-t-0' : ''}`}>
-                      {visibleItems.map((item: any) => {
-                        const isActive = item.href === '/dashboard'
-                          ? pathname === '/dashboard'
-                          : pathname === item.href || pathname?.startsWith(`${item.href}/`);
+                      {/* Anak-Anak Item Menu (Hanya Muncul Jika Grup Dibuka - Persis Gambar 2) */}
+                      {!isGroupCollapsed && (
+                        <div className="relative flex flex-col items-center py-2 space-y-2.5 before:absolute before:top-0 before:bottom-0 before:left-1/2 before:-translate-x-1/2 before:w-[1.5px] before:bg-slate-200/80 before:z-0">
+                          {visibleItems.map((item: any) => {
+                            const isActive = item.href === '/dashboard'
+                              ? pathname === '/dashboard'
+                              : pathname === item.href || pathname?.startsWith(`${item.href}/`);
 
-                        return (
-                          <div key={item.name} className="relative">
-                            <Link
-                              href={item.href}
-                              prefetch={false}
-                              onClick={() => {
-                                setIsMobileSidebarOpen(false);
-                                setActiveTooltip(null);
-                              }}
-                              onMouseEnter={(e) => handleItemMouseEnter(e, item, group.label)}
-                              onMouseLeave={handleItemMouseLeave}
-                              className={`relative flex items-center rounded-xl text-xs font-semibold transition-all ${
-                                isActive
-                                  ? 'bg-gradient-to-r from-red-50 to-red-50/40 text-[#c20000] font-bold border border-red-200/80 shadow-2xs before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:rounded-r-full before:bg-[#c20000]'
-                                  : `text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 border border-transparent ${
-                                      isDesktopCollapsed ? '' : 'hover:translate-x-0.5'
-                                    }`
-                              } ${isDesktopCollapsed ? 'w-10 h-10 justify-center mx-auto' : 'px-3 py-2.5'}`}
-                            >
-                              {/* Ikon Menu */}
-                              <span className={`${isActive ? 'text-[#c20000]' : 'text-slate-400 group-hover:text-slate-700'} transition-colors flex items-center justify-center shrink-0`}>
-                                {item.icon}
-                              </span>
-
-                              {/* Label Menu (Expanded) */}
-                              {!isDesktopCollapsed && (
-                                <span className="ml-3 truncate flex-1">{item.name}</span>
-                              )}
-
-                              {/* Badge Notifikasi (Expanded) */}
-                              {!isDesktopCollapsed && (item as any).badge > 0 && (
-                                <span className="ml-auto shrink-0 min-w-5 h-4.5 px-1.5 bg-[#c20000] text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none shadow-sm">
-                                  {(item as any).badge > 99 ? '99+' : (item as any).badge}
+                            return (
+                              <Link
+                                key={item.name}
+                                href={item.href}
+                                prefetch={false}
+                                onClick={() => setActiveTooltip(null)}
+                                onMouseEnter={(e) => handleItemMouseEnter(e, item, group.label)}
+                                onMouseLeave={handleItemMouseLeave}
+                                className={`relative z-10 w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                                  isActive
+                                    ? 'bg-[#c20000] text-white shadow-xs scale-105'
+                                    : 'bg-white text-slate-500 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80 shadow-2xs hover:scale-105'
+                                }`}
+                              >
+                                <span className="w-4 h-4 flex items-center justify-center">
+                                  {item.icon}
                                 </span>
-                              )}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
 
-                              {/* Dot Badge (Collapsed) */}
-                              {isDesktopCollapsed && (item as any).badge > 0 && (
-                                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[#c20000] rounded-full ring-2 ring-white"></span>
-                              )}
-                            </Link>
-                          </div>
-                        );
-                      })}
+                      {/* Garis Horizontal Tipis Antar Grup */}
+                      <div className="w-7 h-px bg-slate-100 my-1.5" />
                     </div>
                   )}
                 </div>
@@ -560,20 +671,25 @@ export default function DashboardLayout({
         
         {/* Top Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center px-4 md:px-8 z-30 sticky top-0 shadow-2xs">
-          {/* Collapse/Menu Toggle */}
+          {/* Sidebar Panel Toggle Button (Polos tanpa background/border warna) */}
           <button 
             type="button"
-            className="text-slate-500 hover:text-slate-900 transition-colors p-2 -ml-2 rounded-xl hover:bg-slate-100" 
+            className="p-1.5 text-slate-700 hover:text-slate-900 transition-colors focus:outline-none" 
             onClick={() => {
-              if (window.innerWidth < 1024) {
-                setIsMobileSidebarOpen(true);
+              if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                setIsMobileSidebarOpen((prev) => !prev);
               } else {
                 toggleDesktopCollapsed();
               }
             }}
+            title={isDesktopCollapsed ? "Lebarkan Sidebar" : "Ciutkan Sidebar"}
             aria-label="Toggle navigasi sidebar"
           >
-            <Menu className="w-5 h-5" />
+            {isDesktopCollapsed ? (
+              <PanelLeftOpen className="w-5 h-5" />
+            ) : (
+              <PanelLeftClose className="w-5 h-5" />
+            )}
           </button>
           
           <div className="ml-auto flex items-center gap-4">
@@ -643,6 +759,15 @@ export default function DashboardLayout({
             {children}
           </div>
         </main>
+
+        {/* Footer Panel Admin (Menempel di bawah dengan proporsi seimbang) */}
+        <footer className="h-11 bg-white border-t border-slate-200/90 flex items-center justify-between px-4 md:px-8 text-xs text-slate-500 shrink-0 z-20 shadow-2xs">
+          <div className="flex items-center gap-1.5 truncate">
+            <span className="font-normal text-slate-400">@2026</span>
+            <span className="font-bold text-slate-700">PC IMM Kota Surakarta</span>
+          </div>
+          <span className="font-normal text-slate-400 truncate">Tim Developer IMM Solo</span>
+        </footer>
       </div>
 
       {/* Floating Tooltip via React Portal (Paling Atas, Bebas Overflow Clipping) */}

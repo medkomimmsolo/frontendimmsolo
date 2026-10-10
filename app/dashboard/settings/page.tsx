@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Save, Loader2, Settings as SettingsIcon, Image as ImageIcon, MapPin, Link as LinkIcon, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { convertToWebP } from '@/lib/imageUtils';
+import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 
 export default function SettingsManagement() {
   const [isLoading, setIsLoading] = useState(false);
@@ -80,85 +81,39 @@ export default function SettingsManagement() {
     setSettings({ ...settings, [e.target.name]: e.target.value });
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'color' | 'white' | 'icon') => {
-      if (!e.target.files || e.target.files.length === 0) return;
-      let file = e.target.files[0];
-
-      if (!file.type.startsWith('image/')) {
-        toast.error('File harus berupa gambar');
-        return;
-      }
-
-      try {
-        file = await convertToWebP(file);
-      } catch (err) {
-        console.error('WebP conversion failed', err);
-        toast.error('Gagal memproses gambar');
-        return;
-      }
-
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error('Setelah dikonversi, ukuran gambar masih lebih dari 2MB. Silakan pilih gambar dengan resolusi lebih kecil.');
-        return;
-      }
-    const formData = new FormData();
-    formData.append('logo', file);
-    formData.append('type', type);
+  const handleLogoChange = async (fileOrUrl: File | string | null, type: 'color' | 'white' | 'icon' | 'chairman_photo') => {
+    const settingKey = type === 'white' ? 'site_logo_white' : type === 'icon' ? 'site_icon' : type === 'chairman_photo' ? 'chairman_photo' : 'site_logo';
     
-    const toastId = toast.loading(`Mengunggah logo ${type === 'icon' ? 'ikon' : (type === 'white' ? 'putih' : 'warna')}...`);
-    try {
-      const res = await api.post('/settings/logo', formData);
-      const updatedSettings = res.data.data;
-      setSettings(prev => ({ 
-        ...prev, 
-        site_logo: updatedSettings.site_logo || prev.site_logo,
-        site_logo_white: updatedSettings.site_logo_white || prev.site_logo_white,
-        site_icon: updatedSettings.site_icon || prev.site_icon
-      }));
-      toast.success('Logo berhasil diunggah', { id: toastId });
-    } catch (err) {
-      console.error(err);
-      toast.error('Gagal mengunggah logo', { id: toastId });
+    if (!fileOrUrl) {
+      setSettings(prev => ({ ...prev, [settingKey]: '' }));
+      try {
+        await api.post('/settings', { settings: [{ key: settingKey, value: '' }] });
+        toast.success('Gambar dihapus');
+      } catch {
+        toast.error('Gagal menghapus gambar');
+      }
+      return;
     }
-  };
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!e.target.files || e.target.files.length === 0) return;
-      let file = e.target.files[0];
-
-      if (!file.type.startsWith('image/')) {
-        toast.error('File harus berupa gambar');
-        return;
-      }
-
-      try {
-        file = await convertToWebP(file);
-      } catch (err) {
-        console.error('WebP conversion failed', err);
-        toast.error('Gagal memproses gambar');
-        return;
-      }
-
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error('Setelah dikonversi, ukuran gambar masih lebih dari 2MB. Silakan pilih gambar dengan resolusi lebih kecil.');
-        return;
-      }
     const formData = new FormData();
-    formData.append('logo', file);
-    formData.append('type', 'chairman_photo');
-    
-    const toastId = toast.loading('Mengunggah foto...');
+    formData.append('logo', fileOrUrl);
+    formData.append('type', type);
+
+    const toastId = toast.loading('Menyimpan gambar...');
     try {
       const res = await api.post('/settings/logo', formData);
       const updatedSettings = res.data.data;
       setSettings(prev => ({ 
         ...prev, 
-        chairman_photo: updatedSettings.chairman_photo || prev.chairman_photo
+        site_logo: updatedSettings.site_logo ?? prev.site_logo,
+        site_logo_white: updatedSettings.site_logo_white ?? prev.site_logo_white,
+        site_icon: updatedSettings.site_icon ?? prev.site_icon,
+        chairman_photo: updatedSettings.chairman_photo ?? prev.chairman_photo,
       }));
-      toast.success('Foto berhasil diunggah', { id: toastId });
-    } catch (err) {
+      toast.success('Gambar berhasil diperbarui', { id: toastId });
+    } catch (err: any) {
       console.error(err);
-      toast.error('Gagal mengunggah foto', { id: toastId });
+      toast.error(err.response?.data?.message || 'Gagal memperbarui gambar', { id: toastId });
     }
   };
 
@@ -262,71 +217,36 @@ export default function SettingsManagement() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
                   <div className="p-5 rounded-sm border border-slate-100 bg-slate-50/50">
-                    <label className={labelClass}>Logo Berwarna (Header/Terang)</label>
-                    <div className="mt-4 flex flex-col items-center gap-4">
-                      {settings.site_logo ? (
-                        <div className="w-24 h-24 rounded-sm bg-white border border-slate-200 p-2 shadow-sm flex items-center justify-center">
-                          <img src={`${settings.site_logo}`} alt="Logo" className="max-w-full max-h-full object-contain" />
-                        </div>
-                      ) : (
-                        <div className="w-24 h-24 rounded-sm bg-slate-100 border border-slate-200 border-dashed flex flex-col items-center justify-center text-slate-400">
-                          <ImageIcon className="w-6 h-6 mb-1 opacity-50" />
-                          <span className="text-[10px] uppercase font-bold tracking-wider">Kosong</span>
-                        </div>
-                      )}
-                      <label className="cursor-pointer group relative">
-                        <input type="file" accept="image/*" onChange={(e) => handleLogoUpload(e, 'color')} className="hidden" />
-                        <span className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-sm text-sm font-semibold text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-50 transition-colors shadow-sm text-center">
-                          Ubah Logo
-                        </span>
-                      </label>
-                    </div>
+                    <ImageUploadPicker
+                      label="Logo Berwarna (Header/Terang)"
+                      value={settings.site_logo}
+                      onChange={(val) => handleLogoChange(val, 'color')}
+                      aspectRatio="square"
+                      allowedFolder="logos"
+                      description="Logo standar IMM Surakarta untuk background terang."
+                    />
                   </div>
 
                   <div className="p-5 rounded-sm border border-slate-100 bg-slate-50/50">
-                    <label className={labelClass}>Logo Putih (Footer/Gelap)</label>
-                    <div className="mt-4 flex flex-col items-center gap-4">
-                      {settings.site_logo_white ? (
-                        <div className="w-24 h-24 rounded-sm bg-slate-900 border border-slate-800 p-2 shadow-sm flex items-center justify-center relative overflow-hidden">
-                          {/* Chessboard pattern to show transparency clearly */}
-                          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(45deg, #808080 25%, transparent 25%), linear-gradient(-45deg, #808080 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #808080 75%), linear-gradient(-45deg, transparent 75%, #808080 75%)', backgroundSize: '10px 10px', backgroundPosition: '0 0, 0 5px, 5px -5px, -5px 0px' }}></div>
-                          <img src={`${settings.site_logo_white}`} alt="Logo Putih" className="max-w-full max-h-full object-contain relative z-10" />
-                        </div>
-                      ) : (
-                        <div className="w-24 h-24 rounded-sm bg-slate-900 border border-slate-800 border-dashed flex flex-col items-center justify-center text-white/40">
-                          <ImageIcon className="w-6 h-6 mb-1 opacity-50" />
-                          <span className="text-[10px] uppercase font-bold tracking-wider">Kosong</span>
-                        </div>
-                      )}
-                      <label className="cursor-pointer group relative">
-                        <input type="file" accept="image/*" onChange={(e) => handleLogoUpload(e, 'white')} className="hidden" />
-                        <span className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-sm text-sm font-semibold text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-50 transition-colors shadow-sm text-center">
-                          Ubah Logo Putih
-                        </span>
-                      </label>
-                    </div>
+                    <ImageUploadPicker
+                      label="Logo Putih (Footer/Gelap)"
+                      value={settings.site_logo_white}
+                      onChange={(val) => handleLogoChange(val, 'white')}
+                      aspectRatio="square"
+                      allowedFolder="logos"
+                      description="Logo versi monokrom putih untuk footer atau latar gelap."
+                    />
                   </div>
                   
                   <div className="p-5 rounded-sm border border-slate-100 bg-slate-50/50">
-                    <label className={labelClass}>Icon Web (Favicon/Tab)</label>
-                    <div className="mt-4 flex flex-col items-center gap-4">
-                      {settings.site_icon ? (
-                        <div className="w-24 h-24 rounded-sm bg-white border border-slate-200 p-2 shadow-sm flex items-center justify-center">
-                          <img src={`${settings.site_icon}`} alt="Web Icon" className="max-w-full max-h-full object-contain" />
-                        </div>
-                      ) : (
-                        <div className="w-24 h-24 rounded-sm bg-slate-100 border border-slate-200 border-dashed flex flex-col items-center justify-center text-slate-400">
-                          <ImageIcon className="w-6 h-6 mb-1 opacity-50" />
-                          <span className="text-[10px] uppercase font-bold tracking-wider">Kosong</span>
-                        </div>
-                      )}
-                      <label className="cursor-pointer group relative">
-                        <input type="file" accept="image/*" onChange={(e) => handleLogoUpload(e, 'icon')} className="hidden" />
-                        <span className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-sm text-sm font-semibold text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-50 transition-colors shadow-sm text-center">
-                          Ubah Icon
-                        </span>
-                      </label>
-                    </div>
+                    <ImageUploadPicker
+                      label="Icon Web (Favicon)"
+                      value={settings.site_icon}
+                      onChange={(val) => handleLogoChange(val, 'icon')}
+                      aspectRatio="square"
+                      allowedFolder="logos"
+                      description="Icon logo kecil untuk favicon tab browser."
+                    />
                   </div>
                 </div>
 
@@ -540,25 +460,14 @@ export default function SettingsManagement() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="md:col-span-1 p-5 rounded-sm border border-slate-100 bg-slate-50/50">
-                    <label className={labelClass}>Foto Ketua Umum</label>
-                    <div className="mt-4 flex flex-col items-center gap-4">
-                      {settings.chairman_photo ? (
-                        <div className="w-32 h-32 rounded-full bg-white border border-slate-200 p-1 shadow-sm flex items-center justify-center overflow-hidden">
-                          <img src={`${settings.chairman_photo}`} alt="Foto Ketua Umum" className="w-full h-full object-cover rounded-full" />
-                        </div>
-                      ) : (
-                        <div className="w-32 h-32 rounded-full bg-slate-100 border border-slate-200 border-dashed flex flex-col items-center justify-center text-slate-400">
-                          <ImageIcon className="w-6 h-6 mb-1 opacity-50" />
-                          <span className="text-[10px] uppercase font-bold tracking-wider">Kosong</span>
-                        </div>
-                      )}
-                      <label className="cursor-pointer group relative mt-2">
-                        <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                        <span className="inline-block px-4 py-2 bg-white border border-slate-200 rounded-sm text-sm font-semibold text-slate-700 group-hover:border-slate-300 group-hover:bg-slate-50 transition-colors shadow-sm text-center">
-                          Ubah Foto
-                        </span>
-                      </label>
-                    </div>
+                    <ImageUploadPicker
+                      label="Foto Ketua Umum"
+                      value={settings.chairman_photo}
+                      onChange={(val) => handleLogoChange(val, 'chairman_photo')}
+                      aspectRatio="square"
+                      allowedFolder="struktural"
+                      description="Foto resmi Ketua Umum (rasio 1:1 persegi)."
+                    />
                   </div>
 
                   <div className="md:col-span-2 space-y-6">

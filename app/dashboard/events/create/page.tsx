@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { convertToWebP } from '@/lib/imageUtils';
+import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 
 // Import React Quill dynamically to avoid SSR issues
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
@@ -28,10 +29,7 @@ export default function CreateEvent() {
     status: 'upcoming',
   });
 
-  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
-  const [bannerFile, setBannerFile] = useState<File | null>(null);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [bannerImage, setBannerImage] = useState<File | string | null>(null);
 
   const modules = useMemo(() => ({
     toolbar: [
@@ -49,39 +47,6 @@ export default function CreateEvent() {
 
   const handleDescriptionChange = (content: string) => {
     setFormData({ ...formData, description: content });
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('File harus berupa gambar');
-      return;
-    }
-
-
-    try {
-      const webpFile = await convertToWebP(file);
-
-      if (webpFile.size > 2 * 1024 * 1024) {
-        toast.error('Setelah dikonversi, ukuran gambar masih lebih dari 2MB. Silakan pilih gambar dengan resolusi lebih kecil.');
-        return;
-      }
-      setBannerFile(webpFile);
-      setBannerPreview(URL.createObjectURL(webpFile));
-    } catch (error) {
-      console.error('Failed to process image:', error);
-      toast.error('Gagal memproses gambar');
-    }
-  };
-
-  const removeBannerImage = () => {
-    setBannerFile(null);
-    setBannerPreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,8 +75,8 @@ export default function CreateEvent() {
       submitData.append('event_date', formattedDate);
     }
 
-    if (bannerFile) {
-      submitData.append('banner_image', bannerFile);
+    if (bannerImage) {
+      submitData.append('banner_image', bannerImage);
     }
     
     try {
@@ -268,40 +233,15 @@ export default function CreateEvent() {
           {/* Banner Image Card */}
           <Card className="border-slate-200 shadow-sm">
             <div className="p-3 border-b border-slate-200 bg-slate-50 font-medium text-sm text-slate-700">
-              Event Banner
+              Banner Agenda (Event Banner)
             </div>
             <CardContent className="p-4">
-              {bannerPreview ? (
-                <div className="relative group rounded-sm overflow-hidden border border-slate-200">
-                  <img src={bannerPreview} alt="Banner Preview" className="w-full h-auto object-cover" />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button 
-                      type="button"
-                      onClick={removeBannerImage}
-                      className="bg-white text-red-600 rounded-full p-2 hover:bg-red-50 transition-colors shadow-lg"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-slate-200 rounded-sm p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 hover:border-[#c20000] transition-colors group"
-                >
-                  <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mb-2 group-hover:bg-[#c20000]/10 transition-colors">
-                    <ImageIcon className="w-5 h-5 text-slate-400 group-hover:text-[#c20000]" />
-                  </div>
-                  <p className="text-sm font-medium text-[#c20000]">Click to upload banner</p>
-                  <p className="text-xs text-slate-500 mt-1">Recommended size: 1200x630px</p>
-                </div>
-              )}
-              <input 
-                type="file" 
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-                accept="image/*"
-                className="hidden"
+              <ImageUploadPicker
+                value={bannerImage}
+                onChange={(val) => setBannerImage(val)}
+                aspectRatio="banner"
+                allowedFolder="events"
+                description="Pilih dari Media Library atau unggah dari perangkat. Rasio disarankan: 21:9 atau 1200x630px."
               />
             </CardContent>
           </Card>

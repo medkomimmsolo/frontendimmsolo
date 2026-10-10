@@ -11,6 +11,7 @@ import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
 import { useDebounce } from 'use-debounce';
+import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 
 export default function LinksManagement() {
   const { user } = useAuth();
@@ -58,7 +59,7 @@ export default function LinksManagement() {
     { name: 'Sand Light', bg: '#fef3c7', accent: '#b45309', text: '#78350f', btnBg: '#ffffff', btnText: '#92400e' },
     { name: 'Clean White', bg: '#ffffff', accent: '#c20000', text: '#0f172a', btnBg: '#0f172a', btnText: '#ffffff' },
   ];
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarValue, setAvatarValue] = useState<File | string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchPages = useCallback(async (page = currentPage, search = debouncedSearch) => {
@@ -113,7 +114,7 @@ export default function LinksManagement() {
             btn_text_color: '',
           }
     );
-    setAvatarFile(null);
+    setAvatarValue(item?.avatar || null);
     setIsModalOpen(true);
   };
 
@@ -132,7 +133,7 @@ export default function LinksManagement() {
       if (formData.text_color) data.append('text_color', formData.text_color);
       if (formData.btn_bg_color) data.append('btn_bg_color', formData.btn_bg_color);
       if (formData.btn_text_color) data.append('btn_text_color', formData.btn_text_color);
-      if (avatarFile) data.append('avatar', avatarFile);
+      if (avatarValue) data.append('avatar', avatarValue);
       if (editing) {
         data.append('_method', 'PUT');
         await api.post(`/link-pages/${editing.id}`, data);
@@ -322,9 +323,14 @@ export default function LinksManagement() {
                   placeholder="Semua tautan resmi PC IMM Kota Surakarta" className="w-full border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Avatar / Logo</label>
-                <input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
-                  className="w-full text-sm text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-sm file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200" />
+                <ImageUploadPicker
+                  label="Avatar / Logo Profil"
+                  value={avatarValue}
+                  onChange={(val) => setAvatarValue(val)}
+                  aspectRatio="square"
+                  allowedFolder="links"
+                  description="Pilih dari Media Library atau unggah dari perangkat."
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Tema Warna</label>
