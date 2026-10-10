@@ -32,15 +32,17 @@ export default function KontakFormClient() {
     }
   };
 
-  const inputClass = "w-full px-4 py-3 rounded-sm border border-slate-200 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors";
+  const inputClass = "w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/15 transition-all text-sm bg-white";
 
   if (isSuccess) {
     return (
       <div className="text-center py-10">
-        <CheckCircle2 className="w-14 h-14 text-emerald-500 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-[#0f172a] mb-2">Pesan Terkirim</h3>
-        <p className="text-sm text-slate-500 mb-6">Terima kasih! Pesan Anda sudah kami terima dan akan segera ditindaklanjuti.</p>
-        <Button onClick={() => setIsSuccess(false)} variant="outline" className="border-slate-200">
+        <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 border border-emerald-100">
+          <CheckCircle2 className="w-8 h-8" />
+        </div>
+        <h3 className="text-xl font-bold text-[#0f172a] mb-2" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Pesan Terkirim</h3>
+        <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">Terima kasih! Pesan Anda sudah kami terima dan akan segera ditindaklanjuti oleh pengurus PC IMM Kota Surakarta.</p>
+        <Button onClick={() => setIsSuccess(false)} variant="outline" className="border-slate-200 rounded-xl hover:border-red-200 hover:text-[#c20000]">
           Kirim Pesan Lain
         </Button>
       </div>
@@ -67,7 +69,7 @@ export default function KontakFormClient() {
         <label htmlFor="kontak-message" className="text-sm font-semibold text-[#0f172a]">Pesan</label>
         <textarea id="kontak-message" name="message" required rows={5} value={formData.message} onChange={handleChange} placeholder="Tuliskan pesan Anda di sini..." className={`${inputClass} resize-none`}></textarea>
       </div>
-      <Button type="submit" disabled={isLoading} className="w-full bg-[#c20000] hover:bg-[#a30000] text-white h-12 rounded-sm font-semibold text-base mt-4 shadow-md shadow-red-500/20">
+      <Button type="submit" disabled={isLoading} className="w-full bg-[#c20000] hover:bg-[#a00000] text-white h-12 rounded-xl font-bold text-base mt-4 shadow-md shadow-red-500/15">
         {isLoading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <MessageSquare className="w-5 h-5 mr-2" />}
         Kirim Pesan
       </Button>

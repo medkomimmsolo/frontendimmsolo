@@ -29,10 +29,10 @@ export default function EventLocationMap({ location }: EventLocationMapProps) {
   const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(location)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
 
   return (
-    <div className="mt-12 bg-white rounded-sm border border-slate-200 overflow-hidden shadow-sm">
+    <div className="mt-12 bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm">
       <div className="p-5 md:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-sm bg-red-50 text-[#c20000] flex items-center justify-center shrink-0 mt-0.5">
+          <div className="w-10 h-10 rounded-xl bg-red-50 text-[#c20000] flex items-center justify-center shrink-0 mt-0.5">
             <MapPin className="w-5 h-5" />
           </div>
           <div>

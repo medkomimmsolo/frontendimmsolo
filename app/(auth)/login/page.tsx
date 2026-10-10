@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Loader2, ArrowLeft, Mail, Lock, ShieldCheck, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Loader2, ArrowLeft, Mail, Lock, ShieldCheck, Eye, EyeOff, AlertCircle, User } from 'lucide-react';
 import Link from 'next/link';
 import { getApiBase, normalizeSettings } from '@/lib/settings';
 
@@ -19,7 +19,6 @@ export default function Login() {
   const [siteLogoWhite, setSiteLogoWhite] = useState<string | null>(null);
   const router = useRouter();
 
-  const emailInvalid = email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const passwordInvalid = password.length > 0 && password.length < 8;
 
   useEffect(() => {
@@ -46,7 +45,7 @@ export default function Login() {
     setErrorMessage('');
 
     try {
-      const response = await api.post('/login', { email, password });
+      const response = await api.post('/login', { login: email.trim(), password });
 
       if (response.data.success) {
         localStorage.setItem('auth_token', response.data.data.token);
@@ -57,7 +56,7 @@ export default function Login() {
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      let msg = error.response?.data?.message || 'Login gagal. Periksa kembali email dan password Anda.';
+      let msg = error.response?.data?.message || 'Login gagal. Periksa kembali email/username dan password Anda.';
       if (error.response?.status === 429) {
         msg = 'Terlalu banyak percobaan login. Silakan tunggu sekitar 1 menit sebelum mencoba kembali.';
       }
@@ -192,21 +191,20 @@ export default function Login() {
               )}
 
               <div className="space-y-2">
-                <label htmlFor="login-email" className="text-sm font-bold text-slate-900">Email Address</label>
+                <label htmlFor="login-email" className="text-sm font-bold text-slate-900">Email atau Username</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-[#c20000] transition-colors" />
+                    <User className="h-5 w-5 text-slate-400 group-focus-within:text-[#c20000] transition-colors" />
                   </div>
                   <input 
                     id="login-email"
                     name="email"
-                    type="email" 
+                    type="text" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-white border border-slate-200 rounded-sm pl-12 pr-4 py-3.5 text-slate-900 placeholder:text-slate-400/60 placeholder:font-normal focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-all font-medium shadow-sm"
-                    placeholder="admin@immsurakarta.org"
-                    autoComplete="email"
-                    aria-invalid={emailInvalid}
+                    placeholder="admin@immsurakarta.org atau nama_pengguna"
+                    autoComplete="username"
                     aria-describedby={errorMessage ? 'login-error' : undefined}
                     required
                     disabled={isLoading}

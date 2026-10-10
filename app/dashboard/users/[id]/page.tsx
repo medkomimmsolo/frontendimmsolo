@@ -20,6 +20,7 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
   const [availableRoles, setAvailableRoles] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     name: '',
+    username: '',
     email: '',
     password: '',
     role: 'komisariat',
@@ -38,8 +39,9 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
         }
         
         setFormData({
-          name: data.name,
-          email: data.email,
+          name: data.name || '',
+          username: data.username || '',
+          email: data.email || '',
           password: '',
           role: data.roles?.[0]?.name || 'komisariat',
         });
@@ -119,6 +121,21 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
                 onChange={handleChange}
                 className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-[#0f172a]/90">Username</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-mono">@</span>
+                <input 
+                  type="text" 
+                  name="username"
+                  placeholder="nama_pengguna"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="w-full bg-white border border-[#0f172a]/10 rounded-sm pl-8 pr-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors font-mono text-sm"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">

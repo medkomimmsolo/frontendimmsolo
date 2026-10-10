@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
-import { Quote, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { Quote, ShieldCheck, Sparkles } from 'lucide-react';
 import { getApiBase, normalizeSettings } from '@/lib/settings';
 import { toAbsoluteMediaUrl } from '@/lib/absoluteUrl';
 
@@ -111,30 +110,24 @@ export default function ChairmanMessageSection({
               </div>
 
               {/* Kartu Profil Formal di Bawah Foto */}
-              <div className="mt-4 bg-white p-4 sm:p-5 rounded-xl border border-slate-200/90 shadow-lg shadow-slate-900/5 flex items-center justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 
-                      className="font-bold text-base sm:text-lg text-slate-900 truncate leading-snug"
-                      style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
-                    >
-                      {chairmanName}
-                    </h3>
-                    <span title="Terverifikasi" className="inline-flex">
-                      <ShieldCheck className="w-4 h-4 text-[#c20000] shrink-0" />
-                    </span>
-                  </div>
-                  <p className="text-xs font-semibold text-[#c20000] uppercase tracking-wider mt-0.5">
-                    Ketua Umum • {chairmanPeriod}
-                  </p>
-                  <p className="text-[11px] text-slate-500 mt-1">
-                    PC IMM Kota Surakarta
-                  </p>
+              <div className="mt-4 bg-white p-4 sm:p-5 rounded-xl border border-slate-200/90 shadow-lg shadow-slate-900/5">
+                <div className="flex items-center gap-2">
+                  <h3 
+                    className="font-bold text-base sm:text-lg text-slate-900 truncate leading-snug"
+                    style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
+                  >
+                    {chairmanName}
+                  </h3>
+                  <span title="Terverifikasi" className="inline-flex">
+                    <ShieldCheck className="w-4 h-4 text-[#c20000] shrink-0" />
+                  </span>
                 </div>
-
-                <div className="w-11 h-11 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center text-[#c20000] font-black text-sm shrink-0 shadow-xs">
-                  IMM
-                </div>
+                <p className="text-xs font-semibold text-[#c20000] uppercase tracking-wider mt-0.5">
+                  Ketua Umum • {chairmanPeriod}
+                </p>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  PC IMM Kota Surakarta
+                </p>
               </div>
             </div>
           </div>
@@ -156,7 +149,7 @@ export default function ChairmanMessageSection({
             </h2>
 
             {/* Kotak Sambutan Utama */}
-            <div className="relative bg-white rounded-xl p-6 sm:p-8 md:p-10 border border-slate-200/80 shadow-sm shadow-slate-900/5 mb-8">
+            <div className="relative bg-white rounded-xl p-6 sm:p-8 md:p-10 border border-slate-200/80 shadow-sm shadow-slate-900/5">
               {/* Ikon Kutipan Dekoratif Besar */}
               <Quote className="absolute -top-3 left-6 w-9 h-9 text-[#c20000] fill-[#c20000]/10" />
 
@@ -174,24 +167,6 @@ export default function ChairmanMessageSection({
                   Fastabiqul Khairat
                 </span>
               </div>
-            </div>
-
-            {/* Tombol Aksi Cepat */}
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/struktural"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-sm bg-[#c20000] hover:bg-[#a30000] text-white text-xs sm:text-sm font-semibold transition-all shadow-sm hover:shadow"
-              >
-                <span>Struktur Pimpinan Cabang</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              
-              <Link
-                href="/tentang"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-sm bg-white hover:bg-slate-50 text-slate-700 hover:text-[#c20000] border border-slate-200 text-xs sm:text-sm font-semibold transition-colors"
-              >
-                <span>Profil & Visi Misi</span>
-              </Link>
             </div>
           </div>
 

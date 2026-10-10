@@ -64,38 +64,38 @@ export default async function SejarahPage() {
       <section className="relative z-20 -mt-24 mb-32 max-w-7xl mx-auto px-4 md:px-6">
         <div className="grid md:grid-cols-3 gap-8">
           
-          <div data-aos="fade-up" className="bg-white rounded-sm shadow-2xl shadow-slate-200/50 p-8 hover:-translate-y-2 transition-transform duration-500 group relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-200 to-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
-            <div className="w-16 h-16 bg-[#0f172a]/5 rounded-sm flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500">
+          <div data-aos="fade-up" className="bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/90 p-8 hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-200 to-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
+            <div className="w-16 h-16 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500 shadow-sm">
               <Clock className="w-8 h-8" />
             </div>
-            <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Kelahiran IMM</h2>
-            <p className="text-[#0f172a]/70 leading-relaxed">
+            <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Kelahiran IMM</h2>
+            <p className="text-slate-600 leading-relaxed text-base">
               Didirikan di Yogyakarta pada 14 Maret 1964 M (29 Syawal 1384 H). Lahir sebagai respons atas kebutuhan Muhammadiyah akan wadah pembinaan mahasiswa Islam.
             </p>
           </div>
 
           {/* Middle Card: Pushed slightly up */}
-          <div data-aos="fade-up" data-aos-delay="100" className="bg-[#0f172a] text-white rounded-sm shadow-2xl shadow-[#0f172a]/30 p-8 md:-translate-y-8 hover:-translate-y-10 transition-transform duration-500 group relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
-            <div className="absolute -right-10 -top-10 w-40 h-40 bg-[#c20000]/10 rounded-full blur-2xl group-hover:bg-[#c20000]/30 transition-colors duration-500"></div>
+          <div data-aos="fade-up" data-aos-delay="100" className="bg-[#0f172a] text-white rounded-2xl shadow-2xl shadow-slate-900/40 p-8 md:-translate-y-8 hover:-translate-y-10 transition-all duration-500 group relative overflow-hidden border border-slate-800">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-[#c20000]/20 rounded-full blur-2xl group-hover:bg-[#c20000]/40 transition-colors duration-500"></div>
             
-            <div className="w-16 h-16 bg-white/10 rounded-sm flex items-center justify-center text-white mb-8 group-hover:bg-[#c20000] transition-colors duration-500 relative z-10">
+            <div className="w-16 h-16 bg-white/10 border border-white/10 rounded-2xl flex items-center justify-center text-white mb-8 group-hover:bg-[#c20000] transition-colors duration-500 relative z-10 shadow-sm">
               <Target className="w-8 h-8" />
             </div>
-            <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'var(--font-playfair), serif' }}>Tujuan Mulia</h2>
-            <p className="text-white/80 leading-relaxed relative z-10">
+            <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Tujuan Mulia</h2>
+            <p className="text-slate-300 leading-relaxed relative z-10 text-base">
               "Mengusahakan terbentuknya akademisi Islam yang berakhlak mulia dalam rangka mencapai tujuan Muhammadiyah." Sebuah manifesto gerakan intelektual.
             </p>
           </div>
 
-          <div data-aos="fade-up" data-aos-delay="200" className="bg-white rounded-sm shadow-2xl shadow-slate-200/50 p-8 hover:-translate-y-2 transition-transform duration-500 group relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-200 to-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
-            <div className="w-16 h-16 bg-[#0f172a]/5 rounded-sm flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500">
+          <div data-aos="fade-up" data-aos-delay="200" className="bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-200/90 p-8 hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-200 to-[#c20000] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"></div>
+            <div className="w-16 h-16 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center text-[#c20000] mb-8 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500 shadow-sm">
               <Flag className="w-8 h-8" />
             </div>
-            <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-playfair), serif' }}>Deklarasi Kottabarat</h2>
-            <p className="text-[#0f172a]/70 leading-relaxed">
+            <h2 className="text-2xl font-bold mb-4 text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Deklarasi Kottabarat</h2>
+            <p className="text-slate-600 leading-relaxed text-base">
               Melahirkan Enam Penegasan IMM di Surakarta, yang menjadi fondasi dan pijakan ideologis perjuangan seluruh kader IMM se-Indonesia hingga saat ini.
             </p>
           </div>
@@ -120,11 +120,12 @@ export default async function SejarahPage() {
               const Icon = item.icon;
               return (
                 <div key={idx} data-aos="fade-up" data-aos-delay={idx * 100} className="group relative">
-                  <div className="absolute inset-0 bg-[#0f172a]/5 rounded-sm scale-95 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-300"></div>
-                  <div className="relative p-8 flex flex-col h-full border-l-2 border-transparent group-hover:border-[#c20000] transition-colors duration-300">
-                    <Icon className="w-12 h-12 text-slate-300 group-hover:text-[#c20000] transition-colors duration-500 mb-6" />
-                    <h3 className="text-3xl font-bold text-[#0f172a] mb-4" style={{ fontFamily: 'var(--font-playfair), serif' }}>{item.title}</h3>
-                    <p className="text-slate-600 leading-relaxed text-lg">
+                  <div className="p-8 md:p-10 flex flex-col h-full bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-red-200 hover:-translate-y-1 transition-all duration-300">
+                    <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-[#c20000] mb-6 group-hover:bg-[#c20000] group-hover:text-white transition-colors duration-500 shadow-sm">
+                      <Icon className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-[#0f172a] mb-4" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>{item.title}</h3>
+                    <p className="text-slate-600 leading-relaxed text-base">
                       {item.desc}
                     </p>
                   </div>
@@ -136,19 +137,19 @@ export default async function SejarahPage() {
       </section>
 
       {/* 4. SEJARAH OVERLAP LAYOUT */}
-      <section className="py-20 md:py-28 bg-[#f8fafc] relative overflow-hidden">
+      <section className="py-20 md:py-28 bg-slate-50/70 relative overflow-hidden">
         {/* Decorative elements */}
-        <div className="absolute right-0 top-0 w-1/3 h-full bg-[#0f172a]/5 -skew-x-12 translate-x-1/2"></div>
+        <div className="absolute right-0 top-0 w-1/3 h-full bg-red-500/5 -skew-x-12 translate-x-1/2"></div>
         
         <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
             
             {/* Image Side */}
             <div data-aos="fade-right" className="relative">
               {/* Offset decorative box */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#c20000] to-red-500 translate-x-6 translate-y-6 rounded-sm"></div>
+              <div className="absolute inset-0 bg-red-100/60 translate-x-4 translate-y-4 rounded-2xl"></div>
               {/* Image itself */}
-              <div className="relative h-72 sm:h-96 md:h-[600px] rounded-sm overflow-hidden shadow-xl">
+              <div className="relative h-72 sm:h-96 md:h-[600px] rounded-2xl overflow-hidden shadow-xl border border-slate-200/90 bg-slate-100">
                 <img 
                   src="/images/imm_hero_bg.jpg" 
                   alt="Dokumentasi sejarah Ikatan Mahasiswa Muhammadiyah" 
@@ -161,7 +162,7 @@ export default async function SejarahPage() {
                 {/* Superimposed text */}
                 <div className="absolute bottom-10 left-10 text-white">
                   <div className="text-7xl font-black mb-2" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>1964</div>
-                  <div className="text-xl font-medium tracking-widest uppercase">Tahun Berdiri</div>
+                  <div className="text-sm font-bold tracking-widest uppercase text-white/80">Tahun Berdiri</div>
                 </div>
               </div>
             </div>

@@ -24,74 +24,74 @@ import MaintenancePage from "@/components/ui/MaintenancePage";
 export default async function KontakPage() {
   if (await checkMaintenance("maintenance_kontak")) return <MaintenancePage />;
   return (
-    <main className="min-h-screen bg-[#f8f9fa] pt-28 pb-20">
+    <main className="min-h-screen bg-slate-50/70 pt-28 pb-20">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Header Section */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div data-aos="fade-up">
+          <div data-aos="fade-up" className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-[#c20000] border border-red-100 text-xs font-bold uppercase tracking-wider mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#c20000]"></span>
+            Hubungi Kami
+          </div>
+          <div data-aos="fade-up" data-aos-delay="50">
             <h1
-              className="text-3xl md:text-5xl font-bold text-[#0f172a] mb-6"
+              className="text-3xl md:text-5xl font-extrabold text-[#0f172a] mb-5 tracking-tight"
               style={{ fontFamily: "var(--font-poppins), sans-serif" }}
             >
-              Hubungi Kami
+              Layanan & Komunikasi
             </h1>
           </div>
           <div data-aos="fade-up" data-aos-delay="100">
-            <p className="text-[#0f172a]/70 text-lg leading-relaxed">
-              Punya pertanyaan, saran, atau ingin berkolaborasi? Jangan ragu untuk
-              menghubungi PC IMM Kota Surakarta melalui form di bawah atau via
-              kontak langsung kami.
+            <p className="text-slate-500 text-base md:text-lg leading-relaxed font-normal">
+              Punya pertanyaan seputar organisasi, pendaftaran kader, saran, atau peluang kolaborasi? Silakan hubungi kami melalui formulir atau kontak resmi di bawah.
             </p>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           {/* Contact Info */}
           <div data-aos="fade-right">
             <h2
               className="text-2xl font-bold text-[#0f172a] mb-6"
               style={{ fontFamily: "var(--font-poppins), sans-serif" }}
             >
-              Informasi Kontak
+              Sekretariat & Kanal Resmi
             </h2>
             <div className="space-y-6 mb-10">
-              <div className="flex items-start">
-                <div className="w-12 h-12 bg-[#c20000]/10 rounded-sm flex items-center justify-center text-[#c20000] mr-4 shrink-0">
+              <div className="flex items-start bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm">
+                <div className="w-12 h-12 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center text-[#c20000] mr-4 shrink-0 shadow-sm">
                   <MapPin className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-[#0f172a] mb-1">
+                  <h3 className="text-base font-bold text-[#0f172a] mb-1" style={{ fontFamily: "var(--font-poppins), sans-serif" }}>
                     Sekretariat
                   </h3>
-                  <p className="text-[#0f172a]/70 leading-relaxed">
+                  <p className="text-slate-600 leading-relaxed text-sm">
                     Gedung Dakwah Balai Muhammadiyah
                     <br />
-                    Jl. Teuku Umar No.5, Keprabon
-                    <br />
-                    Surakarta
+                    Jl. Teuku Umar No.5, Keprabon, Surakarta
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-[#c20000]/10 rounded-sm flex items-center justify-center text-[#c20000] mr-4 shrink-0">
+              <div className="flex items-center bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm">
+                <div className="w-12 h-12 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center text-[#c20000] mr-4 shrink-0 shadow-sm">
                   <Mail className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-[#0f172a] mb-1">
-                    Email
+                  <h3 className="text-base font-bold text-[#0f172a] mb-1" style={{ fontFamily: "var(--font-poppins), sans-serif" }}>
+                    Email Resmi
                   </h3>
                   <a
                     href="mailto:solo.imm@gmail.com"
-                    className="text-[#c20000] hover:underline font-medium"
+                    className="text-[#c20000] hover:underline font-semibold text-sm"
                   >
                     solo.imm@gmail.com
                   </a>
                 </div>
               </div>
 
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-[#c20000]/10 rounded-sm flex items-center justify-center text-[#c20000] mr-4 shrink-0">
+              <div className="flex items-center bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm">
+                <div className="w-12 h-12 bg-red-50 border border-red-100 rounded-2xl flex items-center justify-center text-[#c20000] mr-4 shrink-0 shadow-sm">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -117,14 +117,14 @@ export default async function KontakPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-[#0f172a] mb-1">
+                  <h3 className="text-base font-bold text-[#0f172a] mb-1" style={{ fontFamily: "var(--font-poppins), sans-serif" }}>
                     Instagram
                   </h3>
                   <a
                     href="https://instagram.com/immsurakarta"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[#c20000] hover:underline font-medium"
+                    className="text-[#c20000] hover:underline font-semibold text-sm"
                   >
                     @immsurakarta
                   </a>
@@ -133,7 +133,7 @@ export default async function KontakPage() {
             </div>
 
             {/* Map Placeholder */}
-            <div className="w-full h-64 bg-slate-200 rounded-sm overflow-hidden relative shadow-sm border border-slate-100">
+            <div className="w-full h-64 bg-slate-100 rounded-2xl overflow-hidden relative shadow-sm border border-slate-200/90">
               <iframe
                 title="Peta lokasi sekretariat PC IMM Kota Surakarta"
                 src="https://maps.google.com/maps?q=Gedung%20Dakwah%20Balai%20Muhammadiyah,%20Jl.%20Teuku%20Umar%20No.5,%20Keprabon,%20Surakarta&t=&z=16&ie=UTF8&iwloc=&output=embed"
@@ -150,13 +150,13 @@ export default async function KontakPage() {
 
           {/* Form */}
           <div data-aos="fade-left" data-aos-delay="150">
-            <Card className="shadow-xl shadow-[#0f172a]/5 border-none">
-              <CardContent className="p-8">
+            <Card className="shadow-xl shadow-slate-200/60 border border-slate-200/90 rounded-2xl bg-white overflow-hidden">
+              <CardContent className="p-8 md:p-10">
                 <h2
                   className="text-2xl font-bold text-[#0f172a] mb-6"
                   style={{ fontFamily: "var(--font-poppins), sans-serif" }}
                 >
-                  Kirim Pesan
+                  Kirim Pesan Langsung
                 </h2>
                 <KontakFormClient />
               </CardContent>

@@ -89,7 +89,7 @@ export default function Footer() {
                 />
               ) : (
                 <>
-                  <div className="w-12 h-12 rounded-sm bg-gradient-to-br from-[#c20000] to-[#a30000] flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-[#c20000]/40">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#c20000] to-[#a30000] flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-[#c20000]/40">
                     I
                   </div>
                   <div className="flex flex-col">
@@ -109,7 +109,7 @@ export default function Footer() {
             {socials.length > 0 && (
               <div className="flex gap-3 pt-2">
                 {socials.map((s) => (
-                  <a key={s.label} href={s.href as string} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="w-10 h-10 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-[#c20000] hover:border-[#c20000] transition-all duration-300 shadow-sm">
+                  <a key={s.label} href={s.href as string} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-[#c20000] hover:border-[#c20000] transition-all duration-300 shadow-sm">
                     {s.icon}
                   </a>
                 ))}
@@ -134,19 +134,19 @@ export default function Footer() {
             <h2 className="text-white font-bold text-lg mb-6 tracking-wide">Hubungi Kami</h2>
             <ul className="space-y-5 text-white/80">
               <li className="flex items-start gap-4 group">
-                <div className="w-10 h-10 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-[#c20000] group-hover:border-[#c20000] transition-colors duration-300 shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-[#c20000] group-hover:border-[#c20000] transition-colors duration-300 shadow-sm">
                   <MapPin className="w-5 h-5 text-white group-hover:text-white transition-colors" />
                 </div>
                 <span className="text-base leading-relaxed pt-1">{address}</span>
               </li>
               <li className="flex items-center gap-4 group">
-                <div className="w-10 h-10 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-[#c20000] group-hover:border-[#c20000] transition-colors duration-300 shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-[#c20000] group-hover:border-[#c20000] transition-colors duration-300 shadow-sm">
                   <Mail className="w-5 h-5 text-white group-hover:text-white transition-colors" />
                 </div>
                 <a href={`mailto:${email}`} className="text-base hover:text-white transition-colors break-all">{email}</a>
               </li>
               <li className="flex items-center gap-4 group">
-                <div className="w-10 h-10 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-[#c20000] group-hover:border-[#c20000] transition-colors duration-300 shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-[#c20000] group-hover:border-[#c20000] transition-colors duration-300 shadow-sm">
                   <Phone className="w-5 h-5 text-white group-hover:text-white transition-colors" />
                 </div>
                 <a href={`tel:${phone.replace(/[^+\d]/g, '')}`} className="text-base hover:text-white transition-colors">{phone}</a>

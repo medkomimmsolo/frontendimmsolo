@@ -1,6 +1,7 @@
 export interface User {
   id: number;
   name: string;
+  username?: string | null;
   email: string;
   komisariat_id: number | null;
   bidang_id: number | null;

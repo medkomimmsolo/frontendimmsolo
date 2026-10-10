@@ -30,7 +30,7 @@ export function PaginationControls({
           type="button"
           disabled={currentPage === 1}
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-          className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors"
+          className="px-3.5 py-1.5 text-sm font-semibold rounded-xl border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors"
         >
           Prev
         </button>
@@ -41,7 +41,7 @@ export function PaginationControls({
           type="button"
           disabled={currentPage === totalPages}
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-          className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors"
+          className="px-3.5 py-1.5 text-sm font-semibold rounded-xl border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors"
         >
           Next
         </button>

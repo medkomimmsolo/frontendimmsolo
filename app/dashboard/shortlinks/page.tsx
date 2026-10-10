@@ -202,28 +202,39 @@ export default function ShortlinksPage() {
         </div>
       </form>
 
-      <Card className="border border-[#0f172a]/10 shadow-sm">
+      <Card className="border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full text-sm text-left">
-              <thead className="text-sm text-[#0f172a]/70 bg-white uppercase border-b border-[#0f172a]/10">
+              <thead className="text-xs text-slate-500 bg-slate-50/80 uppercase tracking-wider font-bold border-b border-slate-200/80">
                 <tr>
-                  <th className="px-6 py-4 font-semibold">Slug / Link</th>
-                  <th className="px-6 py-4 font-semibold">Target URL</th>
-                  <th className="px-6 py-4 font-semibold">Pemohon</th>
-                  <th className="px-6 py-4 font-semibold text-center">Klik</th>
-                  <th className="px-6 py-4 font-semibold text-center">Status</th>
-                  <th className="px-6 py-4 font-semibold text-right">Aksi</th>
+                  <th className="px-6 py-3.5">Slug / Link</th>
+                  <th className="px-6 py-3.5">Target URL</th>
+                  <th className="px-6 py-3.5">Pemohon</th>
+                  <th className="px-6 py-3.5 text-center">Klik</th>
+                  <th className="px-6 py-3.5 text-center">Status</th>
+                  <th className="px-6 py-3.5 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-slate-100">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-slate-500"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#c20000]" /><p className="text-sm mt-2">Memuat data...</p></td>
+                    <td colSpan={6} className="px-6 py-16 text-center text-slate-500">
+                      <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#c20000] mb-2" />
+                      <p className="text-sm font-medium">Memuat data tautan pendek...</p>
+                    </td>
                   </tr>
                 ) : shortlinks.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-slate-500">Belum ada shortlink</td>
+                    <td colSpan={6} className="px-6 py-16 text-center">
+                      <div className="flex flex-col items-center justify-center text-slate-400">
+                        <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3 text-slate-300">
+                          <LinkIcon className="w-6 h-6" />
+                        </div>
+                        <p className="text-sm font-semibold text-slate-700">Belum ada shortlink</p>
+                        <p className="text-xs text-slate-400 mt-1">Buat tautan pendek baru untuk dibagikan</p>
+                      </div>
+                    </td>
                   </tr>
                 ) : (
                   shortlinks.map((item: any) => (

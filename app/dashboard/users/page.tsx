@@ -266,7 +266,7 @@ export default function UsersManagement() {
             <form onSubmit={handleSearch}>
               <input 
                 type="text" 
-                placeholder="Cari nama atau email... (Enter)" 
+                placeholder="Cari nama, username, atau email... (Enter)" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-white border border-[#0f172a]/10 rounded-sm pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
@@ -276,15 +276,15 @@ export default function UsersManagement() {
         </CardContent>
       </Card>
 
-      <Card className="border-[#0f172a]/10 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+      <Card className="border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+        <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-white border-b border-[#0f172a]/5 text-[#0f172a]/70 text-sm font-semibold uppercase tracking-wider">
-                <th className="p-4 pl-6">Nama & Email</th>
-                <th className="p-4">Peran (Role)</th>
-                <th className="p-4">Status</th>
-                <th className="p-4 pr-6 text-right">Aksi</th>
+              <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                <th className="py-3.5 px-4 pl-6">Nama & Email</th>
+                <th className="py-3.5 px-4">Peran (Role)</th>
+                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-4 pr-6 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
@@ -312,7 +312,14 @@ export default function UsersManagement() {
                   <tr key={u.id} className="hover:bg-white/50 transition-colors">
                     <td className="p-4 pl-6">
                       <div className="font-bold text-[#0f172a]">{u.name}</div>
-                      <div className="text-[#0f172a]/70 text-xs mt-1">{u.email}</div>
+                      <div className="flex items-center gap-2 mt-1">
+                        {u.username && (
+                          <span className="text-[11px] font-mono font-semibold text-[#c20000] bg-red-50 px-1.5 py-0.5 rounded border border-red-100">
+                            @{u.username}
+                          </span>
+                        )}
+                        <span className="text-[#0f172a]/70 text-xs">{u.email}</span>
+                      </div>
                     </td>
                     <td className="p-4">
                       {u.roles?.map(r => (

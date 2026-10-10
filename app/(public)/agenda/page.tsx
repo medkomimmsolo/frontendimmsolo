@@ -116,36 +116,43 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
   }
 
   return (
-    <main className="min-h-screen bg-[#f8f9fa] pt-28 pb-20">
+    <main className="min-h-screen bg-slate-50/70 pt-28 pb-20">
       
       {/* Breadcrumb & Title Section */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-6">
+      <section className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-8">
         <nav aria-label="breadcrumb" className="mb-4">
-          <ul className="flex items-center text-sm text-[#0f172a]/60 space-x-2">
+          <ul className="flex items-center text-sm text-slate-500 space-x-2">
             <li>
-              <Link href="/" className="hover:text-[#c20000] transition-colors flex items-center">
+              <Link href="/" className="hover:text-[#c20000] transition-colors flex items-center font-medium">
                 Beranda
               </Link>
             </li>
             <li>
-              <span className="text-[#0f172a]/40 mx-1">/</span>
+              <span className="text-slate-300 mx-1">/</span>
             </li>
-            <li className="text-[#0f172a] font-medium" aria-current="page">Agenda</li>
+            <li className="text-[#0f172a] font-semibold" aria-current="page">Agenda</li>
           </ul>
         </nav>
-        <div>
-          <div data-aos="fade-up" className="flex items-center justify-between border-b border-[#0f172a]/10 pb-4 mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+        <div data-aos="fade-up" className="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-200/80 pb-6 mb-8 gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-[#c20000] border border-red-100 text-xs font-bold uppercase tracking-wider mb-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c20000]"></span>
+              Jadwal & Agenda
+            </div>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-[#0f172a] tracking-tight" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
               Agenda Kegiatan
             </h1>
           </div>
+          <p className="text-slate-500 text-sm md:text-base max-w-md">
+            Ikuti berbagai kegiatan, kajian, aksi sosial, dan perkaderan bersama PC IMM Kota Surakarta.
+          </p>
         </div>
       </section>
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 mb-16">
         
         {/* Filter Navigation */}
-        <div className="flex flex-wrap items-center gap-3 mb-8 pb-4 overflow-x-auto no-scrollbar">
+        <div className="flex flex-wrap items-center gap-2.5 mb-8 pb-4 overflow-x-auto no-scrollbar">
           {filterTabs.map((tab) => {
             const isActive = currentFilter === tab.value;
             return (
@@ -153,7 +160,9 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
                 key={tab.value}
                 asChild
                 variant={isActive ? "default" : "outline"}
-                className={!isActive ? "border-[#0f172a]/10 bg-white hover:border-[#c20000] hover:text-[#c20000]" : "bg-[#0f172a] text-white hover:bg-[#0f172a]/90 shadow-none"}
+                className={!isActive 
+                  ? "rounded-xl border-slate-200 bg-white text-slate-700 hover:border-red-200 hover:text-[#c20000] hover:bg-red-50/50 shadow-sm" 
+                  : "rounded-xl bg-[#c20000] text-white hover:bg-[#a00000] shadow-sm font-semibold"}
               >
                 <Link href={tab.value === 'all' ? '/agenda' : `/agenda?filter=${tab.value}`} scroll={false}>
                   {tab.label}
