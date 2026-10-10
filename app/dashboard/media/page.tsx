@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Loader2, Folder, Image as ImageIcon, Trash2, Calendar, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 interface MediaFile {
   name: string;
@@ -156,12 +157,12 @@ export default function MediaLibrary() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-          Media Library
-        </h1>
-        <p className="text-[#0f172a]/70 text-sm mt-1">Kelola gambar dan dokumen yang dikelompokkan berdasarkan penggunaannya.</p>
-      </div>
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Media Library"
+        description="Kelola gambar dan dokumen yang dikelompokkan berdasarkan penggunaannya di portal"
+        badge="Media"
+      />
 
       <div className="flex flex-col md:flex-row gap-6">
         {/* Sidebar Groups */}

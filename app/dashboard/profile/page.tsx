@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Save, Loader2, User as UserIcon, Lock, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 export default function ProfileSettings() {
   const router = useRouter();
@@ -99,20 +100,12 @@ export default function ProfileSettings() {
 
   return (
     <div className="w-full pb-20">
-      {/* Header Section */}
-      <div 
-       
-       
-        className="flex items-center gap-4 mb-8 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5"
-      >
-        <div className="w-12 h-12 rounded-sm bg-red-50 flex items-center justify-center border border-red-100">
-          <UserIcon className="w-6 h-6 text-[#c20000]" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Pengaturan Profil</h1>
-          <p className="text-[#0f172a]/70 text-sm mt-1">Kelola informasi akun Anda seperti nama, email, dan kata sandi.</p>
-        </div>
-      </div>
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Pengaturan Profil"
+        description="Kelola informasi akun Anda seperti nama, email, dan kata sandi akun sistem"
+        badge="Akun"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-12 max-w-4xl">
         

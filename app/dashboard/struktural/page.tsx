@@ -21,6 +21,7 @@ import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { Struktural } from '@/types';
 import Link from 'next/link';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 type BidangNode = {
   id: string;
@@ -341,16 +342,12 @@ export default function StrukturalManagement() {
   return (
     <div className="space-y-6">
       
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
-        <div>
-          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-            Kelola Struktur Organisasi
-          </h1>
-          <p className="text-[#0f172a]/70 text-sm mt-1">Atur jajaran pengurus harian, bidang, dan lembaga PC IMM. Anda dapat mengatur urutan dengan menarik dan melepaskannya (Drag & Drop).</p>
-        </div>
-
-      </div>
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Kelola Struktur Organisasi"
+        description="Atur jajaran pengurus harian, bidang, dan lembaga PC IMM dengan urutan interaktif (Drag & Drop)"
+        badge="Struktural"
+      />
 
       {/* Toolbar */}
       <Card className="border-[#0f172a]/10 shadow-sm">

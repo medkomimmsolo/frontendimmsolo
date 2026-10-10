@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
 import { useDebounce } from 'use-debounce';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 export default function FormsManagement() {
   const { user } = useAuth();
@@ -162,25 +163,39 @@ export default function FormsManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
-        <div>
-          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Formulir Pendaftaran</h1>
-          <p className="text-[#0f172a]/70 text-sm mt-1">Buat formulir online di immsolo.or.id/form/... dan kelola data pendaftar</p>
-        </div>
-        <Button onClick={() => openModal()} className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm text-sm font-semibold shadow-sm">
-          <Plus className="w-4 h-4 mr-2" /> Buat Formulir
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Formulir Pendaftaran"
+        description="Buat formulir kustom dan kelola data respon/pendaftar kegiatan PC IMM Kota Surakarta"
+        badge="Layanan"
+      >
+        <Button 
+          onClick={() => openModal()} 
+          className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
+          Buat Formulir
         </Button>
+      </PageHeader>
+
+      {/* Search Bar Konsisten */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <form onSubmit={(e) => { e.preventDefault(); setCurrentPage(1); fetchForms(1, searchQuery); }}>
+            <input 
+              type="text" 
+              placeholder="Cari judul atau slug... (Enter)" 
+              value={searchQuery} 
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-2xs transition-all"
+            />
+          </form>
+        </div>
       </div>
 
-      <form onSubmit={(e) => { e.preventDefault(); setCurrentPage(1); fetchForms(1, searchQuery); }} className="bg-white border border-[#0f172a]/10 rounded-sm p-4 sm:p-6 shadow-sm">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input type="text" placeholder="Cari judul atau slug... (Enter)" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border border-slate-200 rounded-sm pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
-        </div>
-      </form>
-
-      <Card className="border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+      {/* Tabel Data Konsisten */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -266,12 +281,12 @@ export default function FormsManagement() {
         <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
           <p className="text-xs text-slate-500 font-medium">Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} formulir</p>
           <div className="flex items-center gap-2">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
-            <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors">Prev</button>
+            <span className="text-xs text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
+            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors">Next</button>
           </div>
         </div>
-      </Card>
+      </div>
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setIsModalOpen(false)}>

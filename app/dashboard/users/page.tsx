@@ -19,6 +19,7 @@ import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { User } from '@/types';
 import { ShieldCheck, Shield, Power, PowerOff } from 'lucide-react';
 import Link from 'next/link';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 export default function UsersManagement() {
   const { user } = useAuth();
@@ -231,52 +232,49 @@ export default function UsersManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
-        <div>
-          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-            Kelola Pengguna
-          </h1>
-          <p className="text-[#0f172a]/70 text-sm mt-1">Sistem manajemen akun admin dan kontributor website.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          {isSuperAdmin && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={openRolesModal}
-              className="h-10 px-4 border-[#0f172a]/20 hover:bg-slate-50 text-slate-700 rounded-sm text-sm font-semibold"
-            >
-              <Shield className="w-4 h-4 mr-2 text-[#c20000]" />
-              Kelola Role
-            </Button>
-          )}
-          <Link href="/dashboard/users/create">
-            <Button className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm text-sm font-semibold shadow-sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Tambah Pengguna
-            </Button>
-          </Link>
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Kelola Pengguna"
+        description="Sistem manajemen akun admin, hak akses, dan kontributor website PC IMM Kota Surakarta"
+        badge="Pengguna"
+      >
+        {isSuperAdmin && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={openRolesModal}
+            className="h-10 px-4 border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold shadow-2xs"
+          >
+            <Shield className="w-4 h-4 mr-1.5 text-[#c20000]" />
+            Kelola Role
+          </Button>
+        )}
+        <Link href="/dashboard/users/create">
+          <Button className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
+            Tambah Pengguna
+          </Button>
+        </Link>
+      </PageHeader>
+
+      {/* Search and Filters Bar Konsisten */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <form onSubmit={handleSearch}>
+            <input 
+              type="text" 
+              placeholder="Cari nama, username, atau email... (Enter)" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-2xs transition-all"
+            />
+          </form>
         </div>
       </div>
 
-      <Card className="border-[#0f172a]/10 shadow-sm">
-        <CardContent className="p-4 sm:p-6 flex flex-col md:flex-row gap-4 justify-between items-center">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <form onSubmit={handleSearch}>
-              <input 
-                type="text" 
-                placeholder="Cari nama, username, atau email... (Enter)" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
-              />
-            </form>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+      {/* Tabel Data Konsisten */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -385,12 +383,12 @@ export default function UsersManagement() {
             Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} pengguna
           </p>
           <div className="flex items-center gap-2">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
-            <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors">Prev</button>
+            <span className="text-xs text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
+            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors">Next</button>
           </div>
         </div>
-      </Card>
+      </div>
 
       {accessModalUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4" onClick={() => setAccessModalUser(null)}>

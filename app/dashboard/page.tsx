@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/Card';
 import Link from 'next/link';
-import { FileText, CalendarDays, Users, Building2, TrendingUp, Activity, BarChart2, Link as LinkIcon } from 'lucide-react';
+import { FileText, CalendarDays, Users, Building2, TrendingUp, Activity, BarChart2, Link as LinkIcon, Plus, Calendar, Clock, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { ChartArea, BarChartSimple } from '@/components/ui/ChartArea';
 import { ActivityTrendChart, type TrendItem } from '@/components/ui/ActivityTrendChart';
@@ -102,81 +102,160 @@ export default function DashboardOverview() {
     fetchAnalytics();
   }, [user]);
 
+  // Helper untuk ucapan salam dinamis berdasarkan jam
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 4 && hour < 11) return { text: 'Selamat Pagi', icon: '🌅' };
+    if (hour >= 11 && hour < 15) return { text: 'Selamat Siang', icon: '☀️' };
+    if (hour >= 15 && hour < 18) return { text: 'Selamat Sore', icon: '🌤️' };
+    return { text: 'Selamat Malam', icon: '🌙' };
+  };
+
+  const greeting = getGreeting();
+  
+  // Format Tanggal Indonesia
+  const currentDateFormatted = new Intl.DateTimeFormat('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date());
+
   const statCards = [
     { 
-      title: 'Total Post', 
+      title: 'Total Publikasi', 
       value: stats?.published_blogs || 0, 
-      icon: <FileText className="w-6 h-6 text-blue-500" />,
-      bg: 'bg-blue-50',
-      trend: 'Artikel & berita terbit'
+      sublabel: `${stats?.total_blogs || 0} total artikel dibuat`,
+      icon: <FileText className="w-5 h-5 text-blue-600" />,
+      bg: 'bg-blue-50/80',
+      border: 'border-blue-100',
+      badge: 'Artikel & Berita',
+      badgeColor: 'bg-blue-50 text-blue-700 border-blue-200/60'
     },
     { 
-      title: 'Agenda Aktif', 
+      title: 'Agenda Mendatang', 
       value: stats?.upcoming_events || 0, 
-      icon: <CalendarDays className="w-6 h-6 text-amber-500" />,
-      bg: 'bg-amber-50',
-      trend: 'Agenda terjadwal'
+      sublabel: `${stats?.total_events || 0} total kegiatan tercatat`,
+      icon: <CalendarDays className="w-5 h-5 text-amber-600" />,
+      bg: 'bg-amber-50/80',
+      border: 'border-amber-100',
+      badge: 'Terjadwal',
+      badgeColor: 'bg-amber-50 text-amber-700 border-amber-200/60'
     },
     { 
       title: 'Pengurus & Kader', 
       value: stats?.total_users || 0, 
-      icon: <Users className="w-6 h-6 text-emerald-500" />,
-      bg: 'bg-emerald-50',
-      trend: 'Akun terdaftar'
+      sublabel: 'Akun sistem terdaftar & aktif',
+      icon: <Users className="w-5 h-5 text-emerald-600" />,
+      bg: 'bg-emerald-50/80',
+      border: 'border-emerald-100',
+      badge: 'Basis Kader',
+      badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
     },
     { 
       title: 'Komisariat & LSO', 
       value: stats?.total_lembaga || 0, 
-      icon: <Building2 className="w-6 h-6 text-[#c20000]" />,
-      bg: 'bg-[#c20000]/5',
-      trend: 'Komisariat & LSO'
+      sublabel: 'Entitas struktural & lembaga otonom',
+      icon: <Building2 className="w-5 h-5 text-[#c20000]" />,
+      bg: 'bg-red-50/80',
+      border: 'border-red-100',
+      badge: 'Struktural',
+      badgeColor: 'bg-red-50 text-[#c20000] border-red-200/60'
     },
   ];
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#0f172a] mb-2" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-          Selamat Datang, {user?.name || 'Administrator'} 👋
-        </h1>
-        <p className="text-[#0f172a]/70">
-          Ini adalah ringkasan aktivitas dan data website PC IMM Kota Surakarta.
-        </p>
+      {/* Welcome Banner Card */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#8f0000] via-[#ab0000] to-[#c20000] text-white p-6 sm:p-7 md:p-8 mb-8 shadow-xl shadow-red-950/15 border border-red-700/50">
+        {/* Latar Belakang Aksen Geometris / Watermark (seperti chevron/line di gambar referensi) */}
+        <div className="absolute right-0 top-0 bottom-0 w-2/3 pointer-events-none opacity-15 overflow-hidden flex items-center justify-end pr-4">
+          <svg
+            className="w-[450px] h-52 transform translate-x-12 select-none"
+            viewBox="0 0 300 120"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="16"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20,100 90,30 160,85 240,15 290,60" />
+          </svg>
+        </div>
+
+        {/* Konten Banner */}
+        <div className="relative z-10">
+          {/* Header Baris Atas: Tanggal & Indikator Waktu */}
+          <div className="flex items-center justify-between gap-3 flex-wrap mb-3.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/15 backdrop-blur-md border border-white/15 text-[11px] sm:text-xs font-medium text-red-50">
+              <Calendar className="w-3.5 h-3.5 text-red-200" />
+              <span>{currentDateFormatted}</span>
+            </div>
+            <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] font-semibold text-red-100 border border-white/10">
+              <Sparkles className="w-3 h-3 text-amber-300" />
+              <span>Sistem Aktif & Terlindungi</span>
+            </div>
+          </div>
+
+          {/* Sapaan Nama & Deskripsi */}
+          <div className="max-w-2xl">
+            <h1 
+              className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white mb-2 flex items-center gap-2 flex-wrap" 
+              style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
+            >
+              <span>{greeting.text}, {user?.name || 'Administrator'}!</span>
+              <span className="text-2xl sm:text-3xl select-none" role="img" aria-label="greeting icon">{greeting.icon}</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-red-100/90 font-medium leading-relaxed">
+              Portal Admin PC IMM Kota Surakarta — Kelola seluruh publikasi berita, kaderisasi, agenda, dan tautan layanan dari satu pusat kendali.
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* Stats Grid Modern */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-8">
         {isLoading ? (
           // Skeleton Loader
           Array(4).fill(0).map((_, i) => (
-            <Card key={i} className="border-[#0f172a]/10 shadow-sm animate-pulse">
-              <CardContent className="p-6">
+            <Card key={i} className="border-slate-200/80 rounded-2xl shadow-xs animate-pulse bg-white">
+              <CardContent className="p-5">
                 <div className="flex justify-between items-start mb-4">
-                  <div className="h-4 w-24 bg-slate-200 rounded"></div>
-                  <div className="w-12 h-12 rounded-sm bg-slate-200"></div>
+                  <div className="h-4 w-24 bg-slate-200 rounded-md"></div>
+                  <div className="w-10 h-10 rounded-xl bg-slate-200"></div>
                 </div>
-                <div className="h-8 w-16 bg-slate-200 rounded mb-2"></div>
-                <div className="h-3 w-32 bg-slate-200 rounded"></div>
+                <div className="h-8 w-16 bg-slate-200 rounded-md mb-2"></div>
+                <div className="h-3 w-32 bg-slate-200 rounded-md"></div>
               </CardContent>
             </Card>
           ))
         ) : (
           statCards.map((stat, index) => (
-            <Card key={index} className="border-[#0f172a]/10 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="text-sm font-semibold text-[#0f172a]/70">{stat.title}</div>
-                  <div className={`w-12 h-12 rounded-sm flex items-center justify-center ${stat.bg}`}>
+            <div 
+              key={index} 
+              className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 group flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${stat.badgeColor}`}>
+                    {stat.badge}
+                  </span>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.bg} ${stat.border} border shrink-0 group-hover:scale-105 transition-transform`}>
                     {stat.icon}
                   </div>
                 </div>
-                <div className="text-3xl font-bold text-[#0f172a] mb-2">{stat.value}</div>
-                <div className="flex items-center text-xs text-[#0f172a]/70 font-medium">
-                  <TrendingUp className="w-3.5 h-3.5 mr-1 text-emerald-500" />
-                  {stat.trend}
+                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-1" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+                  {stat.value.toLocaleString('id-ID')}
                 </div>
-              </CardContent>
-            </Card>
+                <div className="text-xs font-bold text-slate-700 mb-1">
+                  {stat.title}
+                </div>
+              </div>
+              <div className="pt-3 mt-2 border-t border-slate-100 flex items-center text-[11px] text-slate-500 font-medium">
+                <TrendingUp className="w-3.5 h-3.5 mr-1.5 text-emerald-600 shrink-0" />
+                <span className="truncate">{stat.sublabel}</span>
+              </div>
+            </div>
           ))
         )}
       </div>

@@ -10,6 +10,7 @@ import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
 import { QRCodeSVG } from 'qrcode.react';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 export default function ShortlinksPage() {
   const { user } = useAuth();
@@ -140,16 +141,20 @@ export default function ShortlinksPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
-        <div>
-          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Manajemen Shortlink</h1>
-          <p className="text-[#0f172a]/70 text-sm mt-1">Buat dan kelola tautan pendek (URL Shortener)</p>
-        </div>
-        <Button onClick={() => handleOpenModal()} className="bg-[#c20000] hover:bg-[#a30000] text-white">
-          <Plus className="w-4 h-4 mr-2" />
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Manajemen Shortlink"
+        description="Buat dan kelola tautan pendek (URL Shortener) resmi PC IMM Kota Surakarta"
+        badge="Layanan"
+      >
+        <Button 
+          onClick={() => handleOpenModal()} 
+          className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
           Buat Shortlink
         </Button>
-      </div>
+      </PageHeader>
 
       {summary && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -189,33 +194,36 @@ export default function ShortlinksPage() {
         </Card>
       )}
 
-      <form onSubmit={(e) => { e.preventDefault(); setCurrentPage(1); fetchShortlinks(1, searchQuery); }} className="bg-white border border-[#0f172a]/10 rounded-sm p-4 sm:p-6 shadow-sm">
-        <div className="relative">
+      {/* Search Bar Konsisten */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Cari slug atau target URL... (Enter)"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border border-slate-200 rounded-sm pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
-          />
+          <form onSubmit={(e) => { e.preventDefault(); setCurrentPage(1); fetchShortlinks(1, searchQuery); }}>
+            <input
+              type="text"
+              placeholder="Cari slug atau target URL... (Enter)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-2xs transition-all"
+            />
+          </form>
         </div>
-      </form>
+      </div>
 
-      <Card className="border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
-        <CardContent className="p-0">
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-slate-500 bg-slate-50/80 uppercase tracking-wider font-bold border-b border-slate-200/80">
-                <tr>
-                  <th className="px-6 py-3.5">Slug / Link</th>
-                  <th className="px-6 py-3.5">Target URL</th>
-                  <th className="px-6 py-3.5">Pemohon</th>
-                  <th className="px-6 py-3.5 text-center">Klik</th>
-                  <th className="px-6 py-3.5 text-center">Status</th>
-                  <th className="px-6 py-3.5 text-right">Aksi</th>
-                </tr>
-              </thead>
+      {/* Tabel Data Konsisten */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                <th className="py-3.5 px-4 pl-6">Slug / Link</th>
+                <th className="py-3.5 px-4">Target URL</th>
+                <th className="py-3.5 px-4">Pemohon</th>
+                <th className="py-3.5 px-4 text-center">Klik</th>
+                <th className="py-3.5 px-4 text-center">Status</th>
+                <th className="py-3.5 px-4 pr-6 text-right">Aksi</th>
+              </tr>
+            </thead>
               <tbody className="divide-y divide-slate-100">
                 {isLoading ? (
                   <tr>
@@ -359,13 +367,12 @@ export default function ShortlinksPage() {
               Menampilkan {(currentPage - 1) * 15 + 1}–{Math.min(currentPage * 15, totalItems)} dari {totalItems} shortlink
             </p>
             <div className="flex items-center gap-2">
-              <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Prev</button>
-              <span className="text-sm text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
-              <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-sm rounded-sm border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next</button>
+              <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors">Prev</button>
+              <span className="text-xs text-slate-600 font-semibold">{currentPage} / {totalPages}</span>
+              <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors">Next</button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
       {/* Modal Form */}
       {isModalOpen && (

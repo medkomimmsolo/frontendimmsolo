@@ -23,6 +23,7 @@ import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 interface LembagaItem {
   id: number;
@@ -170,23 +171,20 @@ export default function LembagaManagementPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Halaman */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
-        <div>
-          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-            Komisariat & Lembaga
-          </h1>
-          <p className="text-[#0f172a]/70 text-sm mt-1">
-            Kelola data komisariat kampus, lembaga semi otonom (LSO), dan badan khusus PC IMM Kota Surakarta.
-          </p>
-        </div>
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Komisariat & Lembaga"
+        description="Kelola data komisariat kampus, lembaga semi otonom (LSO), dan badan khusus PC IMM Kota Surakarta"
+        badge="Struktural"
+      >
         <Button 
           onClick={openCreateModal} 
-          className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm text-sm font-semibold shadow-sm shrink-0"
+          className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
         >
-          <Plus className="w-4 h-4 mr-2" /> Tambah Lembaga
+          <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
+          Tambah Lembaga
         </Button>
-      </div>
+      </PageHeader>
 
       {/* Filter dan Pencarian */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-sm border border-[#0f172a]/10 shadow-sm">
@@ -236,7 +234,7 @@ export default function LembagaManagementPage() {
       </div>
 
       {/* Tabel Data Lembaga */}
-      <Card className="border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -356,7 +354,7 @@ export default function LembagaManagementPage() {
             </tbody>
           </table>
         </div>
-      </Card>
+      </div>
 
       {/* Modal Tambah / Edit Lembaga */}
       {isModalOpen && (

@@ -8,6 +8,7 @@ import { Save, Loader2, Settings as SettingsIcon, Image as ImageIcon, MapPin, Li
 import toast from 'react-hot-toast';
 import { convertToWebP } from '@/lib/imageUtils';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 export default function SettingsManagement() {
   const [isLoading, setIsLoading] = useState(false);
@@ -151,20 +152,22 @@ export default function SettingsManagement() {
 
   return (
     <div className="w-full pb-20">
-      {/* Header Section */}
-      <div 
-       
-       
-        className="flex items-center gap-4 mb-8 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5"
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Pengaturan Sistem"
+        description="Kelola identitas utama, logo portal, meta SEO, dan kontak resmi PC IMM Kota Surakarta"
+        badge="Konfigurasi"
       >
-        <div className="w-12 h-12 rounded-sm bg-red-50 flex items-center justify-center border border-red-100">
-          <SettingsIcon className="w-6 h-6 text-[#c20000]" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Pengaturan Sistem</h1>
-          <p className="text-[#0f172a]/70 text-sm mt-1">Kelola identitas utama, logo, dan kontak resmi organisasi.</p>
-        </div>
-      </div>
+        <Button 
+          type="button" 
+          onClick={handleSubmit} 
+          disabled={isLoading}
+          className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+        >
+          {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : <Save className="w-4 h-4 mr-1.5" />}
+          Simpan Perubahan
+        </Button>
+      </PageHeader>
 
       <form onSubmit={handleSubmit} className="space-y-12">
         
@@ -678,23 +681,6 @@ export default function SettingsManagement() {
               </CardContent>
             </Card>
           </div>
-        </div>
-
-        {/* Floating Save Button */}
-        <div 
-         
-         
-         
-          className="fixed bottom-8 right-8 z-40"
-        >
-          <Button 
-            type="submit" 
-            disabled={isLoading} 
-            className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm px-8 py-6 shadow-xl shadow-[#c20000]/30 transition-all hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#c20000]/40 text-base font-bold flex items-center gap-3"
-          >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-            {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
-          </Button>
         </div>
 
       </form>

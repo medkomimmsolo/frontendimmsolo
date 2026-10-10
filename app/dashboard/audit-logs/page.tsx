@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Loader2, Search, History } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useDebounce } from 'use-debounce';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -53,12 +54,12 @@ export default function AuditLogsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
-        <h1 className="text-2xl font-bold text-[#0f172a] flex items-center gap-2" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-          <History className="w-6 h-6 text-[#c20000]" /> Log Aktivitas
-        </h1>
-        <p className="text-[#0f172a]/70 text-sm mt-1">Catatan siapa membuat, mengubah, dan menghapus data di sistem.</p>
-      </div>
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Log Aktivitas"
+        description="Catatan rekam jejak transparansi siapa membuat, mengubah, dan menghapus data di portal"
+        badge="Audit"
+      />
 
       <div className="bg-white border border-[#0f172a]/10 rounded-sm p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row gap-3">
         <form onSubmit={(e) => { e.preventDefault(); setCurrentPage(1); fetchLogs(1, searchQuery, actionFilter); }} className="relative flex-1">

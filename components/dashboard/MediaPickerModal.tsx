@@ -217,18 +217,18 @@ export default function MediaPickerModal({
       }}
     >
       <div 
-        className="bg-white rounded-lg shadow-2xl border border-slate-200 w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+        className="bg-white rounded-2xl shadow-2xl border border-slate-200/90 w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
         role="dialog"
         aria-modal="true"
       >
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-md bg-imm-red-50 text-imm-red-500 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-xl bg-red-50 text-[#c20000] border border-red-100 flex items-center justify-center font-bold shrink-0">
               <ImageIcon className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-slate-800 leading-tight">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
                 {title}
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">

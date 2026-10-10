@@ -16,6 +16,8 @@ import {
   Menu, 
   PanelLeftClose,
   PanelLeftOpen,
+  Bell,
+  CheckCircle2,
   X,
   ChevronDown,
   ChevronRight,
@@ -57,6 +59,7 @@ export default function DashboardLayout({
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isNotifDropdownOpen, setIsNotifDropdownOpen] = useState(false);
 
   // UX & HCI Optimization States
   const [menuSearch, setMenuSearch] = useState('');
@@ -189,6 +192,7 @@ export default function DashboardLayout({
   }, [isDesktopCollapsed]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const notifDropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -196,12 +200,63 @@ export default function DashboardLayout({
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsProfileDropdownOpen(false);
       }
+      if (notifDropdownRef.current && !notifDropdownRef.current.contains(event.target as Node)) {
+        setIsNotifDropdownOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // Helper Breadcrumbs untuk Context Navigasi Header
+  const getBreadcrumbs = () => {
+    if (pathname === '/dashboard') {
+      return [{ label: 'Overview', href: '/dashboard', isLast: true }];
+    }
+
+    const segments = pathname.split('/').filter(Boolean);
+    const crumbs = [{ label: 'Dashboard', href: '/dashboard', isLast: false }];
+
+    const routeMap: Record<string, string> = {
+      blog: 'Berita & Opini',
+      events: 'Agenda Kegiatan',
+      documents: 'Dokumen & Arsip',
+      announcements: 'Papan Pengumuman',
+      forms: 'Formulir Online',
+      links: 'Biolink (Linktree)',
+      shortlinks: 'Pemendek Tautan',
+      messages: 'Kotak Masuk',
+      struktural: 'Struktur Pimpinan',
+      lembaga: 'Komisariat & Lembaga',
+      'account-requests': 'Pengajuan Akun',
+      users: 'Pengguna Sistem',
+      'audit-logs': 'Log Aktivitas',
+      settings: 'Pengaturan Portal',
+      profile: 'Setting Profile',
+      media: 'Galeri & Media',
+      create: 'Tambah Baru',
+    };
+
+    let accumulatedPath = '';
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
+      if (segment === 'dashboard') continue;
+
+      accumulatedPath += `/${segment}`;
+      const isLast = i === segments.length - 1;
+      const label = routeMap[segment] || (segment.length > 15 ? 'Detail' : segment);
+
+      crumbs.push({
+        label: isLast && segments[i - 1] === 'create' ? 'Tambah Data' : label,
+        href: `/dashboard${accumulatedPath}`,
+        isLast,
+      });
+    }
+
+    return crumbs;
+  };
 
   // Protect route
   useEffect(() => {
@@ -670,84 +725,221 @@ export default function DashboardLayout({
       <div className="flex-1 flex flex-col h-screen overflow-hidden w-full relative">
         
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-4 md:px-8 z-30 sticky top-0 shadow-2xs">
-          {/* Sidebar Panel Toggle Button (Polos tanpa background/border warna) */}
-          <button 
-            type="button"
-            className="p-1.5 text-slate-700 hover:text-slate-900 transition-colors focus:outline-none" 
-            onClick={() => {
-              if (typeof window !== 'undefined' && window.innerWidth < 1024) {
-                setIsMobileSidebarOpen((prev) => !prev);
-              } else {
-                toggleDesktopCollapsed();
-              }
-            }}
-            title={isDesktopCollapsed ? "Lebarkan Sidebar" : "Ciutkan Sidebar"}
-            aria-label="Toggle navigasi sidebar"
-          >
-            {isDesktopCollapsed ? (
-              <PanelLeftOpen className="w-5 h-5" />
-            ) : (
-              <PanelLeftClose className="w-5 h-5" />
-            )}
-          </button>
-          
-          <div className="ml-auto flex items-center gap-4">
-            <Button variant="outline" size="sm" asChild className="hidden sm:flex border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold rounded-xl">
-              <Link href="/" target="_blank" className="flex items-center gap-1.5">
-                <span>Lihat Website</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </Link>
-            </Button>
+        <header className="h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 flex items-center justify-between px-4 sm:px-6 z-30 sticky top-0 shadow-2xs">
+          {/* Sisi Kiri: Toggle Sidebar & Breadcrumbs */}
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Sidebar Panel Toggle Button (Polos tanpa background/border warna) */}
+            <button 
+              type="button"
+              className="p-1.5 text-slate-700 hover:text-slate-900 transition-colors focus:outline-none shrink-0" 
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                  setIsMobileSidebarOpen((prev) => !prev);
+                } else {
+                  toggleDesktopCollapsed();
+                }
+              }}
+              title={isDesktopCollapsed ? "Lebarkan Sidebar" : "Ciutkan Sidebar"}
+              aria-label="Toggle navigasi sidebar"
+            >
+              {isDesktopCollapsed ? (
+                <PanelLeftOpen className="w-5 h-5" />
+              ) : (
+                <PanelLeftClose className="w-5 h-5" />
+              )}
+            </button>
 
-            {/* User Dropdown Profile */}
+            {/* Separator Garis Halus */}
+            <div className="h-5 w-px bg-slate-200 hidden sm:block shrink-0" />
+
+            {/* Breadcrumb Konteks Halaman */}
+            <nav aria-label="Breadcrumb" className="hidden sm:flex items-center gap-1.5 min-w-0 text-xs">
+              {getBreadcrumbs().map((crumb, idx) => (
+                <div key={crumb.href + idx} className="flex items-center gap-1.5 min-w-0">
+                  {idx > 0 && <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
+                  {crumb.isLast ? (
+                    <span className="font-bold text-slate-900 truncate">
+                      {crumb.label}
+                    </span>
+                  ) : (
+                    <Link
+                      href={crumb.href}
+                      className="text-slate-500 hover:text-slate-800 font-medium transition-colors truncate"
+                    >
+                      {crumb.label}
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </nav>
+          </div>
+          
+          {/* Sisi Kanan: Action Buttons, Notification & Profile */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Notifikasi Cepat */}
+            <div className="relative" ref={notifDropdownRef}>
+              {(() => {
+                const totalNotifs = (Number(notifCounts.unread_messages) || 0) + 
+                                    (Number(notifCounts.pending_blogs) || 0) + 
+                                    (Number(notifCounts.pending_account_requests) || 0);
+
+                return (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setIsNotifDropdownOpen(!isNotifDropdownOpen)}
+                      className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-colors relative"
+                      title="Pemberitahuan Sistem"
+                      aria-label="Pemberitahuan Sistem"
+                    >
+                      <Bell className="w-4.5 h-4.5" />
+                      {totalNotifs > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-[#c20000] text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none border-2 border-white shadow-xs">
+                          {totalNotifs > 99 ? '99+' : totalNotifs}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Dropdown Notifikasi */}
+                    {isNotifDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-2 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                        <div className="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-800">Pemberitahuan</span>
+                          <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                            {totalNotifs} Perhatian
+                          </span>
+                        </div>
+
+                        <div className="py-1 divide-y divide-slate-50 max-h-72 overflow-y-auto">
+                          {Number(notifCounts.unread_messages) > 0 && (
+                            <Link
+                              href="/dashboard/messages"
+                              onClick={() => setIsNotifDropdownOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                <Inbox className="w-4 h-4" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold text-slate-800 truncate">Pesan Kontak Baru</p>
+                                <p className="text-[11px] text-slate-500">{notifCounts.unread_messages} pesan belum dibaca</p>
+                              </div>
+                            </Link>
+                          )}
+
+                          {Number(notifCounts.pending_account_requests) > 0 && (
+                            <Link
+                              href="/dashboard/account-requests"
+                              onClick={() => setIsNotifDropdownOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                                <UserPlus className="w-4 h-4" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold text-slate-800 truncate">Pengajuan Akun</p>
+                                <p className="text-[11px] text-slate-500">{notifCounts.pending_account_requests} akun menunggu persetujuan</p>
+                              </div>
+                            </Link>
+                          )}
+
+                          {Number(notifCounts.pending_blogs) > 0 && (
+                            <Link
+                              href="/dashboard/blog"
+                              onClick={() => setIsNotifDropdownOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors"
+                            >
+                              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                                <FileText className="w-4 h-4" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold text-slate-800 truncate">Berita Pending</p>
+                                <p className="text-[11px] text-slate-500">{notifCounts.pending_blogs} artikel menunggu review</p>
+                              </div>
+                            </Link>
+                          )}
+
+                          {totalNotifs === 0 && (
+                            <div className="py-6 px-4 text-center">
+                              <CheckCircle2 className="w-7 h-7 text-emerald-500 mx-auto mb-2" />
+                              <p className="text-xs font-semibold text-slate-700">Semua Beres!</p>
+                              <p className="text-[11px] text-slate-400 mt-0.5">Tidak ada notifikasi yang membutuhkan tindakan.</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+
+            {/* Separator Garis Halus */}
+            <div className="h-5 w-px bg-slate-200 hidden sm:block" />
+
+            {/* User Dropdown Profile Pill */}
             <div className="relative" ref={dropdownRef}>
               <button 
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                className="flex items-center gap-3 p-1 rounded-full hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200 pr-3"
+                className="flex items-center gap-2.5 p-1 sm:pl-1.5 sm:pr-2.5 rounded-full sm:rounded-2xl border border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/80 transition-all shadow-2xs select-none"
               >
-                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-700 border border-slate-200 shrink-0">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-700 border border-slate-200 shrink-0 relative">
                   {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+                  <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white absolute -bottom-0.5 -right-0.5" title="Online" />
                 </div>
-                <div className="hidden md:flex flex-col items-start">
-                  <span className="text-sm font-bold text-slate-800 leading-none">{user?.name || 'Administrator'}</span>
-                  <span className="text-xs text-slate-500 mt-1">{user?.roles?.[0]?.name || 'Super Admin'}</span>
+                <div className="hidden md:flex flex-col items-start leading-tight">
+                  <span className="text-xs font-bold text-slate-800 truncate max-w-[130px]">{user?.name || 'Administrator'}</span>
+                  <span className="text-[10px] font-medium text-slate-500 mt-0.5 truncate max-w-[130px]">{user?.roles?.[0]?.name || 'Super Admin'}</span>
                 </div>
-                <ChevronDown className="w-4 h-4 text-slate-400 hidden md:block" />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
               </button>
 
-                {isProfileDropdownOpen && (
-                  <div
-                    className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-1.5 z-50 overflow-hidden"
+              {isProfileDropdownOpen && (
+                <div
+                  className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-1.5 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+                >
+                  <div className="px-4 py-3 border-b border-slate-100">
+                    <p className="text-xs font-bold text-slate-900 truncate">{user?.name || 'Administrator'}</p>
+                    <p className="text-[11px] text-slate-400 truncate mt-0.5">{user?.email || 'admin@immsolo.or.id'}</p>
+                    <span className="inline-block mt-1.5 text-[9px] font-bold text-slate-600 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
+                      {user?.roles?.[0]?.name || 'Super Admin'}
+                    </span>
+                  </div>
+                  
+                  <Link 
+                    href="/dashboard/profile" 
+                    className="flex items-center px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#c20000] transition-colors"
+                    onClick={() => setIsProfileDropdownOpen(false)}
                   >
-                    <div className="px-4 py-3 border-b border-slate-100 md:hidden">
-                       <p className="text-sm font-bold text-slate-800 truncate">{user?.name || 'Administrator'}</p>
-                       <p className="text-xs text-slate-500 truncate mt-0.5">{user?.roles?.[0]?.name || 'Super Admin'}</p>
-                    </div>
-                    
+                    <User className="w-4 h-4 mr-3 text-slate-400" />
+                    Setting Profile
+                  </Link>
+                  
+                  {can('manage-settings') && (
                     <Link 
-                      href="/dashboard/profile" 
-                      className="flex items-center px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#c20000] transition-colors"
+                      href="/dashboard/settings" 
+                      className="flex items-center px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#c20000] transition-colors"
                       onClick={() => setIsProfileDropdownOpen(false)}
                     >
-                      <User className="w-4 h-4 mr-3" />
-                      Setting Profile
+                      <Settings className="w-4 h-4 mr-3 text-slate-400" />
+                      Pengaturan Portal
                     </Link>
-                    
-                    <div className="h-px bg-slate-100 my-1"></div>
-                    
-                    <button 
-                      onClick={() => {
-                        setIsProfileDropdownOpen(false);
-                        logout();
-                      }}
-                      className="flex w-full items-center px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <LogOut className="w-4 h-4 mr-3" />
-                      Keluar Sistem
-                    </button>
-                  </div>
-                )}
+                  )}
+                  
+                  <div className="h-px bg-slate-100 my-1" />
+                  
+                  <button 
+                    onClick={() => {
+                      setIsProfileDropdownOpen(false);
+                      logout();
+                    }}
+                    className="flex w-full items-center px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4 mr-3" />
+                    Keluar Sistem
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
