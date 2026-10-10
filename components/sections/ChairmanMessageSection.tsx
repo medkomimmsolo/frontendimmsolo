@@ -1,7 +1,10 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Quote } from 'lucide-react';
 import Image from 'next/image';
+import { getApiBase, normalizeSettings } from '@/lib/settings';
+import { toAbsoluteMediaUrl } from '@/lib/absoluteUrl';
 
 type ChairmanProps = {
   name?: string;
@@ -10,13 +13,52 @@ type ChairmanProps = {
   photo?: string;
 };
 
-export default function ChairmanMessageSection({ name, period, message, photo }: ChairmanProps) {
-  if (!name && !message && !photo) return null;
+const DEFAULT_FALLBACK_PHOTO = 'https://placehold.co/600x800/e2e8f0/64748b?text=Foto+Ketua';
 
-  const chairmanName = name || 'Ketua Umum';
-  const chairmanPeriod = period || 'Periode 2024 - 2025';
-  const chairmanMessage = message || 'Selamat datang di website resmi Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah (PC IMM) Kota Surakarta. Mari bersama-sama mewujudkan generasi yang anggun dalam moral dan unggul dalam intelektual.';
-  const photoUrl = photo ? `${photo}` : 'https://placehold.co/600x800/e2e8f0/64748b?text=Foto+Ketua';
+export default function ChairmanMessageSection({ name: initialName, period: initialPeriod, message: initialMessage, photo: initialPhoto }: ChairmanProps) {
+  const [name, setName] = useState(initialName || '');
+  const [period, setPeriod] = useState(initialPeriod || '');
+  const [message, setMessage] = useState(initialMessage || '');
+  const [photo, setPhoto] = useState(initialPhoto || '');
+  const [imgSrc, setImgSrc] = useState<string>(
+    initialPhoto ? (toAbsoluteMediaUrl(initialPhoto) || initialPhoto) : DEFAULT_FALLBACK_PHOTO
+  );
+
+  // Sync secara client-side langsung dari API /settings untuk memastikan data selalu fresh
+  // tanpa terhalang ISR / Route Cache jika admin baru saja memperbarui setting di dashboard.
+  useEffect(() => {
+    let isMounted = true;
+    fetch(`${getApiBase()}/settings`, {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch');
+        return res.json();
+      })
+      .then((json) => {
+        if (!isMounted) return;
+        const s = normalizeSettings(json?.data);
+        if (s.chairman_name !== undefined) setName(s.chairman_name);
+        if (s.chairman_period !== undefined) setPeriod(s.chairman_period);
+        if (s.chairman_message !== undefined) setMessage(s.chairman_message);
+        if (s.chairman_photo !== undefined) {
+          setPhoto(s.chairman_photo);
+          setImgSrc(s.chairman_photo ? (toAbsoluteMediaUrl(s.chairman_photo) || s.chairman_photo) : DEFAULT_FALLBACK_PHOTO);
+        }
+      })
+      .catch(() => {
+        // Fallback tetap menggunakan initial props
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const chairmanName = name.trim() || 'Ketua Umum';
+  const chairmanPeriod = period.trim() || 'Periode 2024 - 2025';
+  const chairmanMessage = message.trim() || 'Selamat datang di website resmi Pimpinan Cabang Ikatan Mahasiswa Muhammadiyah (PC IMM) Kota Surakarta. Mari bersama-sama mewujudkan generasi yang anggun dalam moral dan unggul dalam intelektual.';
 
   return (
     <section className="py-20 md:py-28 bg-white relative overflow-hidden border-t border-[#0f172a]/5">
@@ -28,11 +70,12 @@ export default function ChairmanMessageSection({ name, period, message, photo }:
             <div className="relative z-10 aspect-square md:aspect-[4/5] rounded-sm overflow-hidden border border-[#0f172a]/10 shadow-lg bg-white group">
               <div className="absolute inset-0 bg-[#0f172a]/5 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
               <Image 
-                src={photoUrl} 
+                src={imgSrc} 
                 alt={`Foto ${chairmanName}`}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover filter grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
+                onError={() => setImgSrc(DEFAULT_FALLBACK_PHOTO)}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/80 via-transparent to-transparent z-20"></div>
               <div className="absolute bottom-6 left-6 z-30">
@@ -59,7 +102,7 @@ export default function ChairmanMessageSection({ name, period, message, photo }:
             <div className="relative">
               <Quote className="absolute -top-2 -left-2 md:-top-4 md:-left-4 w-8 h-8 md:w-12 md:h-12 text-[#c20000]/10 -z-10" />
               <p className="text-xl md:text-2xl text-[#0f172a]/80 leading-relaxed font-medium italic border-l-4 border-[#c20000] pl-4 md:pl-6 py-2">
-                "{chairmanMessage}"
+                &ldquo;{chairmanMessage}&rdquo;
               </p>
             </div>
           </div>

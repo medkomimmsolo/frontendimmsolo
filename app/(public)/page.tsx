@@ -39,16 +39,27 @@ export const metadata: Metadata = {
   },
 };
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function fetchSettings(): Promise<Settings> {
-  const res = await fetch(`${getApiBase()}/settings`, { next: { revalidate: 60 } });
-  if (!res.ok) return {};
-  const json = await res.json();
-  return normalizeSettings(json?.data);
+  try {
+    const res = await fetch(`${getApiBase()}/settings`, {
+      cache: 'no-store',
+      headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) return {};
+    const json = await res.json();
+    return normalizeSettings(json?.data);
+  } catch (error) {
+    console.error("Failed to fetch settings", error);
+    return {};
+  }
 }
 
 async function fetchLatestPosts(): Promise<any[]> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs?per_page=6`, { next: { revalidate: 60 } });
+    const res = await fetch(`${getApiBase()}/blogs?per_page=6`, { cache: 'no-store' });
     if (!res.ok) return [];
     const json = await res.json();
     return json.data?.data || json.data || [];
@@ -60,7 +71,7 @@ async function fetchLatestPosts(): Promise<any[]> {
 
 async function fetchLatestEvents(): Promise<any[]> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events?per_page=3`, { next: { revalidate: 60 } });
+    const res = await fetch(`${getApiBase()}/events?per_page=3`, { cache: 'no-store' });
     if (!res.ok) return [];
     const json = await res.json();
     return json.data?.data || json.data || [];
