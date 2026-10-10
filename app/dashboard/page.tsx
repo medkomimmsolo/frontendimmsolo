@@ -59,27 +59,7 @@ export default function DashboardOverview() {
       }
     };
 
-    const fetchAnalytics = async () => {
-      try {
-        const [shortlinkRes, linkRes] = await Promise.allSettled([
-          api.get('/shortlinks/analytics', { params: { days: 30 } }),
-          api.get('/links/analytics', { params: { days: 30 } }),
-        ]);
-        if (shortlinkRes.status === 'fulfilled' && shortlinkRes.value.data.success) {
-          setShortlinkAnalytics(shortlinkRes.value.data.data);
-        }
-        if (linkRes.status === 'fulfilled' && linkRes.value.data.success) {
-          setLinkAnalytics(linkRes.value.data.data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch analytics', error);
-      } finally {
-        setIsAnalyticsLoading(false);
-      }
-    };
-
     fetchStats();
-    fetchAnalytics();
     api.get('/dashboard/trend', { params: { months: 6 } })
       .then((res) => {
         if (res.data.success) {
@@ -92,6 +72,35 @@ export default function DashboardOverview() {
       .then((res) => setRecentPosts(res.data.data?.data || res.data.data || []))
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchAnalytics = async () => {
+      try {
+        const isSuper = user?.roles?.some((r: any) => r.name === 'super-admin');
+        const canShortlink = isSuper || user?.all_permissions?.includes('manage-shortlinks');
+        const canLinks = isSuper || user?.all_permissions?.includes('manage-links');
+
+        const [shortlinkRes, linkRes] = await Promise.allSettled([
+          canShortlink ? api.get('/shortlinks/analytics', { params: { days: 30 } }) : Promise.reject('no-perm'),
+          canLinks ? api.get('/links/analytics', { params: { days: 30 } }) : Promise.reject('no-perm'),
+        ]);
+        if (shortlinkRes.status === 'fulfilled' && shortlinkRes.value?.data?.success) {
+          setShortlinkAnalytics(shortlinkRes.value.data.data);
+        }
+        if (linkRes.status === 'fulfilled' && linkRes.value?.data?.success) {
+          setLinkAnalytics(linkRes.value.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch analytics', error);
+      } finally {
+        setIsAnalyticsLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, [user]);
 
   const statCards = [
     { 
