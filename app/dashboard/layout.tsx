@@ -217,6 +217,7 @@ export default function DashboardLayout({
                       <Link
                         key={item.name}
                         href={item.href}
+                        prefetch={false}
                         onClick={() => setIsMobileSidebarOpen(false)}
                         className={`animate-in fade-in slide-in-from-left duration-300 relative flex items-center rounded-sm text-sm font-semibold transition-all group ${
                           isActive
