@@ -33,6 +33,7 @@ export default function FormsManagement() {
     slug: '',
     description: '',
     header_image: '',
+    header_image_size: 'banner',
     success_message: '',
     starts_at: '',
     ends_at: '',
@@ -83,6 +84,7 @@ export default function FormsManagement() {
       slug: item.slug,
       description: item.description || '',
       header_image: item.header_image || '',
+      header_image_size: item.header_image_size || 'banner',
       success_message: item.success_message || '',
       starts_at: toLocalInput(item.starts_at),
       ends_at: toLocalInput(item.ends_at),
@@ -95,6 +97,7 @@ export default function FormsManagement() {
       slug: '',
       description: '',
       header_image: '',
+      header_image_size: 'banner',
       success_message: '',
       starts_at: '',
       ends_at: '',
@@ -122,6 +125,7 @@ export default function FormsManagement() {
       fd.append('require_email', formData.require_email ? '1' : '0');
       fd.append('limit_one_response', formData.limit_one_response ? '1' : '0');
       fd.append('is_active', formData.is_active ? '1' : '0');
+      fd.append('header_image_size', formData.header_image_size || 'banner');
 
       if (headerImageValue instanceof File) {
         fd.append('header_image', headerImageValue);
@@ -335,15 +339,43 @@ export default function FormsManagement() {
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Kuota Pendaftar <span className="text-slate-400 font-normal">(kosongkan = tanpa batas)</span></label>
                 <input type="number" min={1} value={formData.max_responses} onChange={(e) => setFormData({ ...formData, max_responses: e.target.value })} placeholder="cth: 100" className={inputClass} />
               </div>
-              <div>
+              <div className="space-y-3">
                 <ImageUploadPicker
                   label="Gambar Header (Banner Formulir)"
                   value={headerImageValue}
                   onChange={(val) => setHeaderImageValue(val)}
-                  aspectRatio="form-banner"
+                  aspectRatio={formData.header_image_size as any || 'banner'}
                   allowedFolder="forms"
-                  description="Pilih dari Media Library atau unggah dari perangkat. Rasio persis Google Forms 4:1 (contoh: 1600x400 px atau 1200x300 px)."
+                  description="Pilih dari Media Library atau unggah dari perangkat."
                 />
+
+                <div className="pt-2 border-t border-slate-200">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Ukuran Gambar Header (Template Sistem)
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: 'banner', label: 'Banner 4:1 (Google Form)' },
+                      { id: 'medium', label: 'Banner 21:9 (Sedang)' },
+                      { id: 'wide', label: 'Standar 16:9 (Lebar)' },
+                      { id: 'natural', label: 'Proporsional Asli (Auto)' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, header_image_size: opt.id })}
+                        className={`px-3 py-2 rounded-xl border text-xs font-semibold text-left transition-all flex items-center justify-between ${
+                          formData.header_image_size === opt.id
+                            ? 'bg-red-50 border-[#c20000] ring-1 ring-[#c20000] text-[#c20000]'
+                            : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+                        }`}
+                      >
+                        {opt.label}
+                        {formData.header_image_size === opt.id && <span className="w-1.5 h-1.5 rounded-full bg-[#c20000]"></span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               {/* Pengaturan Email & Anti-Spam */}

@@ -70,6 +70,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
   const [settingsLimitOneResponse, setSettingsLimitOneResponse] = useState(false);
   const [settingsIsOpen, setSettingsIsOpen] = useState(true);
   const [headerImageVal, setHeaderImageVal] = useState<File | string | null>(null);
+  const [settingsHeaderImageSize, setSettingsHeaderImageSize] = useState<'banner' | 'medium' | 'wide' | 'natural'>('banner');
   const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   useEffect(() => {
@@ -90,6 +91,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       setSettingsLimitOneResponse(Boolean(data.limit_one_response));
       setSettingsIsOpen(Boolean(data.is_open ?? data.is_active));
       setHeaderImageVal(data.header_image || null);
+      setSettingsHeaderImageSize(data.header_image_size || 'banner');
     } catch {
       toast.error('Gagal memuat formulir');
     } finally {
@@ -249,6 +251,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       formData.append('require_email', settingsRequireEmail ? '1' : '0');
       formData.append('limit_one_response', settingsLimitOneResponse ? '1' : '0');
       formData.append('is_active', settingsIsOpen ? '1' : '0');
+      formData.append('header_image_size', settingsHeaderImageSize);
 
       if (headerImageVal instanceof File) {
         formData.append('header_image', headerImageVal);
@@ -266,6 +269,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       const updated = res.data.data;
       setForm(updated);
       setHeaderImageVal(updated.header_image || null);
+      setSettingsHeaderImageSize(updated.header_image_size || 'banner');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Gagal menyimpan pengaturan formulir');
     } finally {
@@ -846,10 +850,10 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
-                    <ImageIcon className="w-4 h-4 text-[#c20000]" /> Banner Gambar Header (Google Form Style)
+                    <ImageIcon className="w-4 h-4 text-[#c20000]" /> Banner Gambar Header Formulir
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Gambar ini akan tampil di bagian atas formulir publik. Rasio rekomendasi 4:1 atau 16:5 (maks. 2MB).
+                    Gambar banner ini akan tampil di bagian atas formulir online publik.
                   </p>
                 </div>
               </div>
@@ -857,10 +861,44 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               <ImageUploadPicker
                 value={headerImageVal}
                 onChange={(val) => setHeaderImageVal(val)}
-                aspectRatio="form-banner"
+                aspectRatio={settingsHeaderImageSize}
                 allowedFolder="forms"
-                description="Pilih dari Media Library atau unggah file baru dari perangkat (rasio 4:1 persis Google Forms direkomendasikan, contoh: 1600x400 px)."
+                description="Pilih dari Media Library atau unggah berkas gambar baru dari perangkat."
               />
+
+              {/* Setting Ukuran Gambar Sesuai Template Sistem */}
+              <div className="pt-3 border-t border-slate-200/80">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  Ukuran & Rasio Gambar Header (Template Sistem)
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {[
+                    { id: 'banner', label: 'Banner Ramping (4:1)', desc: 'Standar Google Forms (1600×400 px)' },
+                    { id: 'medium', label: 'Banner Sedang (21:9)', desc: 'Proporsi sedang sistem (1600×680 px)' },
+                    { id: 'wide', label: 'Standar Lebar (16:9)', desc: 'Format landscape video (1600×900 px)' },
+                    { id: 'natural', label: 'Proporsional Asli (Auto)', desc: 'Tinggi utuh tanpa terpotong' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setSettingsHeaderImageSize(opt.id as any)}
+                      className={`p-3 rounded-xl border text-left transition-all ${
+                        settingsHeaderImageSize === opt.id
+                          ? 'bg-red-50/80 border-[#c20000] ring-1 ring-[#c20000] text-[#c20000]'
+                          : 'bg-white border-slate-200/90 hover:border-slate-300 text-slate-700'
+                      }`}
+                    >
+                      <div className="text-xs font-bold flex items-center justify-between">
+                        {opt.label}
+                        {settingsHeaderImageSize === opt.id && <span className="w-1.5 h-1.5 rounded-full bg-[#c20000]"></span>}
+                      </div>
+                      <div className="text-[10px] text-slate-500 mt-1 leading-tight">
+                        {opt.desc}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Section 2: Judul & Deskripsi */}
@@ -1087,6 +1125,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                   : typeof headerImageVal === 'string'
                   ? headerImageVal
                   : form?.header_image,
+                header_image_size: settingsHeaderImageSize,
                 slug: form?.slug || 'pratinjau',
                 fields,
                 is_open: true,
