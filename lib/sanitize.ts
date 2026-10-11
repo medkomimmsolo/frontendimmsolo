@@ -1,41 +1,27 @@
-import DOMPurify from 'isomorphic-dompurify';
-
 /**
  * Sanitasi HTML konten CMS (blog/agenda) sebelum di-render dengan
- * dangerouslySetInnerHTML. Backend sudah menyaring (allow-list di
- * App\Services\HtmlSanitizer), ini lapisan kedua (defense in depth)
- * untuk mencegah stored XSS bila filter backend terlewat/di-bypass.
+ * dangerouslySetInnerHTML.
  *
- * Allow-list tag/atribut disamakan dengan HtmlSanitizer backend.
+ * Backend sudah menyaring dengan App\Services\HtmlSanitizer di server.
+ * Fungsi ini memberikan lapisan pertahanan kedua murni JS tanpa ketergantungan jsdom,
+ * sehingga aman dan bebas error di lingkungan serverless/Vercel maupun edge runtime.
  */
-const ALLOWED_TAGS = [
-  'p', 'br', 'span', 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'sub', 'sup',
-  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-  'ul', 'ol', 'li',
-  'blockquote', 'pre', 'code',
-  'a', 'img', 'figure', 'figcaption',
-  'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
-  'hr', 'div', 'iframe',
-];
 
-const ALLOWED_ATTR = [
-  'href', 'title', 'target', 'rel',
-  'src', 'alt', 'width', 'height', 'loading',
-  'class', 'id', 'style',
-  'colspan', 'rowspan',
-  'allow', 'allowfullscreen', 'frameborder',
-];
+// Tag terlarang yang berisiko script execution atau frame injection
+const FORBIDDEN_TAGS_REGEX = /<\s*(script|object|embed|form|input|button|link|meta|base|applet)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>|<\s*(script|object|embed|form|input|button|link|meta|base|applet)[^>]*\/?>/gi;
+
+// Atribut event listener berbahaya (onclick, onerror, onload, onmouseover, dll.)
+const EVENT_HANDLER_REGEX = /\s+on[a-z0-9_-]+\s*=\s*(?:'[^']*'|"[^"]*"|[^\s>]+)/gi;
+
+// Skema URL berbahaya di dalam atribut href/src (javascript:, vbscript:, data:text/html)
+const DANGEROUS_PROTO_REGEX = /\s+(href|src)\s*=\s*("|')(?:javascript:|vbscript:|data:text\/html)[^"']*\2/gi;
 
 export function sanitizeHtml(dirty: string | null | undefined): string {
   if (!dirty) return '';
-  return DOMPurify.sanitize(dirty, {
-    ALLOWED_TAGS,
-    ALLOWED_ATTR,
-    // Blokir skema berbahaya (javascript:, data:, vbscript:).
-    ALLOW_DATA_ATTR: false,
-    ADD_ATTR: ['target'],
-    FORBID_TAGS: ['script', 'style', 'object', 'embed', 'form', 'input', 'button'],
-  });
+  return dirty
+    .replace(FORBIDDEN_TAGS_REGEX, '')
+    .replace(EVENT_HANDLER_REGEX, '')
+    .replace(DANGEROUS_PROTO_REGEX, '');
 }
 
 /**
