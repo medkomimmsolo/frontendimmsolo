@@ -7,6 +7,7 @@ import ShareIconButtons from '@/components/post/ShareIconButtons';
 import AddToCalendarButtons from '@/components/agenda/AddToCalendarButtons';
 import EventLocationMap from '@/components/agenda/EventLocationMap';
 import { notFound } from 'next/navigation';
+import { sanitizeHtml, safeJsonLd } from '@/lib/sanitize';
 
 export const revalidate = 60;
 
@@ -112,11 +113,11 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ s
     <main className="min-h-screen bg-white pt-24 pb-20">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(eventJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
       />
       
       {/* Article Header */}
@@ -211,7 +212,7 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ s
         {/* Article Body (Prose) */}
         <div 
           className="prose prose-lg prose-slate max-w-none prose-headings:font-bold prose-headings:text-[#0f172a] prose-a:text-[#c20000] prose-img:rounded-2xl"
-          dangerouslySetInnerHTML={{ __html: event.description }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(event.description) }}
         />
 
         {/* Tambah ke Kalender — Google Calendar + .ics */}

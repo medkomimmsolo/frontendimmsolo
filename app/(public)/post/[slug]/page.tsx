@@ -6,6 +6,7 @@ import { ArrowLeft, Calendar, User, ChevronRight, Clock, TrendingUp, Eye } from 
 import { notFound } from 'next/navigation';
 import ShareButtons from '@/components/post/ShareButtons';
 import ReadingProgress from '@/components/post/ReadingProgress';
+import { sanitizeHtml, safeJsonLd } from '@/lib/sanitize';
 
 export const revalidate = 60;
 
@@ -159,11 +160,11 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
       <ReadingProgress />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(articleJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
       />
 
       <main className="min-h-screen bg-white pt-24 pb-16 selection:bg-[#c20000]/20 selection:text-[#c20000]">
@@ -322,7 +323,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
               <div 
                 className="article-content"
                 dangerouslySetInnerHTML={{
-                  __html: (() => {
+                  __html: sanitizeHtml((() => {
                     let html = post.content
                       .replace(/^(?:\s*<p[^>]*>(?:\s*|&nbsp;|<br\s*\/?>)*<\/p>\s*)+/i, '')
                       .replace(/src="[^"]*\/storage\/(blogs\/[^"]+)"/g, 'src="/storage/$1"');
@@ -334,7 +335,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                       );
                     }
                     return html;
-                  })()
+                  })())
                 }}
               />
 

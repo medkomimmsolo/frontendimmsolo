@@ -10,6 +10,7 @@ import MaintenancePage from '@/components/ui/MaintenancePage';
 import { getApiBase, normalizeSettings, type Settings } from '@/lib/settings';
 import { Metadata } from 'next';
 import { toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
+import { safeJsonLd } from '@/lib/sanitize';
 
 export const metadata: Metadata = {
   title: 'Beranda',
@@ -142,7 +143,7 @@ export default async function Home() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <HeroSection stats={statsData} events={latestEvents} />
       <AboutPreview stats={statsData} />

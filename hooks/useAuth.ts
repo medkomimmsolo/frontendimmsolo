@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { User } from '@/types';
+import { clearSession } from '@/lib/session';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -31,6 +32,7 @@ export function useAuth() {
       console.error('Logout failed', error);
     } finally {
       localStorage.removeItem('auth_token');
+      clearSession();
       setUser(null);
       window.location.href = '/login';
     }

@@ -5,6 +5,7 @@ import { ArrowLeft, ChevronRight, ExternalLink, Building2 } from 'lucide-react';
 import { checkMaintenance } from '@/lib/maintenance';
 import MaintenancePage from '@/components/ui/MaintenancePage';
 import { toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
+import { safeJsonLd } from '@/lib/sanitize';
 
 const TIPE_LABEL: Record<string, string> = {
   komisariat: 'Komisariat',
@@ -67,7 +68,7 @@ export default async function LembagaDetailPage({ params }: { params: Promise<{ 
     <main className="min-h-screen bg-white pt-24 pb-20">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
       />
       <article className="max-w-3xl mx-auto px-4 md:px-6 mt-10">
         <div className="flex items-center justify-between mb-8">

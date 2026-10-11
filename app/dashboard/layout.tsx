@@ -32,6 +32,7 @@ import {
   ClipboardList,
   ShieldCheck,
   Megaphone,
+  QrCode,
   Search,
   SearchX,
   ExternalLink,
@@ -225,6 +226,7 @@ export default function DashboardLayout({
       documents: 'Dokumen & Arsip',
       announcements: 'Papan Pengumuman',
       forms: 'Formulir Online',
+      presensi: 'Presensi Kegiatan',
       links: 'Biolink (Linktree)',
       shortlinks: 'Pemendek Tautan',
       messages: 'Kotak Masuk',
@@ -333,6 +335,7 @@ export default function DashboardLayout({
       icon: <Share2 className="w-3.5 h-3.5 shrink-0" />,
       items: [
         { name: 'Formulir Online', href: '/dashboard/forms', icon: <ClipboardList className="w-4 h-4 shrink-0" />, permission: 'manage-forms' },
+        { name: 'Presensi Kegiatan', href: '/dashboard/presensi', icon: <QrCode className="w-4 h-4 shrink-0" />, permission: 'manage-presensi' },
         { name: 'Biolink (Linktree)', href: '/dashboard/links', icon: <Layers className="w-4 h-4 shrink-0" />, permission: 'manage-links' },
         { name: 'Pemendek Tautan', href: '/dashboard/shortlinks', icon: <LinkIcon className="w-4 h-4 shrink-0" />, permission: 'manage-shortlinks' },
         { name: 'Kotak Masuk (Pesan)', href: '/dashboard/messages', icon: <Inbox className="w-4 h-4 shrink-0" />, permission: 'manage-messages', badge: notifCounts.unread_messages },
