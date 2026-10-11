@@ -5,12 +5,14 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { ArrowLeft, Plus, Edit, Trash2, Loader2, ExternalLink, Download, Users, Copy, Eye, GripVertical, FileSpreadsheet, FolderArchive, Search, FileText, X, Settings, Upload, Image as ImageIcon, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, Loader2, ExternalLink, Download, Users, Copy, Eye, GripVertical, FileSpreadsheet, FolderArchive, Search, FileText, X, Settings, Upload, Image as ImageIcon, ShieldCheck, Crop } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import FormFillClient from '@/components/form/FormFillClient';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
+import ImageCropperModal from '@/components/dashboard/ImageCropperModal';
+import { resolveMediaUrl } from '@/lib/imageUtils';
 import { PageHeader } from '@/components/ui/PageHeader';
 
 const FILE_PRESETS: Record<string, { label: string; exts: string[] }> = {
@@ -71,7 +73,16 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
   const [settingsIsOpen, setSettingsIsOpen] = useState(true);
   const [headerImageVal, setHeaderImageVal] = useState<File | string | null>(null);
   const [settingsHeaderImageSize, setSettingsHeaderImageSize] = useState<'banner' | 'medium' | 'wide' | 'natural'>('banner');
+  const [isHeaderCropModalOpen, setIsHeaderCropModalOpen] = useState(false);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+
+  const getHeaderCropUrl = () => {
+    if (!headerImageVal) return null;
+    if (headerImageVal instanceof File) {
+      return URL.createObjectURL(headerImageVal);
+    }
+    return resolveMediaUrl(headerImageVal);
+  };
 
   useEffect(() => {
     params.then((p) => setFormId(p.id));
@@ -866,10 +877,45 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                 description="Pilih dari Media Library atau unggah berkas gambar baru dari perangkat."
               />
 
+              {/* Fitur Tarik & Sesuaikan Potongan Crop ala Google Forms */}
+              <div className="pt-3 border-t border-slate-200/80 bg-white p-3.5 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-start gap-2.5">
+                  <div className="p-2 rounded-lg bg-red-50 text-[#c20000] mt-0.5 shrink-0">
+                    <Crop className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-800 flex items-center gap-2">
+                      Tarik & Potong Posisi Banner (Interactive Crop)
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Ala Google Form
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Buka jendela pemotong interaktif untuk menggeser kotak crop atau menarik sudutnya agar bagian gambar yang tampil pas di banner.
+                    </p>
+                  </div>
+                </div>
+
+                {headerImageVal ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsHeaderCropModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#c20000] hover:bg-[#a30000] text-white text-xs font-bold rounded-xl shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
+                  >
+                    <Crop className="w-3.5 h-3.5" />
+                    <span>Tarik / Crop Banner Sekarang</span>
+                  </button>
+                ) : (
+                  <span className="text-[11px] text-slate-400 italic">
+                    Pilih gambar di atas terlebih dahulu untuk memotong
+                  </span>
+                )}
+              </div>
+
               {/* Setting Ukuran Gambar Sesuai Template Sistem */}
               <div className="pt-3 border-t border-slate-200/80">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  Ukuran & Rasio Gambar Header (Template Sistem)
+                  Format Tampilan Frame di Formulir Publik
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {[
@@ -1261,6 +1307,18 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
           </form>
         </div>
       )}
+
+      {/* Modal Crop Banner Khusus Header Formulir */}
+      <ImageCropperModal
+        isOpen={isHeaderCropModalOpen}
+        imageUrl={getHeaderCropUrl()}
+        onClose={() => setIsHeaderCropModalOpen(false)}
+        onCropComplete={(croppedFile) => {
+          setHeaderImageVal(croppedFile);
+        }}
+        initialAspectRatio={4 / 1}
+        title="Tarik & Sesuaikan Potongan Banner Header (Crop)"
+      />
     </div>
   );
 }

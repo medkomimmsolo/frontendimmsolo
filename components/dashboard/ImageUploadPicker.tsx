@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { convertToWebP, resolveMediaUrl } from '@/lib/imageUtils';
 import MediaPickerModal from './MediaPickerModal';
+import ImageCropperModal from './ImageCropperModal';
 import { 
   FolderOpen, 
   UploadCloud, 
@@ -11,7 +12,8 @@ import {
   Image as ImageIcon, 
   Check, 
   HardDrive,
-  FolderArchive
+  FolderArchive,
+  Crop
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -24,6 +26,7 @@ export interface ImageUploadPickerProps {
   allowedFolder?: string;
   className?: string;
   modalTitle?: string;
+  enableCrop?: boolean;
 }
 
 export default function ImageUploadPicker({
@@ -35,11 +38,32 @@ export default function ImageUploadPicker({
   allowedFolder = 'media',
   className = '',
   modalTitle = 'Pilih dari Media Library',
+  enableCrop = true,
 }: ImageUploadPickerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isFromLibrary, setIsFromLibrary] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const getNumericRatio = (): number | null => {
+    switch (aspectRatio) {
+      case 'banner':
+      case 'form-banner':
+        return 4 / 1;
+      case 'medium':
+        return 21 / 9;
+      case 'wide':
+      case 'video':
+        return 16 / 9;
+      case 'square':
+        return 1;
+      case 'portrait':
+        return 3 / 4;
+      default:
+        return 4 / 1;
+    }
+  };
 
   useEffect(() => {
     if (!value) {
@@ -171,6 +195,18 @@ export default function ImageUploadPicker({
 
             {/* Hover Actions Overlay */}
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-4">
+              {enableCrop && (
+                <button
+                  type="button"
+                  onClick={() => setIsCropperOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-md text-xs font-medium shadow-md transition-all hover:scale-105"
+                  title="Sesuaikan & Potong Gambar (Crop)"
+                >
+                  <Crop className="w-3.5 h-3.5" />
+                  Tarik / Crop
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
@@ -203,16 +239,28 @@ export default function ImageUploadPicker({
           </div>
 
           <div className="flex items-center justify-between text-xs text-slate-500 px-0.5">
-            <span className="truncate">
+            <span className="truncate max-w-[200px] sm:max-w-xs">
               {value instanceof File ? value.name : typeof value === 'string' ? value : 'Gambar terpilih'}
             </span>
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="text-red-500 hover:text-red-700 font-medium hover:underline shrink-0 ml-2"
-            >
-              Hapus Gambar
-            </button>
+            <div className="flex items-center gap-3 shrink-0">
+              {enableCrop && (
+                <button
+                  type="button"
+                  onClick={() => setIsCropperOpen(true)}
+                  className="inline-flex items-center gap-1 text-[#c20000] hover:text-[#990000] font-bold hover:underline"
+                >
+                  <Crop className="w-3.5 h-3.5" />
+                  Tarik / Crop Gambar
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleRemove}
+                className="text-red-500 hover:text-red-700 font-medium hover:underline"
+              >
+                Hapus Gambar
+              </button>
+            </div>
           </div>
         </div>
       ) : (
@@ -270,6 +318,22 @@ export default function ImageUploadPicker({
         title={modalTitle}
         allowedFolder={allowedFolder}
       />
+
+      {/* Interactive Image Cropper Modal */}
+      {enableCrop && (
+        <ImageCropperModal
+          isOpen={isCropperOpen}
+          imageUrl={previewUrl}
+          onClose={() => setIsCropperOpen(false)}
+          onCropComplete={(croppedFile, croppedPreviewUrl) => {
+            onChange(croppedFile, croppedPreviewUrl);
+            setPreviewUrl(croppedPreviewUrl);
+            setIsFromLibrary(false);
+          }}
+          initialAspectRatio={getNumericRatio()}
+          title="Tarik & Sesuaikan Potongan Banner Header (Crop)"
+        />
+      )}
     </div>
   );
 }
