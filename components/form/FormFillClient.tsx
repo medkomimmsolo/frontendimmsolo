@@ -231,9 +231,9 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
         aria-hidden="true"
       />
 
-      {/* ── HEADER IMAGE (Google Form Banner Cover) ── */}
+      {/* ── HEADER IMAGE (Google Form Banner Cover Rasio 4:1) ── */}
       {form.header_image && (
-        <div className="w-full h-44 sm:h-56 md:h-64 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
+        <div className="w-full aspect-[4/1] rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
           <img
             src={form.header_image}
             alt={form.title}

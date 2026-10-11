@@ -857,9 +857,9 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               <ImageUploadPicker
                 value={headerImageVal}
                 onChange={(val) => setHeaderImageVal(val)}
-                aspectRatio="banner"
+                aspectRatio="form-banner"
                 allowedFolder="forms"
-                description="Pilih dari Media Library atau unggah file baru dari perangkat (rasio 4:1 atau 16:5 direkomendasikan)."
+                description="Pilih dari Media Library atau unggah file baru dari perangkat (rasio 4:1 persis Google Forms direkomendasikan, contoh: 1600x400 px)."
               />
             </div>
 

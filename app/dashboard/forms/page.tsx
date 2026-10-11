@@ -340,9 +340,9 @@ export default function FormsManagement() {
                   label="Gambar Header (Banner Formulir)"
                   value={headerImageValue}
                   onChange={(val) => setHeaderImageValue(val)}
-                  aspectRatio="banner"
+                  aspectRatio="form-banner"
                   allowedFolder="forms"
-                  description="Pilih dari Media Library atau unggah dari perangkat. Rekomendasi rasio banner memanjang 4:1 atau 1200x300px."
+                  description="Pilih dari Media Library atau unggah dari perangkat. Rasio persis Google Forms 4:1 (contoh: 1600x400 px atau 1200x300 px)."
                 />
               </div>
 

@@ -20,7 +20,7 @@ export interface ImageUploadPickerProps {
   onChange: (fileOrUrl: File | string | null, previewUrl: string | null) => void;
   label?: string;
   description?: string;
-  aspectRatio?: 'video' | 'square' | 'portrait' | 'banner' | 'auto';
+  aspectRatio?: 'video' | 'square' | 'portrait' | 'banner' | 'form-banner' | 'auto';
   allowedFolder?: string;
   className?: string;
   modalTitle?: string;
@@ -103,6 +103,8 @@ export default function ImageUploadPicker({
         return 'aspect-[3/4] max-w-[260px]';
       case 'banner':
         return 'aspect-[21/9] w-full';
+      case 'form-banner':
+        return 'aspect-[4/1] w-full';
       case 'auto':
         return 'min-h-[160px] max-h-[320px] w-full';
       case 'video':
