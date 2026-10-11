@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Loader2, CheckCircle2, Lock, ArrowLeft, ArrowRight, RotateCcw, AlertCircle, FileUp, Mail, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getApiBase } from '@/lib/settings';
+import { resolveMediaUrl } from '@/lib/imageUtils';
 
 export default function FormFillClient({ form, preview = false }: { form: any; preview?: boolean }) {
   const [answers, setAnswers] = useState<Record<string, any>>({});
@@ -231,13 +232,18 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
         aria-hidden="true"
       />
 
-      {/* ── HEADER IMAGE (Google Form Banner Cover Rasio 4:1) ── */}
+      {/* ── HEADER IMAGE (Banner Gambar Google Form) ── */}
       {form.header_image && (
-        <div className="w-full aspect-[4/1] rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
+        <div className="w-full rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 flex items-center justify-center">
           <img
-            src={form.header_image}
+            src={resolveMediaUrl(form.header_image)}
             alt={form.title}
-            className="w-full h-full object-cover object-center"
+            className="w-full h-auto max-h-[460px] object-cover sm:object-contain object-center"
+            onError={(e) => {
+              if (typeof form.header_image === 'string' && !form.header_image.startsWith('blob:')) {
+                (e.target as HTMLImageElement).src = form.header_image;
+              }
+            }}
           />
         </div>
       )}

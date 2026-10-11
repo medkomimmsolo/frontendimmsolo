@@ -104,7 +104,7 @@ export default function ImageUploadPicker({
       case 'banner':
         return 'aspect-[21/9] w-full';
       case 'form-banner':
-        return 'aspect-[4/1] w-full';
+        return 'min-h-[140px] max-h-[300px] w-full flex items-center justify-center';
       case 'auto':
         return 'min-h-[160px] max-h-[320px] w-full';
       case 'video':
@@ -138,7 +138,7 @@ export default function ImageUploadPicker({
             <img
               src={previewUrl}
               alt="Pratinjau Gambar"
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-102"
+              className={`w-full h-full ${aspectRatio === 'form-banner' ? 'object-contain' : 'object-cover'} transition-transform duration-300 group-hover:scale-102`}
               onError={(e) => {
                 if (typeof value === 'string') {
                   (e.target as HTMLImageElement).src = value;
