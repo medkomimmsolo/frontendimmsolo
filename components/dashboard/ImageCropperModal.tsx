@@ -517,3 +517,4 @@ export default function ImageCropperModal({
     </div>
   );
 }
+
