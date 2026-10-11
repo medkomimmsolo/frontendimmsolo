@@ -186,6 +186,17 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
             >
               Kirim jawaban lain
             </button>
+            {!preview && form.slug && (
+              <>
+                <span className="text-slate-300">•</span>
+                <Link
+                  href={`/form/${form.slug}/responses`}
+                  className="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
+                >
+                  Lihat Rekap Pendaftar
+                </Link>
+              </>
+            )}
             <span className="text-slate-300">•</span>
             <Link href="/" className="text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors">
               Kembali ke Beranda
@@ -207,12 +218,22 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
           <p className="text-sm text-slate-600 mb-6 leading-relaxed max-w-md mx-auto">
             Formulir ini tidak lagi menerima tanggapan. Silakan hubungi pengurus jika menurut Anda ini adalah sebuah kesalahan.
           </p>
-          <Link
-            href="/"
-            className="inline-flex items-center px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all shadow-xs"
-          >
-            Kembali ke Beranda
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {form.slug && (
+              <Link
+                href={`/form/${form.slug}/responses`}
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 transition-all shadow-xs"
+              >
+                <span>Lihat Rekap Pendaftar</span>
+              </Link>
+            )}
+            <Link
+              href="/"
+              className="inline-flex items-center px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all shadow-xs"
+            >
+              Kembali ke Beranda
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -292,11 +313,23 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
           </p>
         )}
 
-        <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+        <div className="mt-5 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
           <span className="text-red-500 font-semibold">* Menunjukkan pertanyaan yang wajib diisi</span>
-          {preview && (
-            <span className="px-2.5 py-0.5 bg-amber-100 text-amber-800 font-bold rounded-full">MODE PRATINJAU</span>
-          )}
+          <div className="flex items-center gap-2">
+            {!preview && form.slug && (
+              <Link
+                href={`/form/${form.slug}/responses`}
+                className="inline-flex items-center gap-1 text-slate-600 hover:text-[#c20000] font-semibold transition-colors"
+                title="Lihat rekap spreadsheet data pendaftar"
+              >
+                <span>Lihat Rekap Pendaftar</span>
+                <span className="text-slate-400">→</span>
+              </Link>
+            )}
+            {preview && (
+              <span className="px-2.5 py-0.5 bg-amber-100 text-amber-800 font-bold rounded-full">MODE PRATINJAU</span>
+            )}
+          </div>
         </div>
       </div>
 
