@@ -232,21 +232,50 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
         aria-hidden="true"
       />
 
-      {/* ── HEADER IMAGE (Banner Gambar Google Form) ── */}
-      {form.header_image && (
-        <div className="w-full rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 flex items-center justify-center">
-          <img
-            src={resolveMediaUrl(form.header_image)}
-            alt={form.title}
-            className="w-full h-auto max-h-[460px] object-cover sm:object-contain object-center"
-            onError={(e) => {
-              if (typeof form.header_image === 'string' && !form.header_image.startsWith('blob:')) {
-                (e.target as HTMLImageElement).src = form.header_image;
-              }
-            }}
-          />
-        </div>
-      )}
+      {/* ── HEADER IMAGE (Banner Gambar Google Form Sesuai Template) ── */}
+      {form.header_image && (() => {
+        const size = form.header_image_size || 'banner';
+        const styles = (() => {
+          switch (size) {
+            case 'medium':
+              return {
+                wrapper: 'w-full aspect-[21/9] rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 flex items-center justify-center',
+                img: 'w-full h-full object-cover object-center',
+              };
+            case 'wide':
+              return {
+                wrapper: 'w-full aspect-video rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 flex items-center justify-center',
+                img: 'w-full h-full object-cover object-center',
+              };
+            case 'natural':
+              return {
+                wrapper: 'w-full rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 flex items-center justify-center',
+                img: 'w-full h-auto max-h-[520px] object-contain sm:object-cover object-center',
+              };
+            case 'banner':
+            default:
+              return {
+                wrapper: 'w-full aspect-[4/1] rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 flex items-center justify-center',
+                img: 'w-full h-full object-cover object-center',
+              };
+          }
+        })();
+
+        return (
+          <div className={styles.wrapper}>
+            <img
+              src={resolveMediaUrl(form.header_image)}
+              alt={form.title}
+              className={styles.img}
+              onError={(e) => {
+                if (typeof form.header_image === 'string' && !form.header_image.startsWith('blob:')) {
+                  (e.target as HTMLImageElement).src = form.header_image;
+                }
+              }}
+            />
+          </div>
+        );
+      })()}
 
       {/* ── HEADER CARD (Google Form Style Top Card) ── */}
       <div className="bg-white rounded-2xl border-t-8 border-t-[#c20000] border-x border-b border-slate-200 p-6 sm:p-8 shadow-sm">
