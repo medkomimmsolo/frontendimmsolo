@@ -18,11 +18,31 @@ export default function CreateDocument() {
   const [file, setFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     title: '',
+    slug: '',
     description: '',
     file_url: '',
     file_type: 'link', // default for link
     status: 'published',
   });
+  const [isSlugManual, setIsSlugManual] = useState(false);
+
+  const slugify = (text: string) => {
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const title = e.target.value;
+    if (!isSlugManual) {
+      setFormData(prev => ({ ...prev, title, slug: slugify(title) }));
+    } else {
+      setFormData(prev => ({ ...prev, title }));
+    }
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] || null;
@@ -55,6 +75,9 @@ export default function CreateDocument() {
     try {
       const data = new FormData();
       data.append('title', formData.title);
+      if (formData.slug.trim()) {
+        data.append('slug', slugify(formData.slug));
+      }
       data.append('description', formData.description);
       data.append('status', formData.status);
       
@@ -112,10 +135,48 @@ export default function CreateDocument() {
                   type="text" 
                   required
                   value={formData.title}
-                  onChange={(e) => setFormData({...formData, title: e.target.value})}
+                  onChange={handleTitleChange}
                   className="w-full px-4 py-2 bg-white border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
                   placeholder="Enter document title here"
                 />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-semibold text-slate-700">
+                    Slug URL Berkas {uploadMode === 'file' ? <span className="text-xs text-emerald-600 font-medium">(Link Publik /files/slug)</span> : <span className="text-xs text-slate-400 font-normal">(Opsional)</span>}
+                  </label>
+                  {isSlugManual && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSlugManual(false);
+                        setFormData(prev => ({ ...prev, slug: slugify(prev.title) }));
+                      }}
+                      className="text-xs text-[#c20000] hover:underline"
+                    >
+                      Reset dari Judul
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center rounded-sm border border-slate-200 overflow-hidden focus-within:border-[#c20000] focus-within:ring-1 focus-within:ring-[#c20000] bg-white">
+                  <span className="px-3 py-2 bg-slate-50 text-slate-500 text-xs font-mono border-r border-slate-200 select-none">
+                    immsolo.or.id/files/
+                  </span>
+                  <input
+                    type="text"
+                    value={formData.slug}
+                    onChange={(e) => {
+                      setIsSlugManual(true);
+                      setFormData({ ...formData, slug: slugify(e.target.value) });
+                    }}
+                    placeholder="nama-file-atau-foto"
+                    className="flex-1 px-3 py-2 text-sm text-slate-800 outline-none font-mono"
+                  />
+                </div>
+                <p className="text-xs text-slate-400 mt-1">
+                  Gunakan huruf kecil dan tanda hubung (-). Format link ini netral untuk dokumen maupun foto.
+                </p>
               </div>
 
               <div>
@@ -171,28 +232,28 @@ export default function CreateDocument() {
                         <UploadCloud className="mx-auto h-12 w-12 text-slate-300" aria-hidden="true" />
                         <div className="mt-4 flex justify-center text-sm leading-6 text-slate-600">
                           <label htmlFor="file-upload" className="relative cursor-pointer rounded-sm bg-white font-semibold text-[#c20000] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#c20000] focus-within:ring-offset-2 hover:text-[#a30000] px-3 py-1 border border-slate-200 shadow-sm">
-                            <span>Upload a file</span>
+                            <span>Pilih Berkas</span>
                             <input 
                               id="file-upload" 
                               name="file-upload" 
                               type="file" 
-                              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip"
+                              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.jpg,.jpeg,.png,.webp,.svg"
                               className="sr-only" 
                               onChange={handleFileSelect} 
                             />
                           </label>
                         </div>
                         {file ? (
-                          <p className="text-sm leading-5 text-slate-500 mt-2 font-medium">
-                            Selected: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                          <p className="text-sm leading-5 text-slate-600 mt-2 font-medium">
+                            Berkas terpilih: <span className="text-[#0f172a] font-semibold">{file.name}</span> ({(file.size / 1024 / 1024).toFixed(2)} MB)
                           </p>
                         ) : (
                           <p className="text-xs leading-5 text-slate-500 mt-2">
-                            PDF, DOC, XLS, PPT, ZIP up to 10MB
+                            PDF, DOC, XLS, PPT, ZIP, JPG, PNG, WebP hingga 10MB
                           </p>
                         )}
-                        <p className="text-xs text-orange-500 mt-2 max-w-xs mx-auto">
-                          Jika Anda mendapati error "Content Too Large", harap gunakan mode Link URL.
+                        <p className="text-xs text-slate-400 mt-2 max-w-sm mx-auto">
+                          Semua jenis file dan foto didukung. Nama file akan otomatis diformat rapi dengan slug.
                         </p>
                       </div>
                     </div>
@@ -233,6 +294,7 @@ export default function CreateDocument() {
                         >
                           <option value="drive">Google Drive Link</option>
                           <option value="link">External Link / Web</option>
+                          <option value="image">Gambar / Foto</option>
                           <option value="pdf">PDF Document</option>
                           <option value="word">Word Document</option>
                           <option value="excel">Excel Document</option>
