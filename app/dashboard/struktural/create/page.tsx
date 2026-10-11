@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import { convertToWebP } from '@/lib/imageUtils';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 import Link from 'next/link';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 interface SocialMedia {
   icon: string;
@@ -112,43 +113,32 @@ export default function CreateStruktural() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full">
-      {/* Header Bar */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard/struktural">
-            <Button variant="outline" size="sm" className="h-9 w-9 p-0 rounded-sm border-slate-200 hover:text-[#c20000]">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-[#0f172a] tracking-tight" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-              Tambah Pengurus
-            </h1>
-            <p className="text-slate-500 text-sm mt-0.5">Masukkan data pengurus baru.</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href="/dashboard/struktural">
-            <Button type="button" variant="ghost" className="text-slate-600 hover:text-slate-900 rounded-sm">
-              Batal
-            </Button>
-          </Link>
-          <Button type="submit" disabled={isLoading} className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm shadow-sm transition-all px-5">
-            {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-            {isLoading ? 'Menyimpan...' : 'Simpan Data'}
+    <form onSubmit={handleSubmit} className="w-full space-y-6">
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Tambah Pengurus Baru"
+        description="Masukkan data profil, jabatan, dan sosial media pengurus baru"
+        badge="Struktural"
+      >
+        <Link href="/dashboard/struktural">
+          <Button type="button" variant="outline" size="sm" className="h-10 px-4 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs">
+            Batal
           </Button>
-        </div>
-      </div>
+        </Link>
+        <Button type="submit" disabled={isLoading} className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
+          {isLoading ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
+          {isLoading ? 'Menyimpan...' : 'Simpan Data'}
+        </Button>
+      </PageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Left Column - Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-slate-200 shadow-sm rounded-sm overflow-hidden">
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
             <CardContent className="p-0">
-              <div className="p-6 space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-[#0f172a]">Nama Lengkap</label>
+              <div className="p-6 sm:p-7 space-y-5">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Nama Lengkap</label>
                   <input 
                     type="text" 
                     name="name"
@@ -156,12 +146,12 @@ export default function CreateStruktural() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Masukkan nama lengkap beserta gelar..." 
-                    className="w-full bg-white border border-slate-200 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors text-sm"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all text-sm shadow-2xs"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-[#0f172a]">Jabatan</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Jabatan</label>
                   <input 
                     type="text" 
                     name="jabatan"
@@ -169,7 +159,7 @@ export default function CreateStruktural() {
                     value={formData.jabatan}
                     onChange={handleChange}
                     placeholder="Contoh: Ketua Umum"
-                    className="w-full bg-white border border-slate-200 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors text-sm"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all text-sm shadow-2xs"
                   />
                 </div>
               </div>
@@ -177,11 +167,11 @@ export default function CreateStruktural() {
           </Card>
 
           {/* Social Media Card */}
-          <Card className="border-slate-200 shadow-sm rounded-sm overflow-hidden">
-            <div className="bg-slate-50/50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-              <h3 className="text-sm font-semibold text-[#0f172a]">Sosial Media</h3>
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
+            <div className="bg-slate-50/70 px-6 py-4 border-b border-slate-200/80 flex justify-between items-center">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Sosial Media</h3>
               {socialMedia.length < 4 && (
-                <Button type="button" onClick={handleAddSocialMedia} variant="outline" size="sm" className="h-8 text-xs border-dashed border-[#c20000] text-[#c20000] hover:bg-[#c20000]/5">
+                <Button type="button" onClick={handleAddSocialMedia} variant="outline" size="sm" className="h-8 text-xs font-semibold rounded-xl border-dashed border-[#c20000] text-[#c20000] hover:bg-red-50">
                   <Plus className="w-3 h-3 mr-1" /> Tambah Sosmed
                 </Button>
               )}
@@ -189,33 +179,33 @@ export default function CreateStruktural() {
             <CardContent className="p-6">
               <div className="space-y-4">
                 {socialMedia.length === 0 && (
-                  <p className="text-sm text-slate-500 italic">Belum ada sosial media yang ditambahkan.</p>
+                  <p className="text-xs text-slate-400 italic">Belum ada akun sosial media yang ditambahkan.</p>
                 )}
                 {socialMedia.map((sm, idx) => (
-                  <div key={idx} className="flex gap-4 items-start bg-slate-50 p-4 rounded-sm border border-slate-200">
-                    <div className="flex-1 space-y-4">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-slate-600">Ikon Sosial Media (URL)</label>
+                  <div key={idx} className="flex gap-3.5 items-start bg-slate-50/80 p-4 rounded-xl border border-slate-200/80">
+                    <div className="flex-1 space-y-3.5">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-600">Ikon Sosial Media (URL)</label>
                         <input 
                           type="url" 
                           placeholder="Link Logo (CDN SVG) contoh: https://thesvg.org/..."
                           value={sm.icon}
                           onChange={(e) => handleSocialMediaChange(idx, 'icon', e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs"
                         />
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-slate-600">URL Profil</label>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-600">URL Profil</label>
                         <input 
                           type="url" 
                           placeholder="URL Profil Sosial Media"
                           value={sm.url}
                           onChange={(e) => handleSocialMediaChange(idx, 'url', e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs"
                         />
                       </div>
                     </div>
-                    <Button type="button" onClick={() => handleRemoveSocialMedia(idx)} variant="outline" size="icon" className="h-8 w-8 shrink-0 text-red-500 border-red-200 hover:bg-red-50 mt-6">
+                    <Button type="button" onClick={() => handleRemoveSocialMedia(idx)} variant="outline" size="icon" className="h-8 w-8 shrink-0 text-red-500 border-red-200 hover:bg-red-50 rounded-xl mt-6">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -227,9 +217,9 @@ export default function CreateStruktural() {
 
         {/* Right Column - Meta Sidebar */}
         <div className="space-y-6">
-          <Card className="border-slate-200 shadow-sm rounded-sm overflow-hidden">
-            <div className="bg-slate-50/50 px-5 py-4 border-b border-slate-200">
-              <h3 className="text-sm font-semibold text-[#0f172a]">Foto Profil</h3>
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
+            <div className="bg-slate-50/70 px-5 py-4 border-b border-slate-200/80">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Foto Profil</h3>
             </div>
             <CardContent className="p-5">
               <ImageUploadPicker

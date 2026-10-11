@@ -159,7 +159,7 @@ export default function FormsManagement() {
     }
   };
 
-  const inputClass = "w-full border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]";
+  const inputClass = "w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all";
 
   return (
     <div className="space-y-6">
@@ -238,7 +238,7 @@ export default function FormsManagement() {
                     </div>
                     {f.user?.name && (
                       <div className="text-xs text-slate-500 mt-1">
-                        <span className="text-[11px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">
+                        <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">
                           Oleh: {f.user.name}
                         </span>
                       </div>
@@ -253,22 +253,22 @@ export default function FormsManagement() {
                   </td>
                   <td className="p-4 pr-6">
                     <div className="flex items-center justify-end gap-2">
-                      <Link href={`/dashboard/forms/${f.id}`} title="Kelola kolom & data" className="h-9 w-9 inline-flex items-center justify-center text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-sm transition-colors">
+                      <Link href={`/dashboard/forms/${f.id}`} title="Kelola kolom & data" className="h-9 w-9 inline-flex items-center justify-center text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-xl transition-colors">
                         <ClipboardList className="w-4 h-4" />
                       </Link>
                       {isSuperAdmin && (
                         <button
                           onClick={() => setTransferItem(f)}
                           title="Transfer Pemilik"
-                          className="h-9 w-9 inline-flex items-center justify-center text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-sm transition-colors"
+                          className="h-9 w-9 inline-flex items-center justify-center text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-xl transition-colors"
                         >
                           <UserCheck className="w-4 h-4" />
                         </button>
                       )}
-                      <button onClick={() => openModal(f)} title="Edit" className="h-9 w-9 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors">
+                      <button onClick={() => openModal(f)} title="Edit" className="h-9 w-9 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors">
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button onClick={() => handleDelete(f.id)} title="Hapus" className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors">
+                      <button onClick={() => handleDelete(f.id)} title="Hapus" className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-xl transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -289,45 +289,50 @@ export default function FormsManagement() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setIsModalOpen(false)}>
-          <form onSubmit={handleSave} className="bg-white rounded-sm shadow-xl max-w-lg w-full p-6 my-8" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-bold text-slate-800 mb-5">{editing ? 'Edit Formulir' : 'Buat Formulir'}</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setIsModalOpen(false)}>
+          <form onSubmit={handleSave} className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-7 my-8 border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-slate-900">{editing ? 'Edit Formulir' : 'Buat Formulir Baru'}</h2>
+              <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors">
+                ✕
+              </button>
+            </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Judul Formulir</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Judul Formulir</label>
                 <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Pendaftaran DAD 2026" className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Slug Kustom <span className="text-slate-400 font-normal">(kosongkan = otomatis)</span></label>
-                <div className="flex items-center border border-slate-200 rounded-sm overflow-hidden focus-within:border-[#c20000] focus-within:ring-1 focus-within:ring-[#c20000]">
-                  <span className="px-3 py-2 text-sm text-slate-400 bg-slate-50 border-r border-slate-200">/form/</span>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Slug Kustom <span className="text-slate-400 font-normal">(kosongkan = otomatis)</span></label>
+                <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden focus-within:border-[#c20000] focus-within:ring-2 focus-within:ring-[#c20000]/20 bg-white">
+                  <span className="px-3.5 py-2.5 text-sm text-slate-400 bg-slate-50 border-r border-slate-200 select-none">/form/</span>
                   <input type="text" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '') })}
                     placeholder="dad-2026" className="flex-1 px-3 py-2 text-sm focus:outline-none font-mono" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Deskripsi</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Deskripsi</label>
                 <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={2}
                   placeholder="Penjelasan singkat formulir..." className={`${inputClass} resize-none`} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Pesan Setelah Submit <span className="text-slate-400 font-normal">(opsional)</span></label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Pesan Setelah Submit <span className="text-slate-400 font-normal">(opsional)</span></label>
                 <textarea value={formData.success_message} onChange={(e) => setFormData({ ...formData, success_message: e.target.value })} rows={2}
                   placeholder="Default: Terima kasih! Data Anda sudah kami terima." className={`${inputClass} resize-none`} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Dibuka</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Dibuka</label>
                   <input type="datetime-local" value={formData.starts_at} onChange={(e) => setFormData({ ...formData, starts_at: e.target.value })} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Ditutup</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Ditutup</label>
                   <input type="datetime-local" value={formData.ends_at} onChange={(e) => setFormData({ ...formData, ends_at: e.target.value })} className={inputClass} />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Kuota Pendaftar <span className="text-slate-400 font-normal">(kosongkan = tanpa batas)</span></label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Kuota Pendaftar <span className="text-slate-400 font-normal">(kosongkan = tanpa batas)</span></label>
                 <input type="number" min={1} value={formData.max_responses} onChange={(e) => setFormData({ ...formData, max_responses: e.target.value })} placeholder="cth: 100" className={inputClass} />
               </div>
               <div>
@@ -335,17 +340,17 @@ export default function FormsManagement() {
                   label="Gambar Header (Banner Formulir)"
                   value={headerImageValue}
                   onChange={(val) => setHeaderImageValue(val)}
-                  aspectRatio="banner"
+                  aspectRatio="form-banner"
                   allowedFolder="forms"
-                  description="Pilih dari Media Library atau unggah dari perangkat. Rekomendasi rasio banner memanjang 4:1 atau 1200x300px."
+                  description="Pilih dari Media Library atau unggah dari perangkat. Rasio persis Google Forms 4:1 (contoh: 1600x400 px atau 1200x300 px)."
                 />
               </div>
 
               {/* Pengaturan Email & Anti-Spam */}
-              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-sm space-y-3">
+              <div className="p-4 bg-slate-50/80 border border-slate-200/90 rounded-2xl space-y-3">
                 <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">Verifikasi Email & Anti-Spam</p>
                 
-                <label className="flex items-start gap-2.5 text-xs text-slate-700 cursor-pointer">
+                <label className="flex items-start gap-3 text-xs text-slate-700 cursor-pointer p-2.5 bg-white border border-slate-200/80 rounded-xl hover:border-slate-300 transition-colors shadow-2xs">
                   <input
                     type="checkbox"
                     checked={formData.require_email}
@@ -353,12 +358,12 @@ export default function FormsManagement() {
                     className="w-4 h-4 mt-0.5 accent-[#c20000] cursor-pointer"
                   />
                   <div>
-                    <span className="font-semibold text-slate-800">Wajibkan Pengisian Email (Anti-Spam)</span>
-                    <p className="text-slate-500 mt-0.5">Memerlukan alamat email aktif pendaftar yang diverifikasi untuk mencegah bot dan spam.</p>
+                    <span className="font-semibold text-slate-800 block text-xs">Wajibkan Pengisian Email (Anti-Spam)</span>
+                    <p className="text-slate-500 mt-0.5 text-[11px]">Memerlukan alamat email aktif pendaftar yang diverifikasi untuk mencegah bot dan spam.</p>
                   </div>
                 </label>
 
-                <label className="flex items-start gap-2.5 text-xs text-slate-700 cursor-pointer">
+                <label className="flex items-start gap-3 text-xs text-slate-700 cursor-pointer p-2.5 bg-white border border-slate-200/80 rounded-xl hover:border-slate-300 transition-colors shadow-2xs">
                   <input
                     type="checkbox"
                     checked={formData.limit_one_response}
@@ -366,20 +371,20 @@ export default function FormsManagement() {
                     className="w-4 h-4 mt-0.5 accent-[#c20000] cursor-pointer"
                   />
                   <div>
-                    <span className="font-semibold text-slate-800">Batasi 1 Tanggapan per Email</span>
-                    <p className="text-slate-500 mt-0.5">Mencegah pengisian berulang kali dengan alamat email yang sama.</p>
+                    <span className="font-semibold text-slate-800 block text-xs">Batasi 1 Tanggapan per Email</span>
+                    <p className="text-slate-500 mt-0.5 text-[11px]">Mencegah pengisian berulang kali dengan alamat email yang sama.</p>
                   </div>
                 </label>
               </div>
 
-              <label className="flex items-center gap-2 text-sm text-slate-700">
-                <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="w-4 h-4 accent-[#c20000]" />
-                Tampilkan formulir ke publik
+              <label className="flex items-center gap-2.5 text-sm text-slate-700 font-medium cursor-pointer pt-1">
+                <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="w-4 h-4 rounded accent-[#c20000]" />
+                <span>Tampilkan formulir ke publik</span>
               </label>
             </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Batal</Button>
-              <Button type="submit" disabled={isSaving} className="bg-[#c20000] hover:bg-[#a30000] text-white">
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-200">
+              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="rounded-xl h-10 px-4 text-xs font-semibold">Batal</Button>
+              <Button type="submit" disabled={isSaving} className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl h-10 px-5 text-xs font-bold shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]">
                 {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />} Simpan
               </Button>
             </div>

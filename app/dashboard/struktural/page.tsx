@@ -347,66 +347,71 @@ export default function StrukturalManagement() {
         title="Kelola Struktur Organisasi"
         description="Atur jajaran pengurus harian, bidang, dan lembaga PC IMM dengan urutan interaktif (Drag & Drop)"
         badge="Struktural"
-      />
+      >
+        <Link href="/dashboard/struktural/create">
+          <Button className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <Plus className="w-4 h-4 mr-1.5 stroke-[2.5]" />
+            Tambah Pengurus
+          </Button>
+        </Link>
+      </PageHeader>
 
       {/* Toolbar */}
-      <Card className="border-[#0f172a]/10 shadow-sm">
-        <CardContent className="p-4 sm:p-6 space-y-4">
-          <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-            {/* Period Dropdown */}
-            <div className="flex w-full md:w-auto items-center gap-2">
-              <div className="relative">
-                <select
-                  value={selectedPeriod || ''}
-                  onChange={(e) => setSelectedPeriod(e.target.value)}
-                  className="appearance-none bg-white border border-[#0f172a]/10 hover:border-[#0f172a]/30 rounded-sm pl-4 pr-10 py-2 text-sm font-semibold text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors cursor-pointer"
-                >
-                  {periods.length === 0 && <option value="" disabled>Belum ada periode</option>}
-                  {periods.map(period => (
-                    <option key={period} value={period}>
-                      Periode {period}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0f172a]/50 pointer-events-none" />
-              </div>
-
-              <button 
-                onClick={handleOpenModal}
-                className="px-3 py-2 flex items-center justify-center rounded-sm text-sm font-semibold transition-colors border border-dashed border-[#c20000] text-[#c20000] hover:bg-[#c20000]/5"
-                title="Buat Periode Baru"
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs p-4 sm:p-5">
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+          {/* Period Dropdown */}
+          <div className="flex w-full md:w-auto items-center gap-2">
+            <div className="relative">
+              <select
+                value={selectedPeriod || ''}
+                onChange={(e) => setSelectedPeriod(e.target.value)}
+                className="appearance-none bg-white border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all cursor-pointer shadow-2xs"
               >
-                <Plus className="w-4 h-4" /> Baru
-              </button>
+                {periods.length === 0 && <option value="" disabled>Belum ada periode</option>}
+                {periods.map(period => (
+                  <option key={period} value={period}>
+                    Periode {period}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             </div>
 
-            <div className="relative w-full md:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input 
-                type="text" 
-                placeholder="Cari nama, jabatan, bidang..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
-              />
-            </div>
+            <button 
+              onClick={handleOpenModal}
+              className="px-3.5 py-2.5 flex items-center justify-center rounded-xl text-xs font-bold transition-all border border-dashed border-[#c20000] text-[#c20000] hover:bg-red-50 shadow-2xs"
+              title="Buat Periode Baru"
+            >
+              <Plus className="w-4 h-4 mr-1" /> Periode Baru
+            </button>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Cari nama, jabatan, bidang..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs"
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Create Bidang Action */}
       <div className="flex justify-between items-center mb-2">
-         <div className="text-sm text-[#0f172a]/60 flex items-center gap-2">
-           {isSavingOrder && <Loader2 className="w-3 h-3 animate-spin" />}
-           {isSavingOrder ? 'Menyimpan urutan...' : 'Gunakan ikon ☰ untuk drag & drop urutan'}
+         <div className="text-xs text-slate-500 font-medium flex items-center gap-2">
+           {isSavingOrder && <Loader2 className="w-3.5 h-3.5 animate-spin text-[#c20000]" />}
+           {isSavingOrder ? 'Menyimpan urutan...' : 'Gunakan ikon ☰ untuk drag & drop urutan jabatan/pengurus'}
          </div>
          <Button 
            onClick={handleOpenBidangModal}
            variant="outline" 
-           className="border-dashed border-[#c20000] text-[#c20000] hover:bg-[#c20000]/5 text-sm h-9"
+           className="border-dashed border-[#c20000] text-[#c20000] hover:bg-red-50 text-xs font-bold h-10 px-4 rounded-xl shadow-2xs"
            disabled={!selectedPeriod}
          >
-           <Plus className="w-4 h-4 mr-1" /> Buat Bidang Baru
+           <Plus className="w-4 h-4 mr-1.5" /> Buat Bidang Baru
          </Button>
       </div>
 
@@ -452,12 +457,12 @@ export default function StrukturalManagement() {
                       <div 
                         ref={providedKatDrag.innerRef}
                         {...providedKatDrag.draggableProps}
-                        className="space-y-4 bg-white/50 p-4 rounded-sm border border-transparent hover:border-[#0f172a]/5 transition-colors"
+                        className="space-y-4 bg-white/50 p-4 rounded-2xl border border-transparent hover:border-[#0f172a]/5 transition-colors"
                       >
                         <div className="flex items-center gap-4">
                           <div 
                             {...providedKatDrag.dragHandleProps}
-                            className={`p-1.5 rounded-sm text-[#0f172a]/30 hover:bg-slate-100 transition-colors ${isSearching ? 'cursor-not-allowed opacity-30' : 'cursor-grab'}`}
+                            className={`p-1.5 rounded-xl text-[#0f172a]/30 hover:bg-slate-100 transition-colors ${isSearching ? 'cursor-not-allowed opacity-30' : 'cursor-grab'}`}
                             title="Drag to reorder Kategori"
                           >
                             <GripVertical className="w-5 h-5" />
@@ -504,7 +509,7 @@ export default function StrukturalManagement() {
                                                   <td className="p-4 w-10">
                                                     <div 
                                                       {...providedBidangDrag.dragHandleProps} 
-                                                      className={`p-1 rounded-sm text-[#0f172a]/20 hover:text-[#0f172a]/60 hover:bg-slate-100 transition-colors ${isSearching ? 'cursor-not-allowed opacity-30' : 'cursor-grab'}`}
+                                                      className={`p-1 rounded-xl text-[#0f172a]/20 hover:text-[#0f172a]/60 hover:bg-slate-100 transition-colors ${isSearching ? 'cursor-not-allowed opacity-30' : 'cursor-grab'}`}
                                                     >
                                                       <GripVertical className="w-4 h-4" />
                                                     </div>
@@ -580,7 +585,7 @@ export default function StrukturalManagement() {
                                                                             <td className="p-3 w-8">
                                                                               <div 
                                                                                 {...providedMem.dragHandleProps}
-                                                                                className={`p-1 rounded-sm text-[#0f172a]/20 hover:text-[#0f172a]/60 hover:bg-slate-100 transition-colors ${isSearching ? 'cursor-not-allowed opacity-30' : 'cursor-grab'}`}
+                                                                                className={`p-1 rounded-xl text-[#0f172a]/20 hover:text-[#0f172a]/60 hover:bg-slate-100 transition-colors ${isSearching ? 'cursor-not-allowed opacity-30' : 'cursor-grab'}`}
                                                                               >
                                                                                 <GripVertical className="w-3.5 h-3.5" />
                                                                               </div>
@@ -606,12 +611,12 @@ export default function StrukturalManagement() {
                                                                             </td>
                                                                             <td className="p-3 pr-4">
                                                                               <div className="flex items-center justify-end gap-1">
-                                                                                <Link href={`/dashboard/struktural/${item.id}`} className="p-1.5 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors" title="Edit">
+                                                                                <Link href={`/dashboard/struktural/${item.id}`} className="h-8 w-8 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors" title="Edit">
                                                                                   <Edit className="w-3.5 h-3.5" />
                                                                                 </Link>
                                                                                 <button 
                                                                                   onClick={() => handleDelete(item.id)}
-                                                                                  className="p-1.5 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors" 
+                                                                                  className="h-8 w-8 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-xl transition-colors" 
                                                                                   title="Hapus"
                                                                                 >
                                                                                   <Trash2 className="w-3.5 h-3.5" />
@@ -659,47 +664,47 @@ export default function StrukturalManagement() {
 
       {/* Create Period Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm px-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-sm shadow-xl max-w-md w-full p-6 border border-[#0f172a]/10 animate-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-bold text-[#0f172a] mb-2" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Buat Periode Baru</h3>
-            <p className="text-[#0f172a]/70 text-sm mb-6">Masukkan nama periode kepengurusan baru.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-7 border border-slate-200/90">
+            <h3 className="text-lg font-bold text-slate-900 mb-1" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Buat Periode Baru</h3>
+            <p className="text-slate-500 text-xs mb-5">Masukkan nama periode kepengurusan baru PC IMM Kota Surakarta.</p>
             
             <div className="space-y-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-[#0f172a]/90 mb-1.5">Nama Periode</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Periode</label>
                 <input 
                   type="text" 
                   value={newPeriodName}
                   onChange={(e) => setNewPeriodName(e.target.value)}
                   placeholder="Contoh: 2025-2026"
-                  className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs"
                   autoFocus
                 />
               </div>
               
               {selectedPeriod && (
-                <div className="flex items-start gap-3 pt-2">
+                <div className="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
                   <input 
                     type="checkbox" 
                     id="copyStructure"
                     checked={copyStructure}
                     onChange={(e) => setCopyStructure(e.target.checked)}
-                    className="mt-1 w-4 h-4 accent-[#c20000] rounded-sm cursor-pointer"
+                    className="mt-0.5 w-4 h-4 accent-[#c20000] rounded cursor-pointer"
                   />
-                  <label htmlFor="copyStructure" className="text-sm text-[#0f172a]/80 cursor-pointer leading-relaxed">
-                    Salin struktur jabatan dari periode <span className="font-semibold text-[#0f172a]">{selectedPeriod}</span> 
-                    <br /><span className="text-xs text-[#0f172a]/60">(hanya menyalin format jabatannya, nama pengurus akan otomatis dikosongkan)</span>
+                  <label htmlFor="copyStructure" className="text-xs text-slate-700 cursor-pointer leading-relaxed">
+                    Salin struktur jabatan dari periode <span className="font-bold text-slate-900">{selectedPeriod}</span> 
+                    <br /><span className="text-[11px] text-slate-400">(hanya menyalin format jabatannya, nama pengurus akan otomatis dikosongkan)</span>
                   </label>
                 </div>
               )}
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-[#0f172a]/5">
-              <Button variant="outline" onClick={() => setIsModalOpen(false)} className="rounded-sm px-4 text-sm h-9">
+            <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
+              <Button variant="outline" onClick={() => setIsModalOpen(false)} className="rounded-xl px-4 text-xs font-semibold h-10 border-slate-200 hover:bg-slate-50">
                 Batal
               </Button>
-              <Button onClick={submitNewPeriod} disabled={isLoading || !newPeriodName.trim()} className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm px-4 text-sm h-9 shadow-sm">
-                {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              <Button onClick={submitNewPeriod} disabled={isLoading || !newPeriodName.trim()} className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl px-5 text-xs font-bold h-10 shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]">
+                {isLoading ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : null}
                 Buat Periode
               </Button>
             </div>
@@ -709,18 +714,18 @@ export default function StrukturalManagement() {
 
       {/* Create Bidang Modal */}
       {isBidangModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm px-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-sm shadow-xl max-w-md w-full p-6 border border-[#0f172a]/10 animate-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-bold text-[#0f172a] mb-2" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Buat Bidang / Lembaga Baru</h3>
-            <p className="text-[#0f172a]/70 text-sm mb-6">Tambah kelompok pengurus pada periode <span className="font-bold">{selectedPeriod}</span>.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-7 border border-slate-200/90">
+            <h3 className="text-lg font-bold text-slate-900 mb-1" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Buat Bidang / Lembaga Baru</h3>
+            <p className="text-slate-500 text-xs mb-5">Tambah kelompok pengurus pada periode <span className="font-bold text-slate-800">{selectedPeriod}</span>.</p>
             
             <div className="space-y-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-[#0f172a]/90 mb-1.5">Kategori</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kategori</label>
                 <select 
                   value={newKategori}
                   onChange={(e) => setNewKategori(e.target.value)}
-                  className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs cursor-pointer"
                 >
                   <option value="BPH">Badan Pimpinan Harian (BPH)</option>
                   <option value="Lembaga Otonom">Lembaga Otonom</option>
@@ -730,24 +735,24 @@ export default function StrukturalManagement() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#0f172a]/90 mb-1.5">Nama Bidang / Lembaga</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Bidang / Lembaga</label>
                 <input 
                   type="text" 
                   value={newBidangName}
                   onChange={(e) => setNewBidangName(e.target.value)}
                   placeholder="Contoh: Bidang Kader, LSO Tunas, Korkom UMS..."
-                  className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs"
                   autoFocus
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-[#0f172a]/5">
-              <Button variant="outline" onClick={() => setIsBidangModalOpen(false)} className="rounded-sm px-4 text-sm h-9">
+            <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
+              <Button variant="outline" onClick={() => setIsBidangModalOpen(false)} className="rounded-xl px-4 text-xs font-semibold h-10 border-slate-200 hover:bg-slate-50">
                 Batal
               </Button>
-              <Button onClick={submitNewBidang} disabled={isLoading || !newBidangName.trim()} className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm px-4 text-sm h-9 shadow-sm">
-                {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              <Button onClick={submitNewBidang} disabled={isLoading || !newBidangName.trim()} className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl px-5 text-xs font-bold h-10 shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]">
+                {isLoading ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : null}
                 Simpan Bidang
               </Button>
             </div>

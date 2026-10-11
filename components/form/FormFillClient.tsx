@@ -156,17 +156,24 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
   if (isSuccess) {
     return (
       <div className="max-w-2xl mx-auto space-y-4">
-        <div className="bg-white rounded-lg border-t-8 border-t-[#c20000] border-x border-b border-slate-200 p-8 shadow-sm">
-          <div className="flex items-center gap-3 mb-4">
-            <CheckCircle2 className="w-8 h-8 text-emerald-500 shrink-0" />
-            <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-              {form.title}
-            </h1>
+        <div className="bg-white rounded-2xl border-t-8 border-t-[#c20000] border-x border-b border-slate-200/90 p-8 sm:p-10 shadow-sm text-left">
+          <div className="flex items-center gap-3.5 mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-7 h-7 text-emerald-600" />
+            </div>
+            <div>
+              <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                Berhasil Dikirim
+              </span>
+              <h1 className="text-xl sm:text-2xl font-bold text-[#0f172a] mt-1" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+                {form.title}
+              </h1>
+            </div>
           </div>
           <p className="text-sm text-slate-700 leading-relaxed mb-6">
             {form.success_message || 'Jawaban Anda telah berhasil dicatat. Terima kasih atas partisipasi Anda.'}
           </p>
-          <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center gap-4">
+          <div className="pt-5 border-t border-slate-100 flex flex-wrap items-center gap-4">
             <button
               onClick={() => {
                 setAnswers({});
@@ -174,12 +181,12 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
                 setIsSuccess(false);
                 setSectionIdx(0);
               }}
-              className="text-sm font-medium text-[#c20000] hover:underline"
+              className="text-xs font-bold text-[#c20000] hover:text-[#a30000] hover:underline"
             >
               Kirim jawaban lain
             </button>
             <span className="text-slate-300">•</span>
-            <Link href="/" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+            <Link href="/" className="text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors">
               Kembali ke Beranda
             </Link>
           </div>
@@ -191,15 +198,17 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
   if (!form.is_open) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg border-t-8 border-t-slate-400 border-x border-b border-slate-200 p-8 text-center shadow-sm">
-          <Lock className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+        <div className="bg-white rounded-2xl border-t-8 border-t-slate-400 border-x border-b border-slate-200/90 p-8 sm:p-10 text-center shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4 text-slate-400">
+            <Lock className="w-7 h-7" />
+          </div>
           <h1 className="text-xl font-bold text-[#0f172a] mb-2">{form.title}</h1>
-          <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+          <p className="text-sm text-slate-600 mb-6 leading-relaxed max-w-md mx-auto">
             Formulir ini tidak lagi menerima tanggapan. Silakan hubungi pengurus jika menurut Anda ini adalah sebuah kesalahan.
           </p>
           <Link
             href="/"
-            className="inline-flex items-center px-5 py-2.5 rounded-xl bg-[#c20000] text-white text-sm font-semibold hover:bg-[#a30000] transition-colors"
+            className="inline-flex items-center px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all shadow-xs"
           >
             Kembali ke Beranda
           </Link>
@@ -222,9 +231,9 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
         aria-hidden="true"
       />
 
-      {/* ── HEADER IMAGE (Google Form Banner Cover) ── */}
+      {/* ── HEADER IMAGE (Google Form Banner Cover Rasio 4:1) ── */}
       {form.header_image && (
-        <div className="w-full h-44 sm:h-56 md:h-64 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
+        <div className="w-full aspect-[4/1] rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
           <img
             src={form.header_image}
             alt={form.title}
@@ -434,82 +443,122 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
                 />
               )}
 
-              {/* Dropdown Select */}
-              {field.type === 'select' && (
-                <select
-                  id={`form-field-${field.id}`}
-                  value={answers[field.id] || ''}
-                  onChange={(e) => setAnswer(field.id, e.target.value)}
-                  required={field.required}
-                  className="w-full sm:max-w-md border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-[#c20000] bg-white cursor-pointer"
-                >
-                  <option value="">Pilih opsi</option>
-                  {(field.options || []).map((opt: string, i: number) => (
-                    <option key={i} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </select>
-              )}
+              {/* Select (Dropdown) */}
+              {field.type === 'select' && (() => {
+                const options: string[] = Array.from(
+                  new Set<string>(
+                    (field.options || [])
+                      .map((opt: any) => (typeof opt === 'string' ? opt.trim() : String(opt)))
+                      .filter((opt: string) => opt.length > 0)
+                  )
+                );
+                return (
+                  <select
+                    value={answers[field.id] || ''}
+                    onChange={(e) => setAnswer(field.id, e.target.value)}
+                    required={field.required}
+                    className="w-full sm:max-w-md border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-[#c20000] bg-white cursor-pointer"
+                  >
+                    <option value="">Pilih opsi</option>
+                    {options.map((opt: string, i: number) => (
+                      <option key={`field_${field.id}_sel_${i}`} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                );
+              })()}
 
               {/* Radio (Pilihan Ganda ala Google Form) */}
-              {field.type === 'radio' && (
-                <div className="space-y-3 pt-1">
-                  {(field.options || []).map((opt: string, i: number) => {
-                    const checked = answers[field.id] === opt;
-                    return (
-                      <label
-                        key={i}
-                        className="flex items-center gap-3 cursor-pointer group py-1 text-sm text-slate-800"
-                      >
-                        <input
-                          type="radio"
-                          name={`field_${field.id}`}
-                          value={opt}
-                          checked={checked}
-                          onChange={() => setAnswer(field.id, opt)}
-                          required={field.required && !answers[field.id]}
-                          className="w-5 h-5 accent-[#c20000] text-[#c20000] cursor-pointer"
-                        />
-                        <span className="group-hover:text-black leading-snug">{opt}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
+              {field.type === 'radio' && (() => {
+                const options: string[] = Array.from(
+                  new Set<string>(
+                    (field.options || [])
+                      .map((opt: any) => (typeof opt === 'string' ? opt.trim() : String(opt)))
+                      .filter((opt: string) => opt.length > 0)
+                  )
+                );
+                return (
+                  <div className="space-y-1.5 pt-1" role="radiogroup">
+                    {options.map((opt: string, i: number) => {
+                      const checked = answers[field.id] === opt;
+                      const inputId = `field_${field.id}_opt_${i}`;
+                      return (
+                        <label
+                          key={inputId}
+                          htmlFor={inputId}
+                          className={`flex items-center gap-3 cursor-pointer group px-3.5 py-2.5 rounded-xl border transition-all text-sm select-none ${
+                            checked
+                              ? 'bg-red-50/60 border-[#c20000]/40 text-slate-900 shadow-2xs font-medium'
+                              : 'border-transparent hover:bg-slate-50 text-slate-800'
+                          }`}
+                        >
+                          <input
+                            id={inputId}
+                            type="radio"
+                            name={`field_${field.id}`}
+                            value={opt}
+                            checked={checked}
+                            onChange={() => setAnswer(field.id, opt)}
+                            required={field.required && !answers[field.id]}
+                            className="w-4.5 h-4.5 accent-[#c20000] text-[#c20000] cursor-pointer"
+                          />
+                          <span className="leading-snug">{opt}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
 
               {/* Checkboxes (Centang Banyak) */}
-              {field.type === 'checkbox' && (
-                <div className="space-y-3 pt-1">
-                  {(field.options || []).map((opt: string, i: number) => {
-                    const checked = (answers[field.id] || []).includes(opt);
-                    return (
-                      <label
-                        key={i}
-                        className="flex items-center gap-3 cursor-pointer group py-1 text-sm text-slate-800"
-                      >
-                        <input
-                          type="checkbox"
-                          value={opt}
-                          checked={checked}
-                          onChange={() => toggleCheckbox(field.id, opt)}
-                          className="w-5 h-5 rounded accent-[#c20000] text-[#c20000] cursor-pointer"
-                        />
-                        <span className="group-hover:text-black leading-snug">{opt}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
+              {field.type === 'checkbox' && (() => {
+                const options: string[] = Array.from(
+                  new Set<string>(
+                    (field.options || [])
+                      .map((opt: any) => (typeof opt === 'string' ? opt.trim() : String(opt)))
+                      .filter((opt: string) => opt.length > 0)
+                  )
+                );
+                return (
+                  <div className="space-y-1.5 pt-1">
+                    {options.map((opt: string, i: number) => {
+                      const checked = (answers[field.id] || []).includes(opt);
+                      const inputId = `field_${field.id}_chk_${i}`;
+                      return (
+                        <label
+                          key={inputId}
+                          htmlFor={inputId}
+                          className={`flex items-center gap-3 cursor-pointer group px-3.5 py-2.5 rounded-xl border transition-all text-sm select-none ${
+                            checked
+                              ? 'bg-red-50/60 border-[#c20000]/40 text-slate-900 shadow-2xs font-medium'
+                              : 'border-transparent hover:bg-slate-50 text-slate-800'
+                          }`}
+                        >
+                          <input
+                            id={inputId}
+                            type="checkbox"
+                            value={opt}
+                            checked={checked}
+                            onChange={() => toggleCheckbox(field.id, opt)}
+                            className="w-4.5 h-4.5 rounded accent-[#c20000] text-[#c20000] cursor-pointer"
+                          />
+                          <span className="leading-snug">{opt}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
 
               {/* Linear Scale (Skala 1-5 / 1-10) */}
               {field.type === 'linear_scale' && (
                 <div className="pt-2">
-                  <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-2 font-medium">
                     <span>{field.settings?.minLabel || `Nilai ${field.settings?.min ?? 1}`}</span>
                     <span>{field.settings?.maxLabel || `Nilai ${field.settings?.max ?? 5}`}</span>
                   </div>
-                  <div className="flex items-center justify-between gap-1 sm:gap-2">
+                  <div className="flex items-center justify-between gap-1.5 sm:gap-2">
                     {Array.from({ length: (field.settings?.max ?? 5) - (field.settings?.min ?? 1) + 1 }).map((_, idx) => {
                       const val = (field.settings?.min ?? 1) + idx;
                       const selected = answers[field.id] === val;
@@ -518,7 +567,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
                           key={val}
                           type="button"
                           onClick={() => setAnswer(field.id, val)}
-                          className={`flex-1 py-3 text-center rounded-xl text-sm font-semibold border transition-all ${
+                          className={`flex-1 py-3 text-center rounded-xl text-sm font-bold border transition-all ${
                             selected
                               ? 'bg-[#c20000] text-white border-[#c20000] shadow-sm'
                               : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-100'
@@ -579,14 +628,14 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
       })}
 
       {/* ── FOOTER ACTIONS (Navigasi Section, Kirim & Reset) ── */}
-      <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+      <div className="pt-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
           {hasSections && sectionIdx > 0 && (
             <Button
               type="button"
               variant="outline"
               onClick={() => setSectionIdx((idx) => Math.max(0, idx - 1))}
-              className="border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold text-sm"
+              className="h-11 px-5 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs"
             >
               <ArrowLeft className="w-4 h-4 mr-1.5" /> Sebelumnya
             </Button>
@@ -596,7 +645,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
             <Button
               type="button"
               onClick={() => setSectionIdx((idx) => Math.min(sections.length - 1, idx + 1))}
-              className="bg-[#c20000] hover:bg-[#a30000] text-white font-semibold text-sm"
+              className="h-11 px-6 rounded-xl bg-[#c20000] hover:bg-[#a30000] text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               Berikutnya <ArrowRight className="w-4 h-4 ml-1.5" />
             </Button>
@@ -604,7 +653,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-[#c20000] hover:bg-[#a30000] text-white font-semibold text-sm px-6 shadow-sm"
+              className="h-11 px-7 rounded-xl bg-[#c20000] hover:bg-[#a30000] text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               {isLoading ? (
                 <>
@@ -620,7 +669,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
         <button
           type="button"
           onClick={clearForm}
-          className="text-xs font-medium text-slate-500 hover:text-red-600 transition-colors inline-flex items-center gap-1"
+          className="text-xs font-semibold text-slate-400 hover:text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors inline-flex items-center gap-1.5"
         >
           <RotateCcw className="w-3.5 h-3.5" /> Kosongkan formulir
         </button>

@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import FormFillClient from '@/components/form/FormFillClient';
 
@@ -47,26 +46,6 @@ export default async function BareFormFillPage({ params }: { params: Promise<{ s
 
   return (
     <div className="min-h-screen bg-[#f0f4f9] text-slate-800 flex flex-col justify-between selection:bg-[#c20000]/10 selection:text-[#c20000]">
-      {/* ── MINIMAL TOP BAR (Logo IMM Kecil ala Google Form Header) ── */}
-      <header className="py-4 px-6 border-b border-slate-200/60 bg-white/70 backdrop-blur-sm sticky top-0 z-30 flex items-center justify-between">
-        <Link href="/" className="inline-flex items-center gap-2 text-slate-700 hover:text-[#c20000] transition-colors" title="Kembali ke Beranda IMM Solo">
-          <Image
-            src="/images/logo-imm.webp"
-            alt="Logo PC IMM Kota Surakarta"
-            width={28}
-            height={28}
-            className="w-7 h-7 object-contain"
-          />
-          <span className="font-bold text-xs tracking-wide text-slate-800 hidden sm:inline" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-            PC IMM Kota Surakarta
-          </span>
-        </Link>
-
-        <span className="text-[11px] font-mono text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
-          Formulir Digital
-        </span>
-      </header>
-
       {/* ── FORM CONTENT (Tanpa Navbar & Footer Utama Website) ── */}
       <main className="flex-1 py-8 sm:py-12 px-4">
         <FormFillClient form={form} />

@@ -95,7 +95,7 @@ export default function ProfileSettings() {
     );
   }
 
-  const inputClass = "w-full bg-slate-50 hover:bg-slate-100/50 border border-slate-200 rounded-sm px-4 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-[#c20000] focus:ring-4 focus:ring-[#c20000]/10 transition-all text-sm font-medium placeholder:text-slate-400";
+  const inputClass = "w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all text-sm font-medium placeholder:text-slate-400 shadow-2xs";
   const labelClass = "block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2";
 
   return (
@@ -129,7 +129,7 @@ export default function ProfileSettings() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
                 <div>
@@ -203,7 +203,7 @@ export default function ProfileSettings() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
                 <div>
@@ -239,9 +239,9 @@ export default function ProfileSettings() {
           <Button 
             type="submit" 
             disabled={isLoading} 
-            className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm px-8 py-6 shadow-xl shadow-[#c20000]/20 transition-all text-base font-bold flex items-center gap-3 w-full sm:w-auto"
+            className="h-11 px-7 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98] text-sm font-bold flex items-center gap-2 w-full sm:w-auto"
           >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {isLoading ? 'Menyimpan...' : 'Simpan Profil'}
           </Button>
         </div>
