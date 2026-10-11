@@ -2,13 +2,14 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Download, FileText, HardDrive, Globe, Archive, Search, X } from 'lucide-react';
+import { Download, FileText, HardDrive, Globe, Archive, Search, X, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
 interface DocumentItem {
   id: number;
   title: string;
+  slug?: string;
   description?: string;
   file_type?: string;
   file_size?: string;
@@ -20,6 +21,8 @@ const getFileIcon = (type?: string) => {
   switch (type?.toLowerCase()) {
     case 'pdf':
       return <FileText className="w-6 h-6 text-red-500" />;
+    case 'image':
+      return <ImageIcon className="w-6 h-6 text-emerald-600" />;
     case 'word':
     case 'doc':
     case 'docx':
@@ -167,7 +170,13 @@ export default function DokumenClient({ documents }: { documents: DocumentItem[]
 
                 {/* Content */}
                 <h2 className="text-base font-bold text-[#0f172a] leading-snug line-clamp-2 group-hover:text-[#c20000] transition-colors mb-2" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-                  {doc.title}
+                  {doc.slug ? (
+                    <Link href={`/files/${doc.slug}`} className="hover:underline">
+                      {doc.title}
+                    </Link>
+                  ) : (
+                    doc.title
+                  )}
                 </h2>
 
                 {doc.description && (
