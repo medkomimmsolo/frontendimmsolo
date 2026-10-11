@@ -97,6 +97,75 @@ export interface Setting {
   value: string | null;
 }
 
+export type PresensiMode = 'self' | 'scan' | 'both';
+export type PresensiKehadiranStatus = 'hadir' | 'telat' | 'izin' | 'tidak_hadir';
+export type PresensiKehadiranMethod = 'self' | 'scan' | 'manual';
+
+export interface Presensi {
+  id: number;
+  user_id: number | null;
+  event_id: number | null;
+  title: string;
+  slug: string;
+  description: string | null;
+  location: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  is_open: boolean;
+  mode: PresensiMode;
+  event_token: string | null;
+  qr_refresh_seconds?: number;
+  late_after_minutes: number | null;
+  allow_manual_add: boolean;
+  enforce_device_limit?: boolean;
+  meta_title: string | null;
+  meta_description: string | null;
+  created_at: string;
+  updated_at: string;
+  user?: { id: number; name: string };
+  event?: { id: number; title: string } | null;
+  pesertas_count?: number;
+  kehadirans_count?: number;
+}
+
+export interface PresensiStats {
+  total_peserta: number;
+  hadir: number;
+  telat: number;
+  izin: number;
+  belum_hadir: number;
+  persen_hadir: number;
+}
+
+export interface PresensiPeserta {
+  id: number;
+  presensi_id: number;
+  kode: string | null;
+  nama: string;
+  email: string | null;
+  phone: string | null;
+  asal: string | null;
+  token: string;
+  meta: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+  kehadiran?: PresensiKehadiran | null;
+}
+
+export interface PresensiKehadiran {
+  id: number;
+  presensi_id: number;
+  presensi_peserta_id: number;
+  status: PresensiKehadiranStatus;
+  method: PresensiKehadiranMethod;
+  checked_at: string;
+  checked_by: number | null;
+  ip: string | null;
+  note: string | null;
+  peserta?: { id: number; nama: string; kode: string | null; email: string | null; asal: string | null };
+  checked_by_user?: { id: number; name: string } | null;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;

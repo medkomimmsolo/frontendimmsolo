@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { Loader2, ArrowLeft, Mail, Lock, ShieldCheck, Eye, EyeOff, AlertCircle, User } from 'lucide-react';
 import Link from 'next/link';
 import { getApiBase, normalizeSettings } from '@/lib/settings';
+import { markSessionActive } from '@/lib/session';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -49,6 +50,7 @@ export default function Login() {
 
       if (response.data.success) {
         localStorage.setItem('auth_token', response.data.data.token);
+        markSessionActive();
         toast.success('Login berhasil!');
         setTimeout(() => {
           router.push('/dashboard');

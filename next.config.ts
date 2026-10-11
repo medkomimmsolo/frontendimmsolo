@@ -60,6 +60,37 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     const noIndex = { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive, nosnippet' };
+
+    // Content-Security-Policy.
+    // Catatan: memakai 'unsafe-inline' untuk style (Tailwind/Quill/animate) &
+    // 'unsafe-inline' script karena Next.js inline runtime bootstrap belum
+    // pakai nonce. Ini tetap memblokir skema berbahaya & script eksternal
+    // tak dikenal, dan berpasangan dgn sanitasi HTML (lib/sanitize.ts).
+    //
+    // Di development, frontend memanggil backend langsung di
+    // http://127.0.0.1:8010 (NEXT_PUBLIC_API_URL), jadi host dev harus
+    // diizinkan agar CSP tidak memblokir fetch.
+    const isDev = process.env.NODE_ENV !== 'production';
+    const devHosts = isDev
+      ? ' http://127.0.0.1:8010 http://localhost:8010 http://127.0.0.1:3000 http://localhost:3000 ws://127.0.0.1:3000 ws://localhost:3000'
+      : '';
+    const csp = [
+      "default-src 'self'",
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.sentry.io https://browser.sentry-cdn.com`,
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com data:",
+      `img-src 'self' data: blob: https://*.immsolo.or.id https://immsolo.or.id https://placehold.co https://*.vercel.app${devHosts}`,
+      `connect-src 'self' https://*.sentry.io https://*.immsolo.or.id https://immsolo.or.id${devHosts}`,
+      "frame-src 'self' https://www.google.com https://maps.google.com",
+      "frame-ancestors 'self'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "object-src 'none'",
+      // upgrade-insecure-requests hanya aman di produksi (HTTPS). Di dev
+      // ia akan memaksa http://127.0.0.1 naik ke https dan merusak request.
+      ...(isDev ? [] : ["upgrade-insecure-requests"]),
+    ].join('; ');
+
     return [
       {
         source: '/sw.js',
@@ -75,6 +106,10 @@ const nextConfig: NextConfig = {
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self), interest-cohort=()' },
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
+          { key: 'Content-Security-Policy', value: csp },
         ],
       },
     ];

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getApiBase } from '@/lib/settings';
+import { clearSession } from '@/lib/session';
 
 const api = axios.create({
   baseURL: getApiBase(),
@@ -33,6 +34,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('auth_token');
+        clearSession();
         // Avoid redirecting to login if we are already there or checking /me
         if (!window.location.pathname.includes('/login') && !error.config.url?.includes('/me')) {
             window.location.href = '/login';
