@@ -292,29 +292,6 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
           </p>
         )}
 
-        {(form.ends_at || form.max_responses) && (
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-500 font-medium">
-            {form.ends_at && (
-              <span className="px-2.5 py-1 bg-slate-100 rounded-full">
-                Batas:{' '}
-                {new Date(form.ends_at).toLocaleString('id-ID', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}{' '}
-                WIB
-              </span>
-            )}
-            {form.max_responses && (
-              <span className="px-2.5 py-1 bg-slate-100 rounded-full">
-                Kuota: {form.max_responses} peserta
-              </span>
-            )}
-          </div>
-        )}
-
         <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
           <span className="text-red-500 font-semibold">* Menunjukkan pertanyaan yang wajib diisi</span>
           {preview && (
