@@ -121,12 +121,12 @@ export default function ImageUploadPicker({
   };
 
   const getAspectClass = (forPreview = false) => {
-    if (forPreview && previewMode === 'contain') {
+    if (forPreview && previewMode === 'contain' && aspectRatio !== 'square') {
       return 'min-h-[160px] max-h-[380px] w-full flex items-center justify-center p-2';
     }
     switch (aspectRatio) {
       case 'square':
-        return 'aspect-square max-w-[240px]';
+        return 'aspect-square max-w-[200px] mx-auto';
       case 'portrait':
         return 'aspect-[3/4] max-w-[260px]';
       case 'banner':
@@ -163,8 +163,127 @@ export default function ImageUploadPicker({
       />
 
       {/* Main Container */}
-      {previewUrl ? (
-        /* Image Preview State */
+      {aspectRatio === 'square' ? (
+        /* ── DEDICATED SQUARE / AVATAR COMPACT CARD ── */
+        previewUrl ? (
+          <div className="p-3 bg-slate-50/70 border border-slate-200/90 rounded-2xl flex items-center gap-4">
+            {/* Square Avatar Box */}
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-2xs flex items-center justify-center shrink-0 group">
+              <img
+                src={previewUrl}
+                alt="Avatar"
+                className="w-full h-full object-contain p-1"
+                onError={(e) => {
+                  if (typeof value === 'string') {
+                    (e.target as HTMLImageElement).src = value;
+                  }
+                }}
+              />
+              {enableCrop && (
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setIsCropperOpen(true)}
+                    className="p-1.5 bg-white text-slate-800 rounded-lg hover:scale-110 transition-transform shadow-xs"
+                    title="Crop avatar"
+                  >
+                    <Crop className="w-3.5 h-3.5 text-[#c20000]" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Details & Actions */}
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white ${
+                  isFromLibrary ? 'bg-indigo-600' : 'bg-emerald-600'
+                }`}>
+                  {isFromLibrary ? (
+                    <>
+                      <FolderArchive className="w-3 h-3" />
+                      Media Library
+                    </>
+                  ) : (
+                    <>
+                      <HardDrive className="w-3 h-3" />
+                      Dari Device
+                    </>
+                  )}
+                </span>
+                <span className="text-[11px] text-slate-500 font-medium truncate">
+                  {value instanceof File ? value.name : 'Avatar Profil Terpilih'}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {enableCrop && (
+                  <button
+                    type="button"
+                    onClick={() => setIsCropperOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold shadow-2xs hover:border-slate-300 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <Crop className="w-3.5 h-3.5 text-[#c20000]" />
+                    <span>Tarik / Crop</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold shadow-2xs hover:border-slate-300 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <FolderOpen className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Media Library</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold shadow-2xs hover:border-slate-300 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <UploadCloud className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Ganti File</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRemove}
+                  className="inline-flex items-center justify-center p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors ml-auto"
+                  title="Hapus avatar"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Empty Square Dropzone */
+          <div
+            onClick={() => setIsModalOpen(true)}
+            className="p-4 bg-slate-50/70 hover:bg-red-50/20 border-2 border-dashed border-slate-200 hover:border-[#c20000]/60 rounded-2xl flex items-center gap-4 cursor-pointer group transition-all"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-[#c20000] group-hover:scale-105 transition-all shrink-0">
+              <ImageIcon className="w-6 h-6 stroke-[1.75]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-slate-800 group-hover:text-[#c20000] transition-colors">
+                Pilih Avatar / Logo Profil
+              </p>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Klik untuk memilih dari Media Library atau unggah file baru dari perangkat.
+              </p>
+            </div>
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="px-3.5 py-2 bg-[#c20000] hover:bg-[#a30000] text-white text-xs font-bold rounded-xl shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Pilih Avatar
+              </button>
+            </div>
+          </div>
+        )
+      ) : previewUrl ? (
+        /* ── BANNER / LANDSCAPE PREVIEW STATE ── */
         <div className="space-y-2">
           <div className={`relative rounded-xl overflow-hidden border border-slate-200/90 bg-slate-900/5 group shadow-xs flex items-center justify-center ${getAspectClass(true)}`}>
             <img
@@ -281,8 +400,8 @@ export default function ImageUploadPicker({
           </div>
 
           <div className="flex items-center justify-between text-xs text-slate-500 px-0.5">
-            <span className="truncate max-w-[200px] sm:max-w-xs">
-              {value instanceof File ? value.name : typeof value === 'string' ? value : 'Gambar terpilih'}
+            <span className="truncate max-w-[200px] sm:max-w-xs font-medium">
+              {value instanceof File ? value.name : 'Gambar Terpilih'}
             </span>
             <div className="flex items-center gap-3 shrink-0">
               {enableCrop && (
@@ -306,7 +425,7 @@ export default function ImageUploadPicker({
           </div>
         </div>
       ) : (
-        /* Empty Dropzone modern: Klik langsung membuka Media Library atau pilih dari device */
+        /* Empty Banner Dropzone */
         <div 
           onClick={() => setIsModalOpen(true)}
           className={`border-2 border-dashed border-slate-200 hover:border-[#c20000]/60 rounded-2xl p-6 bg-slate-50/60 hover:bg-red-50/20 transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer group shadow-2xs ${getAspectClass()}`}
