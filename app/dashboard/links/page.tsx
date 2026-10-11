@@ -5,7 +5,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
-import { Plus, Search, Edit, Trash2, Loader2, Layers, ExternalLink, UserCheck } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Loader2, Layers, ExternalLink, UserCheck, X, Link2, Palette } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
@@ -163,6 +163,8 @@ export default function LinksManagement() {
     }
   };
 
+  const inputClass = "w-full border border-slate-200/90 rounded-xl px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs";
+
   return (
     <div className="space-y-6">
       {/* Modern Page Header */}
@@ -293,24 +295,62 @@ export default function LinksManagement() {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4" onClick={() => setIsModalOpen(false)}>
-          <form onSubmit={handleSave} className="bg-white rounded-sm shadow-xl max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-bold text-slate-800 mb-5">{editing ? 'Edit Halaman' : 'Buat Halaman Link'}</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Judul Halaman</label>
-                <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Link Resmi PC IMM" className="w-full border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-3 sm:p-5 animate-in fade-in duration-200" onClick={() => setIsModalOpen(false)}>
+          <form 
+            onSubmit={handleSave} 
+            className="bg-white rounded-3xl shadow-2xl max-w-xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-100" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header Modern */}
+            <div className="px-6 py-4.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-red-50 border border-red-100 text-[#c20000] flex items-center justify-center shrink-0 shadow-2xs">
+                  <Link2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-slate-900">
+                    {editing ? 'Edit Halaman Link' : 'Buat Halaman Link Baru'}
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    Atur identitas, avatar, dan tampilan tema Linktree IMM
+                  </p>
+                </div>
               </div>
+              <button 
+                type="button" 
+                onClick={() => setIsModalOpen(false)} 
+                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+                title="Tutup"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body Scrollable */}
+            <div className="p-6 overflow-y-auto space-y-5 custom-scrollbar flex-1">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Judul Halaman <span className="text-red-500">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  required 
+                  value={formData.title} 
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Contoh: Pelatihan Instruktur Dasar 2026" 
+                  className={inputClass} 
+                />
+              </div>
+
               {isSuperAdmin && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Pemilik / Pengelola Halaman
                   </label>
                   <select
                     value={formData.user_id}
                     onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
-                    className="w-full border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] bg-white"
+                    className={`${inputClass} bg-white cursor-pointer`}
                   >
                     <option value="">Saya Sendiri ({user?.name || 'Super Admin'})</option>
                     {usersList.map((u) => (
@@ -320,23 +360,43 @@ export default function LinksManagement() {
                     ))}
                   </select>
                   <p className="text-[11px] text-slate-400 mt-1">
-                    Pilih akun user/pengurus yang akan mengelola Linktree ini.
+                    Pilih akun pengurus atau bidang yang akan mengelola tautan ini.
                   </p>
                 </div>
               )}
+
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Slug Kustom <span className="text-slate-400 font-normal">(kosongkan = otomatis dari judul)</span></label>
-                <div className="flex items-center border border-slate-200 rounded-sm overflow-hidden focus-within:border-[#c20000] focus-within:ring-1 focus-within:ring-[#c20000]">
-                  <span className="px-3 py-2 text-sm text-slate-400 bg-slate-50 border-r border-slate-200">/links/</span>
-                  <input type="text" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '') })}
-                    placeholder="resmi" className="flex-1 px-3 py-2 text-sm focus:outline-none font-mono" />
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Slug URL Kustom <span className="text-slate-400 font-normal lowercase">(kosongkan = otomatis dari judul)</span>
+                </label>
+                <div className="flex items-center border border-slate-200/90 rounded-xl overflow-hidden focus-within:border-[#c20000] focus-within:ring-2 focus-within:ring-[#c20000]/20 shadow-2xs transition-all bg-white">
+                  <span className="px-3.5 py-2.5 text-xs font-mono font-bold text-slate-500 bg-slate-50 border-r border-slate-200/90 select-none">
+                    /links/
+                  </span>
+                  <input 
+                    type="text" 
+                    value={formData.slug} 
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '') })}
+                    placeholder="pid2026" 
+                    className="flex-1 px-3.5 py-2.5 text-sm focus:outline-none font-mono text-slate-800" 
+                  />
                 </div>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Deskripsi</label>
-                <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={2}
-                  placeholder="Semua tautan resmi PC IMM Kota Surakarta" className="w-full border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Deskripsi / Bio Singkat
+                </label>
+                <textarea 
+                  value={formData.description} 
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
+                  rows={2}
+                  placeholder="Koleksi tautan resmi kegiatan dan informasi PC IMM Kota Surakarta" 
+                  className={`${inputClass} resize-none`} 
+                />
               </div>
+
+              {/* Avatar / Logo Profil */}
               <div>
                 <ImageUploadPicker
                   label="Avatar / Logo Profil"
@@ -344,12 +404,27 @@ export default function LinksManagement() {
                   onChange={(val) => setAvatarValue(val)}
                   aspectRatio="square"
                   allowedFolder="links"
-                  description="Pilih dari Media Library atau unggah dari perangkat."
+                  description="Gunakan logo atau foto persegi yang jernih untuk ikon profil Linktree."
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Tema Warna</label>
-                <div className="flex flex-wrap gap-2 mb-3">
+
+              {/* Tema Warna Card */}
+              <div className="p-4 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-3.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <Palette className="w-3.5 h-3.5 text-[#c20000]" /> Tema Visual & Warna
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, bg_color: '', accent_color: '', text_color: '', btn_bg_color: '', btn_text_color: '' })}
+                    className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 hover:underline"
+                  >
+                    Reset Default
+                  </button>
+                </div>
+
+                {/* Preset Chips */}
+                <div className="flex flex-wrap gap-1.5">
                   {THEME_PRESETS.map((t) => {
                     const active = formData.bg_color === t.bg && formData.accent_color === t.accent;
                     return (
@@ -358,65 +433,126 @@ export default function LinksManagement() {
                         type="button"
                         onClick={() => setFormData({ ...formData, bg_color: t.bg, accent_color: t.accent })}
                         title={t.name}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${active ? 'border-[#c20000] bg-[#c20000]/5 text-[#c20000]' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+                          active
+                            ? 'border-[#c20000] bg-red-50 text-[#c20000] shadow-2xs font-bold'
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                        }`}
                       >
-                        <span className="w-3.5 h-3.5 rounded-full border border-black/10" style={{ background: `linear-gradient(135deg, ${t.bg} 50%, ${t.accent} 50%)` }} />
+                        <span className="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0" style={{ background: `linear-gradient(135deg, ${t.bg} 50%, ${t.accent} 50%)` }} />
                         {t.name}
                       </button>
                     );
                   })}
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, bg_color: '', accent_color: '' })}
-                    className={`px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${!formData.bg_color && !formData.accent_color ? 'border-[#c20000] bg-[#c20000]/5 text-[#c20000]' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
-                  >
-                    Default
-                  </button>
                 </div>
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <label className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 rounded-sm px-3 py-2">
-                    <input type="color" value={formData.bg_color || '#0b1120'} onChange={(e) => setFormData({ ...formData, bg_color: e.target.value })} className="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0" />
-                    Latar Halaman
+
+                {/* Custom Color Pickers */}
+                <div className="grid grid-cols-2 gap-2.5 pt-1">
+                  <label className="flex items-center gap-2.5 text-xs text-slate-700 bg-white border border-slate-200/90 rounded-xl px-3 py-2 cursor-pointer hover:border-slate-300 transition-colors shadow-2xs">
+                    <input 
+                      type="color" 
+                      value={formData.bg_color || '#0b1120'} 
+                      onChange={(e) => setFormData({ ...formData, bg_color: e.target.value })} 
+                      className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0 p-0 shrink-0" 
+                    />
+                    <div className="min-w-0">
+                      <span className="font-semibold block text-[11px]">Latar Halaman</span>
+                      <span className="text-[10px] font-mono text-slate-400 truncate">{formData.bg_color || '#0b1120'}</span>
+                    </div>
                   </label>
-                  <label className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 rounded-sm px-3 py-2">
-                    <input type="color" value={formData.accent_color || '#c20000'} onChange={(e) => setFormData({ ...formData, accent_color: e.target.value })} className="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0" />
-                    Aksen Cahaya
+
+                  <label className="flex items-center gap-2.5 text-xs text-slate-700 bg-white border border-slate-200/90 rounded-xl px-3 py-2 cursor-pointer hover:border-slate-300 transition-colors shadow-2xs">
+                    <input 
+                      type="color" 
+                      value={formData.accent_color || '#c20000'} 
+                      onChange={(e) => setFormData({ ...formData, accent_color: e.target.value })} 
+                      className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0 p-0 shrink-0" 
+                    />
+                    <div className="min-w-0">
+                      <span className="font-semibold block text-[11px]">Aksen Cahaya</span>
+                      <span className="text-[10px] font-mono text-slate-400 truncate">{formData.accent_color || '#c20000'}</span>
+                    </div>
                   </label>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
-                  <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-600 border border-slate-200 rounded-sm p-2">
-                    <span>Warna Teks</span>
-                    <div className="flex items-center gap-1.5">
-                      <input type="color" value={formData.text_color || '#ffffff'} onChange={(e) => setFormData({ ...formData, text_color: e.target.value })} className="w-7 h-7 rounded cursor-pointer bg-transparent border-0 p-0" />
+                  <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-700 bg-white border border-slate-200/90 rounded-xl p-2.5 cursor-pointer shadow-2xs">
+                    <span className="font-semibold text-[10px] text-slate-500 uppercase">Teks Utama</span>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <input 
+                        type="color" 
+                        value={formData.text_color || '#ffffff'} 
+                        onChange={(e) => setFormData({ ...formData, text_color: e.target.value })} 
+                        className="w-6 h-6 rounded-md cursor-pointer bg-transparent border-0 p-0 shrink-0" 
+                      />
                       <span className="text-[10px] font-mono text-slate-400 truncate">{formData.text_color || 'Default'}</span>
                     </div>
                   </label>
-                  <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-600 border border-slate-200 rounded-sm p-2">
-                    <span>Latar Tombol</span>
-                    <div className="flex items-center gap-1.5">
-                      <input type="color" value={formData.btn_bg_color || '#ffffff'} onChange={(e) => setFormData({ ...formData, btn_bg_color: e.target.value })} className="w-7 h-7 rounded cursor-pointer bg-transparent border-0 p-0" />
-                      <span className="text-[10px] font-mono text-slate-400 truncate">{formData.btn_bg_color || 'Transparan'}</span>
+
+                  <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-700 bg-white border border-slate-200/90 rounded-xl p-2.5 cursor-pointer shadow-2xs">
+                    <span className="font-semibold text-[10px] text-slate-500 uppercase">Latar Tombol</span>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <input 
+                        type="color" 
+                        value={formData.btn_bg_color || '#ffffff'} 
+                        onChange={(e) => setFormData({ ...formData, btn_bg_color: e.target.value })} 
+                        className="w-6 h-6 rounded-md cursor-pointer bg-transparent border-0 p-0 shrink-0" 
+                      />
+                      <span className="text-[10px] font-mono text-slate-400 truncate">{formData.btn_bg_color || 'Otomatis'}</span>
                     </div>
                   </label>
-                  <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-600 border border-slate-200 rounded-sm p-2">
-                    <span>Teks Tombol</span>
-                    <div className="flex items-center gap-1.5">
-                      <input type="color" value={formData.btn_text_color || '#ffffff'} onChange={(e) => setFormData({ ...formData, btn_text_color: e.target.value })} className="w-7 h-7 rounded cursor-pointer bg-transparent border-0 p-0" />
+
+                  <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-700 bg-white border border-slate-200/90 rounded-xl p-2.5 cursor-pointer shadow-2xs">
+                    <span className="font-semibold text-[10px] text-slate-500 uppercase">Teks Tombol</span>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <input 
+                        type="color" 
+                        value={formData.btn_text_color || '#ffffff'} 
+                        onChange={(e) => setFormData({ ...formData, btn_text_color: e.target.value })} 
+                        className="w-6 h-6 rounded-md cursor-pointer bg-transparent border-0 p-0 shrink-0" 
+                      />
                       <span className="text-[10px] font-mono text-slate-400 truncate">{formData.btn_text_color || '#ffffff'}</span>
                     </div>
                   </label>
                 </div>
               </div>
-              <label className="flex items-center gap-2 text-sm text-slate-700">
-                <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} className="w-4 h-4 accent-[#c20000]" />
-                Tampilkan halaman ini ke publik
+
+              {/* Status Publikasi */}
+              <label className="flex items-start gap-3 p-3.5 bg-slate-50/70 border border-slate-200/90 rounded-2xl cursor-pointer hover:border-slate-300 transition-colors shadow-2xs">
+                <input 
+                  type="checkbox" 
+                  checked={formData.is_active} 
+                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} 
+                  className="w-4 h-4 mt-0.5 accent-[#c20000] cursor-pointer" 
+                />
+                <div>
+                  <span className="text-xs font-bold text-slate-800 block">
+                    Publikasikan Halaman Link Ini
+                  </span>
+                  <span className="text-[11px] text-slate-500 leading-relaxed block mt-0.5">
+                    Jika dicentang, halaman dapat diakses oleh publik melalui URL tautan.
+                  </span>
+                </div>
               </label>
             </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Batal</Button>
-              <Button type="submit" disabled={isSaving} className="bg-[#c20000] hover:bg-[#a30000] text-white">
-                {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />} Simpan
+
+            {/* Modal Actions Footer */}
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/70 flex items-center justify-end gap-3 shrink-0">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsModalOpen(false)}
+                className="rounded-xl h-10 px-4 text-xs font-semibold border-slate-200 hover:bg-slate-100"
+              >
+                Batal
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSaving} 
+                className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl h-10 px-5 text-xs font-bold shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                {editing ? 'Simpan Perubahan' : 'Buat Halaman Link'}
               </Button>
             </div>
           </form>
