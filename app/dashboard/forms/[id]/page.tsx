@@ -1077,11 +1077,22 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               <h2 className="text-base font-bold text-slate-800">Pratinjau Formulir</h2>
               <button onClick={() => setIsPreviewOpen(false)} className="text-xs font-semibold px-2.5 py-1 rounded-lg text-slate-500 hover:text-[#c20000] hover:bg-red-50 transition-colors">Tutup ✕</button>
             </div>
-            <div className="text-center mb-6">
-              <h3 className="text-xl font-bold text-[#0f172a]">{form?.title}</h3>
-              {form?.description && <p className="text-sm text-slate-500 mt-1">{form.description}</p>}
-            </div>
-            <FormFillClient form={{ ...(form || {}), slug: form?.slug || 'pratinjau', fields, is_open: true }} preview />
+            <FormFillClient
+              form={{
+                ...(form || {}),
+                title: settingsTitle || form?.title,
+                description: settingsDescription || form?.description,
+                header_image: headerImageVal instanceof File
+                  ? URL.createObjectURL(headerImageVal)
+                  : typeof headerImageVal === 'string'
+                  ? headerImageVal
+                  : form?.header_image,
+                slug: form?.slug || 'pratinjau',
+                fields,
+                is_open: true,
+              }}
+              preview
+            />
             <p className="text-center text-[11px] text-slate-400 mt-4">Mode pratinjau — isian tidak tersimpan.</p>
           </div>
         </div>
