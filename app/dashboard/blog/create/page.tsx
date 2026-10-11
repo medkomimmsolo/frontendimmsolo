@@ -13,6 +13,7 @@ import { convertToWebP, uploadInlineImage } from '@/lib/imageUtils';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/hooks/useAuth';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 // Import Rich Text Editor (dengan dukungan tabel) secara dinamis agar tidak error SSR
 const RichTextEditor = dynamic(() => import('@/components/post/RichTextEditor'), {
@@ -250,18 +251,19 @@ export default function CreateBlog() {
 
   return (
     <div className="space-y-6 w-full pb-12">
-      <div className="flex items-center gap-4 mb-4">
+      {/* Modern Page Header */}
+      <PageHeader
+        title="Tulis Artikel Baru"
+        description="Buat dan publikasikan artikel, berita kegiatan, atau rilis pers PC IMM Kota Surakarta"
+        badge="Artikel"
+      >
         <Link href="/dashboard/blog">
-          <Button variant="outline" size="sm" className="h-9 w-9 p-0 rounded-sm border-slate-200 hover:text-[#c20000]">
-            <ArrowLeft className="w-4 h-4" />
+          <Button variant="outline" size="sm" className="h-10 px-4 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs">
+            <ArrowLeft className="w-4 h-4 mr-1.5" />
+            Kembali
           </Button>
         </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-            Add New Post
-          </h1>
-        </div>
-      </div>
+      </PageHeader>
 
       <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-6 items-start">
         {/* LEFT COLUMN: Title, Content, Excerpt, Author, SEO */}
@@ -276,7 +278,7 @@ export default function CreateBlog() {
               value={formData.title}
               onChange={handleChange}
               placeholder="Add title" 
-              className="w-full bg-white border border-slate-200 rounded-sm px-4 py-3 text-xl font-medium text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-shadow shadow-sm placeholder:text-slate-400"
+              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-lg font-medium text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-shadow shadow-sm placeholder:text-slate-400"
             />
           </div>
           {formData.title && (
@@ -287,7 +289,7 @@ export default function CreateBlog() {
 
 
           {/* Editor Box */}
-          <div className="bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden">
+          <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
             {/* React Quill Editor Container */}
             <div className="quill-editor-container">
               <style dangerouslySetInnerHTML={{__html: `
@@ -372,7 +374,7 @@ export default function CreateBlog() {
           </div>
 
           {/* Excerpt Meta Box */}
-          <Card className="border-slate-200 shadow-sm rounded-sm">
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
               <CardTitle className="text-sm font-semibold text-[#0f172a]">Excerpt</CardTitle>
             </CardHeader>
@@ -384,14 +386,14 @@ export default function CreateBlog() {
                 value={formData.excerpt}
                 onChange={handleChange}
                 placeholder="Write a short summary or meta description..." 
-                className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors resize-none text-sm shadow-sm"
+                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors resize-none text-sm shadow-sm"
               />
               <p className="text-xs text-slate-500 mt-2">Excerpts are optional hand-crafted summaries of your content that can be used in your theme.</p>
             </CardContent>
           </Card>
 
           {/* Author/Editor Meta Box */}
-          <Card className="border-slate-200 shadow-sm rounded-sm">
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
               <CardTitle className="text-sm font-semibold text-[#0f172a]">Author & Editor Data</CardTitle>
             </CardHeader>
@@ -406,7 +408,7 @@ export default function CreateBlog() {
                       value={formData.author_name}
                       onChange={handleChange}
                       placeholder="Leave blank if Admin" 
-                      className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
                     />
                   </div>
                   <div>
@@ -417,7 +419,7 @@ export default function CreateBlog() {
                       value={formData.author_role}
                       onChange={handleChange}
                       placeholder="e.g. Ketua Umum, Anggota..." 
-                      className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
                     />
                   </div>
                 </div>
@@ -431,7 +433,7 @@ export default function CreateBlog() {
                       value={formData.editor_name}
                       onChange={handleChange}
                       placeholder="Name of editor..." 
-                      className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
                     />
                   </div>
                   <div>
@@ -442,7 +444,7 @@ export default function CreateBlog() {
                       value={formData.editor_role}
                       onChange={handleChange}
                       placeholder="e.g. Pimpinan Redaksi..." 
-                      className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
                     />
                   </div>
                 </div>
@@ -451,7 +453,7 @@ export default function CreateBlog() {
           </Card>
 
           {/* SEO Analyzer Card */}
-          <Card className="border-slate-200 shadow-sm rounded-sm">
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-semibold text-[#0f172a]">SEO Analysis</CardTitle>
               <div className={`px-2 py-0.5 rounded text-xs font-bold ${
@@ -490,7 +492,7 @@ export default function CreateBlog() {
         <div className="w-full lg:w-[30%] space-y-5 sticky top-6">
           
           {/* Publish Box */}
-          <Card className="border-slate-200 shadow-sm rounded-sm">
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
               <CardTitle className="text-sm font-semibold text-[#0f172a]">Publish</CardTitle>
             </CardHeader>
@@ -501,7 +503,7 @@ export default function CreateBlog() {
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="bg-white border border-slate-200 rounded-sm px-2 py-1 text-sm text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] font-medium"
+                  className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-sm text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] font-medium"
                 >
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>
@@ -514,16 +516,16 @@ export default function CreateBlog() {
                   name="published_at"
                   value={formData.published_at}
                   onChange={handleChange}
-                  className="w-full bg-white border border-slate-200 rounded-sm px-2 py-1.5 text-sm text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">Kosongkan untuk tayang langsung. Isi untuk tayang otomatis sesuai jadwal.</p>
               </div>
 
               <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                <Button type="button" onClick={() => router.push('/dashboard/blog')} variant="outline" className="flex-1 rounded-sm text-sm border-slate-200 hover:text-[#c20000]">
+                <Button type="button" onClick={() => router.push('/dashboard/blog')} variant="outline" className="flex-1 rounded-xl text-xs font-semibold border-slate-200 hover:text-[#c20000]">
                   Batal
                 </Button>
-                <Button type="submit" disabled={isLoading} className="flex-1 rounded-sm text-sm bg-[#c20000] hover:bg-[#a30000] text-white shadow-sm transition-colors">
+                <Button type="submit" disabled={isLoading} className="flex-1 rounded-xl text-xs font-bold bg-[#c20000] hover:bg-[#a30000] text-white shadow-sm transition-colors">
                   {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                   {formData.status === 'published' ? 'Terbitkan' : 'Simpan Draf'}
                 </Button>
@@ -532,7 +534,7 @@ export default function CreateBlog() {
           </Card>
 
           {/* Categories Box */}
-          <Card className="border-slate-200 shadow-sm rounded-sm">
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
               <CardTitle className="text-sm font-semibold text-[#0f172a]">Kategori</CardTitle>
             </CardHeader>
@@ -542,7 +544,7 @@ export default function CreateBlog() {
                 required
                 value={formData.category_id}
                 onChange={handleChange}
-                className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
               >
                 <option value="" disabled>Pilih Kategori</option>
                 {categories.map(c => (
@@ -566,9 +568,9 @@ export default function CreateBlog() {
                       value={newCategoryName}
                       onChange={(e) => setNewCategoryName(e.target.value)}
                       placeholder="Category name" 
-                      className="flex-1 bg-white border border-slate-200 rounded-sm px-3 py-1.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                      className="flex-1 bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
                     />
-                    <Button type="button" onClick={handleAddCategory} size="sm" className="bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-sm h-8 px-3">
+                    <Button type="button" onClick={handleAddCategory} size="sm" className="bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl h-8 px-3 text-xs">
                       Add
                     </Button>
                   </div>
@@ -578,7 +580,7 @@ export default function CreateBlog() {
           </Card>
 
           {/* Meta SEO Box */}
-          <Card className="border-slate-200 shadow-sm rounded-sm">
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
               <CardTitle className="text-sm font-semibold text-[#0f172a]">Meta SEO</CardTitle>
             </CardHeader>
@@ -591,7 +593,7 @@ export default function CreateBlog() {
                   value={formData.meta_title}
                   onChange={handleChange}
                   placeholder="Default: judul post"
-                  className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
                 />
               </div>
               <div>
@@ -602,14 +604,14 @@ export default function CreateBlog() {
                   onChange={handleChange}
                   rows={3}
                   placeholder="Default: ringkasan post"
-                  className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
                 />
               </div>
             </CardContent>
           </Card>
 
           {/* Keywords Box */}
-          <Card className="border-slate-200 shadow-sm rounded-sm">
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
               <CardTitle className="text-sm font-semibold text-[#0f172a]">Keywords</CardTitle>
             </CardHeader>
@@ -620,14 +622,14 @@ export default function CreateBlog() {
                 value={formData.keywords}
                 onChange={handleChange}
                 placeholder="e.g. pelantikan, musyda, kader" 
-                className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
               />
               <p className="text-xs text-slate-500 mt-2">Separate tags with commas.</p>
             </CardContent>
           </Card>
 
           {/* Featured Image Box */}
-          <Card className="border-slate-200 shadow-sm rounded-sm">
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
             <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
               <CardTitle className="text-sm font-semibold text-[#0f172a]">Gambar Utama (Featured Image)</CardTitle>
             </CardHeader>

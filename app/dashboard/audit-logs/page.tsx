@@ -61,15 +61,23 @@ export default function AuditLogsPage() {
         badge="Audit"
       />
 
-      <div className="bg-white border border-[#0f172a]/10 rounded-sm p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row gap-3">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row gap-3">
         <form onSubmit={(e) => { e.preventDefault(); setCurrentPage(1); fetchLogs(1, searchQuery, actionFilter); }} className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input type="text" placeholder="Cari aktivitas... (Enter)" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full border border-slate-200 rounded-sm pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Cari aktivitas pengguna, keterangan, atau IP... (Enter)"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all bg-white"
+          />
         </form>
-        <select value={actionFilter} onChange={(e) => { setActionFilter(e.target.value); setCurrentPage(1); }}
-          className="border border-slate-200 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-[#c20000]">
-          <option value="">Semua aksi</option>
+        <select
+          value={actionFilter}
+          onChange={(e) => { setActionFilter(e.target.value); setCurrentPage(1); }}
+          className="border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 font-semibold focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all bg-white cursor-pointer"
+        >
+          <option value="">Semua jenis aksi</option>
           <option value="membuat">Membuat</option>
           <option value="mengubah">Mengubah</option>
           <option value="menghapus">Menghapus</option>

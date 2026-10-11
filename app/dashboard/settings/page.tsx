@@ -147,7 +147,7 @@ export default function SettingsManagement() {
     );
   }
 
-  const inputClass = "w-full bg-slate-50 hover:bg-slate-100/50 border border-slate-200 rounded-sm px-4 py-2.5 text-slate-900 focus:bg-white focus:outline-none focus:border-[#c20000] focus:ring-4 focus:ring-[#c20000]/10 transition-all text-sm font-medium placeholder:text-slate-400";
+  const inputClass = "w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all text-sm font-medium placeholder:text-slate-400 shadow-2xs";
   const labelClass = "block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2";
 
   return (
@@ -191,7 +191,7 @@ export default function SettingsManagement() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
                 <div>
@@ -219,7 +219,7 @@ export default function SettingsManagement() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
-                  <div className="p-5 rounded-sm border border-slate-100 bg-slate-50/50">
+                  <div className="p-5 rounded-xl border border-slate-200/80 bg-slate-50/60">
                     <ImageUploadPicker
                       label="Logo Berwarna (Header/Terang)"
                       value={settings.site_logo}
@@ -230,7 +230,7 @@ export default function SettingsManagement() {
                     />
                   </div>
 
-                  <div className="p-5 rounded-sm border border-slate-100 bg-slate-50/50">
+                  <div className="p-5 rounded-xl border border-slate-200/80 bg-slate-50/60">
                     <ImageUploadPicker
                       label="Logo Putih (Footer/Gelap)"
                       value={settings.site_logo_white}
@@ -241,7 +241,7 @@ export default function SettingsManagement() {
                     />
                   </div>
                   
-                  <div className="p-5 rounded-sm border border-slate-100 bg-slate-50/50">
+                  <div className="p-5 rounded-xl border border-slate-200/80 bg-slate-50/60">
                     <ImageUploadPicker
                       label="Icon Web (Favicon)"
                       value={settings.site_icon}
@@ -280,7 +280,7 @@ export default function SettingsManagement() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -383,7 +383,7 @@ export default function SettingsManagement() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -458,11 +458,11 @@ export default function SettingsManagement() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="md:col-span-1 p-5 rounded-sm border border-slate-100 bg-slate-50/50">
+                  <div className="md:col-span-1 p-5 rounded-xl border border-slate-200/80 bg-slate-50/60">
                     <ImageUploadPicker
                       label="Foto Ketua Umum"
                       value={settings.chairman_photo}
@@ -537,10 +537,10 @@ export default function SettingsManagement() {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Card className="rounded-sm border-slate-200 shadow-sm overflow-hidden bg-white">
+            <Card className="rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
                 
-                <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-slate-50">
+                <div className="flex items-center justify-between p-4 border border-slate-200/80 rounded-xl bg-slate-50/60">
                   <div>
                     <h3 className="font-bold text-slate-800 text-sm">Maintenance Keseluruhan (Global)</h3>
                     <p className="text-xs text-slate-500 mt-1">Aktifkan untuk memblokir seluruh halaman publik.</p>
@@ -563,7 +563,7 @@ export default function SettingsManagement() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       
                       {/* Beranda */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200/80 rounded-xl bg-white hover:bg-slate-50 transition-colors shadow-2xs">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Beranda</h3>
                         </div>
@@ -579,7 +579,7 @@ export default function SettingsManagement() {
                       </div>
 
                       {/* Profil */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200/80 rounded-xl bg-white hover:bg-slate-50 transition-colors shadow-2xs">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Profil</h3>
                         </div>
@@ -595,7 +595,7 @@ export default function SettingsManagement() {
                       </div>
 
                       {/* Berita */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200/80 rounded-xl bg-white hover:bg-slate-50 transition-colors shadow-2xs">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Berita</h3>
                         </div>
@@ -611,7 +611,7 @@ export default function SettingsManagement() {
                       </div>
 
                       {/* Agenda */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200/80 rounded-xl bg-white hover:bg-slate-50 transition-colors shadow-2xs">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Agenda</h3>
                         </div>
@@ -627,7 +627,7 @@ export default function SettingsManagement() {
                       </div>
 
                       {/* Dokumen */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200/80 rounded-xl bg-white hover:bg-slate-50 transition-colors shadow-2xs">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Dokumen</h3>
                         </div>
@@ -643,7 +643,7 @@ export default function SettingsManagement() {
                       </div>
 
                       {/* Kontak */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200/80 rounded-xl bg-white hover:bg-slate-50 transition-colors shadow-2xs">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Kontak</h3>
                         </div>
@@ -659,7 +659,7 @@ export default function SettingsManagement() {
                       </div>
 
                       {/* Shortlink */}
-                      <div className="flex items-center justify-between p-4 border border-slate-200 rounded-sm bg-white hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between p-4 border border-slate-200/80 rounded-xl bg-white hover:bg-slate-50 transition-colors shadow-2xs">
                         <div>
                           <h3 className="font-bold text-slate-800 text-sm">Halaman Shortlink</h3>
                         </div>

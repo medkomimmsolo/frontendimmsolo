@@ -129,12 +129,17 @@ export default function AccountRequestsPage() {
         badge="Akses"
       />
 
-      <div className="flex gap-2">
+      {/* Tab Filter Modern */}
+      <div className="flex items-center gap-2 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/80 w-fit max-w-full overflow-x-auto">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => changeFilter(t.key)}
-            className={`px-4 py-2 rounded-sm text-sm font-semibold border transition-colors ${filter === t.key ? 'bg-[#c20000] text-white border-[#c20000]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              filter === t.key
+                ? 'bg-white text-[#c20000] shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+            }`}
           >
             {t.label} ({t.count})
           </button>
@@ -177,19 +182,19 @@ export default function AccountRequestsPage() {
                 <tr key={r.id} className="hover:bg-slate-50 transition-colors">
                   <td className="p-4 pl-6">
                     <div className="font-bold text-[#0f172a]">{r.name}</div>
-                    <div className="text-[#0f172a]/70 text-xs mt-1">{r.email}</div>
-                    <div className="text-slate-400 text-xs mt-0.5">{new Date(r.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                    <div className="text-slate-500 text-xs mt-0.5">{r.email}</div>
+                    <div className="text-slate-400 text-[11px] font-mono mt-0.5">{new Date(r.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                   </td>
-                  <td className="p-4"><span className="capitalize text-slate-700 font-medium">{r.requested_role}</span></td>
-                  <td className="p-4"><span className="text-slate-600 text-xs line-clamp-2 max-w-xs block">{r.reason || '-'}</span></td>
+                  <td className="p-4"><span className="capitalize text-slate-700 font-semibold text-xs bg-slate-100 px-2 py-0.5 rounded-md">{r.requested_role}</span></td>
+                  <td className="p-4"><span className="text-slate-600 text-xs line-clamp-2 max-w-xs block leading-relaxed">{r.reason || '-'}</span></td>
                   <td className="p-4 text-center">{statusBadge(r.status)}</td>
                   <td className="p-4 pr-6">
                     {r.status === 'pending' ? (
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => openApprove(r)} title="Setujui" className="h-9 w-9 inline-flex items-center justify-center text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-sm transition-colors">
+                        <button onClick={() => openApprove(r)} title="Setujui" className="h-9 w-9 inline-flex items-center justify-center text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors">
                           <Check className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleReject(r.id, r.name)} title="Tolak" className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors">
+                        <button onClick={() => handleReject(r.id, r.name)} title="Tolak" className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-xl transition-colors">
                           <X className="w-4 h-4" />
                         </button>
                       </div>
@@ -213,20 +218,20 @@ export default function AccountRequestsPage() {
       </div>
 
       {approveId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4" onClick={() => setApproveId(null)}>
-          <div className="bg-white rounded-sm shadow-xl max-w-sm w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2"><UserPlus className="w-5 h-5 text-emerald-600" /> Setujui Akun</h2>
-            <p className="text-xs text-slate-500 mb-4">Pilih role final untuk akun ini.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" onClick={() => setApproveId(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 sm:p-7 border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2"><UserPlus className="w-5 h-5 text-emerald-600" /> Setujui Akun</h2>
+            <p className="text-xs text-slate-500 mb-4">Pilih role final untuk akun pemohon ini.</p>
             <select value={approveRole} onChange={(e) => setApproveRole(e.target.value)}
-              className="w-full border border-slate-200 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]">
+              className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs cursor-pointer">
               <option value="komisariat">Komisariat (Kontributor Lokal)</option>
               <option value="bidang">Bidang (Cabang)</option>
               <option value="admin">Admin</option>
             </select>
-            <div className="flex justify-end gap-3 mt-6">
-              <Button variant="outline" onClick={() => setApproveId(null)}>Batal</Button>
-              <Button onClick={handleApprove} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />} Setujui & Aktifkan
+            <div className="flex justify-end gap-2.5 mt-6 pt-4 border-t border-slate-100">
+              <Button variant="outline" onClick={() => setApproveId(null)} className="rounded-xl h-10 px-4 text-xs font-semibold border-slate-200 hover:bg-slate-50">Batal</Button>
+              <Button onClick={handleApprove} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-10 px-4 text-xs font-bold shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]">
+                {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />} Setujui & Aktifkan
               </Button>
             </div>
           </div>

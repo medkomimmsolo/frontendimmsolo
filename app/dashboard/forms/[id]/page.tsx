@@ -11,6 +11,7 @@ import FormFillClient from '@/components/form/FormFillClient';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 const FILE_PRESETS: Record<string, { label: string; exts: string[] }> = {
   images: { label: 'Gambar (jpg, png, webp — maks 2MB)', exts: ['jpg', 'jpeg', 'png', 'webp'] },
@@ -136,11 +137,28 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
   const handleSaveField = async (e: React.FormEvent) => {
     e.preventDefault();
     const withOptions = needsOptions || fieldForm.type === 'file';
-    const options = withOptions ? fieldForm.optionsText.split('\n').map((o) => o.trim()).filter(Boolean) : [];
-    if (needsOptions && options.length === 0) {
-      toast.error('Isi minimal satu opsi pilihan');
-      return;
+    const rawOptions = withOptions ? fieldForm.optionsText.split('\n').map((o) => o.trim()).filter(Boolean) : [];
+    if (needsOptions) {
+      if (rawOptions.length === 0) {
+        toast.error('Isi minimal satu opsi pilihan');
+        return;
+      }
+      const seen = new Set<string>();
+      const duplicates = new Set<string>();
+      for (const opt of rawOptions) {
+        const lower = opt.toLowerCase();
+        if (seen.has(lower)) {
+          duplicates.add(opt);
+        } else {
+          seen.add(lower);
+        }
+      }
+      if (duplicates.size > 0) {
+        toast.error(`Opsi pilihan tidak boleh memiliki nilai duplikat: "${Array.from(duplicates).join('", "')}". Setiap opsi harus unik.`);
+        return;
+      }
     }
+    const options = Array.from(new Set(rawOptions));
     setIsSaving(true);
     try {
       const payload: any = { label: fieldForm.label, description: fieldForm.description || undefined, type: fieldForm.type, options, required: fieldForm.required };
@@ -388,99 +406,131 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
   };
 
   const hasEmail = Boolean(form?.require_email || responses.some((r: any) => Boolean(r.email)));
-  const inputClass = "w-full border border-slate-200 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]";
+  const inputClass = "w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-white focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all";
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      {/* Modern Page Header */}
+      <PageHeader
+        title={form?.title || 'Pengaturan & Kolom Formulir'}
+        description={form?.description || 'Kelola kolom pertanyaan, tinjau responden, ekspor data, dan atur banner formulir'}
+        badge="Form Builder"
+      >
         <Link href="/dashboard/forms">
-          <Button variant="outline" size="sm" className="h-9 w-9 p-0 rounded-sm border-slate-200 hover:text-[#c20000]">
-            <ArrowLeft className="w-4 h-4" />
+          <Button variant="outline" size="sm" className="h-10 px-3.5 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs">
+            <ArrowLeft className="w-4 h-4 mr-1.5" />
+            Kembali
           </Button>
         </Link>
-        <div className="flex-1 bg-white p-6 rounded-sm shadow-sm border border-[#0f172a]/5">
-          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-            {form?.title || 'Memuat...'}
-          </h1>
-          {form && (
-            <a href={`/form/${form.slug}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-mono text-blue-600 hover:text-[#c20000] mt-1">
-              /form/{form.slug} <ExternalLink className="w-3 h-3" />
-            </a>
-          )}
-        </div>
-      </div>
+        {form && (
+          <a
+            href={`/form/${form.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <span>Buka Form Publik</span>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+          </a>
+        )}
+      </PageHeader>
 
-      <div className="flex flex-wrap gap-2">
-        <button onClick={() => setTab('fields')}
-          className={`px-4 py-2 rounded-sm text-sm font-semibold border transition-colors ${tab === 'fields' ? 'bg-[#c20000] text-white border-[#c20000]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}>
-          Kolom Pertanyaan ({fields.length})
+      {/* Tab Navigation Modern */}
+      <div className="flex items-center gap-2 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/80 w-fit max-w-full overflow-x-auto">
+        <button
+          onClick={() => setTab('fields')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            tab === 'fields'
+              ? 'bg-white text-[#c20000] shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+          }`}
+        >
+          <GripVertical className="w-3.5 h-3.5" />
+          <span>Kolom Pertanyaan ({fields.length})</span>
         </button>
-        <button onClick={() => setTab('responses')}
-          className={`px-4 py-2 rounded-sm text-sm font-semibold border transition-colors inline-flex items-center gap-1.5 ${tab === 'responses' ? 'bg-[#c20000] text-white border-[#c20000]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}>
-          <Users className="w-4 h-4" /> Data Pendaftar ({respTotal})
+        <button
+          onClick={() => setTab('responses')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            tab === 'responses'
+              ? 'bg-white text-[#c20000] shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+          }`}
+        >
+          <Users className="w-3.5 h-3.5" />
+          <span>Data Responden ({respTotal})</span>
         </button>
-        <button onClick={() => setTab('settings')}
-          className={`px-4 py-2 rounded-sm text-sm font-semibold border transition-colors inline-flex items-center gap-1.5 ${tab === 'settings' ? 'bg-[#c20000] text-white border-[#c20000]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'}`}>
-          <Settings className="w-4 h-4" /> Pengaturan & Banner
+        <button
+          onClick={() => setTab('settings')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            tab === 'settings'
+              ? 'bg-white text-[#c20000] shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+          }`}
+        >
+          <Settings className="w-3.5 h-3.5" />
+          <span>Pengaturan & Banner</span>
         </button>
       </div>
 
       {tab === 'fields' && (
-        <Card className="border-[#0f172a]/10 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex justify-end gap-2">
-            <Button onClick={() => setIsPreviewOpen(true)} size="sm" variant="outline" className="border-slate-200">
-              <Eye className="w-4 h-4 mr-1.5" /> Pratinjau
-            </Button>
-            <Button onClick={() => openModal()} size="sm" className="bg-[#c20000] hover:bg-[#a30000] text-white">
-              <Plus className="w-4 h-4 mr-1.5" /> Tambah Kolom
-            </Button>
+        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <span className="text-xs font-bold text-slate-700">Daftar Pertanyaan</span>
+            <div className="flex items-center gap-2">
+              <Button onClick={() => setIsPreviewOpen(true)} size="sm" variant="outline" className="border-slate-200 rounded-xl text-xs font-semibold shadow-2xs">
+                <Eye className="w-3.5 h-3.5 mr-1.5" /> Pratinjau
+              </Button>
+              <Button onClick={() => openModal()} size="sm" className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <Plus className="w-3.5 h-3.5 mr-1.5 stroke-[2.5]" /> Tambah Kolom
+              </Button>
+            </div>
           </div>
           <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="fields">
               {(provided) => (
-                <div className="space-y-3 p-4 bg-slate-100/60" ref={provided.innerRef} {...provided.droppableProps}>
+                <div className="space-y-3 p-4 bg-slate-50/40" ref={provided.innerRef} {...provided.droppableProps}>
                   {isLoading ? (
                     <div className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-[#c20000]" /></div>
                   ) : fields.length === 0 ? (
-                    <div className="p-12 text-center text-slate-500">Belum ada kolom. Tambahkan pertanyaan pertama atau seret untuk menyusun ulang.</div>
+                    <div className="p-12 text-center text-slate-500 text-xs">Belum ada kolom. Tambahkan pertanyaan pertama atau seret untuk menyusun ulang.</div>
                   ) : fields.map((f: any, idx: number) => (
                     <Draggable key={f.id} draggableId={String(f.id)} index={idx}>
                       {(dragProvided, snapshot) => (
                         <div
                           ref={dragProvided.innerRef}
                           {...dragProvided.draggableProps}
-                          className={`bg-white border rounded-sm transition-all ${snapshot.isDragging ? 'border-[#c20000]/50 shadow-xl rotate-[0.5deg]' : 'border-slate-200 shadow-sm hover:shadow'}`}
+                          className={`bg-white border rounded-2xl transition-all ${snapshot.isDragging ? 'border-[#c20000]/50 shadow-xl rotate-[0.5deg]' : 'border-slate-200/80 shadow-2xs hover:shadow-xs'}`}
                         >
                           <div className="flex items-center gap-3 p-4">
-                            <span {...dragProvided.dragHandleProps} title="Seret untuk memindahkan" className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-[#c20000] shrink-0">
-                              <GripVertical className="w-5 h-5" />
+                            <span {...dragProvided.dragHandleProps} title="Seret untuk memindahkan" className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-[#c20000] shrink-0 p-1">
+                              <GripVertical className="w-4 h-4" />
                             </span>
                             <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-[#0f172a] text-[15px]">{f.label} {f.required && f.type !== 'section' && <span className="text-red-500">*</span>}</p>
+                              <p className="font-bold text-slate-900 text-sm">{f.label} {f.required && f.type !== 'section' && <span className="text-red-500">*</span>}</p>
                               {f.description && <p className="text-xs text-slate-500 mt-0.5">{f.description}</p>}
-                              <p className="text-[11px] text-slate-400 mt-1 uppercase tracking-wide">{FIELD_TYPES.find((t) => t.value === f.type)?.label}{f.type === 'file' ? ` • ${(f.options || []).join(', ') || 'semua'}` : f.options?.length ? ` • ${f.options.join(', ')}` : ''}{f.type === 'linear_scale' ? ` • ${f.settings?.min ?? 1}–${f.settings?.max ?? 5}` : ''}</p>
+                              <p className="text-[10px] font-mono font-semibold text-slate-400 mt-1 uppercase tracking-wider">{FIELD_TYPES.find((t) => t.value === f.type)?.label}{f.type === 'file' ? ` • ${(f.options || []).join(', ') || 'semua'}` : f.options?.length ? ` • ${f.options.join(', ')}` : ''}{f.type === 'linear_scale' ? ` • ${f.settings?.min ?? 1}–${f.settings?.max ?? 5}` : ''}</p>
                             </div>
                             {f.type === 'section' && (
                               <span className="text-[10px] font-bold uppercase tracking-wider text-violet-600 bg-violet-50 border border-violet-200 rounded-full px-2.5 py-1 shrink-0">Section</span>
                             )}
                           </div>
-                          <div className="flex items-center justify-end gap-1 px-4 py-2 border-t border-slate-100 bg-slate-50/60 rounded-b-xl">
-                            <button onClick={() => handleDuplicateField(f)} title="Duplikat" className="h-8 w-8 inline-flex items-center justify-center text-slate-500 hover:text-violet-700 hover:bg-violet-100 rounded-full transition-colors"><Copy className="w-4 h-4" /></button>
-                            <button onClick={() => openModal(f)} title="Edit" className="h-8 w-8 inline-flex items-center justify-center text-slate-500 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors"><Edit className="w-4 h-4" /></button>
-                            <button onClick={() => handleDeleteField(f.id)} title="Hapus" className="h-8 w-8 inline-flex items-center justify-center text-slate-500 hover:text-red-700 hover:bg-red-100 rounded-full transition-colors"><Trash2 className="w-4 h-4" /></button>
+                          <div className="flex items-center justify-end gap-1 px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl">
+                            <button onClick={() => handleDuplicateField(f)} title="Duplikat" className="h-8 w-8 inline-flex items-center justify-center text-slate-500 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-colors"><Copy className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => openModal(f)} title="Edit" className="h-8 w-8 inline-flex items-center justify-center text-slate-500 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition-colors"><Edit className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => handleDeleteField(f.id)} title="Hapus" className="h-8 w-8 inline-flex items-center justify-center text-slate-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                             {f.type !== 'section' && (
                               <>
-                                <span className="w-px h-5 bg-slate-200 mx-1" />
-                                <span className="text-xs font-medium text-slate-500 mr-1">Wajib</span>
+                                <span className="w-px h-4 bg-slate-200 mx-1.5" />
+                                <span className="text-xs font-semibold text-slate-600 mr-1.5">Wajib</span>
                                 <button
                                   type="button"
                                   role="switch"
                                   aria-checked={f.required}
                                   title={f.required ? 'Jadikan opsional' : 'Jadikan wajib'}
                                   onClick={() => handleToggleRequired(f)}
-                                  className={`relative w-9 h-5 rounded-full transition-colors ${f.required ? 'bg-[#c20000]' : 'bg-slate-300'}`}
+                                  className={`relative w-8 h-4.5 rounded-full transition-colors ${f.required ? 'bg-[#c20000]' : 'bg-slate-300'}`}
                                 >
-                                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${f.required ? 'left-[18px]' : 'left-0.5'}`} />
+                                  <span className={`absolute top-0.5 w-3.5 h-3.5 rounded-full bg-white shadow transition-all ${f.required ? 'left-[15px]' : 'left-0.5'}`} />
                                 </button>
                               </>
                             )}
@@ -494,15 +544,16 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               )}
             </Droppable>
           </DragDropContext>
-        </Card>
+        </div>
       )}
+
       {tab === 'responses' && (
-        <Card className="border-slate-300 shadow-sm overflow-hidden rounded-sm bg-white">
+        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
           {/* Spreadsheet Toolbar */}
-          <div className="bg-[#f8f9fa] border-b border-slate-200 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="bg-slate-50/80 border-b border-slate-200/80 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded text-xs font-semibold">
-                <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-full text-xs font-semibold">
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Spreadsheet View</span>
               </div>
               <span className="text-xs text-slate-500 font-medium">
@@ -777,11 +828,11 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               </button>
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
       {tab === 'settings' && (
-        <Card className="border-[#0f172a]/10 shadow-sm p-6 bg-white max-w-4xl">
+        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs p-6 sm:p-8 max-w-4xl">
           <form onSubmit={handleSaveSettings} className="space-y-6">
             <div>
               <h2 className="text-lg font-bold text-[#0f172a] mb-1">Pengaturan & Banner Formulir</h2>
@@ -791,7 +842,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
             </div>
 
             {/* Section 1: Header Image (Banner ala Google Form) */}
-            <div className="border border-slate-200 rounded-sm p-4 bg-slate-50/50 space-y-3">
+            <div className="border border-slate-200/90 rounded-2xl p-5 bg-slate-50/60 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
@@ -815,7 +866,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
             {/* Section 2: Judul & Deskripsi */}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Judul Formulir</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Judul Formulir</label>
                 <input
                   type="text"
                   required
@@ -827,7 +878,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Deskripsi Formulir</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Deskripsi Formulir</label>
                 <textarea
                   rows={3}
                   value={settingsDescription}
@@ -839,13 +890,13 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
             </div>
 
             {/* Section 3: Keamanan & Pengaturan Google Form */}
-            <div className="border border-slate-200 rounded-sm p-4 bg-slate-50/30 space-y-4">
+            <div className="border border-slate-200/90 rounded-2xl p-5 bg-slate-50/60 space-y-4">
               <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" /> Keamanan & Validasi Email Responden (Anti-Spam)
               </h3>
 
               <div className="space-y-3">
-                <label className="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-sm cursor-pointer hover:border-slate-300 transition-colors">
+                <label className="flex items-start gap-3 p-3.5 bg-white border border-slate-200/80 rounded-xl cursor-pointer hover:border-slate-300 transition-colors shadow-2xs">
                   <input
                     type="checkbox"
                     checked={settingsRequireEmail}
@@ -862,7 +913,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-sm cursor-pointer hover:border-slate-300 transition-colors">
+                <label className="flex items-start gap-3 p-3.5 bg-white border border-slate-200/80 rounded-xl cursor-pointer hover:border-slate-300 transition-colors shadow-2xs">
                   <input
                     type="checkbox"
                     checked={settingsLimitOneResponse}
@@ -880,7 +931,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-sm cursor-pointer hover:border-slate-300 transition-colors">
+                <label className="flex items-start gap-3 p-3.5 bg-white border border-slate-200/80 rounded-xl cursor-pointer hover:border-slate-300 transition-colors shadow-2xs">
                   <input
                     type="checkbox"
                     checked={settingsIsOpen}
@@ -904,7 +955,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               <Button
                 type="submit"
                 disabled={isSavingSettings}
-                className="bg-[#c20000] hover:bg-[#a30000] text-white px-5"
+                className="bg-[#c20000] hover:bg-[#a30000] text-white px-5 rounded-xl h-10 font-bold shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 {isSavingSettings ? (
                   <>
@@ -916,36 +967,36 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               </Button>
             </div>
           </form>
-        </Card>
+        </div>
       )}
 
       {selectedResponse && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setSelectedResponse(null)}>
-          <div className="bg-white rounded-sm shadow-2xl max-w-2xl w-full p-6 my-8 max-h-[90vh] overflow-y-auto border border-slate-200" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setSelectedResponse(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 sm:p-7 my-8 max-h-[90vh] overflow-y-auto border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between border-b border-slate-200 pb-4 mb-5">
               <div>
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold uppercase">
+                <span className="text-[11px] font-mono px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold uppercase">
                   Data Responden #{selectedResponse.id}
                 </span>
-                <h3 className="text-lg font-bold text-[#0f172a] mt-1.5">
+                <h3 className="text-lg font-bold text-[#0f172a] mt-2">
                   Rincian Jawaban Formulir
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Disubmit pada: {new Date(selectedResponse.created_at).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' })}
                 </p>
               </div>
-              <button onClick={() => setSelectedResponse(null)} className="text-slate-400 hover:text-slate-700 p-1 rounded-sm hover:bg-slate-100">
+              <button onClick={() => setSelectedResponse(null)} className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {selectedResponse.email && (
-              <div className="mb-4 p-3 bg-emerald-50/70 border border-emerald-200 rounded-sm flex items-center justify-between">
+              <div className="mb-4 p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span className="text-xs font-semibold text-emerald-950">Email Terverifikasi Responden:</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-emerald-900 bg-white px-2 py-0.5 rounded border border-emerald-300">
+                <span className="text-xs font-mono font-bold text-emerald-900 bg-white px-2.5 py-1 rounded-lg border border-emerald-300">
                   {selectedResponse.email}
                 </span>
               </div>
@@ -957,18 +1008,18 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                 const isFile = f.type === 'file' || (typeof val === 'string' && val.startsWith('/storage/'));
 
                 return (
-                  <div key={f.id} className="p-3.5 bg-slate-50 border border-slate-200 rounded-sm">
+                  <div key={f.id} className="p-4 bg-slate-50/80 border border-slate-200/80 rounded-xl">
                     <div className="flex items-center justify-between gap-2 mb-1.5">
                       <span className="text-xs font-bold text-slate-700">
                         {idx + 1}. {f.label}
                       </span>
-                      <span className="text-[10px] font-mono uppercase text-slate-400 bg-white px-1.5 py-0.5 border border-slate-200 rounded">
+                      <span className="text-[10px] font-mono uppercase text-slate-500 bg-white px-2 py-0.5 border border-slate-200 rounded-md">
                         {f.type}
                       </span>
                     </div>
 
                     {isFile && val ? (
-                      <div className="mt-2 flex items-center justify-between p-2.5 bg-white border border-blue-200 rounded-sm">
+                      <div className="mt-2 flex items-center justify-between p-3 bg-white border border-blue-200 rounded-xl">
                         <div className="flex items-center gap-2 text-xs text-blue-900 truncate">
                           <ExternalLink className="w-4 h-4 text-blue-600 shrink-0" />
                           <span className="truncate font-medium">{val.split('/').pop()}</span>
@@ -977,7 +1028,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                           href={val}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-sm shrink-0 shadow-sm"
+                          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shrink-0 shadow-2xs transition-colors"
                         >
                           Buka / Unduh Berkas
                         </a>
@@ -987,7 +1038,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                     ) : Array.isArray(val) ? (
                       <div className="flex flex-wrap gap-1.5 mt-1">
                         {val.map((item: string, i: number) => (
-                          <span key={i} className="px-2 py-0.5 bg-white border border-slate-300 rounded text-xs text-slate-800">
+                          <span key={i} className="px-2.5 py-0.5 bg-white border border-slate-200 rounded-md text-xs text-slate-800">
                             {item}
                           </span>
                         ))}
@@ -1007,11 +1058,11 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                 variant="outline"
                 size="sm"
                 onClick={() => handleDeleteResponse(selectedResponse.id)}
-                className="text-red-600 border-red-200 hover:bg-red-50 text-xs"
+                className="text-red-600 border-red-200 hover:bg-red-50 text-xs rounded-xl h-9"
               >
                 <Trash2 className="w-3.5 h-3.5 mr-1" /> Hapus Data Ini
               </Button>
-              <Button size="sm" onClick={() => setSelectedResponse(null)} className="bg-slate-800 hover:bg-slate-900 text-white text-xs px-4">
+              <Button size="sm" onClick={() => setSelectedResponse(null)} className="bg-slate-800 hover:bg-slate-900 text-white text-xs px-4 rounded-xl h-9">
                 Tutup
               </Button>
             </div>
@@ -1020,11 +1071,11 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       )}
 
       {isPreviewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setIsPreviewOpen(false)}>
-          <div className="bg-[#f8f9fa] rounded-sm shadow-xl max-w-2xl w-full p-6 my-8 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setIsPreviewOpen(false)}>
+          <div className="bg-[#f8f9fa] rounded-2xl shadow-2xl max-w-2xl w-full p-6 sm:p-8 my-8 max-h-[90vh] overflow-y-auto border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
               <h2 className="text-base font-bold text-slate-800">Pratinjau Formulir</h2>
-              <button onClick={() => setIsPreviewOpen(false)} className="text-sm font-semibold text-slate-500 hover:text-[#c20000]">Tutup ✕</button>
+              <button onClick={() => setIsPreviewOpen(false)} className="text-xs font-semibold px-2.5 py-1 rounded-lg text-slate-500 hover:text-[#c20000] hover:bg-red-50 transition-colors">Tutup ✕</button>
             </div>
             <div className="text-center mb-6">
               <h3 className="text-xl font-bold text-[#0f172a]">{form?.title}</h3>
@@ -1037,33 +1088,70 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4" onClick={() => setIsModalOpen(false)}>
-          <form onSubmit={handleSaveField} className="bg-white rounded-sm shadow-xl max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-bold text-slate-800 mb-5">{editing ? 'Edit Kolom' : 'Tambah Kolom'}</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" onClick={() => setIsModalOpen(false)}>
+          <form onSubmit={handleSaveField} className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-7 border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-slate-900">{editing ? 'Edit Kolom Pertanyaan' : 'Tambah Kolom Pertanyaan'}</h2>
+              <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Pertanyaan / Label</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Pertanyaan / Label</label>
                 <input type="text" required value={fieldForm.label} onChange={(e) => setFieldForm({ ...fieldForm, label: e.target.value })}
-                  placeholder="Nama Lengkap" className={inputClass} />
+                  placeholder="Contoh: Nama Lengkap" className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Deskripsi <span className="text-slate-400 font-normal">(opsional, tampil di bawah pertanyaan)</span></label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Deskripsi / Bantuan <span className="text-slate-400 font-normal">(opsional)</span></label>
                 <input type="text" value={fieldForm.description} onChange={(e) => setFieldForm({ ...fieldForm, description: e.target.value })}
-                  placeholder="Contoh: Isi sesuai KTP" className={inputClass} />
+                  placeholder="Contoh: Isi sesuai kartu identitas / KTP" className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Tipe Kolom</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tipe Kolom</label>
                 <select value={fieldForm.type} onChange={(e) => setFieldForm({ ...fieldForm, type: e.target.value, optionsText: '' })} className={inputClass}>
                   {FIELD_TYPES.map((t) => (<option key={t.value} value={t.value}>{t.label}</option>))}
                 </select>
               </div>
-              {['select', 'radio', 'checkbox'].includes(fieldForm.type) && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Opsi Pilihan <span className="text-slate-400 font-normal">(satu per baris)</span></label>
-                  <textarea value={fieldForm.optionsText} onChange={(e) => setFieldForm({ ...fieldForm, optionsText: e.target.value })} rows={4}
-                    placeholder={'UMS\nUMPKU\nUNISA'} className={`${inputClass} resize-none font-mono`} />
-                </div>
-              )}
+              {['select', 'radio', 'checkbox'].includes(fieldForm.type) && (() => {
+                const lines = fieldForm.optionsText.split('\n').map((o) => o.trim()).filter(Boolean);
+                const seen = new Set<string>();
+                const dups = new Set<string>();
+                for (const l of lines) {
+                  const lower = l.toLowerCase();
+                  if (seen.has(lower)) dups.add(l);
+                  else seen.add(lower);
+                }
+                const hasDups = dups.size > 0;
+                return (
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-sm font-semibold text-slate-700">
+                        Opsi Pilihan <span className="text-slate-400 font-normal">(satu per baris)</span>
+                      </label>
+                      <span className={`text-[11px] font-medium ${hasDups ? 'text-red-600 font-bold' : 'text-slate-500'}`}>
+                        {lines.length} opsi {hasDups && '(duplikat terdeteksi)'}
+                      </span>
+                    </div>
+                    <textarea
+                      value={fieldForm.optionsText}
+                      onChange={(e) => setFieldForm({ ...fieldForm, optionsText: e.target.value })}
+                      rows={4}
+                      placeholder={'UMS\nUMPKU\nUNISA'}
+                      className={`${inputClass} resize-none font-mono ${hasDups ? 'border-red-400 focus:border-red-500' : ''}`}
+                    />
+                    {hasDups ? (
+                      <p className="text-[11px] text-red-600 font-semibold mt-1">
+                        ⚠️ Ditemukan opsi duplikat: &quot;{Array.from(dups).join('", "')}&quot;. Setiap opsi harus unik.
+                      </p>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        Tulis setiap pilihan pada baris baru. Setiap opsi harus unik.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
               {fieldForm.type === 'linear_scale' && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -1086,13 +1174,13 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               )}
               {fieldForm.type === 'file' && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Jenis File yang Diizinkan</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Jenis File yang Diizinkan</label>
                   <div className="space-y-2">
                     {Object.entries(FILE_PRESETS).map(([key, preset]) => {
                       const current = fieldForm.optionsText.split('\n').map((o) => o.trim()).filter(Boolean);
                       const selected = current.length > 0 && preset.exts.every((e) => current.includes(e));
                       return (
-                        <label key={key} className={`flex items-center gap-2.5 p-2.5 border rounded-sm cursor-pointer text-sm transition-colors ${selected ? 'border-[#c20000]/40 bg-[#c20000]/5' : 'border-slate-200 hover:bg-slate-50'}`}>
+                        <label key={key} className={`flex items-center gap-2.5 p-3 border rounded-xl cursor-pointer text-sm transition-all ${selected ? 'border-[#c20000] bg-red-50/50 shadow-2xs' : 'border-slate-200 hover:bg-slate-50'}`}>
                           <input
                             type="radio"
                             name="file-preset"
@@ -1108,15 +1196,15 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                 </div>
               )}
               {fieldForm.type !== 'section' && (
-                <label className="flex items-center gap-2 text-sm text-slate-700">
-                  <input type="checkbox" checked={fieldForm.required} onChange={(e) => setFieldForm({ ...fieldForm, required: e.target.checked })} className="w-4 h-4 accent-[#c20000]" />
-                  Wajib diisi
+                <label className="flex items-center gap-2.5 text-sm text-slate-700 font-medium cursor-pointer pt-1">
+                  <input type="checkbox" checked={fieldForm.required} onChange={(e) => setFieldForm({ ...fieldForm, required: e.target.checked })} className="w-4 h-4 rounded accent-[#c20000]" />
+                  <span>Wajib diisi oleh responden</span>
                 </label>
               )}
             </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Batal</Button>
-              <Button type="submit" disabled={isSaving} className="bg-[#c20000] hover:bg-[#a30000] text-white">
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-200">
+              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="rounded-xl h-10 px-4 text-xs font-semibold">Batal</Button>
+              <Button type="submit" disabled={isSaving} className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl h-10 px-5 text-xs font-bold shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]">
                 {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />} Simpan
               </Button>
             </div>
