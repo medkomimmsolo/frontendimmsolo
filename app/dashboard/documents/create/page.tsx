@@ -24,6 +24,20 @@ export default function CreateDocument() {
     status: 'published',
   });
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0] || null;
+    if (selected) {
+      const maxBytes = 10 * 1024 * 1024; // 10MB limit
+      if (selected.size > maxBytes) {
+        toast.error(`Ukuran file (${(selected.size / 1024 / 1024).toFixed(2)} MB) melebihi batas 10 MB. Silakan gunakan tab "Link URL" (Google Drive) untuk file berukuran besar.`);
+        e.target.value = '';
+        setFile(null);
+        return;
+      }
+    }
+    setFile(selected);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -63,7 +77,11 @@ export default function CreateDocument() {
       router.refresh();
     } catch (error: any) {
       console.error('Failed to add document', error);
-      toast.error(error.response?.data?.message || 'Gagal menambahkan dokumen');
+      if (error.response?.status === 413) {
+        toast.error('Ukuran berkas melebihi batas upload web server (Error 413: Payload Too Large). Silakan gunakan tab "Link URL" (Google Drive) atau hubungi admin server untuk menaikkan post_max_size / client_max_body_size.', { duration: 7000 });
+      } else {
+        toast.error(error.response?.data?.message || 'Gagal menambahkan dokumen');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -160,7 +178,7 @@ export default function CreateDocument() {
                               type="file" 
                               accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip"
                               className="sr-only" 
-                              onChange={(e) => setFile(e.target.files?.[0] || null)} 
+                              onChange={handleFileSelect} 
                             />
                           </label>
                         </div>
