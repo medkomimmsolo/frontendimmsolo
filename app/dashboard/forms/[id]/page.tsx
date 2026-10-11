@@ -1316,7 +1316,12 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
         onCropComplete={(croppedFile) => {
           setHeaderImageVal(croppedFile);
         }}
-        initialAspectRatio={4 / 1}
+        initialAspectRatio={
+          settingsHeaderImageSize === 'medium' ? 21 / 9 :
+          settingsHeaderImageSize === 'wide' ? 16 / 9 :
+          settingsHeaderImageSize === 'natural' ? null :
+          4 / 1
+        }
         title="Tarik & Sesuaikan Potongan Banner Header (Crop)"
       />
     </div>
