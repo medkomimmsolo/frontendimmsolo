@@ -42,6 +42,7 @@ export default function ImageUploadPicker({
 }: ImageUploadPickerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [previewMode, setPreviewMode] = useState<'contain' | 'cover'>('contain');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isFromLibrary, setIsFromLibrary] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -119,7 +120,10 @@ export default function ImageUploadPicker({
     }
   };
 
-  const getAspectClass = () => {
+  const getAspectClass = (forPreview = false) => {
+    if (forPreview && previewMode === 'contain') {
+      return 'min-h-[160px] max-h-[380px] w-full flex items-center justify-center p-2';
+    }
     switch (aspectRatio) {
       case 'square':
         return 'aspect-square max-w-[240px]';
@@ -162,11 +166,15 @@ export default function ImageUploadPicker({
       {previewUrl ? (
         /* Image Preview State */
         <div className="space-y-2">
-          <div className={`relative rounded-md overflow-hidden border border-slate-200 bg-slate-900/5 group shadow-sm ${getAspectClass()}`}>
+          <div className={`relative rounded-xl overflow-hidden border border-slate-200/90 bg-slate-900/5 group shadow-xs flex items-center justify-center ${getAspectClass(true)}`}>
             <img
               src={previewUrl}
               alt="Pratinjau Gambar"
-              className={`w-full h-full ${aspectRatio === 'form-banner' ? 'object-contain' : 'object-cover'} transition-transform duration-300 group-hover:scale-102`}
+              className={`transition-all duration-300 group-hover:scale-[1.01] ${
+                previewMode === 'cover'
+                  ? 'w-full h-full object-cover object-center'
+                  : 'max-w-full max-h-[360px] object-contain rounded-md shadow-xs'
+              }`}
               onError={(e) => {
                 if (typeof value === 'string') {
                   (e.target as HTMLImageElement).src = value;
@@ -174,7 +182,7 @@ export default function ImageUploadPicker({
               }}
             />
 
-            {/* Source Badge */}
+            {/* Source Badge (Kiri Atas) */}
             <div className="absolute top-2 left-2 z-10">
               <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold backdrop-blur-md shadow-sm text-white ${
                 isFromLibrary ? 'bg-indigo-600/90' : 'bg-emerald-600/90'
@@ -191,6 +199,40 @@ export default function ImageUploadPicker({
                   </>
                 )}
               </span>
+            </div>
+
+            {/* Mode Pratinjau: Utuh (Fit) vs Penuh (Cover) di Kanan Atas */}
+            <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-slate-900/80 backdrop-blur-md rounded-lg p-0.5 border border-white/10 text-[10px] shadow-sm">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPreviewMode('contain');
+                }}
+                className={`px-2 py-0.5 rounded-md font-medium transition-all ${
+                  previewMode === 'contain'
+                    ? 'bg-white text-slate-900 font-bold shadow-xs'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+                title="Tampilkan seluruh gambar utuh tanpa terpotong"
+              >
+                Utuh (Fit)
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPreviewMode('cover');
+                }}
+                className={`px-2 py-0.5 rounded-md font-medium transition-all ${
+                  previewMode === 'cover'
+                    ? 'bg-[#c20000] text-white font-bold shadow-xs'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+                title="Tampilkan gambar memenuhi bingkai (Cover)"
+              >
+                Penuh (Cover)
+              </button>
             </div>
 
             {/* Hover Actions Overlay */}

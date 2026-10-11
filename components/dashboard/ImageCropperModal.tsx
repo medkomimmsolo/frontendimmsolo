@@ -34,7 +34,7 @@ const ASPECT_OPTIONS: AspectRatioOption[] = [
   { id: '4:1', label: 'Banner Google Forms (4:1)', ratio: 4 / 1 },
   { id: '21:9', label: 'Banner Sedang (21:9)', ratio: 21 / 9 },
   { id: '16:9', label: 'Standar Lebar (16:9)', ratio: 16 / 9 },
-  { id: 'free', label: 'Bebas (Tanpa Kunci)', ratio: null },
+  { id: 'free', label: 'Bebas / Utuh (Full)', ratio: null },
 ];
 
 export default function ImageCropperModal({
@@ -80,12 +80,23 @@ export default function ImageCropperModal({
     const imgH = imgRef.current.clientHeight;
     if (imgW === 0 || imgH === 0) return;
 
+    if (ratio === null) {
+      // Bebas / Utuh: seleksi awal mencakup 100% luas gambar tanpa terpotong
+      setCrop({
+        x: 0,
+        y: 0,
+        width: Math.round(imgW),
+        height: Math.round(imgH),
+      });
+      return;
+    }
+
     let targetW = imgW * 0.95;
-    let targetH = ratio ? targetW / ratio : imgH * 0.8;
+    let targetH = targetW / ratio;
 
     if (targetH > imgH * 0.95) {
       targetH = imgH * 0.95;
-      targetW = ratio ? targetH * ratio : imgW * 0.95;
+      targetW = targetH * ratio;
     }
 
     const x = Math.max(0, (imgW - targetW) / 2);
@@ -98,6 +109,13 @@ export default function ImageCropperModal({
       height: Math.round(targetH),
     });
   }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      setAspectRatio(initialAspectRatio);
+      setZoom(1);
+    }
+  }, [isOpen, initialAspectRatio]);
 
   useEffect(() => {
     if (isOpen && isImgLoaded) {
