@@ -71,6 +71,8 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
   const [settingsRequireEmail, setSettingsRequireEmail] = useState(false);
   const [settingsLimitOneResponse, setSettingsLimitOneResponse] = useState(false);
   const [settingsIsOpen, setSettingsIsOpen] = useState(true);
+  const [settingsIsUnlimitedQuota, setSettingsIsUnlimitedQuota] = useState(true);
+  const [settingsMaxResponses, setSettingsMaxResponses] = useState('');
   const [headerImageVal, setHeaderImageVal] = useState<File | string | null>(null);
   const [settingsHeaderImageSize, setSettingsHeaderImageSize] = useState<'banner' | 'medium' | 'wide' | 'natural'>('banner');
   const [isHeaderCropModalOpen, setIsHeaderCropModalOpen] = useState(false);
@@ -101,6 +103,8 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       setSettingsRequireEmail(Boolean(data.require_email));
       setSettingsLimitOneResponse(Boolean(data.limit_one_response));
       setSettingsIsOpen(Boolean(data.is_open ?? data.is_active));
+      setSettingsIsUnlimitedQuota(!data.max_responses);
+      setSettingsMaxResponses(data.max_responses ? String(data.max_responses) : '');
       setHeaderImageVal(data.header_image || null);
       setSettingsHeaderImageSize(data.header_image_size || 'banner');
     } catch {
@@ -263,6 +267,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       formData.append('limit_one_response', settingsLimitOneResponse ? '1' : '0');
       formData.append('is_active', settingsIsOpen ? '1' : '0');
       formData.append('header_image_size', settingsHeaderImageSize);
+      formData.append('max_responses', settingsIsUnlimitedQuota ? '' : settingsMaxResponses);
 
       if (headerImageVal instanceof File) {
         formData.append('header_image', headerImageVal);
@@ -970,6 +975,77 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                   className={`${inputClass} resize-none`}
                   placeholder="Tuliskan petunjuk atau informasi tambahan untuk pengisi formulir..."
                 />
+              </div>
+            </div>
+
+            {/* Section: Kuota Pendaftar (Unlimited / Batasi Kuota) */}
+            <div className="border border-slate-200/90 rounded-2xl p-5 bg-slate-50/60 space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+                  <Users className="w-4 h-4 text-[#c20000]" /> Kuota Pendaftar Formulir
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Tentukan apakah kuota pengisi formulir tidak terbatas (unlimited) atau dibatasi pada jumlah tertentu.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-start gap-3 p-3.5 bg-white border border-slate-200/80 rounded-xl cursor-pointer hover:border-slate-300 transition-colors shadow-2xs">
+                  <input
+                    type="radio"
+                    name="quota_choice"
+                    checked={settingsIsUnlimitedQuota}
+                    onChange={() => {
+                      setSettingsIsUnlimitedQuota(true);
+                      setSettingsMaxResponses('');
+                    }}
+                    className="w-4 h-4 mt-0.5 accent-[#c20000] cursor-pointer"
+                  />
+                  <div>
+                    <span className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                      Tanpa Batas Kuota (Unlimited)
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Bebas Kuota
+                      </span>
+                    </span>
+                    <span className="text-xs text-slate-500 leading-relaxed block mt-0.5">
+                      Formulir dapat diisi bebas tanpa batas jumlah pengisi hingga Anda menutup formulir secara manual.
+                    </span>
+                  </div>
+                </label>
+
+                <label className="flex items-start gap-3 p-3.5 bg-white border border-slate-200/80 rounded-xl cursor-pointer hover:border-slate-300 transition-colors shadow-2xs">
+                  <input
+                    type="radio"
+                    name="quota_choice"
+                    checked={!settingsIsUnlimitedQuota}
+                    onChange={() => setSettingsIsUnlimitedQuota(false)}
+                    className="w-4 h-4 mt-0.5 accent-[#c20000] cursor-pointer"
+                  />
+                  <div className="flex-1">
+                    <span className="text-sm font-semibold text-slate-800 block">
+                      Batasi Jumlah Kuota Responden
+                    </span>
+                    <span className="text-xs text-slate-500 leading-relaxed block mt-0.5">
+                      Formulir akan otomatis menolak pendaftar baru setelah batas jumlah pengisi terpenuhi.
+                    </span>
+                    {!settingsIsUnlimitedQuota && (
+                      <div className="max-w-xs mt-3 pt-2 border-t border-slate-100">
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          Maksimal Responden (Jumlah Kuota):
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={settingsMaxResponses}
+                          onChange={(e) => setSettingsMaxResponses(e.target.value)}
+                          placeholder="Contoh: 100 atau 250"
+                          className={inputClass}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </label>
               </div>
             </div>
 

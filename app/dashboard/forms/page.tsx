@@ -121,7 +121,7 @@ export default function FormsManagement() {
       if (formData.success_message) fd.append('success_message', formData.success_message);
       if (formData.starts_at) fd.append('starts_at', formData.starts_at);
       if (formData.ends_at) fd.append('ends_at', formData.ends_at);
-      if (formData.max_responses) fd.append('max_responses', formData.max_responses);
+      fd.append('max_responses', formData.max_responses || '');
       fd.append('require_email', formData.require_email ? '1' : '0');
       fd.append('limit_one_response', formData.limit_one_response ? '1' : '0');
       fd.append('is_active', formData.is_active ? '1' : '0');
@@ -336,8 +336,29 @@ export default function FormsManagement() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Kuota Pendaftar <span className="text-slate-400 font-normal">(kosongkan = tanpa batas)</span></label>
-                <input type="number" min={1} value={formData.max_responses} onChange={(e) => setFormData({ ...formData, max_responses: e.target.value })} placeholder="cth: 100" className={inputClass} />
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-sm font-semibold text-slate-700">
+                    Kuota Pendaftar
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, max_responses: '' })}
+                    className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline"
+                  >
+                    Atur Unlimited (Tanpa Batas)
+                  </button>
+                </div>
+                <input
+                  type="number"
+                  min={1}
+                  value={formData.max_responses}
+                  onChange={(e) => setFormData({ ...formData, max_responses: e.target.value })}
+                  placeholder="Kosongkan untuk Unlimited (Tanpa Batas Kuota)"
+                  className={inputClass}
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  {formData.max_responses ? `Kuota dibatasi maksimal ${formData.max_responses} peserta.` : 'Status: Tanpa batas kuota (Unlimited).'}
+                </p>
               </div>
               <div className="space-y-3">
                 <ImageUploadPicker

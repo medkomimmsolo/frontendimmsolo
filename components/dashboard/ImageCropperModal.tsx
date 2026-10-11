@@ -390,12 +390,25 @@ export default function ImageCropperModal({
           <div className="relative inline-block max-w-full max-h-full">
             <img
               ref={imgRef}
-              src={imageUrl}
+              src={
+                imageUrl
+                  ? imageUrl.startsWith('blob:') || imageUrl.startsWith('data:')
+                    ? imageUrl
+                    : `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`
+                  : ''
+              }
               crossOrigin="anonymous"
               alt="Gambar untuk dipotong"
               onLoad={() => {
                 setIsImgLoaded(true);
                 initCropBox(aspectRatio);
+              }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (target.src.includes('/api/proxy-image') && imageUrl) {
+                  target.removeAttribute('crossorigin');
+                  target.src = imageUrl;
+                }
               }}
               className="max-h-[55vh] max-w-full object-contain block pointer-events-none rounded-sm"
             />
