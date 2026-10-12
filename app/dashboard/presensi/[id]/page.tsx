@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Loader2, Users, QrCode, ClipboardCheck, Settings, Upload, Download, Plus, Trash2, Search, ArrowLeft, Save, ScanLine, RefreshCw, Layers } from 'lucide-react';
+import { Loader2, Users, QrCode, ClipboardCheck, Settings, Upload, Download, Plus, Trash2, Search, ArrowLeft, Save, ScanLine, Layers } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { Presensi, PresensiPeserta, PresensiStats, PresensiKehadiran, PresensiSesi } from '@/types';
@@ -15,7 +15,6 @@ import Link from 'next/link';
 import { useDebounce } from 'use-debounce';
 import { formatDateTime } from '@/lib/utils';
 import { PresensiQrPanel } from '@/components/presensi/PresensiQrPanel';
-import { PresensiScanPanel } from '@/components/presensi/PresensiScanPanel';
 import { PresensiImportModal } from '@/components/presensi/PresensiImportModal';
 import { PresensiSesiPanel } from '@/components/presensi/PresensiSesiPanel';
 
@@ -493,9 +492,22 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
         <PresensiQrPanel presensi={presensi} peserta={peserta} activeSesi={activeSesi} onRefreshPeserta={fetchPeserta} />
       )}
 
-      {/* Scan */}
-      {tab === 'scan' && presensi && (
-        <PresensiScanPanel presensi={presensi} activeSesi={activeSesi} onChecked={refreshAll} />
+      {/* Scan — halaman khusus agar kamera punya ruang penuh. */}
+      {tab === 'scan' && (
+        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs p-6 text-center">
+          <ScanLine className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+          <p className="text-sm font-bold text-slate-800 mb-1">
+            Scan QR{activeSesi ? ` — ${activeSesi.name}` : ''}
+          </p>
+          <p className="text-sm text-slate-500 mb-4">
+            Halaman scan terbuka penuh dengan kamera besar dan hasil peserta.
+          </p>
+          <Link href={`/dashboard/presensi/${id}/scan${activeSesiId ? `?sesi=${activeSesiId}` : ''}`}>
+            <Button className="h-11 px-6 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl font-bold">
+              <ScanLine className="w-4 h-4 mr-2" /> Buka Halaman Scan
+            </Button>
+          </Link>
+        </div>
       )}
 
       {/* Kehadiran */}

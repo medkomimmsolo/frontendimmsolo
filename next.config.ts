@@ -107,19 +107,9 @@ const nextConfig: NextConfig = {
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self), interest-cohort=()' },
+          { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=(self), interest-cohort=()' },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
           { key: 'Content-Security-Policy', value: csp },
-        ],
-      },
-      // Halaman scan QR presensi butuh kamera (html5-qrcode di
-      // PresensiScanPanel). Entry ini diletakkan SETELAH '/:path*' agar
-      // menimpa Permissions-Policy global — sesuai perilaku override
-      // header Next.js (entri terakhir yang cocok menang untuk key sama).
-      {
-        source: '/dashboard/presensi/:path*',
-        headers: [
-          { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=(self), interest-cohort=()' },
         ],
       },
     ];
