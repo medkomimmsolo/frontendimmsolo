@@ -6,7 +6,7 @@ import { useDebounce } from 'use-debounce';
 import { getApiBase } from '@/lib/settings';
 import { getDeviceFingerprint } from '@/lib/deviceFingerprint';
 import { Button } from '@/components/ui/Button';
-import { Loader2, Search, CheckCircle2, UserCheck, MapPin, CalendarDays, AlertCircle, ShieldCheck } from 'lucide-react';
+import { Loader2, Search, CheckCircle2, UserCheck, MapPin, CalendarDays, AlertCircle, ShieldCheck, QrCode } from 'lucide-react';
 
 interface Session {
   id: number;
@@ -54,6 +54,8 @@ export function PresensiSelfClient({ token }: Props) {
   const [selected, setSelected] = useState<PesertaItem | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [done, setDone] = useState<{ nama: string; status: string; already: boolean } | null>(null);
+  const [submitError, setSubmitError] = useState('');
+  const [needsRescan, setNeedsRescan] = useState(false);
 
   // 1. Muat info sesi.
   useEffect(() => {
@@ -124,6 +126,7 @@ export function PresensiSelfClient({ token }: Props) {
   const handleCheckIn = async () => {
     if (!selected) return;
     setIsSubmitting(true);
+    setSubmitError('');
     try {
       const res = await fetch(`${base}/presensi-public/${token}/check-in`, {
         method: 'POST',
@@ -136,12 +139,16 @@ export function PresensiSelfClient({ token }: Props) {
       });
       const json = await res.json();
       if (!json.success) {
-        alert(json.message || 'Gagal mencatat kehadiran');
+        setSubmitError(json.message || 'Gagal mencatat kehadiran');
+        // Pesan terkait ticket/QR kadaluwarsa → perlu pindai ulang.
+        if (res.status === 403 || /kedaluwarsa|pindai ulang/i.test(json.message || '')) {
+          setNeedsRescan(true);
+        }
         return;
       }
       setDone({ nama: json.data.peserta.nama, status: json.data.status, already: json.data.already });
     } catch {
-      alert('Terjadi kesalahan jaringan');
+      setSubmitError('Terjadi kesalahan jaringan. Periksa koneksi Anda lalu coba lagi.');
     } finally {
       setIsSubmitting(false);
     }
@@ -239,7 +246,7 @@ export function PresensiSelfClient({ token }: Props) {
             <input
               type="text"
               value={query}
-              onChange={(e) => { setQuery(e.target.value); setSelected(null); }}
+              onChange={(e) => { setQuery(e.target.value); setSelected(null); setSubmitError(''); setNeedsRescan(false); }}
               placeholder="Ketik minimal 2 huruf nama Anda..."
               className="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-3 py-3 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none"
             />
@@ -255,7 +262,7 @@ export function PresensiSelfClient({ token }: Props) {
                   <button
                     key={r.id}
                     disabled={!!hadir || !session.is_receiving}
-                    onClick={() => setSelected(r)}
+                    onClick={() => { setSelected(r); setSubmitError(''); setNeedsRescan(false); }}
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-left transition-colors ${
                       selected?.id === r.id ? 'border-[#c20000] bg-red-50/60' : 'border-slate-200 hover:border-slate-300'
                     } ${hadir ? 'opacity-60 cursor-not-allowed' : ''}`}
@@ -277,6 +284,27 @@ export function PresensiSelfClient({ token }: Props) {
 
           {!isSearching && debouncedQuery.trim().length >= 2 && results.length === 0 && (
             <p className="text-sm text-slate-400 text-center py-4">Nama tidak ditemukan. Pastikan Anda sudah terdaftar atau hubungi petugas.</p>
+          )}
+
+          {submitError && (
+            <div className="mt-4 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p>{submitError}</p>
+                {needsRescan && (
+                  <button
+                    onClick={() => {
+                      const url = new URL(window.location.href);
+                      url.searchParams.delete('qr');
+                      window.location.href = url.toString();
+                    }}
+                    className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#c20000] hover:bg-[#a30000] text-white text-xs font-bold rounded-lg transition-colors"
+                  >
+                    <QrCode className="w-4 h-4" /> Pindai Ulang QR
+                  </button>
+                )}
+              </div>
+            </div>
           )}
 
           <Button

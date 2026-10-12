@@ -182,31 +182,70 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
   const exportExcel = async () => {
     const toastId = toast.loading('Menyiapkan file Excel...');
     try {
-      const res = await api.get(`/presensi/${id}/peserta`, { params: { per_page: 100, page: 1 } });
-      // Ambil semua halaman.
-      const first = res.data.data;
-      let all: PresensiPeserta[] = first.data || [];
-      const totalPages = first.last_page || 1;
-      for (let p = 2; p <= totalPages; p++) {
-        const r = await api.get(`/presensi/${id}/peserta`, { params: { per_page: 100, page: p } });
-        all = all.concat(r.data.data.data || []);
-      }
+      // Ambil seluruh data lewat endpoint ekspor (satu request).
+      const res = await api.get(`/presensi/${id}/export`);
+      const payload = res.data.data;
+      const all: Array<{
+        kode: string | null; nama: string; email: string | null; phone: string | null;
+        asal: string | null; status: string; method: string | null;
+        checked_at: string | null; checked_by: string | null; note: string | null;
+      }> = payload.rows || [];
+      const stats = payload.stats as PresensiStats | undefined;
+      const title = payload.presensi?.title || presensi?.slug || id;
+
       const XLSX = await import('xlsx');
-      const header = ['No', 'Kode', 'Nama', 'Email', 'Telepon', 'Asal', 'Status', 'Waktu Hadir', 'Metode'];
+      const header = ['No', 'Kode', 'Nama', 'Email', 'Telepon', 'Asal', 'Status', 'Waktu Hadir', 'Metode', 'Petugas', 'Catatan'];
       const rows = all.map((p, idx) => [
         idx + 1, p.kode || '', p.nama, p.email || '', p.phone || '', p.asal || '',
-        p.kehadiran?.status || 'belum',
-        p.kehadiran?.checked_at ? new Date(p.kehadiran.checked_at).toLocaleString('id-ID') : '',
-        p.kehadiran?.method || '',
+        p.status,
+        p.checked_at ? new Date(p.checked_at).toLocaleString('id-ID') : '',
+        p.method || '',
+        p.checked_by || '',
+        p.note || '',
       ]);
       const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
-      ws['!cols'] = [{ wch: 5 }, { wch: 10 }, { wch: 28 }, { wch: 28 }, { wch: 18 }, { wch: 24 }, { wch: 12 }, { wch: 22 }, { wch: 10 }];
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Peserta Presensi');
-      XLSX.writeFile(wb, `presensi-${presensi?.slug || id}.xlsx`);
+      ws['!cols'] = [{ wch: 5 }, { wch: 10 }, { wch: 28 }, { wch: 28 }, { wch: 18 }, { wch: 24 }, { wch: 12 }, { wch: 22 }, { wch: 10 }, { wch: 18 }, { wch: 24 }];
+
+      // Ringkasan di sheet kedua.
+      if (stats) {
+        const summary = XLSX.utils.aoa_to_sheet([
+          ['Ringkasan Presensi', title],
+          ['Total Peserta', stats.total_peserta],
+          ['Hadir', stats.hadir],
+          ['Telat', stats.telat],
+          ['Izin', stats.izin],
+          ['Belum Hadir', stats.belum_hadir],
+          ['Persentase Hadir', `${stats.persen_hadir}%`],
+        ]);
+        summary['!cols'] = [{ wch: 20 }, { wch: 40 }];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Peserta Presensi');
+        XLSX.utils.book_append_sheet(wb, summary, 'Ringkasan');
+        XLSX.writeFile(wb, `presensi-${presensi?.slug || id}.xlsx`);
+      } else {
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Peserta Presensi');
+        XLSX.writeFile(wb, `presensi-${presensi?.slug || id}.xlsx`);
+      }
       toast.success('File Excel diunduh', { id: toastId });
     } catch {
       toast.error('Gagal mengekspor Excel', { id: toastId });
+    }
+  };
+
+  const handleMarkStatus = async (peserta: PresensiPeserta, status: 'hadir' | 'telat' | 'izin' | 'tidak_hadir') => {
+    const label: Record<string, string> = { hadir: 'Hadir', telat: 'Telat', izin: 'Izin', tidak_hadir: 'Tidak Hadir' };
+    if (peserta.kehadiran?.status === status) return;
+    if (await confirm({ message: `Tandai ${peserta.nama} sebagai "${label[status]}"?`, tone: status === 'tidak_hadir' ? 'danger' : 'default' })) {
+      try {
+        await api.post(`/presensi/${id}/peserta/${peserta.id}/mark`, { status });
+        toast.success(`${peserta.nama} ditandai ${label[status]}`);
+        fetchPeserta();
+        fetchDetail();
+      } catch (error) {
+        const err = error as { response?: { data?: { message?: string } } };
+        toast.error(err.response?.data?.message || 'Gagal menandai kehadiran');
+      }
     }
   };
 
@@ -358,6 +397,19 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                           ) : (
                             <span className="text-xs text-slate-400">Belum hadir</span>
                           )}
+                          <div className="flex flex-wrap items-center gap-1 mt-1.5">
+                            {(['hadir', 'telat', 'izin'] as const).map((st) => (
+                              <button
+                                key={st}
+                                onClick={() => handleMarkStatus(p, st)}
+                                disabled={p.kehadiran?.status === st}
+                                className="px-2 py-0.5 text-[11px] font-semibold rounded border border-slate-200 text-slate-600 hover:border-[#c20000] hover:text-[#c20000] transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:border-slate-200 disabled:hover:text-slate-600"
+                                title={`Tandai ${st}`}
+                              >
+                                {st}
+                              </button>
+                            ))}
+                          </div>
                         </td>
                         <td className="py-3 px-4 pr-6 text-right">
                           <button onClick={() => handleDeletePeserta(p.id)} className="h-8 w-8 inline-flex items-center justify-center text-red-500 hover:bg-red-50 rounded-sm transition-colors">
