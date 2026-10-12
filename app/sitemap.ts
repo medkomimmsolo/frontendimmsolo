@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
+import { apiUrl, siteUrl } from '@/lib/env';
 
-const BASE_URL = 'https://immsolo.or.id';
+const BASE_URL = siteUrl();
 const MAX_PAGES = 5;
 const PER_PAGE = 100;
 
@@ -27,7 +28,7 @@ async function fetchAllPages(apiUrl: string, resource: 'blogs' | 'events'): Prom
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = BASE_URL;
-  const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').trim();
+  const apiBase = apiUrl();
 
   // Base routes (tanpa lastModified palsu agar tidak diabaikan Google)
   const routes: MetadataRoute.Sitemap = [
@@ -47,13 +48,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    if (!apiUrl) {
-      console.warn('NEXT_PUBLIC_API_URL kosong — sitemap hanya berisi rute statis.');
-      return routes;
-    }
     const [blogs, events] = await Promise.all([
-      fetchAllPages(apiUrl, 'blogs'),
-      fetchAllPages(apiUrl, 'events'),
+      fetchAllPages(apiBase, 'blogs'),
+      fetchAllPages(apiBase, 'events'),
     ]);
     for (const blog of blogs) {
       routes.push({
@@ -75,9 +72,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Formulir, tautan, lembaga diambil paralel agar build cepat.
     const [formRes, linksRes, lembagaRes] = await Promise.all([
-      fetch(`${apiUrl}/forms`, { next: { revalidate: 3600 } }).catch(() => null),
-      fetch(`${apiUrl}/links`, { next: { revalidate: 3600 } }).catch(() => null),
-      fetch(`${apiUrl}/lembaga?per_page=100`, { next: { revalidate: 3600 } }).catch(() => null),
+      fetch(`${apiBase}/forms`, { next: { revalidate: 3600 } }).catch(() => null),
+      fetch(`${apiBase}/links`, { next: { revalidate: 3600 } }).catch(() => null),
+      fetch(`${apiBase}/lembaga?per_page=100`, { next: { revalidate: 3600 } }).catch(() => null),
     ]);
     if (formRes?.ok) {
       const formJson = await formRes.json();

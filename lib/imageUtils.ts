@@ -47,6 +47,7 @@ export const convertToWebP = (file: File): Promise<File> => {
 };
 
 import api from '@/lib/api';
+import { backendOrigin } from '@/lib/env';
 
 export const uploadInlineImage = async (file: File): Promise<string> => {
   const webpFile = await convertToWebP(file);
@@ -56,7 +57,6 @@ export const uploadInlineImage = async (file: File): Promise<string> => {
   const res = await api.post('/media', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
   const url: string = res.data.data.url;
   return resolveMediaUrl(url);
 };
@@ -66,7 +66,6 @@ export const resolveMediaUrl = (url?: string | null): string => {
   if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:')) {
     return url;
   }
-  const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || '').replace(/\/$/, '');
   const cleanPath = url.startsWith('/') ? url : `/${url}`;
-  return `${backendUrl}${cleanPath}`;
+  return `${backendOrigin()}${cleanPath}`;
 };

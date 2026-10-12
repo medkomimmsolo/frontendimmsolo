@@ -1,12 +1,11 @@
+import { apiUrl } from '@/lib/env';
+
 export type Settings = Record<string, string>;
 
-// Canonical default: matches .env.local (NEXT_PUBLIC_API_URL) and the majority of
-// pages that fall back to it. Never hardcode 8000 anywhere else.
-const FALLBACK_API_BASE = 'http://127.0.0.1:8010/api/v1';
-
+// Presisi: jangan hardcode URL di sini lagi — resolusi terpusat di lib/env.ts
+// (fallback-nya peka NODE_ENV, bukan selalu 127.0.0.1).
 export function getApiBase(): string {
-  const configured = process.env.NEXT_PUBLIC_API_URL?.trim();
-  return (configured || FALLBACK_API_BASE).replace(/\/+$/, '');
+  return apiUrl();
 }
 
 /**
