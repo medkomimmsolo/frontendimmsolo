@@ -126,6 +126,20 @@ export interface Presensi {
   event?: { id: number; title: string } | null;
   pesertas_count?: number;
   kehadirans_count?: number;
+  sesis?: PresensiSesi[];
+}
+
+export interface PresensiSesi {
+  id: number;
+  presensi_id: number;
+  name: string;
+  starts_at: string | null;
+  ends_at: string | null;
+  is_open: boolean;
+  position: number;
+  hadir_count?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PresensiStats {
@@ -156,6 +170,7 @@ export interface PresensiKehadiran {
   id: number;
   presensi_id: number;
   presensi_peserta_id: number;
+  presensi_sesi_id: number | null;
   status: PresensiKehadiranStatus;
   method: PresensiKehadiranMethod;
   checked_at: string;
@@ -163,7 +178,8 @@ export interface PresensiKehadiran {
   ip: string | null;
   note: string | null;
   peserta?: { id: number; nama: string; kode: string | null; email: string | null; asal: string | null };
-  checked_by_user?: { id: number; name: string } | null;
+  checkedBy?: { id: number; name: string } | null;
+  sesi?: { id: number; name: string } | null;
 }
 
 export interface ApiResponse<T> {

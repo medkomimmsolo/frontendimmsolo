@@ -7,16 +7,17 @@ import { Button } from '@/components/ui/Button';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Loader2, Users, QrCode, ClipboardCheck, Settings, Upload, Download, Plus, Trash2, Search, ArrowLeft, Save, ScanLine, RefreshCw } from 'lucide-react';
+import { Loader2, Users, QrCode, ClipboardCheck, Settings, Upload, Download, Plus, Trash2, Search, ArrowLeft, Save, ScanLine, RefreshCw, Layers } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
-import { Presensi, PresensiPeserta, PresensiStats, PresensiKehadiran } from '@/types';
+import { Presensi, PresensiPeserta, PresensiStats, PresensiKehadiran, PresensiSesi } from '@/types';
 import Link from 'next/link';
 import { useDebounce } from 'use-debounce';
 import { formatDateTime } from '@/lib/utils';
 import { PresensiQrPanel } from '@/components/presensi/PresensiQrPanel';
 import { PresensiScanPanel } from '@/components/presensi/PresensiScanPanel';
 import { PresensiImportModal } from '@/components/presensi/PresensiImportModal';
+import { PresensiSesiPanel } from '@/components/presensi/PresensiSesiPanel';
 
 const inputCls =
   'w-full bg-white border border-slate-200 rounded-sm px-3.5 py-2.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none shadow-sm transition-all';
@@ -28,7 +29,7 @@ const STATUS_BADGE: Record<string, string> = {
   tidak_hadir: 'bg-slate-100 text-slate-500 border-slate-200',
 };
 
-type Tab = 'peserta' | 'qr' | 'scan' | 'kehadiran' | 'settings';
+type Tab = 'peserta' | 'qr' | 'scan' | 'kehadiran' | 'sesi' | 'settings';
 
 export default function PresensiDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -38,6 +39,8 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
   const [tab, setTab] = useState<Tab>('peserta');
   const [presensi, setPresensi] = useState<Presensi | null>(null);
   const [stats, setStats] = useState<PresensiStats | null>(null);
+  const [sesis, setSesis] = useState<PresensiSesi[]>([]);
+  const [activeSesiId, setActiveSesiId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showImport, setShowImport] = useState(false);
 
@@ -62,6 +65,12 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
       const res = await api.get(`/presensi/${id}`);
       setPresensi(res.data.data.presensi);
       setStats(res.data.data.stats);
+      const list: PresensiSesi[] = res.data.data.sesis || res.data.data.presensi?.sesis || [];
+      setSesis(list);
+      setActiveSesiId((prev) => {
+        if (prev !== null && list.some((s) => s.id === prev)) return prev;
+        return list.length > 0 ? list[0].id : null;
+      });
       setSForm({
         title: res.data.data.presensi.title,
         location: res.data.data.presensi.location,
@@ -86,7 +95,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
     setPesertaLoading(true);
     try {
       const res = await api.get(`/presensi/${id}/peserta`, {
-        params: { page, per_page: 25, search: debouncedSearch || undefined, status: statusFilter === 'all' ? undefined : statusFilter },
+        params: { page, per_page: 25, search: debouncedSearch || undefined, status: statusFilter === 'all' ? undefined : statusFilter, sesi_id: activeSesiId ?? undefined },
       });
       const payload = res.data.data;
       setPeserta(payload.data || []);
@@ -96,26 +105,30 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
     } finally {
       setPesertaLoading(false);
     }
-  }, [id, page, debouncedSearch, statusFilter]);
+  }, [id, page, debouncedSearch, statusFilter, activeSesiId]);
 
   const fetchKehadiran = useCallback(async () => {
     try {
-      const res = await api.get(`/presensi/${id}/kehadiran`);
+      const res = await api.get(`/presensi/${id}/kehadiran`, {
+        params: activeSesiId ? { sesi_id: activeSesiId } : undefined,
+      });
       setKehadiran(res.data.data.items || []);
       setStats(res.data.data.stats);
     } catch {
       toast.error('Gagal memuat kehadiran');
     }
-  }, [id]);
+  }, [id, activeSesiId]);
 
   useEffect(() => { fetchDetail(); }, [fetchDetail]);
   useEffect(() => {
     if (tab === 'peserta' || tab === 'scan') fetchPeserta();
     if (tab === 'kehadiran') fetchKehadiran();
   }, [tab, fetchPeserta, fetchKehadiran]);
-  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter, activeSesiId]);
 
   const refreshAll = () => { fetchDetail(); fetchPeserta(); };
+
+  const activeSesi = sesis.find((s) => s.id === activeSesiId) || null;
 
   const handleToggleOpen = async () => {
     if (!presensi) return;
@@ -182,21 +195,24 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
   const exportExcel = async () => {
     const toastId = toast.loading('Menyiapkan file Excel...');
     try {
-      // Ambil seluruh data lewat endpoint ekspor (satu request).
-      const res = await api.get(`/presensi/${id}/export`);
+      // Ambil seluruh data lewat endpoint ekspor (satu request), mengikuti sesi aktif.
+      const res = await api.get(`/presensi/${id}/export`, {
+        params: activeSesiId ? { sesi_id: activeSesiId } : undefined,
+      });
       const payload = res.data.data;
       const all: Array<{
         kode: string | null; nama: string; email: string | null; phone: string | null;
-        asal: string | null; status: string; method: string | null;
+        asal: string | null; sesi: string | null; status: string; method: string | null;
         checked_at: string | null; checked_by: string | null; note: string | null;
       }> = payload.rows || [];
       const stats = payload.stats as PresensiStats | undefined;
       const title = payload.presensi?.title || presensi?.slug || id;
+      const scopeLabel = activeSesi ? ` — ${activeSesi.name}` : '';
 
       const XLSX = await import('xlsx');
-      const header = ['No', 'Kode', 'Nama', 'Email', 'Telepon', 'Asal', 'Status', 'Waktu Hadir', 'Metode', 'Petugas', 'Catatan'];
+      const header = ['No', 'Kode', 'Nama', 'Email', 'Telepon', 'Asal', 'Sesi', 'Status', 'Waktu Hadir', 'Metode', 'Petugas', 'Catatan'];
       const rows = all.map((p, idx) => [
-        idx + 1, p.kode || '', p.nama, p.email || '', p.phone || '', p.asal || '',
+        idx + 1, p.kode || '', p.nama, p.email || '', p.phone || '', p.asal || '', p.sesi || activeSesi?.name || '',
         p.status,
         p.checked_at ? new Date(p.checked_at).toLocaleString('id-ID') : '',
         p.method || '',
@@ -204,12 +220,12 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
         p.note || '',
       ]);
       const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
-      ws['!cols'] = [{ wch: 5 }, { wch: 10 }, { wch: 28 }, { wch: 28 }, { wch: 18 }, { wch: 24 }, { wch: 12 }, { wch: 22 }, { wch: 10 }, { wch: 18 }, { wch: 24 }];
+      ws['!cols'] = [{ wch: 5 }, { wch: 10 }, { wch: 28 }, { wch: 28 }, { wch: 18 }, { wch: 24 }, { wch: 22 }, { wch: 12 }, { wch: 22 }, { wch: 10 }, { wch: 18 }, { wch: 24 }];
 
       // Ringkasan di sheet kedua.
       if (stats) {
         const summary = XLSX.utils.aoa_to_sheet([
-          ['Ringkasan Presensi', title],
+          ['Ringkasan Presensi', `${title}${scopeLabel}`],
           ['Total Peserta', stats.total_peserta],
           ['Hadir', stats.hadir],
           ['Telat', stats.telat],
@@ -221,7 +237,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Peserta Presensi');
         XLSX.utils.book_append_sheet(wb, summary, 'Ringkasan');
-        XLSX.writeFile(wb, `presensi-${presensi?.slug || id}.xlsx`);
+        XLSX.writeFile(wb, `presensi-${presensi?.slug || id}${activeSesi ? `-${activeSesi.name}` : ''}.xlsx`);
       } else {
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Peserta Presensi');
@@ -236,9 +252,10 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
   const handleMarkStatus = async (peserta: PresensiPeserta, status: 'hadir' | 'telat' | 'izin' | 'tidak_hadir') => {
     const label: Record<string, string> = { hadir: 'Hadir', telat: 'Telat', izin: 'Izin', tidak_hadir: 'Tidak Hadir' };
     if (peserta.kehadiran?.status === status) return;
-    if (await confirm({ message: `Tandai ${peserta.nama} sebagai "${label[status]}"?`, tone: status === 'tidak_hadir' ? 'danger' : 'default' })) {
+    const scope = activeSesi ? ` pada sesi "${activeSesi.name}"` : '';
+    if (await confirm({ message: `Tandai ${peserta.nama} sebagai "${label[status]}"${scope}?`, tone: status === 'tidak_hadir' ? 'danger' : 'default' })) {
       try {
-        await api.post(`/presensi/${id}/peserta/${peserta.id}/mark`, { status });
+        await api.post(`/presensi/${id}/peserta/${peserta.id}/mark`, { status, sesi_id: activeSesiId ?? undefined });
         toast.success(`${peserta.nama} ditandai ${label[status]}`);
         fetchPeserta();
         fetchDetail();
@@ -278,6 +295,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
     { key: 'qr', label: 'QR Code', icon: <QrCode className="w-4 h-4" /> },
     { key: 'scan', label: 'Scan', icon: <ScanLine className="w-4 h-4" /> },
     { key: 'kehadiran', label: 'Kehadiran', icon: <ClipboardCheck className="w-4 h-4" /> },
+    { key: 'sesi', label: 'Sesi', icon: <Layers className="w-4 h-4" /> },
     { key: 'settings', label: 'Pengaturan', icon: <Settings className="w-4 h-4" /> },
   ];
 
@@ -285,6 +303,20 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
     <div className="space-y-6 w-full">
       <PageHeader title={presensi.title} description={presensi.location || 'Sesi presensi'} badge={presensi.is_open ? 'Dibuka' : 'Ditutup'}>
         <div className="flex items-center gap-2">
+          {sesis.length > 0 && (
+            <select
+              value={activeSesiId ?? ''}
+              onChange={(e) => setActiveSesiId(e.target.value ? Number(e.target.value) : null)}
+              className={`${inputCls} h-10 w-44 text-xs font-bold`}
+              title="Pilih sesi aktif"
+            >
+              {sesis.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}{s.is_open ? '' : ' (tutup)'}
+                </option>
+              ))}
+            </select>
+          )}
           <Button onClick={handleToggleOpen} variant="outline" className="h-10 px-4 rounded-xl text-xs font-bold">
             {presensi.is_open ? 'Tutup Presensi' : 'Buka Presensi'}
           </Button>
@@ -295,6 +327,28 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
           </Link>
         </div>
       </PageHeader>
+
+      {/* Sesi aktif */}
+      {sesis.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="inline-flex items-center gap-1.5 font-bold text-slate-600">
+            <Layers className="w-3.5 h-3.5" /> Sesi aktif:
+          </span>
+          {sesis.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setActiveSesiId(s.id)}
+              className={`px-3 py-1 rounded-full border font-semibold transition-colors ${
+                activeSesiId === s.id
+                  ? 'bg-[#c20000] text-white border-[#c20000]'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-[#c20000] hover:text-[#c20000]'
+              }`}
+            >
+              {s.name}{!s.is_open && ' · tutup'}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Statistik */}
       {stats && (
@@ -436,12 +490,12 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
 
       {/* QR */}
       {tab === 'qr' && presensi && (
-        <PresensiQrPanel presensi={presensi} peserta={peserta} onRefreshPeserta={fetchPeserta} />
+        <PresensiQrPanel presensi={presensi} peserta={peserta} activeSesi={activeSesi} onRefreshPeserta={fetchPeserta} />
       )}
 
       {/* Scan */}
       {tab === 'scan' && presensi && (
-        <PresensiScanPanel presensi={presensi} onChecked={refreshAll} />
+        <PresensiScanPanel presensi={presensi} activeSesi={activeSesi} onChecked={refreshAll} />
       )}
 
       {/* Kehadiran */}
@@ -452,6 +506,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
                   <th className="py-3 px-4 pl-6">Nama</th>
+                  <th className="py-3 px-4 w-32">Sesi</th>
                   <th className="py-3 px-4 w-28">Status</th>
                   <th className="py-3 px-4 w-28">Metode</th>
                   <th className="py-3 px-4 w-48">Waktu</th>
@@ -461,7 +516,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm bg-white">
                 {kehadiran.length === 0 ? (
-                  <tr><td colSpan={6} className="py-14 text-center text-slate-400 text-sm">Belum ada kehadiran tercatat.</td></tr>
+                  <tr><td colSpan={7} className="py-14 text-center text-slate-400 text-sm">Belum ada kehadiran tercatat.</td></tr>
                 ) : (
                   kehadiran.map((k) => (
                     <tr key={k.id} className="hover:bg-slate-50/80">
@@ -469,12 +524,13 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                         <div className="font-semibold text-slate-800">{k.peserta?.nama}</div>
                         {k.peserta?.asal && <div className="text-xs text-slate-400">{k.peserta.asal}</div>}
                       </td>
+                      <td className="py-3 px-4 text-xs text-slate-600">{k.sesi?.name || '—'}</td>
                       <td className="py-3 px-4">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${STATUS_BADGE[k.status]}`}>{k.status}</span>
                       </td>
                       <td className="py-3 px-4 text-xs text-slate-600">{k.method}</td>
                       <td className="py-3 px-4 text-xs text-slate-600">{formatDateTime(k.checked_at)}</td>
-                      <td className="py-3 px-4 text-xs text-slate-600">{k.checked_by_user?.name || (k.method === 'self' ? 'Self check-in' : '—')}</td>
+                      <td className="py-3 px-4 text-xs text-slate-600">{k.checkedBy?.name || (k.method === 'self' ? 'Self check-in' : '—')}</td>
                       <td className="py-3 px-4 pr-6 text-right">
                         <button onClick={() => handleDeleteKehadiran(k.id)} className="h-8 w-8 inline-flex items-center justify-center text-red-500 hover:bg-red-50 rounded-sm transition-colors">
                           <Trash2 className="w-4 h-4" />
@@ -487,6 +543,17 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
             </table>
           </div>
         </div>
+      )}
+
+      {/* Sesi */}
+      {tab === 'sesi' && (
+        <PresensiSesiPanel
+          presensiId={Number(id)}
+          sesis={sesis}
+          activeSesiId={activeSesiId}
+          onSelect={(sid) => { setActiveSesiId(sid); setPage(1); }}
+          onChanged={fetchDetail}
+        />
       )}
 
       {/* Settings */}

@@ -8,10 +8,11 @@ import { Camera, CameraOff, CheckCircle2, XCircle, Loader2, ScanLine } from 'luc
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { getDeviceFingerprint } from '@/lib/deviceFingerprint';
-import { Presensi } from '@/types';
+import { Presensi, PresensiSesi } from '@/types';
 
 interface Props {
   presensi: Presensi;
+  activeSesi?: PresensiSesi | null;
   onChecked: () => void;
 }
 
@@ -25,7 +26,7 @@ interface ScanResult {
 
 const SCANNER_ID = 'presensi-qr-reader';
 
-export function PresensiScanPanel({ presensi, onChecked }: Props) {
+export function PresensiScanPanel({ presensi, activeSesi, onChecked }: Props) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
@@ -40,7 +41,11 @@ export function PresensiScanPanel({ presensi, onChecked }: Props) {
       lastScanRef.current = { token: payload, at: now };
 
       try {
-        const res = await api.post(`/presensi/${presensi.id}/scan`, { payload, device: getDeviceFingerprint() });
+        const res = await api.post(`/presensi/${presensi.id}/scan`, {
+          payload,
+          device: getDeviceFingerprint(),
+          sesi_id: activeSesi?.id,
+        });
         const d = res.data.data;
         setResults((prev) => [
           { nama: d.peserta.nama, kode: d.peserta.kode, status: d.status, already: d.already, at: now },
@@ -58,7 +63,7 @@ export function PresensiScanPanel({ presensi, onChecked }: Props) {
         setResults((prev) => [{ nama: 'QR tidak dikenali', status: 'error', already: false, at: now }, ...prev.slice(0, 19)]);
       }
     },
-    [presensi.id, onChecked]
+    [presensi.id, activeSesi, onChecked]
   );
 
   const startScan = useCallback(async () => {
@@ -93,7 +98,7 @@ export function PresensiScanPanel({ presensi, onChecked }: Props) {
       scannerRef.current = scanner;
       await scanner.start(
         cameraConfig,
-        { fps: 10, qrbox: { width: 250, height: 250 } },
+        { fps: 10, qrbox: { width: 280, height: 280 }, aspectRatio: 1.0 },
         (decodedText) => { handlePayload(decodedText); },
         () => { /* abaikan error decode per-frame */ }
       );
@@ -140,11 +145,13 @@ export function PresensiScanPanel({ presensi, onChecked }: Props) {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <Card className="border-slate-200/90 rounded-2xl shadow-2xs">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Kamera — area lebar sendiri agar leluasa mengarahkan QR. */}
+      <Card className="border-slate-200/90 rounded-2xl shadow-2xs lg:col-span-2">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <ScanLine className="w-4 h-4" /> Scan QR Peserta
+            {activeSesi && <span className="text-xs font-bold text-[#c20000]">· {activeSesi.name}</span>}
           </CardTitle>
           <p className="text-sm text-slate-500 mt-1">
             Arahkan kamera ke QR unik peserta. Kehadiran tercatat otomatis.
@@ -152,29 +159,44 @@ export function PresensiScanPanel({ presensi, onChecked }: Props) {
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-3">
             {!isScanning ? (
-              <Button onClick={startScan} disabled={isStarting} className="h-11 px-6 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl font-bold">
-                {isStarting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Camera className="w-4 h-4 mr-2" />}
+              <Button onClick={startScan} disabled={isStarting} className="h-12 px-7 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl font-bold">
+                {isStarting ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Camera className="w-5 h-5 mr-2" />}
                 Mulai Scan
               </Button>
             ) : (
-              <Button onClick={stopScan} variant="outline" className="h-11 px-6 rounded-xl font-bold">
-                <CameraOff className="w-4 h-4 mr-2" /> Hentikan
+              <Button onClick={stopScan} variant="outline" className="h-12 px-7 rounded-xl font-bold">
+                <CameraOff className="w-5 h-5 mr-2" /> Hentikan
               </Button>
             )}
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+              <span className={`inline-block w-2.5 h-2.5 rounded-full ${isScanning ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+              {isScanning ? 'Kamera aktif — siap memindai' : 'Kamera nonaktif'}
+            </div>
           </div>
-          <div id={SCANNER_ID} className="w-full max-w-md mx-auto rounded-xl overflow-hidden bg-slate-900/5 min-h-[200px]" />
+          <div
+            id={SCANNER_ID}
+            className={`w-full rounded-2xl overflow-hidden bg-slate-900/90 min-h-[320px] sm:min-h-[440px] flex items-center justify-center ${isScanning ? '' : 'border-2 border-dashed border-slate-300'}`}
+          >
+            {!isScanning && (
+              <div className="text-center text-slate-300 px-6 py-16">
+                <Camera className="w-10 h-10 mx-auto mb-3 opacity-60" />
+                <p className="text-sm">Tekan <strong>Mulai Scan</strong> untuk mengaktifkan kamera.</p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
+      {/* Riwayat scan di samping kamera. */}
       <Card className="border-slate-200/90 rounded-2xl shadow-2xs">
         <CardHeader><CardTitle className="text-base">Riwayat Scan (Sesi Ini)</CardTitle></CardHeader>
         <CardContent>
           {results.length === 0 ? (
             <p className="text-sm text-slate-400 py-4 text-center">Belum ada scan.</p>
           ) : (
-            <div className="space-y-2 max-h-96 overflow-y-auto">
+            <div className="space-y-2 max-h-[520px] overflow-y-auto">
               {results.map((r, i) => (
                 <div key={i} className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${r.status === 'error' ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}`}>
                   {r.status === 'error' ? <XCircle className="w-5 h-5 text-red-500 shrink-0" /> : <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />}

@@ -8,6 +8,15 @@ import { getDeviceFingerprint } from '@/lib/deviceFingerprint';
 import { Button } from '@/components/ui/Button';
 import { Loader2, Search, CheckCircle2, UserCheck, MapPin, CalendarDays, AlertCircle, ShieldCheck, QrCode } from 'lucide-react';
 
+interface SesiItem {
+  id: number;
+  name: string;
+  starts_at: string | null;
+  ends_at: string | null;
+  is_open: boolean;
+  is_receiving: boolean;
+}
+
 interface Session {
   id: number;
   title: string;
@@ -18,6 +27,9 @@ interface Session {
   is_receiving: boolean;
   is_open: boolean;
   total_peserta: number;
+  sesis?: SesiItem[];
+  active_sesi_id?: number | null;
+  active_sesi_name?: string | null;
 }
 
 interface PesertaItem {
@@ -38,6 +50,8 @@ export function PresensiSelfClient({ token }: Props) {
   const base = getApiBase();
   const searchParams = useSearchParams();
   const qrPayload = searchParams.get('qr');
+  const sesiParam = searchParams.get('sesi');
+  const sesiId = sesiParam ? Number(sesiParam) : null;
 
   const [session, setSession] = useState<Session | null>(null);
   const [loadError, setLoadError] = useState('');
@@ -57,11 +71,12 @@ export function PresensiSelfClient({ token }: Props) {
   const [submitError, setSubmitError] = useState('');
   const [needsRescan, setNeedsRescan] = useState(false);
 
-  // 1. Muat info sesi.
+  // 1. Muat info sesi (bawa sesi_id dari QR bila ada).
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`${base}/presensi-public/${token}`);
+        const query = sesiId ? `?sesi_id=${sesiId}` : '';
+        const res = await fetch(`${base}/presensi-public/${token}${query}`);
         const json = await res.json();
         if (!json.success) throw new Error(json.message);
         setSession(json.data);
@@ -71,7 +86,7 @@ export function PresensiSelfClient({ token }: Props) {
         setIsLoading(false);
       }
     })();
-  }, [base, token]);
+  }, [base, token, sesiId]);
 
   // 2. Tukar payload QR → ticket. Wajib ada payload yang valid.
   useEffect(() => {
@@ -86,7 +101,7 @@ export function PresensiSelfClient({ token }: Props) {
         const res = await fetch(`${base}/presensi-public/${token}/exchange-qr`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ payload: qrPayload }),
+          body: JSON.stringify({ payload: qrPayload, sesi_id: sesiId ?? undefined }),
         });
         const json = await res.json();
         if (!json.success) {
@@ -101,7 +116,7 @@ export function PresensiSelfClient({ token }: Props) {
         setPhase('qr-invalid');
       }
     })();
-  }, [base, token, qrPayload, isLoading, session]);
+  }, [base, token, qrPayload, isLoading, session, sesiId]);
 
   // 3. Pencarian nama (butuh ticket).
   useEffect(() => {
@@ -112,7 +127,7 @@ export function PresensiSelfClient({ token }: Props) {
     (async () => {
       setIsSearching(true);
       try {
-        const res = await fetch(`${base}/presensi-public/${token}/cari?q=${encodeURIComponent(debouncedQuery)}&ticket=${encodeURIComponent(ticket)}`);
+        const res = await fetch(`${base}/presensi-public/${token}/cari?q=${encodeURIComponent(debouncedQuery)}&ticket=${encodeURIComponent(ticket)}${sesiId ? `&sesi_id=${sesiId}` : ''}`);
         const json = await res.json();
         setResults(json.data || []);
       } catch {
@@ -121,7 +136,7 @@ export function PresensiSelfClient({ token }: Props) {
         setIsSearching(false);
       }
     })();
-  }, [debouncedQuery, base, token, ticket, phase]);
+  }, [debouncedQuery, base, token, ticket, phase, sesiId]);
 
   const handleCheckIn = async () => {
     if (!selected) return;
@@ -135,6 +150,7 @@ export function PresensiSelfClient({ token }: Props) {
           peserta_id: selected.id,
           ticket,
           device: getDeviceFingerprint(),
+          sesi_id: sesiId ?? undefined,
         }),
       });
       const json = await res.json();
@@ -199,6 +215,9 @@ export function PresensiSelfClient({ token }: Props) {
             {done.already ? 'Anda Sudah Tercatat' : 'Kehadiran Tercatat!'}
           </h1>
           <p className="text-sm text-slate-500 mt-1">{done.nama}</p>
+          {session.active_sesi_name && (
+            <p className="text-xs text-slate-400 mt-0.5">Sesi: {session.active_sesi_name}</p>
+          )}
           <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold mt-4 ${done.status === 'telat' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>
             {done.status === 'telat' ? 'Telat' : 'Hadir'}
           </div>
@@ -216,6 +235,11 @@ export function PresensiSelfClient({ token }: Props) {
             <UserCheck className="w-3.5 h-3.5 mr-1.5 text-[#c20000]" /> Presensi Kegiatan
           </div>
           <h1 className="text-xl font-bold mb-2">{session.title}</h1>
+          {session.active_sesi_name && (
+            <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#c20000] text-white text-xs font-bold mb-2">
+              {session.active_sesi_name}
+            </div>
+          )}
           <div className="space-y-1 text-sm text-white/70">
             {session.location && <div className="flex items-center gap-2"><MapPin className="w-4 h-4" /> {session.location}</div>}
             {session.starts_at && (
