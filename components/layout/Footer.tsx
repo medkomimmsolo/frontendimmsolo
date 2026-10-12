@@ -26,7 +26,10 @@ export default function Footer() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch(`${getApiBase()}/settings`);
+        const response = await fetch(`${getApiBase()}/settings`, {
+          headers: { Accept: 'application/json' },
+        });
+        if (!response.ok) return;
         const data = await response.json();
         // Backend returns a flat { key: value } map under `data`; normalizeSettings
         // also tolerates the legacy array-of-{key,value} shape.

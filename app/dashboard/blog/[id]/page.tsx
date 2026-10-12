@@ -54,7 +54,7 @@ export default function EditBlog({ params }: { params: Promise<{ id: string }> }
       try {
         const [catRes, blogRes] = await Promise.all([
           api.get('/categories'),
-          api.get(`/blogs/${id}`)
+          api.get(`/blogs/${id}/edit`)
         ]);
 
         let list = catRes.data.data || [];

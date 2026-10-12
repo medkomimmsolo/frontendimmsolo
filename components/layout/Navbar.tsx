@@ -84,29 +84,34 @@ export default function Navbar() {
     const fetchSettingsAndCategories = async () => {
       try {
         const [settingsRes, categoriesRes] = await Promise.all([
-          fetch(`${getApiBase()}/settings`),
-          fetch(`${getApiBase()}/categories`),
+          fetch(`${getApiBase()}/settings`, { headers: { Accept: 'application/json' } }).catch(() => null),
+          fetch(`${getApiBase()}/categories`, { headers: { Accept: 'application/json' } }).catch(() => null),
         ]);
 
-        const settings = normalizeSettings((await settingsRes.json())?.data);
-        if (settings.site_logo) setSiteLogo(settings.site_logo);
-        if (settings.site_logo_white) setSiteLogoWhite(settings.site_logo_white);
+        if (settingsRes && settingsRes.ok) {
+          const settingsJson = await settingsRes.json().catch(() => null);
+          const settings = normalizeSettings(settingsJson?.data);
+          if (settings.site_logo) setSiteLogo(settings.site_logo);
+          if (settings.site_logo_white) setSiteLogoWhite(settings.site_logo_white);
+        }
 
-        const categoriesData = await categoriesRes.json();
-        if (categoriesData.success && categoriesData.data) {
-          const navCopy = [...navigationTemplate];
-          const infoNode = navCopy.find((n) => n.name === 'Info');
-          if (infoNode) {
-            infoNode.children = [
-              { name: 'Semua Berita & Opini', href: '/post' },
-              ...categoriesData.data.map((cat: any) => ({
-                name: cat.name,
-                href: `/post?category=${cat.slug}`,
-              })),
-              { name: 'Agenda Kegiatan', href: '/agenda' },
-            ];
+        if (categoriesRes && categoriesRes.ok) {
+          const categoriesData = await categoriesRes.json().catch(() => null);
+          if (categoriesData?.success && categoriesData?.data) {
+            const navCopy = [...navigationTemplate];
+            const infoNode = navCopy.find((n) => n.name === 'Info');
+            if (infoNode) {
+              infoNode.children = [
+                { name: 'Semua Berita & Opini', href: '/post' },
+                ...categoriesData.data.map((cat: any) => ({
+                  name: cat.name,
+                  href: `/post?category=${cat.slug}`,
+                })),
+                { name: 'Agenda Kegiatan', href: '/agenda' },
+              ];
+            }
+            setNavigation(navCopy);
           }
-          setNavigation(navCopy);
         }
       } catch (e) {
         console.error('Failed to fetch navbar data', e);
