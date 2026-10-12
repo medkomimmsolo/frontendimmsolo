@@ -65,10 +65,34 @@ export function PresensiScanPanel({ presensi, onChecked }: Props) {
     if (scannerRef.current) return;
     setIsStarting(true);
     try {
+      // getUserMedia hanya tersedia di secure context (HTTPS atau localhost).
+      // Tanpa ini, browser menolak akses kamera di http://<ip-lan>.
+      if (typeof window !== 'undefined' && !window.isSecureContext) {
+        toast.error('Kamera hanya bisa dipakai via HTTPS atau localhost. Buka situs lewat https:// lalu coba lagi.');
+        return;
+      }
+
       const scanner = new Html5Qrcode(SCANNER_ID);
+
+      // Pilih kamera yang paling tepat: utamakan kamera belakang di mobile,
+      // tapi tetap jalan di desktop yang hanya punya webcam depan.
+      // Menggunakan cameraId konkret (bukan facingMode) agar kompatibel
+      // di iOS Safari & Android Chrome sekaligus laptop/desktop.
+      let cameraConfig: string | { facingMode: string } = { facingMode: 'environment' };
+      try {
+        const cameras = await Html5Qrcode.getCameras();
+        if (cameras && cameras.length > 0) {
+          const back = cameras.find((c) => /back|rear|environment|belakang/i.test(c.label));
+          cameraConfig = (back ?? cameras[cameras.length - 1]).id;
+        }
+      } catch {
+        // getCameras bisa gagal sebelum izin diberikan; biarkan start()
+        // yang memicu prompt izin lalu fallback ke facingMode.
+      }
+
       scannerRef.current = scanner;
       await scanner.start(
-        { facingMode: 'environment' },
+        cameraConfig,
         { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => { handlePayload(decodedText); },
         () => { /* abaikan error decode per-frame */ }
@@ -76,7 +100,16 @@ export function PresensiScanPanel({ presensi, onChecked }: Props) {
       setIsScanning(true);
     } catch (error) {
       console.error(error);
-      toast.error('Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.');
+      const name = (error as { name?: string })?.name;
+      if (name === 'NotAllowedError') {
+        toast.error('Izin kamera ditolak. Aktifkan izin kamera di pengaturan browser, lalu muat ulang halaman.');
+      } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
+        toast.error('Kamera tidak ditemukan pada perangkat ini.');
+      } else if (name === 'NotReadableError') {
+        toast.error('Kamera sedang dipakai aplikasi lain. Tutup aplikasi tersebut lalu coba lagi.');
+      } else {
+        toast.error('Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.');
+      }
       scannerRef.current = null;
     } finally {
       setIsStarting(false);

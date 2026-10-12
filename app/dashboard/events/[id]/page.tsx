@@ -49,7 +49,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const response = await api.get(`/events/${id}`);
+        const response = await api.get(`/events/${id}/edit`);
         const eventData = response.data.data;
         
         // Convert Laravel timestamp to datetime-local format

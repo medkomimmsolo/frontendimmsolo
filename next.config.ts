@@ -112,6 +112,16 @@ const nextConfig: NextConfig = {
           { key: 'Content-Security-Policy', value: csp },
         ],
       },
+      // Halaman scan QR presensi butuh kamera (html5-qrcode di
+      // PresensiScanPanel). Entry ini diletakkan SETELAH '/:path*' agar
+      // menimpa Permissions-Policy global — sesuai perilaku override
+      // header Next.js (entri terakhir yang cocok menang untuk key sama).
+      {
+        source: '/dashboard/presensi/:path*',
+        headers: [
+          { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=(self), interest-cohort=()' },
+        ],
+      },
     ];
   },
   async rewrites() {
