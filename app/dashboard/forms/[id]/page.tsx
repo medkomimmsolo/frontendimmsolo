@@ -454,17 +454,6 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               <span>Isi Form</span>
               <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
             </a>
-            <a
-              href={`/form/${form.slug}/responses`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
-              title="Buka tampilan spreadsheet publik (hanya lihat) yang dapat diakses oleh publik tanpa login"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-              <span>Spreadsheet Publik</span>
-              <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-            </a>
           </div>
         )}
       </PageHeader>
@@ -596,20 +585,6 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              {form?.slug && (
-                <a
-                  href={`/form/${form.slug}/responses`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-sm text-xs font-semibold shadow-2xs transition-colors h-8"
-                  title="Buka tampilan spreadsheet publik (hanya lihat) untuk pendaftar umum"
-                >
-                  <Eye className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Buka Spreadsheet Publik</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400" />
-                </a>
-              )}
-
               {/* Search filter */}
               <div className="relative">
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
