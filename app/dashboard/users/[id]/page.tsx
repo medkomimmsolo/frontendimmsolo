@@ -9,15 +9,21 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function EditUser({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { user: currentUser } = useAuth();
   const unwrappedParams = use(params);
   const id = unwrappedParams.id;
+  const isSuperAdmin = currentUser?.roles?.some((role: any) => role.name === 'super-admin') ?? false;
   
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+  const [dataAccessSaving, setDataAccessSaving] = useState(false);
   const [availableRoles, setAvailableRoles] = useState<any[]>([]);
+  const [dataAccessUsers, setDataAccessUsers] = useState<any[]>([]);
+  const [dataAccessUserIds, setDataAccessUserIds] = useState<number[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -29,13 +35,18 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
   useEffect(() => {
     const fetchUserAndRoles = async () => {
       try {
-        const [userRes, rolesRes] = await Promise.all([
+        const [userRes, rolesRes, dataAccessRes] = await Promise.all([
           api.get(`/users/${id}`),
           api.get('/roles').catch(() => null),
+          isSuperAdmin ? api.get(`/users/${id}/data-access`) : Promise.resolve(null),
         ]);
         const data = userRes.data.data;
         if (rolesRes?.data?.data?.roles) {
           setAvailableRoles(rolesRes.data.data.roles);
+        }
+        if (dataAccessRes?.data?.data) {
+          setDataAccessUsers(dataAccessRes.data.data.users || []);
+          setDataAccessUserIds((dataAccessRes.data.data.user_ids || []).map(Number));
         }
         
         setFormData({
@@ -55,7 +66,7 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
     };
     
     fetchUserAndRoles();
-  }, [id, router]);
+  }, [id, router, isSuperAdmin]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -80,6 +91,18 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
       toast.error(error.response?.data?.message || 'Gagal menyimpan perubahan');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const saveDataAccess = async () => {
+    setDataAccessSaving(true);
+    try {
+      await api.put(`/users/${id}/data-access`, { user_ids: dataAccessUserIds });
+      toast.success('Akses data lintas pengguna berhasil diperbarui');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Gagal menyimpan akses data');
+    } finally {
+      setDataAccessSaving(false);
     }
   };
 
@@ -203,6 +226,57 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
           </CardContent>
         </Card>
       </form>
+
+      {isSuperAdmin && (
+        <Card className="border-[#0f172a]/10 shadow-sm">
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <h2 className="text-base font-bold text-[#0f172a]">Akses Data Pengguna Lain</h2>
+              <p className="text-sm text-slate-500 mt-1">
+                Berikan izin untuk melihat data milik pengguna lain. Izin ini tidak memberi hak mengubah atau memindahkan data.
+              </p>
+            </div>
+            {dataAccessUsers.length === 0 ? (
+              <p className="text-sm text-slate-400">Tidak ada pengguna lain untuk dipilih.</p>
+            ) : (
+              <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-sm">
+                {dataAccessUsers.map((owner) => {
+                  const checked = dataAccessUserIds.includes(Number(owner.id));
+                  return (
+                    <label key={owner.id} className="flex items-center gap-3 p-3 cursor-pointer hover:bg-slate-50">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => setDataAccessUserIds((previous) => (
+                          checked
+                            ? previous.filter((ownerId) => ownerId !== Number(owner.id))
+                            : [...previous, Number(owner.id)]
+                        ))}
+                        className="w-4 h-4 accent-[#c20000]"
+                      />
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium text-slate-700">{owner.name}</span>
+                        <span className="block text-xs text-slate-400">{owner.username ? `@${owner.username} · ` : ''}{owner.email}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                onClick={saveDataAccess}
+                disabled={dataAccessSaving}
+                className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm px-5"
+              >
+                {dataAccessSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Simpan Akses Data
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

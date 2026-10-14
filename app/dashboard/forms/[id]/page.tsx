@@ -329,7 +329,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
     try {
       const res = await api.get(`/form-admin/${formId}/responses`, { params: { per_page: 1000 } });
       const allResponses = res.data.data.responses.data || responses;
-      const XLSX = await import('xlsx');
+      const XLSX = await import('@e965/xlsx');
 
       const hasEmail = form?.require_email || allResponses.some((r: any) => Boolean(r.email));
       const header = ['No', 'ID Pendaftar', 'Waktu Submit', ...(hasEmail ? ['Email Responden'] : []), ...answerFields.map((f: any) => f.label)];

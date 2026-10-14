@@ -10,6 +10,7 @@ import SwRegister from '@/components/providers/SwRegister';
 import AosInit from '@/components/providers/AosInit';
 import { getSiteSettings } from '@/lib/siteSettings';
 import { toAbsoluteMediaUrl, toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
+import { headers } from 'next/headers';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -139,6 +140,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await headers();
+
   // Same cached fetch as generateMetadata above — no second round-trip.
   const settingsMap = await getSiteSettings();
   const siteIcon = settingsMap.site_icon ?? '';

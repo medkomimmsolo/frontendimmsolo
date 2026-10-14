@@ -48,6 +48,9 @@ export default function UsersManagement() {
   const [newRoleName, setNewRoleName] = useState('');
   const [newRolePerms, setNewRolePerms] = useState<string[]>([]);
   const [creatingRole, setCreatingRole] = useState(false);
+  const [editingRoleId, setEditingRoleId] = useState<number | null>(null);
+  const [editingRolePerms, setEditingRolePerms] = useState<string[]>([]);
+  const [savingRoleId, setSavingRoleId] = useState<number | null>(null);
 
   const isSuperAdmin = user?.roles?.some((r: any) => r.name === 'super-admin');
 
@@ -178,6 +181,7 @@ export default function UsersManagement() {
 
   const openRolesModal = async () => {
     setIsRolesModalOpen(true);
+    setEditingRoleId(null);
     setRolesLoading(true);
     try {
       const res = await api.get('/roles');
@@ -227,6 +231,26 @@ export default function UsersManagement() {
       setRolesList((prev) => prev.filter((r) => r.id !== role.id));
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Gagal menghapus role');
+    }
+  };
+
+  const handleEditRolePermissions = (role: any) => {
+    setEditingRoleId(role.id);
+    setEditingRolePerms(role.permissions || []);
+  };
+
+  const handleSaveRolePermissions = async (role: any) => {
+    setSavingRoleId(role.id);
+    try {
+      await api.put(`/roles/${role.id}`, { permissions: editingRolePerms });
+      const res = await api.get('/roles');
+      setRolesList(res.data.data.roles || []);
+      setEditingRoleId(null);
+      toast.success(`Hak akses role "${role.name}" diperbarui`);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Gagal memperbarui hak akses role');
+    } finally {
+      setSavingRoleId(null);
     }
   };
 
@@ -466,7 +490,7 @@ export default function UsersManagement() {
                   Kelola Role & Hak Akses
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  Atur hak akses bawaan dan tambahkan role kustom untuk tim/anggota website.
+                  Hak akses role bawaan dapat diubah atau dinonaktifkan oleh Super Admin.
                 </p>
               </div>
               <Button variant="outline" size="sm" onClick={() => setIsRolesModalOpen(false)} className="rounded-sm">
@@ -550,28 +574,70 @@ export default function UsersManagement() {
                                 {isSystemRole ? 'Sistem Bawaan' : 'Custom Role'}
                               </Badge>
                             </div>
-                            {!isSystemRole && (
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteRole(r)}
-                                className="text-red-500 hover:text-red-700 p-1 rounded-sm hover:bg-red-50 text-xs flex items-center gap-1 transition-colors"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                Hapus
-                              </button>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {r.name !== 'super-admin' && (
+                                <button
+                                  type="button"
+                                  onClick={() => editingRoleId === r.id ? setEditingRoleId(null) : handleEditRolePermissions(r)}
+                                  className="text-blue-600 hover:text-blue-700 p-1 rounded-sm hover:bg-blue-50 text-xs transition-colors"
+                                >
+                                  {editingRoleId === r.id ? 'Batal' : 'Ubah Hak Akses'}
+                                </button>
+                              )}
+                              {!isSystemRole && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteRole(r)}
+                                  className="text-red-500 hover:text-red-700 p-1 rounded-sm hover:bg-red-50 text-xs flex items-center gap-1 transition-colors"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  Hapus
+                                </button>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex flex-wrap gap-1">
-                            {r.permissions && r.permissions.length > 0 ? (
-                              r.permissions.map((p: string) => (
-                                <span key={p} className="px-2 py-0.5 rounded-sm bg-slate-100 text-slate-600 text-[11px]">
-                                  {PERM_LABELS[p] ?? p}
-                                </span>
-                              ))
-                            ) : (
-                              <span className="text-xs text-slate-400 italic">Tidak ada permission</span>
-                            )}
-                          </div>
+                          {editingRoleId === r.id ? (
+                            <div className="space-y-3 pt-2">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {allPermissionsList.map((perm) => (
+                                  <label key={perm} className="flex items-center gap-2 text-xs p-2 border border-slate-100 rounded-sm cursor-pointer hover:bg-slate-50">
+                                    <input
+                                      type="checkbox"
+                                      checked={editingRolePerms.includes(perm)}
+                                      onChange={() => setEditingRolePerms((prev) => (
+                                        prev.includes(perm) ? prev.filter((p) => p !== perm) : [...prev, perm]
+                                      ))}
+                                      className="w-3.5 h-3.5 accent-[#c20000]"
+                                    />
+                                    <span className="text-slate-700">{PERM_LABELS[perm] ?? perm}</span>
+                                  </label>
+                                ))}
+                              </div>
+                              <div className="flex justify-end">
+                                <Button
+                                  type="button"
+                                  onClick={() => handleSaveRolePermissions(r)}
+                                  disabled={savingRoleId === r.id}
+                                  className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm text-xs"
+                                >
+                                  {savingRoleId === r.id && <Loader2 className="w-3.5 h-3.5 animate-spin mr-2" />}
+                                  Simpan Hak Akses
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex flex-wrap gap-1">
+                              {r.permissions && r.permissions.length > 0 ? (
+                                r.permissions.map((p: string) => (
+                                  <span key={p} className="px-2 py-0.5 rounded-sm bg-slate-100 text-slate-600 text-[11px]">
+                                    {PERM_LABELS[p] ?? p}
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-xs text-slate-400 italic">Tidak ada permission</span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       );
                     })}

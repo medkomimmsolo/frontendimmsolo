@@ -105,7 +105,7 @@ export function PresensiExportModal({
       const title = payload.presensi?.title || presensiTitle;
       const scopeLabel = activeSesi ? ` — ${activeSesi.name}` : '';
 
-      const XLSX = await import('xlsx');
+      const XLSX = await import('@e965/xlsx');
 
       const selected = COLUMN_OPTIONS.filter((c) => columns.includes(c.key));
       const header = selected.map((c) => c.label);

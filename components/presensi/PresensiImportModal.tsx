@@ -60,7 +60,7 @@ export function PresensiImportModal({ isOpen, presensiId, onClose, onImported }:
   if (!isOpen) return null;
 
   const downloadTemplate = async () => {
-    const XLSX = await import('xlsx');
+    const XLSX = await import('@e965/xlsx');
     const ws = XLSX.utils.aoa_to_sheet(TEMPLATE_SAMPLE);
     ws['!cols'] = [{ wch: 28 }, { wch: 28 }, { wch: 18 }, { wch: 30 }, { wch: 10 }];
     const wb = XLSX.utils.book_new();
@@ -73,7 +73,7 @@ export function PresensiImportModal({ isOpen, presensiId, onClose, onImported }:
     setParsed([]);
     if (!f) return;
     try {
-      const XLSX = await import('xlsx');
+      const XLSX = await import('@e965/xlsx');
       const buf = await f.arrayBuffer();
       const wb = XLSX.read(buf, { type: 'array' });
       const sheet = wb.Sheets[wb.SheetNames[0]];
