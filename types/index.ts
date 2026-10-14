@@ -137,6 +137,7 @@ export interface PresensiSesi {
   ends_at: string | null;
   is_open: boolean;
   position: number;
+  scan_token: string;
   hadir_count?: number;
   created_at?: string;
   updated_at?: string;
@@ -179,6 +180,28 @@ export interface PresensiKehadiran {
   note: string | null;
   peserta?: { id: number; nama: string; kode: string | null; email: string | null; asal: string | null };
   checkedBy?: { id: number; name: string } | null;
+  sesi?: { id: number; name: string } | null;
+}
+
+export type PresensiKehadiranLogAction = 'created' | 'updated' | 'deleted';
+
+/** Satu baris riwayat perubahan kehadiran (audit trail). */
+export interface PresensiKehadiranLog {
+  id: number;
+  presensi_id: number;
+  presensi_kehadiran_id: number | null;
+  presensi_peserta_id: number | null;
+  presensi_sesi_id: number | null;
+  action: PresensiKehadiranLogAction;
+  status_before: PresensiKehadiranStatus | null;
+  status_after: PresensiKehadiranStatus | null;
+  method: PresensiKehadiranMethod | null;
+  note: string | null;
+  changed_by: number | null;
+  changed_by_name: string | null;
+  ip: string | null;
+  created_at: string;
+  peserta?: { id: number; nama: string; kode: string | null } | null;
   sesi?: { id: number; name: string } | null;
 }
 

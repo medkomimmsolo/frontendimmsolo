@@ -7,10 +7,9 @@ import { Html5Qrcode } from 'html5-qrcode';
 import api from '@/lib/api';
 import { getDeviceFingerprint } from '@/lib/deviceFingerprint';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import {
   Camera, CameraOff, CheckCircle2, XCircle, Loader2, ArrowLeft,
-  Layers, UserCheck, Clock, MapPin,
+  Layers, Clock, MapPin, Maximize2, Minimize2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Presensi, PresensiSesi } from '@/types';
@@ -48,11 +47,13 @@ function ScanClient({ params }: { params: Promise<{ id: string }> }) {
   const [activeSesiId, setActiveSesiId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const cameraContainerRef = useRef<HTMLDivElement | null>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [last, setLast] = useState<ScanResult | null>(null);
-  const [history, setHistory] = useState<ScanResult[]>([]);
+  const popupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastScanRef = useRef<{ token: string; at: number }>({ token: '', at: 0 });
 
   // Muat detail + daftar sesi.
@@ -79,6 +80,39 @@ function ScanClient({ params }: { params: Promise<{ id: string }> }) {
 
   const activeSesi = sesis.find((s) => s.id === activeSesiId) || null;
 
+  useEffect(() => {
+    const updateFullscreenState = () => {
+      setIsFullscreen(document.fullscreenElement === cameraContainerRef.current);
+    };
+    document.addEventListener('fullscreenchange', updateFullscreenState);
+    return () => document.removeEventListener('fullscreenchange', updateFullscreenState);
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    const cameraContainer = cameraContainerRef.current;
+    if (!cameraContainer) return;
+    try {
+      if (document.fullscreenElement === cameraContainer) {
+        await document.exitFullscreen();
+      } else if (!document.fullscreenElement) {
+        await cameraContainer.requestFullscreen();
+      } else {
+        toast.error('Tutup mode layar penuh yang sedang aktif terlebih dahulu.');
+      }
+    } catch {
+      toast.error('Tidak dapat mengubah mode layar penuh pada browser ini.');
+    }
+  }, []);
+
+  const showScanPopup = useCallback((result: ScanResult) => {
+    if (popupTimeoutRef.current) clearTimeout(popupTimeoutRef.current);
+    setLast(result);
+    popupTimeoutRef.current = setTimeout(() => {
+      setLast(null);
+      popupTimeoutRef.current = null;
+    }, 5000);
+  }, []);
+
   const handlePayload = useCallback(
     async (payload: string) => {
       const now = Date.now();
@@ -102,21 +136,14 @@ function ScanClient({ params }: { params: Promise<{ id: string }> }) {
           sesiName: d.sesi_name ?? activeSesi?.name,
           at: now,
         };
-        setLast(entry);
-        setHistory((prev) => [entry, ...prev.slice(0, 29)]);
-        if (d.already) {
-          toast(`${d.peserta.nama} sudah tercatat`, { icon: 'ℹ️' });
-        } else {
-          toast.success(`${d.peserta.nama} — ${d.status}`);
-        }
+        showScanPopup(entry);
       } catch (error) {
         const err = error as { response?: { data?: { message?: string } } };
         const msg = err.response?.data?.message || 'QR tidak dikenali';
-        toast.error(msg);
-        setLast({ id: 0, nama: msg, status: 'error', already: false, at: now, error: true });
+        showScanPopup({ id: 0, nama: msg, status: 'error', already: false, at: now, error: true });
       }
     },
-    [id, activeSesi]
+    [id, activeSesi, showScanPopup]
   );
 
   const startScan = useCallback(async () => {
@@ -138,10 +165,16 @@ function ScanClient({ params }: { params: Promise<{ id: string }> }) {
       } catch {
         // biarkan start() memicu prompt izin lalu fallback facingMode
       }
+      const desktopVideoConstraints: MediaTrackConstraints = window.matchMedia('(min-width: 768px)').matches
+        ? { width: { ideal: 1280 }, height: { ideal: 720 }, aspectRatio: { ideal: 16 / 9 } }
+        : {};
+      const videoConstraints: MediaTrackConstraints = typeof cameraConfig === 'string'
+        ? { deviceId: { exact: cameraConfig }, ...desktopVideoConstraints }
+        : { ...cameraConfig, ...desktopVideoConstraints };
       scannerRef.current = scanner;
       await scanner.start(
         cameraConfig,
-        { fps: 10, qrbox: { width: 320, height: 320 }, aspectRatio: 1.0 },
+        { fps: 10, videoConstraints },
         (decodedText) => { handlePayload(decodedText); },
         () => { /* abaikan error decode per-frame */ }
       );
@@ -187,6 +220,7 @@ function ScanClient({ params }: { params: Promise<{ id: string }> }) {
       if (scanner) {
         scanner.stop().then(() => scanner.clear()).catch(() => {});
       }
+      if (popupTimeoutRef.current) clearTimeout(popupTimeoutRef.current);
     };
   }, []);
 
@@ -244,95 +278,72 @@ function ScanClient({ params }: { params: Promise<{ id: string }> }) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-        {/* Kamera besar — hampir penuh lebar layar. */}
-        <div className="xl:col-span-2">
-          <div className="relative rounded-3xl overflow-hidden bg-slate-900 border border-slate-800 shadow-lg">
-            <div id={SCANNER_ID} className="w-full min-h-[420px] sm:min-h-[560px] xl:min-h-[640px]" />
-            {!isScanning && (
-              <div className="absolute inset-0 flex items-center justify-center text-center text-slate-300 px-6">
-                <div>
-                  <Camera className="w-12 h-12 mx-auto mb-3 opacity-60" />
-                  <p className="text-sm">Menyiapkan kamera… Tekan <strong>Mulai</strong> bila tidak muncul otomatis.</p>
-                </div>
+      <div className="w-full">
+        <div
+          ref={cameraContainerRef}
+          className={`relative w-full overflow-hidden bg-slate-900 border border-slate-800 shadow-lg [&_video]:!h-full [&_video]:!w-full [&_video]:!object-contain ${
+            isFullscreen
+              ? 'h-screen w-screen aspect-auto rounded-none'
+              : 'aspect-[9/16] md:aspect-video rounded-3xl'
+          }`}
+        >
+          <div id={SCANNER_ID} className="h-full w-full" />
+          {!isScanning && (
+            <div className="absolute inset-0 flex items-center justify-center text-center text-slate-300 px-6">
+              <div>
+                <Camera className="w-12 h-12 mx-auto mb-3 opacity-60" />
+                <p className="text-sm">Menyiapkan kamera… Tekan <strong>Mulai</strong> bila tidak muncul otomatis.</p>
               </div>
-            )}
-            <div className="absolute top-3 left-3 flex items-center gap-2 bg-black/50 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold text-white">
-              <span className={`inline-block w-2.5 h-2.5 rounded-full ${isScanning ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}`} />
-              {isScanning ? 'Kamera aktif' : 'Kamera nonaktif'}
             </div>
+          )}
+          <div className="absolute top-3 left-3 z-10 flex items-center gap-2 bg-black/50 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold text-white">
+            <span className={`inline-block w-2.5 h-2.5 rounded-full ${isScanning ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}`} />
+            {isScanning ? 'Kamera aktif' : 'Kamera nonaktif'}
           </div>
-        </div>
-
-        {/* Hasil scan terakhir + riwayat. */}
-        <div className="space-y-4">
-          <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs p-5">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Hasil Scan Terakhir</div>
-            {!last ? (
-              <p className="text-sm text-slate-400 py-6 text-center">Belum ada peserta yang dipindai.</p>
-            ) : last.error ? (
-              <div className="text-center py-4">
-                <XCircle className="w-12 h-12 text-red-400 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-red-600">{last.nama}</p>
-              </div>
-            ) : (
-              <div className="text-center">
-                {last.status === 'error' ? (
-                  <XCircle className="w-12 h-12 text-red-400 mx-auto mb-2" />
-                ) : (
-                  <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
-                )}
-                <div className="text-lg font-bold text-slate-800">{last.nama}</div>
-                {last.kode && <div className="text-xs text-slate-400">Kode {last.kode}</div>}
-                <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-                    last.status === 'telat' ? 'bg-amber-50 text-amber-600 border-amber-200'
-                    : last.status === 'hadir' ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                    : 'bg-slate-100 text-slate-500 border-slate-200'
-                  }`}>
-                    {last.status}
-                  </span>
-                  {last.already && <Badge className="bg-slate-100 text-slate-500 border-slate-200">sudah tercatat</Badge>}
-                </div>
-                <div className="mt-3 space-y-1 text-xs text-slate-500">
-                  {last.asal && <div className="flex items-center justify-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {last.asal}</div>}
-                  {last.sesiName && <div className="flex items-center justify-center gap-1.5"><Layers className="w-3.5 h-3.5" /> {last.sesiName}</div>}
-                  <div className="flex items-center justify-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {new Date(last.at).toLocaleTimeString('id-ID')}</div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Riwayat ({history.length})</div>
-              {history.length > 0 && (
-                <button onClick={() => setHistory([])} className="text-[11px] font-semibold text-slate-400 hover:text-red-600">
-                  Bersihkan
-                </button>
-              )}
-            </div>
-            {history.length === 0 ? (
-              <p className="text-sm text-slate-400 py-4 text-center">Belum ada scan.</p>
-            ) : (
-              <div className="space-y-2 max-h-[360px] overflow-y-auto">
-                {history.map((r, i) => (
-                  <div key={i} className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${r.error ? 'border-red-200 bg-red-50' : 'border-slate-200 bg-white'}`}>
-                    {r.error ? <XCircle className="w-4 h-4 text-red-500 shrink-0" /> : <UserCheck className="w-4 h-4 text-emerald-500 shrink-0" />}
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-slate-800 truncate">{r.nama}</div>
-                      <div className="text-[11px] text-slate-400">{new Date(r.at).toLocaleTimeString('id-ID')}{r.sesiName ? ` · ${r.sesiName}` : ''}</div>
-                    </div>
-                    <span className={`text-[11px] font-bold uppercase shrink-0 ${
-                      r.status === 'telat' ? 'text-amber-600' : r.status === 'hadir' ? 'text-emerald-600' : 'text-slate-400'
-                    }`}>{r.status}</span>
+          <Button
+            type="button"
+            onClick={toggleFullscreen}
+            variant="outline"
+            aria-label={isFullscreen ? 'Keluar dari layar penuh' : 'Tampilkan kamera layar penuh'}
+            title={isFullscreen ? 'Keluar dari layar penuh' : 'Layar penuh'}
+            className="absolute top-3 right-3 z-10 h-9 w-9 rounded-full border-white/30 bg-black/50 p-0 text-white backdrop-blur hover:bg-black/70 hover:text-white"
+          >
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </Button>
+          {last && (
+            <div className="pointer-events-none absolute inset-x-3 top-14 z-20 flex justify-center" role="status" aria-live="polite">
+              <div className={`w-full max-w-md rounded-2xl border p-4 shadow-xl backdrop-blur-md ${
+                last.error ? 'border-red-200 bg-white/95' : 'border-emerald-200 bg-white/95'
+              }`}>
+                <div className="flex items-start gap-3">
+                  {last.error
+                    ? <XCircle className="mt-0.5 h-6 w-6 shrink-0 text-red-500" />
+                    : <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-emerald-500" />}
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-xs font-bold uppercase tracking-wider ${last.error ? 'text-red-600' : 'text-emerald-700'}`}>
+                      {last.error ? 'Scan gagal' : last.already ? 'Sudah tercatat' : 'Scan berhasil'}
+                    </p>
+                    <p className="mt-0.5 truncate text-lg font-bold text-slate-900">{last.nama}</p>
+                    {!last.error && (
+                      <>
+                        {last.kode && <p className="text-xs text-slate-500">Kode {last.kode}</p>}
+                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
+                          <span className={`font-bold uppercase ${
+                            last.status === 'telat' ? 'text-amber-600' : 'text-emerald-600'
+                          }`}>{last.status}</span>
+                          {last.asal && <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{last.asal}</span>}
+                          {last.sesiName && <span className="inline-flex items-center gap-1"><Layers className="h-3.5 w-3.5" />{last.sesiName}</span>}
+                          <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{new Date(last.at).toLocaleTimeString('id-ID')}</span>
+                        </div>
+                      </>
+                    )}
                   </div>
-                ))}
+                </div>
               </div>
+            </div>
             )}
           </div>
         </div>
       </div>
-    </div>
   );
 }

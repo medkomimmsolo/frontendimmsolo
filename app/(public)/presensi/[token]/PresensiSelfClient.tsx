@@ -6,7 +6,7 @@ import { useDebounce } from 'use-debounce';
 import { getApiBase } from '@/lib/settings';
 import { getDeviceFingerprint } from '@/lib/deviceFingerprint';
 import { Button } from '@/components/ui/Button';
-import { Loader2, Search, CheckCircle2, UserCheck, MapPin, CalendarDays, AlertCircle, ShieldCheck, QrCode } from 'lucide-react';
+import { Loader2, Search, CheckCircle2, UserCheck, MapPin, CalendarDays, AlertCircle, ShieldCheck, QrCode, Clock, RefreshCw } from 'lucide-react';
 
 interface SesiItem {
   id: number;
@@ -59,6 +59,7 @@ export function PresensiSelfClient({ token }: Props) {
   const [phase, setPhase] = useState<Phase>('validating-qr');
   const [qrError, setQrError] = useState('');
   const [ticket, setTicket] = useState('');
+  const [ticketSecondsLeft, setTicketSecondsLeft] = useState<number | null>(null);
 
   const [query, setQuery] = useState('');
   const [debouncedQuery] = useDebounce(query, 400);
@@ -70,6 +71,21 @@ export function PresensiSelfClient({ token }: Props) {
   const [done, setDone] = useState<{ nama: string; status: string; already: boolean } | null>(null);
   const [submitError, setSubmitError] = useState('');
   const [needsRescan, setNeedsRescan] = useState(false);
+
+  // Countdown masa aktif tiket (5 menit)
+  useEffect(() => {
+    if (phase !== 'ready' || ticketSecondsLeft === null) return;
+    if (ticketSecondsLeft <= 0) {
+      setQrError('Waktu sesi presensi Anda telah habis (5 menit). Silakan pindai ulang QR di layar kegiatan.');
+      setPhase('qr-invalid');
+      setNeedsRescan(true);
+      return;
+    }
+    const timer = setInterval(() => {
+      setTicketSecondsLeft((prev) => (prev !== null && prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [phase, ticketSecondsLeft]);
 
   // 1. Muat info sesi (bawa sesi_id dari QR bila ada).
   useEffect(() => {
@@ -110,6 +126,7 @@ export function PresensiSelfClient({ token }: Props) {
           return;
         }
         setTicket(json.data.ticket);
+        setTicketSecondsLeft(json.data.expires_in || 300);
         setPhase('ready');
       } catch {
         setQrError('Gagal memverifikasi QR.');
@@ -162,6 +179,13 @@ export function PresensiSelfClient({ token }: Props) {
         }
         return;
       }
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        try {
+          navigator.vibrate([100, 50, 100]);
+        } catch {
+          /* ignore */
+        }
+      }
       setDone({ nama: json.data.peserta.nama, status: json.data.status, already: json.data.already });
     } catch {
       setSubmitError('Terjadi kesalahan jaringan. Periksa koneksi Anda lalu coba lagi.');
@@ -199,8 +223,18 @@ export function PresensiSelfClient({ token }: Props) {
             <AlertCircle className="w-8 h-8 text-amber-500" />
           </div>
           <h1 className="text-lg font-bold text-slate-800 mb-1">QR Kedaluwarsa</h1>
-          <p className="text-sm text-slate-500">{qrError}</p>
-          <p className="text-xs text-slate-400 mt-4">Pindai ulang QR terbaru yang ditampilkan di layar kegiatan.</p>
+          <p className="text-sm text-slate-500 mb-4">{qrError}</p>
+          <p className="text-xs text-slate-400 mb-6">Pindai ulang QR terbaru yang ditampilkan di layar kegiatan.</p>
+          <Button
+            onClick={() => {
+              const url = new URL(window.location.href);
+              url.searchParams.delete('qr');
+              window.location.href = url.toString();
+            }}
+            className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold"
+          >
+            <RefreshCw className="w-4 h-4 mr-1.5" /> Pindai Ulang QR
+          </Button>
         </div>
       </div>
     );
@@ -209,17 +243,17 @@ export function PresensiSelfClient({ token }: Props) {
   if (done) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 max-w-md text-center">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 max-w-md text-center animate-in zoom-in-95 duration-200">
           <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
           <h1 className="text-xl font-bold text-slate-800 mb-1">
             {done.already ? 'Anda Sudah Tercatat' : 'Kehadiran Tercatat!'}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">{done.nama}</p>
+          <p className="text-base font-semibold text-slate-700 mt-1">{done.nama}</p>
           {session.active_sesi_name && (
-            <p className="text-xs text-slate-400 mt-0.5">Sesi: {session.active_sesi_name}</p>
+            <p className="text-xs text-slate-500 mt-0.5">Sesi: <strong>{session.active_sesi_name}</strong></p>
           )}
-          <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold mt-4 ${done.status === 'telat' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>
-            {done.status === 'telat' ? 'Telat' : 'Hadir'}
+          <div className={`inline-flex items-center px-3.5 py-1 rounded-full text-xs font-bold mt-4 ${done.status === 'telat' ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'}`}>
+            {done.status === 'telat' ? 'Status: Telat' : 'Status: Hadir Tepat Waktu'}
           </div>
           <p className="text-xs text-slate-400 mt-6">Terima kasih telah melakukan presensi. Anda boleh menutup halaman ini.</p>
         </div>
@@ -241,10 +275,10 @@ export function PresensiSelfClient({ token }: Props) {
             </div>
           )}
           <div className="space-y-1 text-sm text-white/70">
-            {session.location && <div className="flex items-center gap-2"><MapPin className="w-4 h-4" /> {session.location}</div>}
+            {session.location && <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-white/50" /> {session.location}</div>}
             {session.starts_at && (
               <div className="flex items-center gap-2">
-                <CalendarDays className="w-4 h-4" />
+                <CalendarDays className="w-4 h-4 text-white/50" />
                 {new Date(session.starts_at).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' })}
               </div>
             )}
@@ -258,16 +292,37 @@ export function PresensiSelfClient({ token }: Props) {
           </div>
         )}
 
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-2.5 text-xs mb-4 flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 shrink-0" />
-          <span>QR terverifikasi. Satu perangkat hanya dapat presensi untuk satu peserta.</span>
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-3.5 py-2 text-xs flex items-center gap-2 flex-1 min-w-0">
+            <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-600" />
+            <span className="truncate">Anti-Titip: 1 HP = 1 Peserta</span>
+          </div>
+
+          {ticketSecondsLeft !== null && (
+            <div
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border shrink-0 transition-colors ${
+                ticketSecondsLeft <= 45
+                  ? 'bg-amber-50 text-amber-700 border-amber-300 animate-pulse'
+                  : 'bg-white text-slate-700 border-slate-200 shadow-2xs'
+              }`}
+              title="Sisa waktu sebelum tiket kedaluwarsa"
+            >
+              <Clock className="w-3.5 h-3.5 text-slate-400" />
+              <span>
+                Tiket: {Math.floor(ticketSecondsLeft / 60)}:{String(ticketSecondsLeft % 60).padStart(2, '0')}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-          <label className="block text-sm font-bold text-slate-900 mb-2">Cari Nama Anda</label>
+          <label htmlFor="self-search-input" className="block text-sm font-bold text-slate-900 mb-2">
+            Cari Nama Anda
+          </label>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
+              id="self-search-input"
               type="text"
               value={query}
               onChange={(e) => { setQuery(e.target.value); setSelected(null); setSubmitError(''); setNeedsRescan(false); }}
@@ -279,26 +334,34 @@ export function PresensiSelfClient({ token }: Props) {
           {isSearching && <div className="text-center py-4"><Loader2 className="w-5 h-5 animate-spin text-[#c20000] mx-auto" /></div>}
 
           {!isSearching && results.length > 0 && (
-            <div className="mt-3 space-y-2 max-h-72 overflow-y-auto">
+            <div aria-live="polite" className="mt-3 space-y-2 max-h-72 overflow-y-auto">
               {results.map((r) => {
                 const hadir = r.kehadiran && ['hadir', 'telat'].includes(r.kehadiran.status);
                 return (
                   <button
                     key={r.id}
+                    type="button"
                     disabled={!!hadir || !session.is_receiving}
                     onClick={() => { setSelected(r); setSubmitError(''); setNeedsRescan(false); }}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-left transition-colors ${
-                      selected?.id === r.id ? 'border-[#c20000] bg-red-50/60' : 'border-slate-200 hover:border-slate-300'
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-left transition-all ${
+                      selected?.id === r.id ? 'border-[#c20000] bg-red-50/60 shadow-2xs' : 'border-slate-200 hover:border-slate-300'
                     } ${hadir ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
-                    <span>
-                      <span className="block text-sm font-semibold text-slate-800">{r.nama}</span>
-                      {r.asal && <span className="block text-xs text-slate-500">{r.asal}</span>}
+                    <span className="min-w-0 pr-2">
+                      <span className="block text-sm font-semibold text-slate-800 truncate">{r.nama}</span>
+                      <span className="flex items-center gap-2 mt-0.5 flex-wrap">
+                        {r.asal && <span className="text-xs text-slate-500 font-medium">{r.asal}</span>}
+                        {r.kode && (
+                          <span className="inline-block px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-600">
+                            #{r.kode}
+                          </span>
+                        )}
+                      </span>
                     </span>
                     {hadir ? (
                       <span className="text-xs font-bold text-emerald-600 shrink-0">Sudah hadir</span>
                     ) : (
-                      <span className={`w-5 h-5 rounded-full border-2 shrink-0 ${selected?.id === r.id ? 'border-[#c20000] bg-[#c20000]' : 'border-slate-300'}`} />
+                      <span className={`w-5 h-5 rounded-full border-2 shrink-0 transition-colors ${selected?.id === r.id ? 'border-[#c20000] bg-[#c20000]' : 'border-slate-300'}`} />
                     )}
                   </button>
                 );
@@ -317,6 +380,7 @@ export function PresensiSelfClient({ token }: Props) {
                 <p>{submitError}</p>
                 {needsRescan && (
                   <button
+                    type="button"
                     onClick={() => {
                       const url = new URL(window.location.href);
                       url.searchParams.delete('qr');

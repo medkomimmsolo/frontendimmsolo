@@ -4,24 +4,27 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Download, Copy, Check, RefreshCw, ShieldCheck, Upload, X, ImageDown } from 'lucide-react';
+import { Download, Copy, Check, RefreshCw, ShieldCheck, Upload, X, ImageDown, Tv } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { exportQrPng, getStoredQrLogo, storeQrLogo } from '@/lib/qrExport';
-import { Presensi, PresensiPeserta, PresensiSesi } from '@/types';
+import { Presensi, PresensiPeserta, PresensiSesi, PresensiStats } from '@/types';
+import { PresensiProjectorModal } from '@/components/presensi/PresensiProjectorModal';
 
 interface Props {
   presensi: Presensi;
   peserta: PresensiPeserta[];
   activeSesi?: PresensiSesi | null;
   onRefreshPeserta: () => void;
+  stats?: PresensiStats | null;
 }
 
-export function PresensiQrPanel({ presensi, peserta, activeSesi }: Props) {
+export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props) {
   const [copied, setCopied] = useState(false);
   const [payload, setPayload] = useState<string>('');
   const [secondsLeft, setSecondsLeft] = useState<number>(presensi.qr_refresh_seconds || 15);
   const [isLoading, setIsLoading] = useState(false);
+  const [showProjector, setShowProjector] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Logo tengah QR peserta (upload mandiri, tersimpan per-browser).
@@ -216,7 +219,10 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi }: Props) {
                   {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button onClick={() => setShowProjector(true)} className="h-10 px-4 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold">
+                  <Tv className="w-4 h-4 mr-1.5" /> Mode Layar Penuh (Proyektor)
+                </Button>
                 <Button onClick={fetchQr} variant="outline" className="h-10 px-4 rounded-xl text-xs font-bold">
                   <RefreshCw className="w-4 h-4 mr-1.5" /> Refresh QR
                 </Button>
@@ -225,7 +231,7 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi }: Props) {
                 </Button>
               </div>
               <p className="text-xs text-slate-400">
-                Catatan: QR yang diunduh hanya berlaku sementara. Untuk ditampilkan, gunakan QR live di halaman ini.
+                Catatan: QR yang diunduh hanya berlaku sementara. Untuk ditampilkan, gunakan QR live di halaman ini atau klik Mode Layar Penuh.
               </p>
             </div>
           </CardContent>
@@ -321,6 +327,17 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi }: Props) {
       {!canSelf && !canScan && (
         <p className="text-sm text-slate-400">Mode QR tidak aktif untuk sesi ini.</p>
       )}
+
+      <PresensiProjectorModal
+        isOpen={showProjector}
+        onClose={() => setShowProjector(false)}
+        presensi={presensi}
+        activeSesi={activeSesi}
+        qrUrl={qrUrl}
+        secondsLeft={secondsLeft}
+        interval={interval}
+        stats={stats}
+      />
     </div>
   );
 }
