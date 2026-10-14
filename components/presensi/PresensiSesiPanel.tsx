@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Plus, Trash2, Pencil, Play, Pause, Loader2, Layers } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import api from '@/lib/api';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { PresensiSesi } from '@/types';
@@ -92,7 +93,12 @@ export function PresensiSesiPanel({ presensiId, sesis, activeSesiId, onSelect, o
       toast.error('Kegiatan harus punya minimal satu sesi');
       return;
     }
-    if (await confirm({ message: `Hapus sesi "${s.name}" beserta catatan kehadirannya?`, tone: 'danger' })) {
+    if (await confirm({
+      title: 'Hapus sesi presensi?',
+      message: `Sesi "${s.name}" dan catatan kehadirannya akan dihapus.`,
+      confirmText: 'Hapus sesi',
+      tone: 'danger',
+    })) {
       try {
         await api.delete(`/presensi-sesi/${s.id}`);
         toast.success('Sesi dihapus');
@@ -111,8 +117,8 @@ export function PresensiSesiPanel({ presensiId, sesis, activeSesiId, onSelect, o
       await api.put(`/presensi-sesi/${s.id}/toggle-open`, { is_open: !s.is_open });
       toast.success(s.is_open ? `Sesi "${s.name}" ditutup` : `Sesi "${s.name}" dibuka`);
       onChanged();
-    } catch {
-      toast.error('Gagal mengubah status sesi');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal mengubah status sesi'));
     } finally {
       setToggling(null);
     }

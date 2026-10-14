@@ -7,6 +7,7 @@ import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Loader2, ArrowLeft, Link as LinkIcon, FileText, UploadCloud, Link2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import Link from 'next/link';
 
 export default function CreateDocument() {
@@ -101,7 +102,7 @@ export default function CreateDocument() {
     } catch (error: any) {
       console.error('Failed to add document', error);
       if (error.response?.status === 413) {
-        toast.error('Ukuran berkas melebihi batas upload web server (Error 413: Payload Too Large). Silakan gunakan tab "Link URL" (Google Drive) atau hubungi admin server untuk menaikkan post_max_size / client_max_body_size.', { duration: 7000 });
+        toast.error(getUserFacingErrorMessage(error, 'Ukuran berkas melebihi batas upload web server (Error 413: Payload Too Large). Silakan gunakan tab "Link URL" (Google Drive) atau hubungi admin server untuk menaikkan post_max_size / client_max_body_size.'), { duration: 7000 });
       } else {
         toast.error(error.response?.data?.message || 'Gagal menambahkan dokumen');
       }

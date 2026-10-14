@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { MessageSquare, Loader2, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getApiBase } from '@/lib/settings';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 
 export default function KontakFormClient() {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -25,8 +26,7 @@ export default function KontakFormClient() {
       setIsSuccess(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (err: any) {
-      const errs = err.response?.data?.errors;
-      toast.error(errs ? Object.values(errs).flat().join(', ') : err.response?.data?.message || 'Gagal mengirim pesan');
+      toast.error(getUserFacingErrorMessage(err, 'Pesan belum terkirim. Periksa isian, lalu coba lagi.'));
     } finally {
       setIsLoading(false);
     }

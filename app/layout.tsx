@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import QueryProvider from '@/providers/QueryProvider';
-import { Toaster } from 'react-hot-toast';
 import SplashScreen from '@/components/ui/SplashScreen';
 import { ProgressBarProvider } from '@/components/providers/ProgressBarProvider';
 import { ConfirmProvider } from '@/components/providers/ConfirmProvider';
@@ -11,6 +10,7 @@ import AosInit from '@/components/providers/AosInit';
 import { getSiteSettings } from '@/lib/siteSettings';
 import { toAbsoluteMediaUrl, toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
 import { headers } from 'next/headers';
+import { ToastProvider } from '@/components/providers/ToastProvider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -156,23 +156,7 @@ export default async function RootLayout({
             <SwRegister />
             <AosInit />
             {children}
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: '#ffffff',
-                  color: '#0f172a',
-                  border: '1px solid rgba(220, 38, 38, 0.2)',
-                },
-                success: {
-                  iconTheme: {
-                    primary: '#dc2626',
-                    secondary: '#ffffff',
-                  },
-                },
-              }}
-            />
+            <ToastProvider />
                       </ConfirmProvider>
           </ProgressBarProvider>
         </QueryProvider>

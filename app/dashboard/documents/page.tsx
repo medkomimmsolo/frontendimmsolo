@@ -19,6 +19,7 @@ import {
   X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import Link from 'next/link';
 import { useDebounce } from 'use-debounce';
@@ -90,7 +91,7 @@ export default function DocumentsManagement() {
       setSelectedDocuments([]);
     } catch (error) {
       console.error('Failed to fetch documents', error);
-      toast.error('Gagal memuat data dokumen');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat data dokumen'));
     } finally {
       setIsLoading(false);
     }
@@ -105,14 +106,14 @@ export default function DocumentsManagement() {
   }, [debouncedSearch]);
 
   const handleDelete = async (id: number) => {
-    if (await confirm({ message: 'Apakah Anda yakin ingin memindahkan dokumen ini ke tempat sampah?', tone: 'danger' })) {
+    if (await confirm({ title: 'Pindahkan dokumen ke sampah?', message: 'Dokumen tidak lagi tampil di halaman publik dan dapat dipulihkan dari tempat sampah.', confirmText: 'Pindahkan ke sampah', tone: 'danger' })) {
       try {
         await api.delete(`/documents/${id}`);
         toast.success('Dokumen berhasil dihapus');
         fetchDocuments();
       } catch (error) {
         console.error('Failed to delete', error);
-        toast.error('Gagal menghapus dokumen');
+        toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus dokumen'));
       }
     }
   };
@@ -135,7 +136,7 @@ export default function DocumentsManagement() {
 
   const applyBulkAction = async () => {
     if (bulkAction === 'trash' && selectedDocuments.length > 0) {
-      if (await confirm({ message: `Apakah Anda yakin ingin menghapus ${selectedDocuments.length} dokumen?`, tone: 'danger' })) {
+      if (await confirm({ title: `Hapus ${selectedDocuments.length} dokumen?`, message: 'Dokumen yang dipilih akan dihapus.', confirmText: 'Hapus dokumen', tone: 'danger' })) {
         setIsBulkLoading(true);
         try {
           await Promise.all(selectedDocuments.map(id => api.delete(`/documents/${id}`)));
@@ -144,7 +145,7 @@ export default function DocumentsManagement() {
           setBulkAction('');
         } catch (error) {
           console.error('Failed to delete some documents', error);
-          toast.error('Gagal menghapus beberapa dokumen');
+          toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus beberapa dokumen'));
         } finally {
           setIsBulkLoading(false);
         }
@@ -154,7 +155,7 @@ export default function DocumentsManagement() {
     }
   };
 
-  const copyLink = (doc: any) => {
+  const copyLink = async (doc: any) => {
     let url = '';
     if (doc.slug) {
       url = `${window.location.origin}/files/${doc.slug}`;
@@ -163,10 +164,14 @@ export default function DocumentsManagement() {
     } else {
       url = `${window.location.origin}/dokumen`;
     }
-    navigator.clipboard.writeText(url);
-    setCopiedId(doc.id);
-    toast.success('Link berkas berhasil disalin!');
-    setTimeout(() => setCopiedId(null), 2000);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(doc.id);
+      toast.success('Tautan dokumen berhasil disalin.');
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Tautan belum tersalin. Periksa izin clipboard browser, lalu coba lagi.'));
+    }
   };
 
   const openEditModal = (doc: any) => {

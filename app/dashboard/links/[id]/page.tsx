@@ -13,6 +13,7 @@ import {
 import LinkItemIcon from '@/components/post/LinkItemIcon';
 import { LINK_ICON_OPTIONS } from '@/lib/linkIcons';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
@@ -91,8 +92,8 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
         setAvatarValue(data.avatar);
         setAvatarPreview(data.avatar);
       }
-    } catch {
-      toast.error('Gagal memuat data');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat data'));
     } finally {
       setIsLoading(false);
     }
@@ -159,13 +160,13 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
   };
 
   const handleDeleteItem = async (id: number) => {
-    if (!(await confirm({ message: 'Hapus tautan ini?', tone: 'danger' }))) return;
+    if (!(await confirm({ title: 'Hapus tautan?', message: 'Tautan ini akan dihapus dari halaman link.', confirmText: 'Hapus tautan', tone: 'danger' }))) return;
     try {
       await api.delete(`/link-items/${id}`);
       toast.success('Tautan dihapus');
       fetchPage();
-    } catch {
-      toast.error('Gagal menghapus');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus'));
     }
   };
 
@@ -179,8 +180,8 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
       await api.put(`/link-pages/${pageId}/reorder`, {
         items: reordered.map((it, i) => ({ id: it.id, order: i + 1 })),
       });
-    } catch {
-      toast.error('Gagal menyimpan urutan');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menyimpan urutan'));
       fetchPage();
     }
   };
@@ -189,8 +190,8 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
     try {
       await api.put(`/link-items/${item.id}`, { is_active: !item.is_active });
       fetchPage();
-    } catch {
-      toast.error('Gagal mengubah status');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal mengubah status'));
     }
   };
 
@@ -218,12 +219,16 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
 
   const publicUrl = page ? `https://immsolo.or.id/links/${page.slug}` : '';
 
-  const copyUrl = () => {
+  const copyUrl = async () => {
     if (publicUrl) {
-      navigator.clipboard.writeText(publicUrl);
-      setCopied(true);
-      toast.success('Link disalin ke clipboard');
-      setTimeout(() => setCopied(false), 2000);
+      try {
+        await navigator.clipboard.writeText(publicUrl);
+        setCopied(true);
+        toast.success('Tautan halaman berhasil disalin.');
+        setTimeout(() => setCopied(false), 2000);
+      } catch (error) {
+        toast.error(getUserFacingErrorMessage(error, 'Tautan belum tersalin. Periksa izin clipboard browser, lalu coba lagi.'));
+      }
     }
   };
 

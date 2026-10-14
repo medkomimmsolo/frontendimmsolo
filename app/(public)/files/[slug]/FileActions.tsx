@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Download, Copy, Check, Share2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 
 interface FileActionsProps {
   slug: string;
@@ -22,12 +23,16 @@ export default function FileActions({
 }: FileActionsProps) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopyLink = () => {
+  const handleCopyLink = async () => {
     const url = typeof window !== 'undefined' ? `${window.location.origin}/files/${slug}` : `https://immsolo.or.id/files/${slug}`;
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    toast.success('Link berkas berhasil disalin!');
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      toast.success('Tautan berkas berhasil disalin.');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Tautan belum tersalin. Periksa izin clipboard browser, lalu coba lagi.'));
+    }
   };
 
   const handleShare = async () => {
@@ -39,8 +44,8 @@ export default function FileActions({
           text: `Unduh berkas: ${title}`,
           url,
         });
-      } catch (err) {
-        // User cancelled or share failed, fallback to copy
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return;
         handleCopyLink();
       }
     } else {
@@ -104,4 +109,3 @@ export default function FileActions({
     </div>
   );
 }
-

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { Loader2, ArrowLeft, Mail, Lock, ShieldCheck, Eye, EyeOff, AlertCircle, User } from 'lucide-react';
 import Link from 'next/link';
 import { getApiBase, normalizeSettings } from '@/lib/settings';
@@ -61,12 +62,11 @@ export default function Login() {
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      let msg = error.response?.data?.message || 'Login gagal. Periksa kembali email/username dan password Anda.';
+      let msg = getUserFacingErrorMessage(error, 'Login gagal. Periksa kembali email/username dan password Anda.');
       if (error.response?.status === 429) {
         msg = 'Terlalu banyak percobaan login. Silakan tunggu sekitar 1 menit sebelum mencoba kembali.';
       }
       setErrorMessage(msg);
-      toast.error(msg);
     } finally {
       setIsLoading(false);
     }

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -58,7 +59,7 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
         });
       } catch (err: any) {
         console.error(err);
-        toast.error('Gagal memuat data pengguna');
+        toast.error(getUserFacingErrorMessage(err, 'Gagal memuat data pengguna'));
         router.push('/dashboard/users');
       } finally {
         setIsFetching(false);

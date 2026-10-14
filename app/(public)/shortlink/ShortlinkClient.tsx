@@ -9,6 +9,7 @@ import { LinkIcon, Loader2, ArrowRight, ShieldCheck, CheckCircle2, Copy, Key, Se
 import toast from 'react-hot-toast';
 import { getApiBase, normalizeSettings } from '@/lib/settings';
 import { QRCodeSVG } from 'qrcode.react';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 
 export default function PengajuanShortlink() {
   const [activeTab, setActiveTab] = useState<'pengajuan' | 'aktivasi' | 'status'>('pengajuan');
@@ -84,8 +85,8 @@ export default function PengajuanShortlink() {
       const res = await axios.get(`${getApiBase()}/captcha`);
       setCaptcha(res.data.data);
       setCaptchaAnswer('');
-    } catch {
-      toast.error('Gagal memuat captcha, silakan coba lagi.');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Captcha gagal dimuat. Periksa koneksi lalu coba lagi.'));
     } finally {
       setCaptchaLoading(false);
     }
@@ -100,10 +101,14 @@ export default function PengajuanShortlink() {
     setFormData({ ...formData, slug: randomString });
   };
 
-  const copyToClipboard = () => {
+  const copyToClipboard = async () => {
     const text = `immsolo.or.id/${formData.slug}`;
-    navigator.clipboard.writeText(text);
-    toast.success('Link disalin ke clipboard');
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Tautan shortlink berhasil disalin.');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Tautan belum tersalin. Periksa izin clipboard browser, lalu coba lagi.'));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -144,9 +149,9 @@ export default function PengajuanShortlink() {
     } catch (error: any) {
       const status = error.response?.status;
       if (status === 429) {
-        toast.error(error.response?.data?.message || 'Batas pengajuan harian tercapai. Coba lagi besok.');
+        toast.error(getUserFacingErrorMessage(error, 'Batas pengajuan harian tercapai. Coba lagi besok.'));
       } else {
-        toast.error(error.response?.data?.message || 'Terjadi kesalahan, silakan coba lagi');
+        toast.error(getUserFacingErrorMessage(error, 'Pengajuan belum terkirim. Periksa data, lalu coba lagi.'));
       }
       fetchCaptcha();
     } finally {
@@ -159,13 +164,13 @@ export default function PengajuanShortlink() {
     setIsActivating(true);
     try {
       const res = await axios.post(`${getApiBase()}/shortlinks/activate`, activationData);
-      toast.success(res.data.message);
+      toast.success('Shortlink berhasil diaktifkan.');
       setActivationData({ slug: '', phone_number: '', token: '' });
       setActiveTab('status');
       setStatusQuery(activationData.slug);
       handleCheckStatus(null, activationData.slug);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Gagal mengaktifkan shortlink');
+      toast.error(getUserFacingErrorMessage(error, 'Tautan belum aktif. Periksa data aktivasi, lalu coba lagi.'));
     } finally {
       setIsActivating(false);
     }
@@ -185,7 +190,7 @@ export default function PengajuanShortlink() {
       if (error.response?.status === 404) {
         setStatusResult({ not_found: true });
       } else {
-        toast.error('Gagal mengecek status');
+        toast.error(getUserFacingErrorMessage(error, 'Status tautan belum dapat diperiksa. Coba lagi.'));
       }
     } finally {
       setIsChecking(false);

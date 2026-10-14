@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { Badge } from '@/components/ui/Badge';
 import { History, Loader2, RefreshCw, UserRound } from 'lucide-react';
 import { PresensiKehadiranLog, PresensiSesi } from '@/types';
@@ -43,8 +44,8 @@ export function PresensiHistoryPanel({ presensiId, activeSesiId, sesis }: Props)
         params: { sesi_id: sesiId ?? undefined },
       });
       setItems(res.data.data.items || []);
-    } catch {
-      toast.error('Gagal memuat riwayat kehadiran');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat riwayat kehadiran'));
     } finally {
       setIsLoading(false);
     }

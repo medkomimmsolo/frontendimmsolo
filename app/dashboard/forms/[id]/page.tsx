@@ -9,6 +9,7 @@ import { ArrowLeft, Plus, Edit, Trash2, Loader2, ExternalLink, Download, Users, 
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import FormFillClient from '@/components/form/FormFillClient';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 import ImageCropperModal from '@/components/dashboard/ImageCropperModal';
@@ -107,8 +108,8 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       setSettingsMaxResponses(data.max_responses ? String(data.max_responses) : '');
       setHeaderImageVal(data.header_image || null);
       setSettingsHeaderImageSize(data.header_image_size || 'banner');
-    } catch {
-      toast.error('Gagal memuat formulir');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat formulir'));
     } finally {
       setIsLoading(false);
     }
@@ -123,8 +124,8 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       setResponses(payload.data || []);
       setRespTotalPages(payload.last_page || 1);
       setRespTotal(payload.total || 0);
-    } catch {
-      toast.error('Gagal memuat data pendaftar');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat data pendaftar'));
     }
   }, [formId, respPage]);
 
@@ -204,19 +205,19 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
     try {
       await api.put(`/form-fields/${item.id}`, { required: !item.required });
       fetchForm();
-    } catch {
-      toast.error('Gagal mengubah status wajib');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal mengubah status wajib'));
     }
   };
 
   const handleDeleteField = async (id: number) => {
-    if (!(await confirm({ message: 'Hapus kolom ini? Jawaban terkait tetap tersimpan.', tone: 'danger' }))) return;
+    if (!(await confirm({ title: 'Hapus kolom?', message: 'Kolom ini akan dihapus. Jawaban yang sudah masuk tetap tersimpan.', confirmText: 'Hapus kolom', tone: 'danger' }))) return;
     try {
       await api.delete(`/form-fields/${id}`);
       toast.success('Kolom dihapus');
       fetchForm();
-    } catch {
-      toast.error('Gagal menghapus');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus'));
     }
   };
 
@@ -228,8 +229,8 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
     setFields(reordered);
     try {
       await api.put(`/form-admin/${formId}/reorder`, { items: reordered.map((f, i) => ({ id: f.id, order: i + 1 })) });
-    } catch {
-      toast.error('Gagal menyimpan urutan');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menyimpan urutan'));
       fetchForm();
     }
   };
@@ -244,8 +245,8 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       });
       toast.success('Kolom diduplikat');
       fetchForm();
-    } catch {
-      toast.error('Gagal menduplikat');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menduplikat'));
     }
   };
 
@@ -295,7 +296,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
 
 
   const handleDeleteResponse = async (id: number) => {
-    if (!(await confirm({ message: 'Hapus data pendaftar ini?', tone: 'danger' }))) return;
+    if (!(await confirm({ title: 'Hapus data pendaftar?', message: 'Data pendaftar ini akan dihapus.', confirmText: 'Hapus data', tone: 'danger' }))) return;
     try {
       await api.delete(`/form-responses/${id}`);
       toast.success('Data dihapus');
@@ -303,8 +304,8 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       if (selectedResponse?.id === id) {
         setSelectedResponse(null);
       }
-    } catch {
-      toast.error('Gagal menghapus');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus'));
     }
   };
 
@@ -356,8 +357,8 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       XLSX.utils.book_append_sheet(wb, ws, 'Data Responden');
       XLSX.writeFile(wb, `pendaftar-${form?.slug || formId}.xlsx`);
       toast.success('File Excel berhasil diunduh', { id: toastId });
-    } catch {
-      toast.error('Gagal mengekspor file Excel', { id: toastId });
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal mengekspor file Excel'), { id: toastId });
     }
   };
 

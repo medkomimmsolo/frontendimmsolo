@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Loader2, Folder, Image as ImageIcon, Trash2, Calendar, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { PageHeader } from '@/components/ui/PageHeader';
 
@@ -91,7 +92,7 @@ export default function MediaLibrary() {
       setSelectedGroup((prev) => (prev && keys.includes(prev) ? prev : (keys[0] ?? '')));
     } catch (error) {
       console.error(error);
-      toast.error('Gagal memuat media library');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat media library'));
     } finally {
       setIsLoading(false);
     }
@@ -102,7 +103,12 @@ export default function MediaLibrary() {
   }, []);
 
   const handleDelete = async (path: string) => {
-    if (!(await confirm({ message: 'Apakah Anda yakin ingin menghapus file ini? Ini mungkin merusak tampilan website jika file masih digunakan.', tone: 'danger' }))) {
+    if (!(await confirm({
+      title: 'Hapus file media?',
+      message: 'File ini akan dihapus permanen. Jika masih digunakan, gambar atau dokumen pada website dapat rusak.',
+      confirmText: 'Hapus file',
+      tone: 'danger',
+    }))) {
       return;
     }
 
@@ -112,7 +118,7 @@ export default function MediaLibrary() {
       fetchMedia();
     } catch (error) {
       console.error(error);
-      toast.error('Gagal menghapus file');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus file'));
     }
   };
 

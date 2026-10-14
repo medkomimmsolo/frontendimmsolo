@@ -16,6 +16,7 @@ import {
   Trash2,
   Eye, Check, X, UserCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { formatDate } from '@/lib/utils';
 import { Blog, Category } from '@/types';
@@ -87,7 +88,7 @@ export default function BlogManagement() {
       setSelectedBlogs([]); // Reset selections on fetch
     } catch (error) {
       console.error('Failed to fetch blogs', error);
-      toast.error('Gagal memuat data post');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat data post'));
     } finally {
       setIsLoading(false);
     }
@@ -106,14 +107,14 @@ export default function BlogManagement() {
   }, [debouncedSearch, statusFilter, categoryFilter]);
 
   const handleDelete = async (id: number) => {
-    if (await confirm({ message: 'Apakah Anda yakin ingin memindahkan post ini ke tempat sampah?', tone: 'danger' })) {
+    if (await confirm({ title: 'Pindahkan post ke sampah?', message: 'Post tidak lagi tampil di halaman publik dan dapat dipulihkan dari tempat sampah.', confirmText: 'Pindahkan ke sampah', tone: 'danger' })) {
       try {
         await api.delete(`/blogs/${id}`);
         toast.success('Post berhasil dihapus');
         fetchBlogs();
       } catch (error) {
         console.error('Failed to delete', error);
-        toast.error('Gagal menghapus post');
+        toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus post'));
       }
     }
   };
@@ -133,7 +134,7 @@ export default function BlogManagement() {
   const handleReject = async (id: number) => {
     const noteInput = window.prompt('Catatan revisi untuk penulis (opsional, maks 2000 karakter):');
     if (noteInput === null) return; // batal
-    if (!(await confirm({ message: 'Tolak post ini dan kirim catatan revisi?', tone: 'danger' }))) return;
+    if (!(await confirm({ title: 'Tolak post?', message: 'Post akan dikembalikan kepada penulis bersama catatan revisi.', confirmText: 'Tolak post', tone: 'danger' }))) return;
     try {
       await api.post(`/blogs/${id}/reject`, noteInput ? { review_note: noteInput } : {});
       toast.success('Post ditolak dengan catatan revisi');
@@ -162,7 +163,7 @@ export default function BlogManagement() {
 
   const applyBulkAction = async () => {
     if (bulkAction === 'trash' && selectedBlogs.length > 0) {
-      if (await confirm({ message: `Apakah Anda yakin ingin menghapus ${selectedBlogs.length} post?`, tone: 'danger' })) {
+      if (await confirm({ title: `Hapus ${selectedBlogs.length} post?`, message: 'Post yang dipilih akan dihapus.', confirmText: 'Hapus post', tone: 'danger' })) {
         setIsBulkLoading(true);
         try {
           // Send bulk delete request or delete one by one
@@ -172,7 +173,7 @@ export default function BlogManagement() {
           setBulkAction('');
         } catch (error) {
           console.error('Failed to delete some blogs', error);
-          toast.error('Gagal menghapus beberapa post');
+          toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus beberapa post'));
         } finally {
           setIsBulkLoading(false);
         }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { Button } from '@/components/ui/Button';
 import { Loader2, Upload, FileSpreadsheet, ClipboardList, Download, X } from 'lucide-react';
 
@@ -102,7 +103,7 @@ export function PresensiImportModal({ isOpen, presensiId, onClose, onImported }:
       }
     } catch (error) {
       console.error(error);
-      toast.error('Gagal membaca file Excel');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal membaca file Excel'));
     }
   };
 

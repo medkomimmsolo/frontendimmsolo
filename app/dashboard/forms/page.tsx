@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Plus, Search, Edit, Trash2, Loader2, ClipboardList, ExternalLink, UserCheck, X, Calendar, Users, ShieldCheck, ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
@@ -57,8 +58,8 @@ export default function FormsManagement() {
       } else {
         setForms(Array.isArray(payload) ? payload : []);
       }
-    } catch {
-      toast.error('Gagal memuat formulir');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat formulir'));
     } finally {
       setIsLoading(false);
     }
@@ -153,13 +154,13 @@ export default function FormsManagement() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!(await confirm({ message: 'Hapus formulir ini beserta semua kolom dan data pendaftar?', tone: 'danger' }))) return;
+    if (!(await confirm({ title: 'Hapus formulir?', message: 'Formulir, seluruh kolom, dan data pendaftar akan dihapus permanen.', confirmText: 'Hapus formulir', tone: 'danger' }))) return;
     try {
       await api.delete(`/form-admin/${id}`);
       toast.success('Formulir dihapus');
       fetchForms();
-    } catch {
-      toast.error('Gagal menghapus');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus'));
     }
   };
 

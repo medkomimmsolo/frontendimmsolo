@@ -19,6 +19,7 @@ import {
   Users,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { formatDateTime } from '@/lib/utils';
 import { Presensi } from '@/types';
@@ -62,7 +63,7 @@ export default function PresensiManagement() {
       setTotalItems(payload?.total || 0);
     } catch (error) {
       console.error('Failed to fetch presensi', error);
-      toast.error('Gagal memuat data presensi');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat data presensi'));
     } finally {
       setIsLoading(false);
     }
@@ -77,14 +78,14 @@ export default function PresensiManagement() {
   }, [debouncedSearch, statusFilter]);
 
   const handleDelete = async (id: number) => {
-    if (await confirm({ message: 'Yakin ingin menghapus sesi presensi ini beserta seluruh pesertanya?', tone: 'danger' })) {
+    if (await confirm({ title: 'Hapus sesi presensi?', message: 'Sesi ini beserta seluruh peserta dan catatan kehadirannya akan dihapus.', confirmText: 'Hapus sesi', tone: 'danger' })) {
       try {
         await api.delete(`/presensi/${id}`);
         toast.success('Sesi presensi berhasil dihapus');
         fetchItems();
       } catch (error) {
         console.error(error);
-        toast.error('Gagal menghapus sesi presensi');
+        toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus sesi presensi'));
       }
     }
   };
@@ -96,7 +97,7 @@ export default function PresensiManagement() {
       fetchItems();
     } catch (error) {
       console.error(error);
-      toast.error('Gagal mengubah status presensi');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal mengubah status presensi'));
     }
   };
 

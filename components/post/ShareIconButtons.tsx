@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { MessageSquare, Share2, Link as LinkIcon, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
 
 function FacebookIcon({ className }: { className?: string }) {
@@ -50,8 +51,8 @@ export default function ShareIconButtons({ title, slug, basePath = '/post' }: Sh
       setCopied(true);
       toast.success('Tautan berhasil disalin!');
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error('Gagal menyalin tautan');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menyalin tautan'));
     }
   };
 

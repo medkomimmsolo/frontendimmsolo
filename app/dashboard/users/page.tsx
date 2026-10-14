@@ -15,6 +15,7 @@ import {
   Users as UsersIcon
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { User } from '@/types';
 import { ShieldCheck, Shield, Power, PowerOff } from 'lucide-react';
@@ -72,8 +73,8 @@ export default function UsersManagement() {
       setAccessDirect(permRes.data.data.direct || []);
       setAccessViaRole(isSuper ? (rolesRes.data.data.permissions || []) : (permRes.data.data.via_role || []));
       setAccessDenied(isSuper ? [] : (permRes.data.data.denied || []));
-    } catch {
-      toast.error('Gagal memuat hak akses');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat hak akses'));
     } finally {
       setAccessLoading(false);
     }
@@ -108,7 +109,13 @@ export default function UsersManagement() {
   };
 
   const handleToggleActive = async (u: User) => {
-    if (!(await confirm({ message: `${u.is_active ? 'Nonaktifkan' : 'Aktifkan'} pengguna "${u.name}"?`, tone: 'danger' }))) return;
+    const action = u.is_active ? 'Nonaktifkan' : 'Aktifkan';
+    if (!(await confirm({
+      title: `${action} pengguna?`,
+      message: `Pengguna "${u.name}" akan ${u.is_active ? 'dinonaktifkan' : 'diaktifkan'}.`,
+      confirmText: `${action} akun`,
+      tone: u.is_active ? 'danger' : 'default',
+    }))) return;
     try {
       await api.put(`/users/${u.id}/toggle-active`);
       toast.success(`Status "${u.name}" diperbarui`);
@@ -150,7 +157,7 @@ export default function UsersManagement() {
       }
     } catch (error) {
       console.error('Failed to fetch users', error);
-      toast.error('Gagal memuat data pengguna');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat data pengguna'));
     } finally {
       setIsLoading(false);
     }
@@ -167,7 +174,7 @@ export default function UsersManagement() {
   };
 
   const handleDelete = async (id: number) => {
-    if (await confirm({ message: 'Apakah Anda yakin ingin menghapus pengguna ini?', tone: 'danger' })) {
+    if (await confirm({ title: 'Hapus pengguna?', message: 'Akun pengguna ini akan dihapus.', confirmText: 'Hapus pengguna', tone: 'danger' })) {
       try {
         await api.delete(`/users/${id}`);
         toast.success('Pengguna berhasil dihapus');
@@ -189,8 +196,8 @@ export default function UsersManagement() {
         setRolesList(res.data.data.roles || []);
         setAllPermissionsList(res.data.data.permissions || []);
       }
-    } catch {
-      toast.error('Gagal memuat daftar role');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat daftar role'));
     } finally {
       setRolesLoading(false);
     }
@@ -224,7 +231,7 @@ export default function UsersManagement() {
       toast.error('Role sistem bawaan tidak dapat dihapus');
       return;
     }
-    if (!(await confirm({ message: `Apakah Anda yakin ingin menghapus role "${role.name}"?`, tone: 'danger' }))) return;
+    if (!(await confirm({ title: 'Hapus role?', message: `Role "${role.name}" akan dihapus. Pengguna yang memakai role ini dapat kehilangan hak akses terkait.`, confirmText: 'Hapus role', tone: 'danger' }))) return;
     try {
       await api.delete(`/roles/${role.id}`);
       toast.success(`Role "${role.name}" berhasil dihapus`);

@@ -8,8 +8,11 @@ import { Loader2, CheckCircle2, Lock, ArrowLeft, ArrowRight, RotateCcw, AlertCir
 import toast from 'react-hot-toast';
 import { getApiBase } from '@/lib/settings';
 import { resolveMediaUrl } from '@/lib/imageUtils';
+import { useConfirm } from '@/components/providers/ConfirmProvider';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 
 export default function FormFillClient({ form, preview = false }: { form: any; preview?: boolean }) {
+  const { confirm } = useConfirm();
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [respondentEmail, setRespondentEmail] = useState('');
   const [honeypot, setHoneypot] = useState('');
@@ -48,8 +51,13 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
     }));
   };
 
-  const clearForm = () => {
-    if (window.confirm('Kosongkan semua jawaban yang sudah diisi?')) {
+  const clearForm = async () => {
+    if (await confirm({
+      title: 'Kosongkan jawaban?',
+      message: 'Semua jawaban yang sudah Anda isi akan dihapus dari formulir ini.',
+      confirmText: 'Kosongkan jawaban',
+      tone: 'danger',
+    })) {
       setAnswers({});
       setRespondentEmail('');
       setSectionIdx(0);
@@ -59,7 +67,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (preview) {
-      toast.success('Ini pratinjau — data tidak dikirim');
+      toast('Mode pratinjau aktif. Jawaban tidak dikirim.', { icon: 'ℹ️', ariaProps: { role: 'status', 'aria-live': 'polite' } });
       return;
     }
 
@@ -134,7 +142,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
       }
       setIsSuccess(true);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Gagal mengirim pendaftaran');
+      toast.error(getUserFacingErrorMessage(err, 'Pendaftaran belum terkirim. Silakan coba lagi.'));
     } finally {
       setIsLoading(false);
     }
@@ -697,4 +705,3 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
     </form>
   );
 }
-

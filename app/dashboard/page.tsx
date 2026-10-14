@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import Link from 'next/link';
 import { FileText, CalendarDays, Users, Building2, TrendingUp, Activity, BarChart2, Link as LinkIcon, Plus, Calendar, Clock, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { ChartArea, BarChartSimple } from '@/components/ui/ChartArea';
 import { ActivityTrendChart, type TrendItem } from '@/components/ui/ActivityTrendChart';
 
@@ -53,7 +54,7 @@ export default function DashboardOverview() {
         }
       } catch (error) {
         console.error('Failed to fetch stats', error);
-        toast.error('Gagal memuat statistik dashboard');
+        toast.error(getUserFacingErrorMessage(error, 'Gagal memuat statistik dashboard'));
       } finally {
         setIsLoading(false);
       }

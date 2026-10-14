@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ArrowLeft, Save, Loader2, Image as ImageIcon, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import Link from 'next/link';
 import { Category, Blog } from '@/types';
 import { convertToWebP, uploadInlineImage } from '@/lib/imageUtils';
@@ -93,7 +94,7 @@ export default function EditBlog({ params }: { params: Promise<{ id: string }> }
         }
       } catch (err: any) {
         console.error(err);
-        toast.error('Gagal memuat data');
+        toast.error(getUserFacingErrorMessage(err, 'Gagal memuat data'));
         router.push('/dashboard/blog');
       } finally {
         setIsFetching(false);
@@ -188,7 +189,7 @@ export default function EditBlog({ params }: { params: Promise<{ id: string }> }
             }
           } catch (err) {
             console.error(err);
-            toast.error('Gagal mengunggah gambar');
+            toast.error(getUserFacingErrorMessage(err, 'Gagal mengunggah gambar'));
           }
         };
         input.click();

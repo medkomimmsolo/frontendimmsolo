@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Download, Copy, Check, RefreshCw, ShieldCheck, Upload, X, ImageDown, Tv } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import api from '@/lib/api';
 import { exportQrPng, getStoredQrLogo, storeQrLogo } from '@/lib/qrExport';
 import { Presensi, PresensiPeserta, PresensiSesi, PresensiStats } from '@/types';
@@ -54,8 +55,8 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
       const res = await api.get(url);
       setPayload(res.data.data.payload);
       setSecondsLeft(res.data.data.expires_in || res.data.data.interval || 15);
-    } catch {
-      toast.error('Gagal memuat QR');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat QR'));
     } finally {
       setIsLoading(false);
     }
@@ -89,8 +90,8 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
       setCopied(true);
       toast.success('Link disalin');
       setTimeout(() => setCopied(false), 1500);
-    } catch {
-      toast.error('Gagal menyalin');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menyalin'));
     }
   };
 

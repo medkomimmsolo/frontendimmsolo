@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Plus, Search, Edit, Trash2, Loader2, Layers, ExternalLink, UserCheck, X, Link2, Palette } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
@@ -75,8 +76,8 @@ export default function LinksManagement() {
       } else {
         setPages(Array.isArray(payload) ? payload : []);
       }
-    } catch {
-      toast.error('Gagal memuat halaman link');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat halaman link'));
     } finally {
       setIsLoading(false);
     }
@@ -153,13 +154,13 @@ export default function LinksManagement() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!(await confirm({ message: 'Hapus halaman link ini beserta semua tautannya?', tone: 'danger' }))) return;
+    if (!(await confirm({ title: 'Hapus halaman link?', message: 'Halaman ini beserta seluruh tautannya akan dihapus.', confirmText: 'Hapus halaman', tone: 'danger' }))) return;
     try {
       await api.delete(`/link-pages/${id}`);
       toast.success('Halaman link dihapus');
       fetchPages();
-    } catch {
-      toast.error('Gagal menghapus');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus'));
     }
   };
 

@@ -12,6 +12,7 @@ import {
   Layers, Clock, MapPin, Maximize2, Minimize2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { Presensi, PresensiSesi } from '@/types';
 
 const SCANNER_ID = 'presensi-qr-reader-full';
@@ -70,8 +71,8 @@ function ScanClient({ params }: { params: Promise<{ id: string }> }) {
         } else {
           setActiveSesiId(list.length > 0 ? list[0].id : null);
         }
-      } catch {
-        toast.error('Gagal memuat data presensi');
+      } catch (error) {
+        toast.error(getUserFacingErrorMessage(error, 'Gagal memuat data presensi'));
       } finally {
         setIsLoading(false);
       }
@@ -99,8 +100,8 @@ function ScanClient({ params }: { params: Promise<{ id: string }> }) {
       } else {
         toast.error('Tutup mode layar penuh yang sedang aktif terlebih dahulu.');
       }
-    } catch {
-      toast.error('Tidak dapat mengubah mode layar penuh pada browser ini.');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Tidak dapat mengubah mode layar penuh pada browser ini.'));
     }
   }, []);
 
@@ -182,13 +183,13 @@ function ScanClient({ params }: { params: Promise<{ id: string }> }) {
     } catch (error) {
       const name = (error as { name?: string })?.name;
       if (name === 'NotAllowedError') {
-        toast.error('Izin kamera ditolak. Aktifkan izin kamera di browser, lalu muat ulang halaman.');
+        toast.error(getUserFacingErrorMessage(error, 'Izin kamera ditolak. Aktifkan izin kamera di browser, lalu muat ulang halaman.'));
       } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
-        toast.error('Kamera tidak ditemukan pada perangkat ini.');
+        toast.error(getUserFacingErrorMessage(error, 'Kamera tidak ditemukan pada perangkat ini.'));
       } else if (name === 'NotReadableError') {
-        toast.error('Kamera sedang dipakai aplikasi lain.');
+        toast.error(getUserFacingErrorMessage(error, 'Kamera sedang dipakai aplikasi lain.'));
       } else {
-        toast.error('Tidak dapat mengakses kamera.');
+        toast.error(getUserFacingErrorMessage(error, 'Tidak dapat mengakses kamera.'));
       }
       scannerRef.current = null;
     } finally {

@@ -5,6 +5,7 @@ import api from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { Loader2, Search, Inbox, Trash2, MailOpen, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { PageHeader } from '@/components/ui/PageHeader';
 
@@ -30,8 +31,8 @@ export default function MessagesPage() {
       } else {
         setMessages([]);
       }
-    } catch {
-      toast.error('Gagal memuat pesan');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat pesan'));
     } finally {
       setIsLoading(false);
     }
@@ -54,13 +55,13 @@ export default function MessagesPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!(await confirm({ message: 'Hapus pesan ini?', tone: 'danger' }))) return;
+    if (!(await confirm({ title: 'Hapus pesan?', message: 'Pesan ini akan dihapus secara permanen.', confirmText: 'Hapus pesan', tone: 'danger' }))) return;
     try {
       await api.delete(`/messages/${id}`);
       toast.success('Pesan dihapus');
       fetchMessages();
-    } catch {
-      toast.error('Gagal menghapus');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus'));
     }
   };
 

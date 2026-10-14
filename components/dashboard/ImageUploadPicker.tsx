@@ -16,6 +16,7 @@ import {
   Crop
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 
 export interface ImageUploadPickerProps {
   value?: File | string | null;
@@ -101,7 +102,7 @@ export default function ImageUploadPicker({
         toast.success('Gambar dari perangkat siap digunakan');
       } catch (err) {
         console.error('Gagal konversi ke WebP', err);
-        toast.error('Gagal memproses gambar');
+        toast.error(getUserFacingErrorMessage(err, 'Gagal memproses gambar'));
       }
     }
   };

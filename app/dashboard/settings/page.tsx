@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Save, Loader2, Settings as SettingsIcon, Image as ImageIcon, MapPin, Link as LinkIcon, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { convertToWebP } from '@/lib/imageUtils';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -69,7 +70,7 @@ export default function SettingsManagement() {
         setSettings(newSettings);
       } catch (err: any) {
         console.error(err);
-        toast.error('Gagal memuat pengaturan sistem');
+        toast.error(getUserFacingErrorMessage(err, 'Gagal memuat pengaturan sistem'));
       } finally {
         setIsFetching(false);
       }
@@ -90,8 +91,8 @@ export default function SettingsManagement() {
       try {
         await api.post('/settings', { settings: [{ key: settingKey, value: '' }] });
         toast.success('Gambar dihapus');
-      } catch {
-        toast.error('Gagal menghapus gambar');
+      } catch (error) {
+        toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus gambar'));
       }
       return;
     }
@@ -132,7 +133,7 @@ export default function SettingsManagement() {
       toast.success('Pengaturan sistem berhasil disimpan');
     } catch (error: any) {
       console.error(error);
-      toast.error('Gagal menyimpan pengaturan');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menyimpan pengaturan'));
     } finally {
       setIsLoading(false);
     }

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Check, X, Loader2, UserPlus, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { PageHeader } from '@/components/ui/PageHeader';
 
@@ -36,8 +37,8 @@ export default function AccountRequestsPage() {
       } else {
         setRequests(Array.isArray(payload) ? payload : []);
       }
-    } catch {
-      toast.error('Gagal memuat pengajuan akun');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat pengajuan akun'));
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +95,7 @@ export default function AccountRequestsPage() {
   };
 
   const handleReject = async (id: number, name: string) => {
-    if (!(await confirm({ message: `Tolak pengajuan akun "${name}"?`, tone: 'danger' }))) return;
+    if (!(await confirm({ title: 'Tolak pengajuan akun?', message: `Pengajuan akun "${name}" akan ditolak.`, confirmText: 'Tolak pengajuan', tone: 'danger' }))) return;
     try {
       await api.post(`/account-requests/${id}/reject`);
       toast.success('Pengajuan ditolak');

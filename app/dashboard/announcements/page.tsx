@@ -20,6 +20,7 @@ import {
   UserCheck,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
@@ -80,8 +81,8 @@ export default function AnnouncementsPage() {
       } else {
         setAnnouncements([]);
       }
-    } catch {
-      toast.error('Gagal memuat daftar pengumuman');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat daftar pengumuman'));
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +148,7 @@ export default function AnnouncementsPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!(await confirm({ message: 'Apakah Anda yakin ingin menghapus pengumuman ini?', tone: 'danger' }))) {
+    if (!(await confirm({ title: 'Hapus pengumuman?', message: 'Pengumuman ini akan dihapus dari website.', confirmText: 'Hapus pengumuman', tone: 'danger' }))) {
       return;
     }
 
@@ -155,8 +156,8 @@ export default function AnnouncementsPage() {
       await api.delete(`/announcements/${id}`);
       toast.success('Pengumuman dihapus');
       fetchAnnouncements();
-    } catch {
-      toast.error('Gagal menghapus pengumuman');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus pengumuman'));
     }
   };
 
@@ -173,8 +174,8 @@ export default function AnnouncementsPage() {
       setAnnouncements((prev) =>
         prev.map((a) => (a.id === item.id ? { ...a, is_active: !a.is_active } : a))
       );
-    } catch {
-      toast.error('Gagal mengubah status');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal mengubah status'));
     }
   };
 

@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Plus, Edit, Trash2, Link as LinkIcon, ExternalLink, Activity, Key, Loader2, Search, QrCode, BarChart3, X, UserCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
@@ -52,7 +53,7 @@ export default function ShortlinksPage() {
         setShortlinks(Array.isArray(payload) ? payload : []);
       }
     } catch (error) {
-      toast.error('Gagal mengambil data shortlink');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal mengambil data shortlink'));
     } finally {
       setIsLoading(false);
     }
@@ -104,13 +105,13 @@ export default function ShortlinksPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!(await confirm({ message: 'Yakin ingin menghapus shortlink ini?', tone: 'danger' }))) return;
+    if (!(await confirm({ title: 'Hapus shortlink?', message: 'Shortlink ini akan dihapus dan tidak lagi dapat digunakan.', confirmText: 'Hapus shortlink', tone: 'danger' }))) return;
     try {
       await api.delete(`/shortlinks/${id}`);
       toast.success('Shortlink berhasil dihapus');
       fetchShortlinks();
     } catch (error) {
-      toast.error('Gagal menghapus shortlink');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus shortlink'));
     }
   };
 
@@ -119,10 +120,14 @@ export default function ShortlinksPage() {
     setFormData({ ...formData, slug: randomString });
   };
 
-  const copyToClipboard = (slug: string) => {
+  const copyToClipboard = async (slug: string) => {
     const url = `${window.location.origin}/${slug}`;
-    navigator.clipboard.writeText(url);
-    toast.success('Link disalin ke clipboard');
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Tautan shortlink berhasil disalin.');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Tautan belum tersalin. Periksa izin clipboard browser, lalu coba lagi.'));
+    }
   };
 
   const openStats = async (item: any) => {
@@ -132,8 +137,8 @@ export default function ShortlinksPage() {
     try {
       const res = await api.get('/shortlinks/analytics', { params: { days: 30, shortlink_id: item.id } });
       setStatsData(res.data?.data);
-    } catch {
-      toast.error('Gagal memuat statistik');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat statistik'));
     } finally {
       setStatsLoading(false);
     }
@@ -298,12 +303,16 @@ export default function ShortlinksPage() {
                           <div className="flex flex-col items-center gap-1">
                             <span className="px-2.5 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full text-xs font-semibold">Pending</span>
                             {item.activation_token && (
-                              <span className="text-[10px] font-mono text-slate-500 font-bold bg-slate-100 px-1 rounded cursor-pointer" onClick={() => {
-                                navigator.clipboard.writeText(item.activation_token);
-                                toast.success('Token disalin');
-                              }} title="Klik untuk menyalin token">
+                              <button type="button" className="border-0 bg-slate-100 px-1 text-left text-[10px] font-mono font-bold text-slate-500 rounded cursor-pointer" onClick={async () => {
+                                try {
+                                  await navigator.clipboard.writeText(item.activation_token);
+                                  toast.success('Token aktivasi berhasil disalin.');
+                                } catch (error) {
+                                  toast.error(getUserFacingErrorMessage(error, 'Token belum tersalin. Periksa izin clipboard browser, lalu coba lagi.'));
+                                }
+                              }} title="Klik untuk menyalin token" aria-label="Salin token aktivasi">
                                 {item.activation_token}
-                              </span>
+                              </button>
                             )}
                           </div>
                         )}
@@ -318,12 +327,16 @@ export default function ShortlinksPage() {
                               onClick={async () => {
                                 try {
                                   const res = await api.post(`/shortlinks/${item.id}/token`);
-                                  toast.success('Token berhasil digenerate');
-                                  navigator.clipboard.writeText(res.data.data.token);
-                                  toast.success('Token disalin ke clipboard!');
+                                  const token = res.data.data.token;
                                   fetchShortlinks();
+                                  try {
+                                    await navigator.clipboard.writeText(token);
+                                    toast.success('Token aktivasi dibuat dan berhasil disalin.');
+                                  } catch {
+                                    toast.error('Token aktivasi sudah dibuat, tetapi belum tersalin. Salin token dari daftar shortlink.');
+                                  }
                                 } catch (e) {
-                                  toast.error('Gagal generate token');
+                                  toast.error(getUserFacingErrorMessage(e, 'Gagal generate token'));
                                 }
                               }}
                               title="Generate Token Aktivasi"
@@ -466,9 +479,13 @@ export default function ShortlinksPage() {
             </div>
             <Button
               className="mt-4 w-full bg-[#c20000] hover:bg-[#a30000] text-white"
-              onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/${qrItem.slug}`);
-                toast.success('Link disalin ke clipboard');
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(`${window.location.origin}/${qrItem.slug}`);
+                  toast.success('Tautan shortlink berhasil disalin.');
+                } catch (error) {
+                  toast.error(getUserFacingErrorMessage(error, 'Tautan belum tersalin. Periksa izin clipboard browser, lalu coba lagi.'));
+                }
               }}
             >
               Salin Link

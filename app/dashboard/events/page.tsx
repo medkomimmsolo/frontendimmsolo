@@ -16,6 +16,7 @@ import {
   UserCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { formatDateTime } from '@/lib/utils';
 import { Event } from '@/types';
@@ -87,7 +88,7 @@ export default function EventsManagement() {
       setSelectedEvents([]);
     } catch (error) {
       console.error('Failed to fetch events', error);
-      toast.error('Gagal memuat data agenda');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat data agenda'));
     } finally {
       setIsLoading(false);
     }
@@ -102,14 +103,14 @@ export default function EventsManagement() {
   }, [debouncedSearch, statusFilter]);
 
   const handleDelete = async (id: number) => {
-    if (await confirm({ message: 'Apakah Anda yakin ingin memindahkan agenda ini ke tempat sampah?', tone: 'danger' })) {
+    if (await confirm({ title: 'Pindahkan agenda ke sampah?', message: 'Agenda tidak lagi tampil di halaman publik dan dapat dipulihkan dari tempat sampah.', confirmText: 'Pindahkan ke sampah', tone: 'danger' })) {
       try {
         await api.delete(`/events/${id}`);
         toast.success('Agenda berhasil dihapus');
         fetchEvents();
       } catch (error) {
         console.error('Failed to delete', error);
-        toast.error('Gagal menghapus agenda');
+        toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus agenda'));
       }
     }
   };
@@ -133,7 +134,7 @@ export default function EventsManagement() {
 
   const applyBulkAction = async () => {
     if (bulkAction === 'trash' && selectedEvents.length > 0) {
-      if (await confirm({ message: `Apakah Anda yakin ingin menghapus ${selectedEvents.length} agenda?`, tone: 'danger' })) {
+      if (await confirm({ title: `Hapus ${selectedEvents.length} agenda?`, message: 'Agenda yang dipilih akan dihapus.', confirmText: 'Hapus agenda', tone: 'danger' })) {
         setIsBulkLoading(true);
         try {
           await Promise.all(selectedEvents.map(id => api.delete(`/events/${id}`)));
@@ -142,7 +143,7 @@ export default function EventsManagement() {
           setBulkAction('');
         } catch (error) {
           console.error('Failed to delete some events', error);
-          toast.error('Gagal menghapus beberapa agenda');
+          toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus beberapa agenda'));
         } finally {
           setIsBulkLoading(false);
         }

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { ArrowLeft, Save, Loader2, Image as ImageIcon, Plus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { convertToWebP } from '@/lib/imageUtils';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 import Link from 'next/link';
@@ -61,7 +62,7 @@ export default function EditStruktural({ params }: { params: Promise<{ id: strin
         }
       } catch (err: any) {
         console.error(err);
-        toast.error('Gagal memuat data');
+        toast.error(getUserFacingErrorMessage(err, 'Gagal memuat data'));
         router.push('/dashboard/struktural');
       } finally {
         setIsFetching(false);

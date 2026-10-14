@@ -14,6 +14,7 @@ import {
   Info
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 
 export interface ImageCropperModalProps {
   isOpen: boolean;
@@ -300,7 +301,7 @@ export default function ImageCropperModal({
       );
     } catch (err) {
       console.error('Error cropping image:', err);
-      toast.error('Gagal memproses crop gambar (kemungkinan CORS).');
+      toast.error(getUserFacingErrorMessage(err, 'Gagal memproses crop gambar (kemungkinan CORS).'));
     }
   };
 

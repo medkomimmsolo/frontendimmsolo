@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Save, Loader2, User as UserIcon, Lock, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/ui/PageHeader';
 
@@ -36,7 +37,7 @@ export default function ProfileSettings() {
         });
       } catch (err: any) {
         console.error(err);
-        toast.error('Gagal memuat profil pengguna');
+        toast.error(getUserFacingErrorMessage(err, 'Gagal memuat profil pengguna'));
       } finally {
         setIsFetching(false);
       }
@@ -79,7 +80,7 @@ export default function ProfileSettings() {
       
     } catch (error: any) {
       console.error(error);
-      const msg = error.response?.data?.message || 'Gagal memperbarui profil';
+      const msg = getUserFacingErrorMessage(error, 'Profil belum berhasil diperbarui. Silakan coba lagi.');
       toast.error(msg);
     } finally {
       setIsLoading(false);

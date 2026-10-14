@@ -17,6 +17,7 @@ import {
   GripVertical
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { Struktural } from '@/types';
 import Link from 'next/link';
@@ -69,7 +70,7 @@ export default function StrukturalManagement() {
       }
     } catch (error) {
       console.error('Failed to fetch struktural', error);
-      toast.error('Gagal memuat data pengurus');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat data pengurus'));
     } finally {
       setIsLoading(false);
     }
@@ -113,14 +114,14 @@ export default function StrukturalManagement() {
   }, [struktural, selectedPeriod]);
 
   const handleDelete = async (id: number) => {
-    if (await confirm({ message: 'Apakah Anda yakin ingin menghapus data pengurus ini?', tone: 'danger' })) {
+    if (await confirm({ title: 'Hapus data pengurus?', message: 'Data pengurus ini akan dihapus.', confirmText: 'Hapus data', tone: 'danger' })) {
       try {
         await api.delete(`/struktural/${id}`);
         toast.success('Data pengurus berhasil dihapus');
         fetchStruktural();
       } catch (error) {
         console.error('Failed to delete', error);
-        toast.error('Gagal menghapus data');
+        toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus data'));
       }
     }
   };
@@ -180,7 +181,7 @@ export default function StrukturalManagement() {
       setSelectedPeriod(newPeriod);
     } catch (error) {
       console.error(error);
-      toast.error('Gagal membuat periode baru');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal membuat periode baru'));
       setIsLoading(false);
     }
   };
@@ -215,7 +216,7 @@ export default function StrukturalManagement() {
       await fetchStruktural();
     } catch (error) {
       console.error(error);
-      toast.error('Gagal membuat bidang baru');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal membuat bidang baru'));
       setIsLoading(false);
     }
   };
@@ -290,7 +291,7 @@ export default function StrukturalManagement() {
       });
       toast.success('Urutan berhasil diperbarui');
     } catch (e) {
-      toast.error('Gagal memperbarui urutan. Server error.');
+      toast.error(getUserFacingErrorMessage(e, 'Gagal memperbarui urutan. Server error.'));
       // Revert if failed
       fetchStruktural(); 
     } finally {

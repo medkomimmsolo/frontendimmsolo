@@ -20,6 +20,7 @@ import {
   Upload
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
@@ -73,8 +74,8 @@ export default function LembagaManagementPage() {
       const res = await api.get('/lembaga');
       const data = res.data?.data || [];
       setItems(Array.isArray(data) ? data : []);
-    } catch {
-      toast.error('Gagal memuat data lembaga');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat data lembaga'));
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +148,9 @@ export default function LembagaManagementPage() {
 
   const handleDelete = async (item: LembagaItem) => {
     const isConfirmed = await confirm({
+      title: 'Hapus data lembaga?',
       message: `Hapus data "${item.name}"? Data yang dihapus tidak dapat dipulihkan.`,
+      confirmText: 'Hapus data',
       tone: 'danger',
     });
     if (!isConfirmed) return;
@@ -489,4 +492,3 @@ export default function LembagaManagementPage() {
     </div>
   );
 }
-

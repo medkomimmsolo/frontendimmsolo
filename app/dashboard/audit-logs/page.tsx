@@ -5,6 +5,7 @@ import api from '@/lib/api';
 import { Card } from '@/components/ui/Card';
 import { Loader2, Search, History } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useDebounce } from 'use-debounce';
 import { PageHeader } from '@/components/ui/PageHeader';
 
@@ -30,8 +31,8 @@ export default function AuditLogsPage() {
       } else {
         setLogs([]);
       }
-    } catch {
-      toast.error('Gagal memuat log aktivitas');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat log aktivitas'));
     } finally {
       setIsLoading(false);
     }

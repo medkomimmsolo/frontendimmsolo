@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Loader2, CheckCircle2, UserPlus, ArrowLeft, MessageCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getApiBase, normalizeSettings } from '@/lib/settings';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 
 export default function AjukanAkunClient() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', passwordConfirm: '', requested_role: 'komisariat', reason: '' });
@@ -93,9 +94,7 @@ export default function AjukanAkunClient() {
       });
       setIsSuccess(true);
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Gagal mengirim pengajuan';
-      const errs = err.response?.data?.errors;
-      toast.error(errs ? Object.values(errs).flat().join(', ') : msg);
+      toast.error(getUserFacingErrorMessage(err, 'Pengajuan belum terkirim. Periksa isian, lalu coba lagi.'));
     } finally {
       setIsLoading(false);
     }

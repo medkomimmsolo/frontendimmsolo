@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ArrowLeft, Save, Loader2, Image as ImageIcon, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import Link from 'next/link';
 import { Category } from '@/types';
 import { convertToWebP, uploadInlineImage } from '@/lib/imageUtils';
@@ -176,7 +177,7 @@ export default function CreateBlog() {
             }
           } catch (err) {
             console.error(err);
-            toast.error('Gagal mengunggah gambar');
+            toast.error(getUserFacingErrorMessage(err, 'Gagal mengunggah gambar'));
           }
         };
         input.click();

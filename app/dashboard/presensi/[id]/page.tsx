@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Loader2, Users, QrCode, ClipboardCheck, Settings, Upload, Download, Plus, Trash2, Search, ArrowLeft, Save, ScanLine, Layers, RefreshCw, History, Copy, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { Presensi, PresensiPeserta, PresensiStats, PresensiKehadiran, PresensiSesi } from '@/types';
 import Link from 'next/link';
@@ -87,8 +88,8 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
         qr_refresh_seconds: res.data.data.presensi.qr_refresh_seconds ?? 15,
         enforce_device_limit: res.data.data.presensi.enforce_device_limit ?? true,
       });
-    } catch {
-      toast.error('Gagal memuat detail presensi');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat detail presensi'));
       router.push('/dashboard/presensi');
     } finally {
       setIsLoading(false);
@@ -112,8 +113,8 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
       const payload = res.data.data;
       setPeserta(payload.data || []);
       setLastPage(payload.last_page || 1);
-    } catch {
-      toast.error('Gagal memuat daftar peserta');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat daftar peserta'));
     } finally {
       setPesertaLoading(false);
     }
@@ -132,8 +133,8 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
       } else {
         setStats(res.data.data.stats);
       }
-    } catch {
-      toast.error('Gagal memuat kehadiran');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat kehadiran'));
     }
   }, [id, activeSesiId]);
 
@@ -172,8 +173,8 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
       setCameraLinkCopied(true);
       toast.success('Token kamera disalin');
       setTimeout(() => setCameraLinkCopied(false), 2000);
-    } catch {
-      toast.error('Tidak dapat menyalin token kamera');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Tidak dapat menyalin token kamera'));
     }
   };
 
@@ -185,34 +186,34 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
     if (!presensi) return;
     try {
       await api.put(`/presensi/${id}/toggle-open`, { is_open: !presensi.is_open });
-      toast.success(presensi.is_open ? 'Presensi ditutup' : 'Presensi dibuka');
+      toast.success(presensi.is_open ? 'Presensi berhasil ditutup.' : 'Presensi berhasil dibuka.');
       fetchDetail();
-    } catch {
-      toast.error('Gagal mengubah status');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal mengubah status'));
     }
   };
 
   const handleDeletePeserta = async (pid: number) => {
-    if (await confirm({ message: 'Hapus peserta ini beserta catatan kehadirannya?', tone: 'danger' })) {
+    if (await confirm({ title: 'Hapus peserta?', message: 'Peserta ini beserta catatan kehadirannya akan dihapus.', confirmText: 'Hapus peserta', tone: 'danger' })) {
       try {
         await api.delete(`/presensi-peserta/${pid}`);
         toast.success('Peserta dihapus');
         refreshAll();
-      } catch {
-        toast.error('Gagal menghapus peserta');
+      } catch (error) {
+        toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus peserta'));
       }
     }
   };
 
   const handleDeleteKehadiran = async (kid: number) => {
-    if (await confirm({ message: 'Hapus catatan kehadiran ini?', tone: 'danger' })) {
+    if (await confirm({ title: 'Hapus catatan kehadiran?', message: 'Catatan kehadiran ini akan dihapus.', confirmText: 'Hapus catatan', tone: 'danger' })) {
       try {
         await api.delete(`/presensi-kehadiran/${kid}`);
         toast.success('Catatan kehadiran dihapus');
         fetchKehadiran();
         fetchDetail();
-      } catch {
-        toast.error('Gagal menghapus kehadiran');
+      } catch (error) {
+        toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus kehadiran'));
       }
     }
   };
@@ -249,7 +250,12 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
     const label: Record<string, string> = { hadir: 'Hadir', telat: 'Telat', izin: 'Izin', tidak_hadir: 'Tidak Hadir' };
     if (peserta.kehadiran?.status === status) return;
     const scope = activeSesi ? ` pada sesi "${activeSesi.name}"` : '';
-    if (await confirm({ message: `Tandai ${peserta.nama} sebagai "${label[status]}"${scope}?`, tone: status === 'tidak_hadir' ? 'danger' : 'default' })) {
+    if (await confirm({
+      title: 'Ubah status kehadiran?',
+      message: `Status kehadiran ${peserta.nama} akan diubah menjadi "${label[status]}"${scope}.`,
+      confirmText: `Tandai ${label[status]}`,
+      tone: status === 'tidak_hadir' ? 'danger' : 'default',
+    })) {
       try {
         await api.post(`/presensi/${id}/peserta/${peserta.id}/mark`, { status, sesi_id: activeSesiId ?? undefined });
         toast.success(`${peserta.nama} ditandai ${label[status]}`);

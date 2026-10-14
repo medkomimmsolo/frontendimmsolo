@@ -5,6 +5,7 @@ import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { UserCheck, Loader2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 
 interface TransferOwnershipModalProps {
   isOpen: boolean;
@@ -37,8 +38,8 @@ export function TransferOwnershipModal({
           if (list.length > 0) {
             setSelectedUserId(String(list[0].id));
           }
-        } catch {
-          toast.error('Gagal memuat daftar pengguna');
+        } catch (error) {
+          toast.error(getUserFacingErrorMessage(error, 'Gagal memuat daftar pengguna'));
         } finally {
           setIsLoadingUsers(false);
         }

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { MapPin, ExternalLink, Copy, Check, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import toast from 'react-hot-toast';
 
 interface EventLocationMapProps {
   location: string;
@@ -19,9 +20,10 @@ export default function EventLocationMap({ location }: EventLocationMapProps) {
     try {
       await navigator.clipboard.writeText(location);
       setCopied(true);
+      toast.success('Alamat lokasi berhasil disalin.');
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback
+      toast.error('Alamat lokasi belum tersalin. Periksa izin clipboard browser, lalu coba lagi.');
     }
   };
 

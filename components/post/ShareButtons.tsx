@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Share2, MessageSquare, Link as LinkIcon, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
 
 interface ShareButtonsProps {
@@ -43,8 +44,8 @@ export default function ShareButtons({ title, slug, layout = 'vertical', basePat
       setCopied(true);
       toast.success('Tautan berhasil disalin!');
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error('Gagal menyalin tautan');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menyalin tautan'));
     }
   };
 

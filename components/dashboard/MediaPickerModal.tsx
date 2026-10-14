@@ -16,6 +16,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 
 export interface MediaFile {
   name: string;
@@ -114,7 +115,7 @@ export default function MediaPickerModal({
       }
     } catch (err) {
       console.error('Failed to load media library', err);
-      toast.error('Gagal memuat Media Library');
+      toast.error(getUserFacingErrorMessage(err, 'Gagal memuat Media Library'));
     } finally {
       setIsLoading(false);
     }
@@ -171,7 +172,7 @@ export default function MediaPickerModal({
         setUploadPreview(objUrl);
       } catch (err) {
         console.error(err);
-        toast.error('Gagal memproses gambar');
+        toast.error(getUserFacingErrorMessage(err, 'Gagal memproses gambar'));
       }
     }
   };

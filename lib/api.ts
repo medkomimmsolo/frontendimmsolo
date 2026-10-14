@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { getApiBase } from '@/lib/settings';
 import { clearSession } from '@/lib/session';
+import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 
 const api = axios.create({
   baseURL: getApiBase(),
@@ -31,6 +32,15 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (axios.isAxiosError(error)) {
+      const message = getUserFacingErrorMessage(error);
+      error.message = message;
+
+      if (error.response?.data && typeof error.response.data === 'object' && !Array.isArray(error.response.data)) {
+        error.response.data = { ...error.response.data, message };
+      }
+    }
+
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('auth_token');
