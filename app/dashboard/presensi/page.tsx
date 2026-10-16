@@ -29,9 +29,9 @@ import { PaginationControls } from '@/components/ui/PaginationControls';
 import { PageHeader } from '@/components/ui/PageHeader';
 
 const MODE_LABEL: Record<string, string> = {
-  self: 'QR Kegiatan',
+  self: 'Form Presensi',
   scan: 'Scan Peserta',
-  both: 'Keduanya',
+  both: 'Form + Scan (Lama)',
 };
 
 export default function PresensiManagement() {
@@ -105,7 +105,7 @@ export default function PresensiManagement() {
     <div className="space-y-6 w-full">
       <PageHeader
         title="Presensi Kegiatan"
-        description="Kelola kehadiran peserta via QR Code (self check-in / scan petugas) dan impor Excel"
+        description="Kelola kehadiran melalui form publik dengan QR langsung ke form, atau scan QR peserta oleh petugas"
         badge="Presensi"
       >
         <Link href="/dashboard/presensi/create">

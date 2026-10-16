@@ -5,7 +5,7 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/Button';
 import { Loader2, Download, FileSpreadsheet, X } from 'lucide-react';
-import { PresensiSesi, PresensiStats, PresensiKehadiranStatus } from '@/types';
+import type { PresensiFormField, PresensiFormValue, PresensiSesi, PresensiStats, PresensiKehadiranStatus } from '@/types';
 
 interface Props {
   isOpen: boolean;
@@ -14,6 +14,7 @@ interface Props {
   presensiSlug: string;
   sesis: PresensiSesi[];
   activeSesiId: number | null;
+  formFields?: PresensiFormField[];
   onClose: () => void;
 }
 
@@ -29,6 +30,7 @@ type Row = {
   checked_at: string | null;
   checked_by: string | null;
   note: string | null;
+  form_data?: Record<string, PresensiFormValue> | null;
 };
 
 const STATUS_OPTIONS: { value: PresensiKehadiranStatus | 'belum'; label: string }[] = [
@@ -56,6 +58,7 @@ const COLUMN_OPTIONS: { key: string; label: string }[] = [
 ];
 
 const DEFAULT_COLUMNS = COLUMN_OPTIONS.map((c) => c.key);
+const EMPTY_FORM_FIELDS: PresensiFormField[] = [];
 
 const METHOD_LABEL: Record<string, string> = { self: 'Self', scan: 'Scan', manual: 'Manual' };
 
@@ -66,6 +69,7 @@ export function PresensiExportModal({
   presensiSlug,
   sesis,
   activeSesiId,
+  formFields = EMPTY_FORM_FIELDS,
   onClose,
 }: Props) {
   const [sesiId, setSesiId] = useState<number | null>(activeSesiId);
@@ -75,8 +79,14 @@ export function PresensiExportModal({
 
   // Sinkronkan sesi terpilih dengan sesi aktif saat modal dibuka.
   useEffect(() => {
-    if (isOpen) setSesiId(activeSesiId);
-  }, [isOpen, activeSesiId]);
+    if (isOpen) {
+      setSesiId(activeSesiId);
+      const customKeys = formFields
+        .filter((field) => !['nama', 'email', 'phone', 'asal'].includes(field.key))
+        .map((field) => `form_${field.key}`);
+      setColumns([...DEFAULT_COLUMNS, ...customKeys]);
+    }
+  }, [isOpen, activeSesiId, formFields]);
 
   if (!isOpen) return null;
 
@@ -107,7 +117,13 @@ export function PresensiExportModal({
 
       const XLSX = await import('@e965/xlsx');
 
-      const selected = COLUMN_OPTIONS.filter((c) => columns.includes(c.key));
+      const dynamicColumns = formFields
+        .filter((field) => !['nama', 'email', 'phone', 'asal'].includes(field.key))
+        .map((field) => ({ key: `form_${field.key}`, label: field.label }));
+      const selected = [
+        ...COLUMN_OPTIONS.filter((column) => columns.includes(column.key)),
+        ...dynamicColumns.filter((column) => columns.includes(column.key)),
+      ];
       const header = selected.map((c) => c.label);
       const rows = all.map((p, idx) =>
         selected.map((c) => {
@@ -121,6 +137,10 @@ export function PresensiExportModal({
             case 'sesi':
               return p.sesi || activeSesi?.name || '';
             default:
+              if (c.key.startsWith('form_')) {
+                const value = p.form_data?.[c.key.slice(5)];
+                return Array.isArray(value) ? value.join(', ') : value ?? '';
+              }
               return (p as Record<string, unknown>)[c.key] ?? '';
           }
         }),
@@ -234,7 +254,7 @@ export function PresensiExportModal({
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Kolom</label>
               <div className="flex gap-2">
-                <button type="button" onClick={() => setColumns(DEFAULT_COLUMNS)} className="text-[11px] font-semibold text-[#c20000] hover:underline">
+                <button type="button" onClick={() => setColumns([...DEFAULT_COLUMNS, ...formFields.filter((field) => !['nama', 'email', 'phone', 'asal'].includes(field.key)).map((field) => `form_${field.key}`)])} className="text-[11px] font-semibold text-[#c20000] hover:underline">
                   Semua
                 </button>
                 <button type="button" onClick={() => setColumns([])} className="text-[11px] font-semibold text-slate-400 hover:underline">
@@ -254,6 +274,22 @@ export function PresensiExportModal({
                   {col.label}
                 </label>
               ))}
+              {formFields
+                .filter((field) => !['nama', 'email', 'phone', 'asal'].includes(field.key))
+                .map((field) => {
+                  const key = `form_${field.key}`;
+                  return (
+                    <label key={key} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={columns.includes(key)}
+                        onChange={() => toggle(columns, setColumns, key)}
+                        className="h-4 w-4 accent-[#c20000]"
+                      />
+                      {field.label}
+                    </label>
+                  );
+                })}
             </div>
           </div>
         </div>

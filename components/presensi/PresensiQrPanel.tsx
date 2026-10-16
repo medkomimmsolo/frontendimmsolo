@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Download, Copy, Check, RefreshCw, ShieldCheck, Upload, X, ImageDown, Tv } from 'lucide-react';
+import { Download, Copy, Check, RefreshCw, Upload, X, ImageDown, Tv, QrCode } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
-import api from '@/lib/api';
 import { exportQrPng, getStoredQrLogo, storeQrLogo } from '@/lib/qrExport';
 import { Presensi, PresensiPeserta, PresensiSesi, PresensiStats } from '@/types';
 import { PresensiProjectorModal } from '@/components/presensi/PresensiProjectorModal';
@@ -22,11 +21,7 @@ interface Props {
 
 export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props) {
   const [copied, setCopied] = useState(false);
-  const [payload, setPayload] = useState<string>('');
-  const [secondsLeft, setSecondsLeft] = useState<number>(presensi.qr_refresh_seconds || 15);
-  const [isLoading, setIsLoading] = useState(false);
   const [showProjector, setShowProjector] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Logo tengah QR peserta (upload mandiri, tersimpan per-browser).
   const [logo, setLogo] = useState<string | null>(null);
@@ -38,51 +33,11 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
     setLogo(getStoredQrLogo());
   }, []);
 
-  const siteUrl =
-    typeof window !== 'undefined'
-      ? process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
-      : process.env.NEXT_PUBLIC_SITE_URL || '';
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : '')).replace(/\/+$/, '');
 
-  // URL yang di-encode QR = halaman self check-in + payload dinamis + sesi.
-  const qrUrl = payload
-    ? `${siteUrl}/presensi/${presensi.event_token}?qr=${encodeURIComponent(payload)}${activeSesi ? `&sesi=${activeSesi.id}` : ''}`
+  const qrUrl = presensi.event_token
+    ? `${siteUrl}/presensi/${presensi.event_token}${activeSesi ? `?sesi=${activeSesi.id}` : ''}`
     : '';
-
-  const fetchQr = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const url = activeSesi ? `/presensi-sesi/${activeSesi.id}/activity-qr` : `/presensi/${presensi.id}/activity-qr`;
-      const res = await api.get(url);
-      setPayload(res.data.data.payload);
-      setSecondsLeft(res.data.data.expires_in || res.data.data.interval || 15);
-    } catch (error) {
-      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat QR'));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [presensi.id, activeSesi?.id]);
-
-  useEffect(() => {
-    if (presensi.mode === 'scan') return; // QR dinamis hanya untuk mode self/both
-    fetchQr();
-  }, [fetchQr, presensi.mode]);
-
-  // Countdown + auto-refresh saat mencapai 0.
-  useEffect(() => {
-    if (presensi.mode === 'scan') return;
-    timerRef.current = setInterval(() => {
-      setSecondsLeft((s) => {
-        if (s <= 1) {
-          fetchQr();
-          return presensi.qr_refresh_seconds || 15;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [fetchQr, presensi.mode, presensi.qr_refresh_seconds]);
 
   const copyLink = async (text: string) => {
     try {
@@ -96,22 +51,20 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
   };
 
   const downloadQr = () => {
-    const svg = document.getElementById('qr-kegiatan') as SVGSVGElement | null;
+    const svg = document.getElementById('qr-form-presensi') as SVGSVGElement | null;
     if (!svg) return;
     const xml = new XMLSerializer().serializeToString(svg);
     const blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `qr-kegiatan-${presensi.slug}.svg`;
+    a.download = `qr-form-presensi-${presensi.slug}.svg`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   const canSelf = presensi.mode === 'self' || presensi.mode === 'both';
   const canScan = presensi.mode === 'scan' || presensi.mode === 'both';
-  const interval = presensi.qr_refresh_seconds || 15;
-  const progress = Math.max(0, Math.min(100, (secondsLeft / interval) * 100));
 
   /** Baca file logo → data URL (dibatasi ukurannya agar tetap ringan). */
   const handleLogoFile = (f: File | null) => {
@@ -176,47 +129,34 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
         <Card className="border-slate-200/90 rounded-2xl shadow-2xs">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-500" /> QR Kegiatan Dinamis — Self Check-in
+              <QrCode className="w-4 h-4 text-[#c20000]" /> QR Form Presensi
               {activeSesi && <span className="text-xs font-bold text-[#c20000]">· {activeSesi.name}</span>}
             </CardTitle>
             <p className="text-sm text-slate-500 mt-1">
-              QR berputar setiap <strong>{interval} detik</strong>. Peserta harus memindai QR yang sedang tampil; QR lama otomatis kedaluwarsa.
+              QR ini langsung membuka form presensi publik. Peserta tidak perlu login atau memindai QR peserta.
             </p>
           </CardHeader>
           <CardContent className="flex flex-col md:flex-row gap-8 items-start">
             <div className="flex flex-col items-center">
               <div className="bg-white p-5 border-2 border-slate-100 rounded-2xl shadow-sm">
-                {isLoading || !qrUrl ? (
-                  <div className="w-[220px] h-[220px] flex items-center justify-center">
-                    <RefreshCw className="w-8 h-8 animate-spin text-slate-300" />
-                  </div>
+                {qrUrl ? (
+                  <QRCodeSVG id="qr-form-presensi" value={qrUrl} size={220} level="M" />
                 ) : (
-                  <QRCodeSVG id="qr-kegiatan" value={qrUrl} size={220} level="M" />
+                  <div className="w-[220px] h-[220px] flex items-center justify-center text-sm text-slate-400">
+                    Link presensi belum tersedia
+                  </div>
                 )}
-              </div>
-              {/* Progress bar countdown */}
-              <div className="w-[220px] mt-3">
-                <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
-                  <span>Refresh dalam</span>
-                  <span className="font-bold text-slate-700">{secondsLeft}s</span>
-                </div>
-                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[#c20000] transition-all duration-1000 ease-linear"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
               </div>
             </div>
 
             <div className="flex-1 space-y-3">
               <p className="text-sm text-slate-600">
-                Tampilkan QR ini di layar lokasi kegiatan. Peserta memindai, memilih namanya, lalu menandai hadir sendiri.
+                Tampilkan atau cetak QR ini. Saat dipindai, peserta langsung membuka dan mengisi form presensi.
                 Anti-titip-absen {presensi.enforce_device_limit !== false ? <strong>aktif</strong> : <span className="text-slate-400">nonaktif</span>}: satu perangkat hanya untuk satu peserta.
               </p>
               <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-                <code className="text-xs text-slate-600 flex-1 truncate">{siteUrl}/presensi/{presensi.event_token}{activeSesi ? ` (sesi: ${activeSesi.name})` : ''}</code>
-                <button onClick={() => copyLink(`${siteUrl}/presensi/${presensi.event_token}${activeSesi ? `?sesi=${activeSesi.id}` : ''}`)} className="text-slate-500 hover:text-[#c20000]">
+                <code className="text-xs text-slate-600 flex-1 truncate">{qrUrl}</code>
+                <button onClick={() => copyLink(qrUrl)} disabled={!qrUrl} className="text-slate-500 hover:text-[#c20000] disabled:opacity-40" aria-label="Salin tautan form presensi">
                   {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
@@ -224,15 +164,12 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
                 <Button onClick={() => setShowProjector(true)} className="h-10 px-4 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold">
                   <Tv className="w-4 h-4 mr-1.5" /> Mode Layar Penuh (Proyektor)
                 </Button>
-                <Button onClick={fetchQr} variant="outline" className="h-10 px-4 rounded-xl text-xs font-bold">
-                  <RefreshCw className="w-4 h-4 mr-1.5" /> Refresh QR
-                </Button>
-                <Button onClick={downloadQr} variant="outline" className="h-10 px-4 rounded-xl text-xs font-bold">
+                <Button onClick={downloadQr} disabled={!qrUrl} variant="outline" className="h-10 px-4 rounded-xl text-xs font-bold">
                   <Download className="w-4 h-4 mr-1.5" /> Unduh QR
                 </Button>
               </div>
               <p className="text-xs text-slate-400">
-                Catatan: QR yang diunduh hanya berlaku sementara. Untuk ditampilkan, gunakan QR live di halaman ini atau klik Mode Layar Penuh.
+                QR tetap berlaku selama tautan presensi aktif. Akses publik dibatasi ke sesi ini; data kehadiran tetap tercatat di dashboard.
               </p>
             </div>
           </CardContent>
@@ -335,8 +272,6 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
         presensi={presensi}
         activeSesi={activeSesi}
         qrUrl={qrUrl}
-        secondsLeft={secondsLeft}
-        interval={interval}
         stats={stats}
       />
     </div>

@@ -11,8 +11,6 @@ interface Props {
   presensi: Presensi;
   activeSesi?: PresensiSesi | null;
   qrUrl: string;
-  secondsLeft: number;
-  interval: number;
   stats?: PresensiStats | null;
 }
 
@@ -22,8 +20,6 @@ export function PresensiProjectorModal({
   presensi,
   activeSesi,
   qrUrl,
-  secondsLeft,
-  interval,
   stats,
 }: Props) {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -64,7 +60,6 @@ export function PresensiProjectorModal({
     }
   };
 
-  const progress = Math.max(0, Math.min(100, (secondsLeft / interval) * 100));
   const attendedCount = stats ? stats.hadir + stats.telat : 0;
   const totalCount = stats ? stats.total_peserta : 0;
 
@@ -82,7 +77,7 @@ export function PresensiProjectorModal({
           </div>
           <div>
             <div className="text-xs font-semibold tracking-wider text-white/60 uppercase">
-              Presensi Digital · Mode Proyektor
+              Presensi Digital · Form Presensi
             </div>
             <div className="text-sm font-bold text-white flex items-center gap-2">
               <span>{presensi.title}</span>
@@ -139,34 +134,16 @@ export function PresensiProjectorModal({
               </div>
             )}
 
-            {/* Rotating countdown badge */}
-            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-[#0f172a] border border-white/20 rounded-full px-4 py-1.5 shadow-xl flex items-center gap-2 text-xs font-bold whitespace-nowrap">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Refresh dalam</span>
-              <span className="text-[#f87171]">{secondsLeft}s</span>
-            </div>
           </div>
 
-          {/* Progress bar under QR */}
-          <div className="w-[300px] mt-7">
-            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-red-600 to-[#c20000] transition-all duration-1000 ease-linear rounded-full"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <div className="flex justify-between items-center text-[11px] text-white/50 mt-1.5">
-              <span>QR Dinamis Anti-Titip</span>
-              <span>Rotasi tiap {interval}d</span>
-            </div>
-          </div>
+          <p className="mt-4 text-xs text-white/50">QR selalu membuka form presensi untuk sesi ini.</p>
         </div>
 
         {/* Right: Event Info & Instructions */}
         <div className="flex-1 max-w-lg space-y-6 text-center lg:text-left">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600/20 border border-red-500/30 text-red-300 text-xs font-bold">
-              <Sparkles className="w-3.5 h-3.5" /> Pindai untuk Absen
+              <Sparkles className="w-3.5 h-3.5" /> Form Presensi
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
               {presensi.title}
@@ -207,14 +184,14 @@ export function PresensiProjectorModal({
                 3
               </div>
               <p className="text-sm text-white/90">
-                Cari nama Anda lalu klik <strong>Konfirmasi Kehadiran</strong>.
+                Isi data diri pada form yang terbuka, lalu kirim presensi.
               </p>
             </div>
           </div>
 
           <div className="flex items-center justify-center lg:justify-start gap-2 text-xs text-emerald-400/90">
             <ShieldCheck className="w-4 h-4 shrink-0" />
-            <span>Anti-Titip Absen: Satu perangkat HP hanya untuk satu peserta.</span>
+            <span>Peserta dapat mengisi form langsung tanpa login.</span>
           </div>
         </div>
       </main>

@@ -22,6 +22,8 @@ import { PresensiSesiPanel } from '@/components/presensi/PresensiSesiPanel';
 import { PresensiManualModal } from '@/components/presensi/PresensiManualModal';
 import { PresensiExportModal } from '@/components/presensi/PresensiExportModal';
 import { PresensiHistoryPanel } from '@/components/presensi/PresensiHistoryPanel';
+import { PresensiFormFieldBuilder } from '@/components/presensi/PresensiFormFieldBuilder';
+import { DEFAULT_PRESENSI_FORM_FIELDS } from '@/lib/presensi';
 
 const inputCls =
   'w-full bg-white border border-slate-200 rounded-sm px-3.5 py-2.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none shadow-sm transition-all';
@@ -85,8 +87,10 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
         mode: res.data.data.presensi.mode,
         late_after_minutes: res.data.data.presensi.late_after_minutes,
         allow_manual_add: res.data.data.presensi.allow_manual_add,
-        qr_refresh_seconds: res.data.data.presensi.qr_refresh_seconds ?? 15,
         enforce_device_limit: res.data.data.presensi.enforce_device_limit ?? true,
+        form_fields: res.data.data.presensi.form_fields?.length
+          ? res.data.data.presensi.form_fields
+          : DEFAULT_PRESENSI_FORM_FIELDS,
       });
     } catch (error) {
       toast.error(getUserFacingErrorMessage(error, 'Gagal memuat detail presensi'));
@@ -231,8 +235,8 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
         mode: sForm.mode,
         late_after_minutes: sForm.late_after_minutes || null,
         allow_manual_add: sForm.allow_manual_add,
-        qr_refresh_seconds: sForm.qr_refresh_seconds || 15,
         enforce_device_limit: sForm.enforce_device_limit,
+        form_fields: sForm.mode === 'self' ? sForm.form_fields : undefined,
       });
       toast.success('Pengaturan disimpan');
       fetchDetail();
@@ -287,7 +291,9 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: 'peserta', label: 'Peserta', icon: <Users className="w-4 h-4" /> },
     { key: 'qr', label: 'QR Code', icon: <QrCode className="w-4 h-4" /> },
-    { key: 'scan', label: 'Scan', icon: <ScanLine className="w-4 h-4" /> },
+    ...(presensi.mode === 'scan' || presensi.mode === 'both'
+      ? [{ key: 'scan' as const, label: 'Scan', icon: <ScanLine className="w-4 h-4" /> }]
+      : []),
     { key: 'kehadiran', label: 'Kehadiran', icon: <ClipboardCheck className="w-4 h-4" /> },
     { key: 'riwayat', label: 'Riwayat', icon: <History className="w-4 h-4" /> },
     { key: 'sesi', label: 'Sesi', icon: <Layers className="w-4 h-4" /> },
@@ -411,18 +417,22 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row justify-between gap-3">
             <div className="flex items-center gap-2">
-              <Button onClick={() => setShowImport(true)} className="h-10 px-4 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold">
-                <Upload className="w-4 h-4 mr-1.5" /> Impor Peserta
-              </Button>
-              <Button
-                onClick={handleAddManual}
-                variant="outline"
-                disabled={presensi.allow_manual_add === false}
-                title={presensi.allow_manual_add === false ? 'Diaktifkan lewat tab Pengaturan' : 'Tambah satu peserta'}
-                className="h-10 px-4 rounded-xl text-xs font-bold"
-              >
-                <Plus className="w-4 h-4 mr-1.5" /> Tambah Manual
-              </Button>
+              {presensi.mode !== 'self' && (
+                <>
+                  <Button onClick={() => setShowImport(true)} className="h-10 px-4 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold">
+                    <Upload className="w-4 h-4 mr-1.5" /> Impor Peserta
+                  </Button>
+                  <Button
+                    onClick={handleAddManual}
+                    variant="outline"
+                    disabled={presensi.allow_manual_add === false}
+                    title={presensi.allow_manual_add === false ? 'Diaktifkan lewat tab Pengaturan' : 'Tambah satu peserta'}
+                    className="h-10 px-4 rounded-xl text-xs font-bold"
+                  >
+                    <Plus className="w-4 h-4 mr-1.5" /> Tambah Manual
+                  </Button>
+                </>
+              )}
               <Button onClick={exportExcel} variant="outline" className="h-10 px-4 rounded-xl text-xs font-bold">
                 <Download className="w-4 h-4 mr-1.5" /> Export Excel
               </Button>
@@ -449,15 +459,16 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                     <th className="py-3 px-4">Nama</th>
                     <th className="py-3 px-4 w-56">Kontak</th>
                     <th className="py-3 px-4 w-40">Asal</th>
+                    {presensi.mode === 'self' && <th className="py-3 px-4">Jawaban Form</th>}
                     <th className="py-3 px-4 w-32">Status</th>
                     <th className="py-3 px-4 w-16 pr-6"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm bg-white">
                   {pesertaLoading ? (
-                    <tr><td colSpan={6} className="py-14 text-center"><Loader2 className="w-7 h-7 animate-spin text-[#c20000] mx-auto" /></td></tr>
+                    <tr><td colSpan={presensi.mode === 'self' ? 7 : 6} className="py-14 text-center"><Loader2 className="w-7 h-7 animate-spin text-[#c20000] mx-auto" /></td></tr>
                   ) : peserta.length === 0 ? (
-                    <tr><td colSpan={6} className="py-14 text-center text-slate-400 text-sm">Belum ada peserta. Impor dari Excel/Form atau tambah manual.</td></tr>
+                    <tr><td colSpan={presensi.mode === 'self' ? 7 : 6} className="py-14 text-center text-slate-400 text-sm">{presensi.mode === 'self' ? 'Belum ada peserta yang mengisi form presensi.' : 'Belum ada peserta. Impor dari Excel atau tambah manual.'}</td></tr>
                   ) : (
                     peserta.map((p, i) => (
                       <tr key={p.id} className="hover:bg-slate-50/80">
@@ -472,6 +483,20 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                           {!p.email && !p.phone && <span className="text-slate-300">—</span>}
                         </td>
                         <td className="py-3 px-4 text-slate-600 text-xs">{p.asal || '—'}</td>
+                        {presensi.mode === 'self' && (
+                          <td className="py-3 px-4 text-xs text-slate-600">
+                            {(() => {
+                              const answers = (presensi.form_fields || [])
+                                .filter((field) => !['nama', 'email', 'phone', 'asal'].includes(field.key))
+                                .map((field) => {
+                                const answer = p.form_data?.[field.key];
+                                const display = Array.isArray(answer) ? answer.join(', ') : answer;
+                                return display ? <div key={field.key}><span className="font-semibold">{field.label}:</span> {display}</div> : null;
+                                }).filter(Boolean);
+                              return answers.length ? answers : '—';
+                            })()}
+                          </td>
+                        )}
                         <td className="py-3 px-4">
                           {p.kehadiran ? (
                             <div className="flex flex-wrap items-center gap-1.5">
@@ -609,7 +634,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                         </span>
                       </td>
                       <td className="py-3 px-4 text-xs text-slate-600">{formatDateTime(k.checked_at)}</td>
-                      <td className="py-3 px-4 text-xs text-slate-600">{k.checkedBy?.name || (k.method === 'self' ? 'Self check-in' : '—')}</td>
+                      <td className="py-3 px-4 text-xs text-slate-600">{k.checkedBy?.name || (k.method === 'self' ? 'Form presensi' : '—')}</td>
                       <td className="py-3 px-4 pr-6 text-right">
                         <button onClick={() => handleDeleteKehadiran(k.id)} className="h-8 w-8 inline-flex items-center justify-center text-red-500 hover:bg-red-50 rounded-sm transition-colors">
                           <Trash2 className="w-4 h-4" />
@@ -672,8 +697,8 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                 <div>
                   <label className="block text-sm font-bold text-slate-900 mb-1.5">Mode</label>
                   <select className={inputCls} value={sForm.mode} onChange={(e) => setSForm({ ...sForm, mode: e.target.value as Presensi['mode'] })}>
-                    <option value="both">Keduanya</option>
-                    <option value="self">QR Kegiatan</option>
+                    {sForm.mode === 'both' && <option value="both">Form + Scan (sesi lama)</option>}
+                    <option value="self">Form Presensi</option>
                     <option value="scan">Scan Peserta</option>
                   </select>
                 </div>
@@ -682,13 +707,15 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                   <input type="number" min={0} className={inputCls} value={sForm.late_after_minutes ?? ''} onChange={(e) => setSForm({ ...sForm, late_after_minutes: e.target.value === '' ? null : Number(e.target.value) })} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold text-slate-900 mb-1.5">Rotasi QR (detik)</label>
-                  <input type="number" min={5} max={300} className={inputCls} value={sForm.qr_refresh_seconds ?? 15} onChange={(e) => setSForm({ ...sForm, qr_refresh_seconds: e.target.value === '' ? 15 : Number(e.target.value) })} />
-                  <p className="text-xs text-slate-400 mt-1">QR kegiatan berputar tiap N detik (5–300).</p>
+              {sForm.mode === 'self' && (
+                <div className="rounded-xl border border-slate-200 p-4">
+                  <PresensiFormFieldBuilder
+                    fields={sForm.form_fields || []}
+                    onChange={(form_fields) => setSForm({ ...sForm, form_fields })}
+                  />
                 </div>
-                <div className="flex flex-col justify-center gap-3">
+              )}
+              {sForm.mode !== 'self' && <div className="flex flex-col gap-3">
                   <label className="flex items-center gap-2.5 cursor-pointer">
                     <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" checked={!!sForm.allow_manual_add} onChange={(e) => setSForm({ ...sForm, allow_manual_add: e.target.checked })} />
                     <span className="text-sm text-slate-700">Izinkan tambah peserta manual</span>
@@ -697,8 +724,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                     <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" checked={sForm.enforce_device_limit !== false} onChange={(e) => setSForm({ ...sForm, enforce_device_limit: e.target.checked })} />
                     <span className="text-sm text-slate-700">Batasi 1 perangkat = 1 peserta</span>
                   </label>
-                </div>
-              </div>
+              </div>}
               <Button type="submit" disabled={isSavingSettings} className="h-11 px-6 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl font-bold">
                 {isSavingSettings ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />} Simpan Perubahan
               </Button>
@@ -728,6 +754,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
         presensiSlug={presensi.slug || String(id)}
         sesis={sesis}
         activeSesiId={activeSesiId}
+        formFields={presensi.form_fields}
         onClose={() => setShowExportModal(false)}
       />
     </div>

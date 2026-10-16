@@ -10,6 +10,8 @@ import { Loader2, Save, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { Event } from '@/types';
+import { PresensiFormFieldBuilder } from '@/components/presensi/PresensiFormFieldBuilder';
+import { DEFAULT_PRESENSI_FORM_FIELDS } from '@/lib/presensi';
 
 const inputCls =
   'w-full bg-white border border-slate-200 rounded-sm px-3.5 py-2.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none shadow-sm transition-all';
@@ -25,13 +27,13 @@ export default function PresensiCreatePage() {
     description: '',
     starts_at: '',
     ends_at: '',
-    mode: 'both' as 'self' | 'scan' | 'both',
+    mode: 'self' as 'self' | 'scan',
     event_id: '' as string | number,
     late_after_minutes: '' as string | number,
     allow_manual_add: true,
-    qr_refresh_seconds: 15 as string | number,
     enforce_device_limit: true,
     is_open: false,
+    form_fields: DEFAULT_PRESENSI_FORM_FIELDS,
   });
 
   useEffect(() => {
@@ -67,9 +69,9 @@ export default function PresensiCreatePage() {
         event_id: form.event_id ? Number(form.event_id) : null,
         late_after_minutes: form.late_after_minutes === '' ? null : Number(form.late_after_minutes),
         allow_manual_add: form.allow_manual_add,
-        qr_refresh_seconds: form.qr_refresh_seconds === '' ? 15 : Number(form.qr_refresh_seconds),
         enforce_device_limit: form.enforce_device_limit,
         is_open: form.is_open,
+        form_fields: form.mode === 'self' ? form.form_fields : undefined,
       };
       const res = await api.post('/presensi', payload);
       toast.success('Sesi presensi berhasil dibuat');
@@ -112,6 +114,17 @@ export default function PresensiCreatePage() {
             </CardContent>
           </Card>
 
+          {form.mode === 'self' && (
+            <Card className="border-slate-200/90 rounded-2xl shadow-2xs">
+              <CardContent className="pt-6">
+                <PresensiFormFieldBuilder
+                  fields={form.form_fields}
+                  onChange={(form_fields) => set('form_fields', form_fields)}
+                />
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="border-slate-200/90 rounded-2xl shadow-2xs">
             <CardHeader><CardTitle className="text-base">Jadwal & Status</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -140,11 +153,6 @@ export default function PresensiCreatePage() {
                 <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" checked={form.allow_manual_add} onChange={(e) => set('allow_manual_add', e.target.checked)} />
                 <span className="text-sm text-slate-700">Izinkan tambah peserta manual</span>
               </label>
-              <div>
-                <label className="block text-sm font-bold text-slate-900 mb-1.5">Rotasi QR Kegiatan (detik)</label>
-                <input type="number" min={5} max={300} className={inputCls} value={form.qr_refresh_seconds} onChange={(e) => set('qr_refresh_seconds', e.target.value)} />
-                <p className="text-xs text-slate-400 mt-1">QR kegiatan berputar tiap N detik (5–300). Bisa diubah nanti.</p>
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -154,9 +162,8 @@ export default function PresensiCreatePage() {
             <CardHeader><CardTitle className="text-base">Mode Presensi</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               {([
-                ['both', 'Keduanya', 'QR kegiatan (self) + scan petugas'],
-                ['self', 'QR Kegiatan', 'Peserta scan lalu pilih nama sendiri'],
-                ['scan', 'Scan Peserta', 'Petugas scan QR tiap peserta'],
+                ['self', 'Form Presensi', 'Peserta scan QR/link lalu mengisi form kehadiran'],
+                ['scan', 'Scan Peserta', 'Petugas memindai QR masing-masing peserta'],
               ] as const).map(([val, label, desc]) => (
                 <label key={val} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${form.mode === val ? 'border-[#c20000] bg-red-50/50' : 'border-slate-200 hover:border-slate-300'}`}>
                   <input type="radio" name="mode" className="mt-1 w-4 h-4 text-[#c20000] focus:ring-[#c20000]" checked={form.mode === val} onChange={() => set('mode', val)} />

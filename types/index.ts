@@ -98,6 +98,18 @@ export interface Setting {
 }
 
 export type PresensiMode = 'self' | 'scan' | 'both';
+export type PresensiFormFieldType = 'text' | 'email' | 'phone' | 'number' | 'date' | 'textarea' | 'select' | 'checkbox';
+
+export interface PresensiFormField {
+  key: string;
+  label: string;
+  type: PresensiFormFieldType;
+  required: boolean;
+  options?: string[];
+}
+
+export type PresensiFormValue = string | number | string[] | null;
+
 export type PresensiKehadiranStatus = 'hadir' | 'telat' | 'izin' | 'tidak_hadir';
 export type PresensiKehadiranMethod = 'self' | 'scan' | 'manual';
 
@@ -114,7 +126,7 @@ export interface Presensi {
   is_open: boolean;
   mode: PresensiMode;
   event_token: string | null;
-  qr_refresh_seconds?: number;
+  form_fields: PresensiFormField[];
   late_after_minutes: number | null;
   allow_manual_add: boolean;
   enforce_device_limit?: boolean;
@@ -162,6 +174,7 @@ export interface PresensiPeserta {
   asal: string | null;
   token: string;
   meta: Record<string, unknown> | null;
+  form_data?: Record<string, PresensiFormValue> | null;
   created_at: string;
   updated_at: string;
   kehadiran?: PresensiKehadiran | null;

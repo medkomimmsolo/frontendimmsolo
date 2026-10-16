@@ -150,7 +150,7 @@ export function PresensiHistoryPanel({ presensiId, activeSesiId, sesis }: Props)
                       {log.changed_by_name ? (
                         <span className="inline-flex items-center gap-1.5"><UserRound className="w-3.5 h-3.5 text-slate-400" /> {log.changed_by_name}</span>
                       ) : (
-                        <span className="text-slate-400">Self check-in</span>
+                        <span className="text-slate-400">Form presensi</span>
                       )}
                     </td>
                     <td className="py-3 px-4 pr-6 text-xs text-slate-500">{log.note || '—'}</td>

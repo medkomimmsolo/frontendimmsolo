@@ -1,8 +1,16 @@
 import type {
+  PresensiFormField,
   PresensiKehadiranMethod,
   PresensiKehadiranStatus,
   PresensiKehadiranLogAction,
 } from '@/types';
+
+export const DEFAULT_PRESENSI_FORM_FIELDS: PresensiFormField[] = [
+  { key: 'nama', label: 'Nama lengkap', type: 'text', required: true },
+  { key: 'email', label: 'Email', type: 'email', required: false },
+  { key: 'phone', label: 'Nomor WhatsApp', type: 'phone', required: false },
+  { key: 'asal', label: 'Komisariat / kampus', type: 'text', required: false },
+];
 
 /** Label + gaya badge untuk status kehadiran. */
 export const STATUS_LABEL: Record<PresensiKehadiranStatus, string> = {
@@ -21,11 +29,11 @@ export const STATUS_BADGE_CLASS: Record<PresensiKehadiranStatus, string> = {
 
 /**
  * Label + gaya badge untuk metode pencatatan kehadiran.
- * self = peserta scan QR kegiatan sendiri, scan = petugas scan QR peserta,
+ * self = peserta mengisi form via QR/link publik, scan = petugas scan QR peserta,
  * manual = petugas menandai langsung.
  */
 export const METHOD_LABEL: Record<PresensiKehadiranMethod, string> = {
-  self: 'Self',
+  self: 'Form',
   scan: 'Scan',
   manual: 'Manual',
 };
@@ -38,7 +46,7 @@ export const METHOD_BADGE_CLASS: Record<PresensiKehadiranMethod, string> = {
 
 /** Keterangan panjang metode, untuk tooltip. */
 export const METHOD_HINT: Record<PresensiKehadiranMethod, string> = {
-  self: 'Diisi sendiri oleh peserta via QR kegiatan',
+  self: 'Diisi sendiri oleh peserta melalui form presensi',
   scan: 'Dipindai petugas dari QR peserta',
   manual: 'Ditandai manual oleh petugas',
 };

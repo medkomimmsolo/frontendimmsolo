@@ -5,7 +5,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { ArrowLeft, Plus, Edit, Trash2, Loader2, ExternalLink, Download, Users, Copy, Eye, GripVertical, FileSpreadsheet, FolderArchive, Search, FileText, X, Settings, Upload, Image as ImageIcon, ShieldCheck, Crop } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, Loader2, ExternalLink, Download, Users, Copy, Eye, GripVertical, FileSpreadsheet, FolderArchive, Search, FileText, X, Settings, Upload, Image as ImageIcon, ShieldCheck, Crop, KeyRound, RotateCw } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import FormFillClient from '@/components/form/FormFillClient';
 import toast from 'react-hot-toast';
@@ -65,6 +65,8 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedResponse, setSelectedResponse] = useState<any | null>(null);
   const [isExportingZip, setIsExportingZip] = useState(false);
+  const [monitorToken, setMonitorToken] = useState('');
+  const [isGeneratingMonitorToken, setIsGeneratingMonitorToken] = useState(false);
 
   // Form Settings states
   const [settingsTitle, setSettingsTitle] = useState('');
@@ -306,6 +308,44 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       }
     } catch (error) {
       toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus'));
+    }
+  };
+
+  const handleGenerateMonitorToken = async () => {
+    if (form?.monitor_token_enabled && !(await confirm({
+      title: 'Rotasi token pemantau?',
+      message: 'Token lama akan langsung tidak berlaku. Pemantau yang memakai token lama akan kehilangan akses.',
+      confirmText: 'Rotasi token',
+    }))) return;
+
+    setIsGeneratingMonitorToken(true);
+    try {
+      const res = await api.post(`/form-admin/${formId}/monitor-token`);
+      setMonitorToken(res.data.data.token);
+      setForm((current: any) => ({ ...current, monitor_token_enabled: true }));
+      toast.success('Token akses pemantau berhasil dibuat');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal membuat token pemantau'));
+    } finally {
+      setIsGeneratingMonitorToken(false);
+    }
+  };
+
+  const handleRevokeMonitorToken = async () => {
+    if (!(await confirm({
+      title: 'Cabut akses pemantau?',
+      message: 'Token yang sudah dibagikan tidak akan dapat digunakan lagi.',
+      confirmText: 'Cabut akses',
+      tone: 'danger',
+    }))) return;
+
+    try {
+      await api.delete(`/form-admin/${formId}/monitor-token`);
+      setMonitorToken('');
+      setForm((current: any) => ({ ...current, monitor_token_enabled: false }));
+      toast.success('Akses pemantau dicabut');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal mencabut akses pemantau'));
     }
   };
 
@@ -572,7 +612,67 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       )}
 
       {tab === 'responses' && (
-        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+        <div className="space-y-4">
+        <section className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 sm:p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="rounded-xl bg-white p-2 text-amber-700 shadow-xs"><KeyRound className="h-5 w-5" /></div>
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">Akses Pemantau Tanpa Akun</h2>
+                <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-600">
+                  Token memberi akses baca ke seluruh respons pendaftar. Bagikan hanya kepada pemantau tepercaya; siapa pun yang memiliki token dapat melihat data ini.
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <Button
+                onClick={handleGenerateMonitorToken}
+                disabled={isGeneratingMonitorToken}
+                size="sm"
+                className="h-9 bg-amber-700 text-white hover:bg-amber-800"
+              >
+                {isGeneratingMonitorToken
+                  ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  : form?.monitor_token_enabled ? <RotateCw className="mr-1.5 h-4 w-4" /> : <KeyRound className="mr-1.5 h-4 w-4" />}
+                {form?.monitor_token_enabled ? 'Rotasi Token' : 'Buat Token'}
+              </Button>
+              {form?.monitor_token_enabled && (
+                <Button onClick={handleRevokeMonitorToken} variant="outline" size="sm" className="h-9 border-red-200 text-red-700 hover:bg-red-50">
+                  Cabut Akses
+                </Button>
+              )}
+            </div>
+          </div>
+          {monitorToken && (
+            <div className="mt-4 rounded-xl border border-amber-200 bg-white p-3">
+              <p className="mb-2 text-xs font-semibold text-amber-800">
+                Simpan token ini sekarang. Demi keamanan, token lengkap tidak ditampilkan kembali setelah halaman ditutup.
+              </p>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <code className="min-w-0 flex-1 break-all rounded-lg bg-slate-50 px-3 py-2 font-mono text-xs text-slate-800">{monitorToken}</code>
+                <Button
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(monitorToken);
+                      toast.success('Token disalin');
+                    } catch (error) {
+                      toast.error(getUserFacingErrorMessage(error, 'Gagal menyalin token'));
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="h-9 shrink-0"
+                >
+                  <Copy className="mr-1.5 h-4 w-4" /> Salin Token
+                </Button>
+              </div>
+              <p className="mt-2 text-xs text-slate-500">
+                Pemantau membuka <Link href="/pantau-form" target="_blank" className="font-semibold text-[#c20000] underline">halaman Pantau Form</Link> lalu memasukkan token ini.
+              </p>
+            </div>
+          )}
+        </section>
+        <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
           {/* Spreadsheet Toolbar */}
           <div className="bg-slate-50/80 border-b border-slate-200/80 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -852,6 +952,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               </button>
             </div>
           </div>
+        </div>
         </div>
       )}
 
