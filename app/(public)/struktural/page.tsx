@@ -159,7 +159,7 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
                   <div key={groupName} className="mb-12 last:mb-0">
                     {groupName && (
                       <div className="flex items-center gap-4 mb-6">
-                        <h3 className="text-xs font-bold text-[#c20000] uppercase tracking-[0.2em] shrink-0 bg-red-50/70 border border-red-100/80 px-3 py-1 rounded-full">
+                        <h3 className="min-w-0 max-w-full break-words text-xs font-bold text-[#c20000] uppercase tracking-[0.2em] bg-red-50/70 border border-red-100/80 px-3 py-1 rounded-full">
                           {groupName}
                         </h3>
                         <div className="h-px bg-slate-200/80 w-full"></div>

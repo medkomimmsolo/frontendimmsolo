@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { QRCodeSVG } from 'qrcode.react';
 import { 
   ArrowLeft, Plus, Edit, Trash2, Loader2, ArrowUp, ArrowDown, ExternalLink, 
-  Palette, Smartphone, Save, BadgeCheck, ArrowUpRight, Copy, Check, UserCheck
+  Palette, Smartphone, Save, BadgeCheck, ArrowUpRight, Copy, Check, UserCheck,
+  QrCode, Download, Upload, X, ImageDown
 } from 'lucide-react';
 import LinkItemIcon from '@/components/post/LinkItemIcon';
 import { LINK_ICON_OPTIONS } from '@/lib/linkIcons';
@@ -18,6 +20,7 @@ import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
+import { exportQrPng, safeFileName } from '@/lib/qrExport';
 
 const THEME_PRESETS = [
   { name: 'Midnight', bg: '#0b1120', accent: '#c20000', text: '#ffffff', btnBg: '', btnText: '#ffffff' },
@@ -38,6 +41,10 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
   const [items, setItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [qrLogo, setQrLogo] = useState<string | null>(null);
+  const [isDownloadingQr, setIsDownloadingQr] = useState(false);
+  const qrLogoInputRef = useRef<HTMLInputElement | null>(null);
 
   // Tab mode di sisi kiri: 'links' (daftar link) | 'design' (kustomisasi warna & profil)
   const [activeTab, setActiveTab] = useState<'links' | 'design'>('links');
@@ -64,10 +71,17 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isPageSaving, setIsPageSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [siteOrigin, setSiteOrigin] = useState(process.env.NEXT_PUBLIC_SITE_URL || 'https://immsolo.or.id');
 
   useEffect(() => {
     params.then((p) => setPageId(p.id));
   }, [params]);
+
+  useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_SITE_URL) {
+      setSiteOrigin(window.location.origin);
+    }
+  }, []);
 
   const fetchPage = useCallback(async () => {
     if (!pageId) return;
@@ -217,7 +231,60 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
   const previewBtnIsLight = previewBtnBg ? isLightColor(previewBtnBg) : false;
   const previewBtnText = pageFormData.btn_text_color || (previewBtnBg ? (previewBtnIsLight ? '#0f172a' : '#ffffff') : (previewBgIsLight ? '#0f172a' : '#ffffff'));
 
-  const publicUrl = page ? `https://immsolo.or.id/links/${page.slug}` : '';
+  const publicUrl = page
+    ? `${siteOrigin.replace(/\/+$/, '')}/links/${page.slug}`
+    : '';
+
+  const handleQrLogoChange = (file: File | null) => {
+    if (!file) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      toast.error('Logo QR harus berupa PNG, JPG, atau WebP.');
+      return;
+    }
+    if (file.size > 2_000_000) {
+      toast.error('Ukuran logo maksimal 2 MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setQrLogo(String(reader.result));
+    reader.onerror = () => toast.error('Gagal membaca file logo.');
+    reader.readAsDataURL(file);
+  };
+
+  const downloadQrSvg = () => {
+    const svg = document.getElementById(`linktree-qr-${pageId}`) as SVGSVGElement | null;
+    if (!svg || !page) {
+      toast.error('QR Code belum siap diunduh.');
+      return;
+    }
+    const clone = svg.cloneNode(true) as SVGSVGElement;
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const blob = new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${safeFileName(`linktree-${page.slug}`)}.svg`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadQrPng = async () => {
+    if (!page) return;
+    setIsDownloadingQr(true);
+    try {
+      await exportQrPng({
+        svgId: `linktree-qr-${pageId}`,
+        fileName: `linktree-${page.slug}`,
+        size: 1200,
+        caption: { title: page.title, subtitle: publicUrl },
+      });
+      toast.success('QR Linktree berhasil diunduh.');
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal mengunduh QR Code.'));
+    } finally {
+      setIsDownloadingQr(false);
+    }
+  };
 
   const copyUrl = async () => {
     if (publicUrl) {
@@ -273,6 +340,15 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
 
         {/* Tab Switcher & Action */}
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <Button
+            onClick={() => setIsQrModalOpen(true)}
+            disabled={!page}
+            variant="outline"
+            size="sm"
+            className="h-9 px-3 text-xs border-slate-200 text-slate-700 hover:border-[#c20000] hover:text-[#c20000] rounded-sm shadow-sm"
+          >
+            <QrCode className="w-3.5 h-3.5 mr-1.5" /> QR Linktree
+          </Button>
           {isSuperAdmin && (
             <Button
               onClick={() => setIsTransferModalOpen(true)}
@@ -879,6 +955,134 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
               </Button>
             </div>
           </form>
+        </div>
+      )}
+
+      {isQrModalOpen && page && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-sm"
+          onClick={() => setIsQrModalOpen(false)}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="linktree-qr-title"
+            className="my-auto w-full max-w-3xl overflow-hidden rounded-3xl border border-white/50 bg-white shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-[#3c1014] px-6 py-6 text-white sm:px-8">
+              <div className="absolute -right-14 -top-24 h-64 w-64 rounded-full bg-[#c20000]/30 blur-3xl" />
+              <button
+                type="button"
+                onClick={() => setIsQrModalOpen(false)}
+                className="absolute right-4 top-4 z-10 rounded-full border border-white/20 bg-white/10 p-2 text-white/80 transition hover:bg-white/20 hover:text-white"
+                aria-label="Tutup QR Linktree"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <div className="relative">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">
+                  <QrCode className="h-3.5 w-3.5 text-red-300" /> LINKTREE QR
+                </div>
+                <h2 id="linktree-qr-title" className="text-xl font-bold sm:text-2xl">QR Code Halaman Linktree</h2>
+                <p className="mt-1 max-w-xl break-all text-sm text-white/65">{publicUrl}</p>
+              </div>
+            </div>
+
+            <div className="grid gap-6 p-5 sm:p-8 md:grid-cols-[minmax(0,1fr)_minmax(260px,0.85fr)]">
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-gradient-to-b from-slate-50 to-white p-5 sm:p-7">
+                <div className="mb-4 w-full text-center">
+                  <p className="text-base font-bold text-slate-900">{page.title}</p>
+                  <p className="mt-1 text-xs text-slate-500">Pindai untuk membuka tautan organisasi</p>
+                </div>
+                <div className="rounded-3xl border border-slate-100 bg-white p-4 shadow-[0_18px_50px_-24px_rgba(15,23,42,0.35)]">
+                  <QRCodeSVG
+                    id={`linktree-qr-${pageId}`}
+                    value={publicUrl}
+                    size={260}
+                    level="H"
+                    marginSize={3}
+                    imageSettings={qrLogo ? {
+                      src: qrLogo,
+                      width: 54,
+                      height: 54,
+                      excavate: true,
+                    } : undefined}
+                  />
+                </div>
+                <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                  <BadgeCheck className="h-4 w-4" /> Logo tengah aman · koreksi QR tinggi
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Logo pada QR</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                    Tambahkan logo organisasi di tengah QR. Area putih pelindung dan koreksi error tinggi membantu QR tetap mudah dipindai.
+                  </p>
+                </div>
+
+                <input
+                  ref={qrLogoInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={(event) => {
+                    handleQrLogoChange(event.target.files?.[0] || null);
+                    event.currentTarget.value = '';
+                  }}
+                />
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white">
+                    {qrLogo ? (
+                      <Image src={qrLogo} alt="Pratinjau logo QR" width={56} height={56} unoptimized className="h-full w-full object-contain p-1" />
+                    ) : (
+                      <ImageDown className="h-5 w-5 text-slate-300" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-slate-800">{qrLogo ? 'Logo siap digunakan' : 'Tanpa logo'}</p>
+                    <p className="mt-0.5 text-[11px] text-slate-500">PNG, JPG, atau WebP · maksimal 2 MB</p>
+                  </div>
+                  <div className="flex shrink-0 flex-col gap-1.5">
+                    <Button type="button" onClick={() => qrLogoInputRef.current?.click()} variant="outline" size="sm" className="h-8 px-2.5 text-[11px] font-semibold">
+                      <Upload className="mr-1 h-3.5 w-3.5" /> {qrLogo ? 'Ganti' : 'Pilih Logo'}
+                    </Button>
+                    {qrLogo && (
+                      <button type="button" onClick={() => setQrLogo(null)} className="text-[11px] font-semibold text-slate-500 hover:text-red-600">
+                        Hapus logo
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5">
+                  <p className="text-xs font-bold text-blue-900">Tips agar hasil pindai tetap bagus</p>
+                  <ul className="mt-2 space-y-1.5 text-[11px] leading-relaxed text-blue-800/80">
+                    <li>• Gunakan logo sederhana dengan latar transparan atau putih.</li>
+                    <li>• Cetak QR hitam di atas latar putih dan jangan memotong bagian tepinya.</li>
+                    <li>• Coba pindai QR sebelum dicetak dalam jumlah banyak.</li>
+                  </ul>
+                </div>
+
+                <div className="mt-auto grid grid-cols-2 gap-2 pt-1">
+                  <Button
+                    type="button"
+                    onClick={downloadQrPng}
+                    disabled={isDownloadingQr}
+                    className="h-10 rounded-xl bg-[#c20000] text-xs font-bold text-white hover:bg-[#a30000]"
+                  >
+                    {isDownloadingQr ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <ImageDown className="mr-1.5 h-4 w-4" />}
+                    Unduh PNG
+                  </Button>
+                  <Button type="button" onClick={downloadQrSvg} variant="outline" className="h-10 rounded-xl text-xs font-bold">
+                    <Download className="mr-1.5 h-4 w-4" /> Unduh SVG
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       )}
 

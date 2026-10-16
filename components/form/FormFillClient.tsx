@@ -11,6 +11,11 @@ import { resolveMediaUrl } from '@/lib/imageUtils';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 
+const getMaxFileSizeMb = (field: any): number => {
+  if (field.settings?.max_file_size_mb != null) return Number(field.settings.max_file_size_mb);
+  return 2;
+};
+
 export default function FormFillClient({ form, preview = false }: { form: any; preview?: boolean }) {
   const { confirm } = useConfirm();
   const [answers, setAnswers] = useState<Record<string, any>>({});
@@ -101,11 +106,12 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
       }
     }
 
-    // Validasi ukuran file di sisi klien (maks 10MB)
+    // Validasi ukuran file sebelum pengiriman; backend tetap memvalidasi ulang.
     for (const field of form.fields || []) {
       const v = answers[field.id];
-      if (v instanceof File && v.size > 10 * 1024 * 1024) {
-        toast.error(`File "${field.label}" maksimal 10MB`);
+      const maxFileSizeMb = getMaxFileSizeMb(field);
+      if (v instanceof File && v.size > maxFileSizeMb * 1024 * 1024) {
+        toast.error(`File "${field.label}" maksimal ${maxFileSizeMb}MB`);
         return;
       }
     }
@@ -630,15 +636,23 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
                       <FileUp className="w-8 h-8 text-slate-400 mb-2" />
                       <span className="text-sm font-semibold text-slate-700">Pilih berkas dari perangkat Anda</span>
                       <span className="text-xs text-slate-400 mt-1">
-                        Format didukung: {(field.options || []).join(', ') || 'Semua format'} (maks 10MB)
+                        Format didukung: {(field.options || []).join(', ') || 'Semua format'} (maks {getMaxFileSizeMb(field)}MB)
                       </span>
                       <input
                         id={`form-field-${field.id}`}
                         type="file"
+                        accept={(field.options || []).map((extension: string) => `.${extension}`).join(',')}
                         required={field.required && !answers[field.id]}
                         onChange={(e) => {
                           const f = e.target.files?.[0];
-                          if (f) setAnswer(field.id, f);
+                          if (!f) return;
+                          const maxFileSizeMb = getMaxFileSizeMb(field);
+                          if (f.size > maxFileSizeMb * 1024 * 1024) {
+                            toast.error(`File "${field.label}" maksimal ${maxFileSizeMb}MB`);
+                            e.target.value = '';
+                            return;
+                          }
+                          setAnswer(field.id, f);
                         }}
                         className="hidden"
                       />

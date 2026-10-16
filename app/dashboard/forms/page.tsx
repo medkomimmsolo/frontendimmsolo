@@ -202,7 +202,7 @@ export default function FormsManagement() {
       {/* Tabel Data Konsisten */}
       <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left border-collapse">
+          <table className="admin-panel-table w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
                 <th className="py-3.5 px-4 pl-6">Formulir</th>

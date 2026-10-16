@@ -483,7 +483,7 @@ export default function StrukturalManagement() {
                             >
                               <Card className="border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
                                 <div className="overflow-x-auto custom-scrollbar">
-                                  <table className="w-full text-left border-collapse">
+                                  <table className="admin-panel-table w-full text-left border-collapse">
                                     <thead>
                                       <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
                                         <th className="py-3.5 px-4 w-10"></th>
@@ -554,7 +554,7 @@ export default function StrukturalManagement() {
                                                         <div className="border border-slate-200/90 rounded-xl overflow-hidden bg-white shadow-2xs">
                                                           <Droppable droppableId={`anggota-${kategori.id}|${bidang.id}`} type={`ANGGOTA-${kategori.id}|${bidang.id}`}>
                                                             {(providedAnggota) => (
-                                                              <table className="w-full text-left border-collapse">
+                                                              <table className="admin-panel-table w-full text-left border-collapse">
                                                                 <thead>
                                                                   <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-[11px] font-bold uppercase tracking-wider">
                                                                     <th className="p-3 w-8"></th>

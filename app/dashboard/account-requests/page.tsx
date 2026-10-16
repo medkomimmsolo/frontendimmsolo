@@ -149,7 +149,7 @@ export default function AccountRequestsPage() {
 
       <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left border-collapse">
+          <table className="admin-panel-table w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
                 <th className="py-3.5 px-4 pl-6">Pemohon</th>
@@ -183,6 +183,7 @@ export default function AccountRequestsPage() {
                 <tr key={r.id} className="hover:bg-slate-50 transition-colors">
                   <td className="p-4 pl-6">
                     <div className="font-bold text-[#0f172a]">{r.name}</div>
+                    {r.username && <div className="text-slate-600 text-xs mt-0.5">@{r.username}</div>}
                     <div className="text-slate-500 text-xs mt-0.5">{r.email}</div>
                     <div className="text-slate-400 text-[11px] font-mono mt-0.5">{new Date(r.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                   </td>

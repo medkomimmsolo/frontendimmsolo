@@ -5,16 +5,17 @@ import Link from 'next/link';
 import axios from 'axios';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
-import { Loader2, CheckCircle2, UserPlus, ArrowLeft, MessageCircle } from 'lucide-react';
+import { Loader2, CheckCircle2, UserPlus, ArrowLeft, MessageCircle, UserRound, Mail, LockKeyhole, ShieldCheck, Eye, EyeOff, AtSign, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getApiBase, normalizeSettings } from '@/lib/settings';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 
 export default function AjukanAkunClient() {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', passwordConfirm: '', requested_role: 'komisariat', reason: '' });
-  const [submittedData, setSubmittedData] = useState({ name: '', email: '', requested_role: 'komisariat' });
+  const [formData, setFormData] = useState({ name: '', username: '', email: '', password: '', passwordConfirm: '', requested_role: 'komisariat', reason: '' });
+  const [submittedData, setSubmittedData] = useState({ name: '', username: '', email: '', requested_role: 'komisariat' });
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [adminWa, setAdminWa] = useState('6282226252923');
 
   useEffect(() => {
@@ -82,6 +83,7 @@ export default function AjukanAkunClient() {
       const base = getApiBase();
       await axios.post(`${base}/account-requests`, {
         name: formData.name,
+        username: formData.username,
         email: formData.email,
         password: formData.password,
         requested_role: formData.requested_role,
@@ -89,6 +91,7 @@ export default function AjukanAkunClient() {
       });
       setSubmittedData({
         name: formData.name,
+        username: formData.username,
         email: formData.email,
         requested_role: formData.requested_role,
       });
@@ -100,7 +103,8 @@ export default function AjukanAkunClient() {
     }
   };
 
-  const inputClass = "w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/15 transition-all bg-white";
+  const inputClass = "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#c20000] focus:ring-4 focus:ring-[#c20000]/10";
+  const iconInputClass = `${inputClass} pl-11`;
 
   if (isSuccess) {
     const roleLabels: Record<string, string> = {
@@ -109,25 +113,38 @@ export default function AjukanAkunClient() {
       admin: 'Admin',
     };
     const roleText = roleLabels[submittedData.requested_role] || submittedData.requested_role;
-    const waText = `Halo Admin PC IMM Kota Surakarta,%0A%0ASaya telah mengajukan pendaftaran akun di website immsolo.or.id dengan rincian berikut:%0A%0A- *Nama Lengkap*: ${encodeURIComponent(submittedData.name)}%0A- *Email*: ${encodeURIComponent(submittedData.email)}%0A- *Role*: ${encodeURIComponent(roleText)}%0A%0AMohon bantuannya untuk verifikasi dan persetujuan akun saya. Terima kasih!`;
+    const waText = `Halo Admin PC IMM Kota Surakarta,%0A%0ASaya telah mengajukan pendaftaran akun di website immsolo.or.id dengan rincian berikut:%0A%0A- *Nama Lengkap*: ${encodeURIComponent(submittedData.name)}%0A- *Username*: ${encodeURIComponent(submittedData.username)}%0A- *Email*: ${encodeURIComponent(submittedData.email)}%0A- *Role*: ${encodeURIComponent(roleText)}%0A%0AMohon bantuannya untuk verifikasi dan persetujuan akun saya. Terima kasih!`;
 
     return (
-      <main className="min-h-screen bg-slate-50/70 pt-32 pb-20 px-4 flex items-start justify-center">
-        <Card className="max-w-md w-full border border-slate-200/90 shadow-xl shadow-slate-200/60 rounded-2xl bg-white overflow-hidden">
-          <CardContent className="p-8 text-center">
-            <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 border border-emerald-100">
-              <CheckCircle2 className="w-8 h-8" />
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 pb-16 pt-28">
+        <div className="pointer-events-none absolute -left-24 top-32 h-72 w-72 rounded-full bg-red-100/70 blur-3xl" />
+        <div className="pointer-events-none absolute -right-24 bottom-10 h-80 w-80 rounded-full bg-amber-100/60 blur-3xl" />
+        <Card className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-300/40">
+          <CardContent className="p-7 text-center sm:p-10">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-8 ring-emerald-50/60">
+              <CheckCircle2 className="h-8 w-8" />
             </div>
-            <h1 className="text-xl font-bold text-[#0f172a] mb-2" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-              Pengajuan Terkirim
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+              <ShieldCheck className="h-3.5 w-3.5" /> Pengajuan diterima
+            </span>
+            <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+              Terima kasih, <span className="break-words">{submittedData.name.split(' ')[0]}</span>!
             </h1>
-            <p className="text-sm text-slate-600 leading-relaxed mb-6">
-              Pengajuan akun Anda sudah diterima dan menunggu persetujuan Super Admin. Anda dapat mengonfirmasi langsung ke Admin agar akun lebih cepat diverifikasi.
+            <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-600">
+              Pengajuan akun Anda sedang menunggu verifikasi Super Admin. Kami akan mengaktifkan akun setelah permohonan ditinjau.
             </p>
+            <div className="my-6 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-left">
+              <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">Ringkasan pengajuan</p>
+              <div className="grid gap-3 text-sm sm:grid-cols-2">
+                <div className="min-w-0"><span className="block text-xs text-slate-500">Username</span><span className="break-all font-semibold text-slate-800">@{submittedData.username}</span></div>
+                <div className="min-w-0"><span className="block text-xs text-slate-500">Email</span><span className="break-all font-medium text-slate-800">{submittedData.email}</span></div>
+                <div className="sm:col-span-2"><span className="block text-xs text-slate-500">Role diajukan</span><span className="font-medium text-slate-800">{roleText}</span></div>
+              </div>
+            </div>
             <div className="space-y-3">
               <Button
                 asChild
-                className="w-full h-11 bg-[#25D366] hover:bg-[#1da851] text-white font-bold flex items-center justify-center gap-2 rounded-xl shadow-sm"
+                className="h-12 w-full rounded-xl bg-[#25D366] font-bold text-white shadow-sm hover:bg-[#1da851]"
               >
                 <a
                   href={`https://wa.me/${adminWa}?text=${waText}`}
@@ -138,7 +155,7 @@ export default function AjukanAkunClient() {
                 </a>
               </Button>
               <Link href="/login" className="block">
-                <Button variant="outline" className="w-full h-11 border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl">
+                <Button variant="outline" className="h-12 w-full rounded-xl border-slate-200 font-semibold text-slate-700 hover:bg-slate-50">
                   Kembali ke Login
                 </Button>
               </Link>
@@ -150,64 +167,104 @@ export default function AjukanAkunClient() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50/70 pt-28 pb-20 px-4">
-      <div className="max-w-lg mx-auto">
-        <Link href="/login" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#c20000] mb-6 transition-colors font-medium">
-          <ArrowLeft className="w-4 h-4" /> Kembali ke Login
+    <main className="relative min-h-screen overflow-hidden bg-[#f6f7fb] px-4 pb-16 pt-28 sm:pt-32">
+      <div className="pointer-events-none absolute -left-28 top-40 h-80 w-80 rounded-full bg-red-100/70 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-amber-100/50 blur-3xl" />
+      <div className="relative mx-auto max-w-6xl">
+        <Link href="/login" className="mb-5 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-red-200 hover:text-[#c20000]">
+          <ArrowLeft className="h-4 w-4" /> Kembali ke Login
         </Link>
-        <Card className="border border-slate-200/90 shadow-xl shadow-slate-200/60 rounded-2xl overflow-hidden bg-white">
-          <div className="bg-[#0f172a] px-6 py-8 text-center relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-red-600/10 rounded-full blur-2xl"></div>
-            <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/10 text-white flex items-center justify-center mx-auto mb-3 shadow-sm relative z-10">
-              <UserPlus className="w-6 h-6" />
+        <Card className="grid overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-300/40 lg:grid-cols-[0.82fr_1.18fr]">
+          <aside className="relative isolate overflow-hidden bg-[#101a30] px-7 py-8 text-white sm:px-10 sm:py-10 lg:flex lg:flex-col lg:justify-between lg:px-11 lg:py-12">
+            <div className="pointer-events-none absolute -right-24 -top-20 -z-10 h-72 w-72 rounded-full bg-red-600/25 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-28 -left-20 -z-10 h-72 w-72 rounded-full bg-amber-400/10 blur-3xl" />
+            <div>
+              <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white shadow-lg shadow-black/10">
+                <UserPlus className="h-7 w-7" />
+              </div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#fcd34d]" /> Portal Keanggotaan
+              </span>
+              <h1 className="mt-5 max-w-sm text-3xl font-bold leading-tight tracking-tight sm:text-4xl" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+                Bergabung dan berkontribusi bersama IMM.
+              </h1>
+              <p className="mt-4 max-w-sm text-sm leading-6 text-slate-300">
+                Ajukan akun pengelola untuk mendukung publikasi dan pengelolaan informasi PC IMM Kota Surakarta.
+              </p>
             </div>
-            <h1 className="text-2xl font-bold text-white relative z-10" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-              Pengajuan Akun
-            </h1>
-            <p className="text-xs text-white/60 mt-1 relative z-10">Portal Keanggotaan PC IMM Kota Surakarta</p>
-          </div>
-          <CardContent className="p-6 md:p-8">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="ajnama" className="block text-sm font-semibold text-[#0f172a] mb-1">Nama Lengkap</label>
-                <input id="ajnama" type="text" name="name" autoComplete="name" required value={formData.name} onChange={handleChange} placeholder="Nama lengkap" className={inputClass} />
+            <div className="mt-8 grid gap-3 md:grid-cols-2 lg:mt-12 lg:grid-cols-1">
+              <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
+                <div><p className="text-sm font-semibold text-white">Verifikasi admin</p><p className="mt-1 text-xs leading-5 text-slate-400">Akun aktif setelah pengajuan ditinjau dan disetujui.</p></div>
               </div>
-              <div>
-                <label htmlFor="ajemail" className="block text-sm font-semibold text-[#0f172a] mb-1">Email</label>
-                <input id="ajemail" type="email" name="email" autoComplete="email" required value={formData.email} onChange={handleChange} placeholder="email@contoh.id" className={inputClass} />
+              <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+                <LockKeyhole className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
+                <div><p className="text-sm font-semibold text-white">Kredensial aman</p><p className="mt-1 text-xs leading-5 text-slate-400">Gunakan username unik dan kata sandi minimal 8 karakter.</p></div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            </div>
+            <p className="mt-8 hidden text-[11px] tracking-wide text-slate-500 lg:block">PC IMM KOTA SURAKARTA</p>
+          </aside>
+
+          <section className="px-6 py-7 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
+            <div className="mb-7">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#c20000]">Mulai di sini</p>
+              <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Pengajuan Akun</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-500">Lengkapi data berikut. Pastikan username dan email aktif sebelum mengirim.</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="grid gap-5 md:grid-cols-2">
                 <div>
-                  <label htmlFor="ajpassword" className="block text-sm font-semibold text-[#0f172a] mb-1">Password</label>
-                  <input id="ajpassword" type="password" name="password" autoComplete="new-password" minLength={8} required aria-invalid={formData.password.length > 0 && formData.password.length < 8} aria-describedby="ajpassword-hint ajpassword-error" value={formData.password} onChange={handleChange} placeholder="Min. 8 karakter" className={inputClass} />
-                  <p id="ajpassword-hint" className="text-xs text-slate-400 mt-1">Minimal 8 karakter.</p>
-                  {validationErrors.password && <p id="ajpassword-error" role="alert" className="text-xs text-red-600 font-medium mt-1">{validationErrors.password}</p>}
+                  <label htmlFor="ajnama" className="mb-1.5 block text-xs font-bold text-slate-700">Nama Lengkap</label>
+                  <div className="relative"><UserRound className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input id="ajnama" type="text" name="name" autoComplete="name" required value={formData.name} onChange={handleChange} placeholder="Nama sesuai identitas" className={iconInputClass} /></div>
                 </div>
                 <div>
-                  <label htmlFor="ajpasswordconfirm" className="block text-sm font-semibold text-[#0f172a] mb-1">Konfirmasi Password</label>
-                  <input id="ajpasswordconfirm" type="password" name="passwordConfirm" autoComplete="new-password" required aria-invalid={formData.passwordConfirm.length > 0 && formData.passwordConfirm !== formData.password} aria-describedby="ajpasswordconfirm-error" value={formData.passwordConfirm} onChange={handleChange} placeholder="Ulangi password" className={inputClass} />
-                  {validationErrors.passwordConfirm && <p id="ajpasswordconfirm-error" role="alert" className="text-xs text-red-600 font-medium mt-1">{validationErrors.passwordConfirm}</p>}
+                  <label htmlFor="ajusername" className="mb-1.5 block text-xs font-bold text-slate-700">Username Login</label>
+                  <div className="relative"><AtSign className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input id="ajusername" type="text" name="username" autoComplete="username" minLength={3} maxLength={60} pattern="[A-Za-z0-9_-]+" required value={formData.username} onChange={handleChange} placeholder="contoh_username" className={iconInputClass} /></div>
+                  <p className="mt-1.5 text-[11px] text-slate-400">Huruf, angka, _ atau - (min. 3 karakter).</p>
                 </div>
               </div>
               <div>
-                <label htmlFor="ajrole" className="block text-sm font-semibold text-[#0f172a] mb-1">Role yang Diajukan</label>
-                <select id="ajrole" name="requested_role" value={formData.requested_role} onChange={handleChange} className={inputClass}>
-                  <option value="komisariat">Komisariat (Kontributor Lokal)</option>
-                  <option value="bidang">Bidang (Cabang)</option>
-                  <option value="admin">Admin</option>
-                </select>
-                <p className="text-xs text-slate-400 mt-1">Keputusan akhir tetap di tangan Super Admin.</p>
+                <label htmlFor="ajemail" className="mb-1.5 block text-xs font-bold text-slate-700">Alamat Email</label>
+                <div className="relative"><Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input id="ajemail" type="email" name="email" autoComplete="email" required value={formData.email} onChange={handleChange} placeholder="nama@email.com" className={iconInputClass} /></div>
               </div>
-              <div>
-                <label htmlFor="ajalasan" className="block text-sm font-semibold text-[#0f172a] mb-1">Alasan / Keterangan <span className="text-slate-400 font-normal">(opsional)</span></label>
-                <textarea id="ajalasan" name="reason" value={formData.reason} onChange={handleChange} rows={3} placeholder="Contoh: Kader komisariat UMS, butuh akses publikasi..." className={`${inputClass} resize-none`} />
+              <div className="grid gap-5 md:grid-cols-2">
+                <div>
+                  <label htmlFor="ajpassword" className="mb-1.5 block text-xs font-bold text-slate-700">Kata Sandi</label>
+                  <div className="relative"><LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input id="ajpassword" type={showPassword ? 'text' : 'password'} name="password" autoComplete="new-password" minLength={8} required aria-invalid={formData.password.length > 0 && formData.password.length < 8} aria-describedby="ajpassword-hint ajpassword-error" value={formData.password} onChange={handleChange} placeholder="Minimal 8 karakter" className={`${iconInputClass} pr-11`} /><button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:text-slate-700" aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>
+                  <p id="ajpassword-hint" className="mt-1.5 text-[11px] text-slate-400">Minimal 8 karakter.</p>
+                  {validationErrors.password && <p id="ajpassword-error" role="alert" className="mt-1 text-xs font-medium text-red-600">{validationErrors.password}</p>}
+                </div>
+                <div>
+                  <label htmlFor="ajpasswordconfirm" className="mb-1.5 block text-xs font-bold text-slate-700">Konfirmasi Kata Sandi</label>
+                  <div className="relative"><LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input id="ajpasswordconfirm" type={showPassword ? 'text' : 'password'} name="passwordConfirm" autoComplete="new-password" required aria-invalid={formData.passwordConfirm.length > 0 && formData.passwordConfirm !== formData.password} aria-describedby="ajpasswordconfirm-error" value={formData.passwordConfirm} onChange={handleChange} placeholder="Ulangi kata sandi" className={iconInputClass} /></div>
+                  {validationErrors.passwordConfirm && <p id="ajpasswordconfirm-error" role="alert" className="mt-1 text-xs font-medium text-red-600">{validationErrors.passwordConfirm}</p>}
+                </div>
               </div>
-              <Button type="submit" disabled={isLoading} className="w-full h-11 bg-[#c20000] hover:bg-[#a00000] text-white font-bold rounded-xl shadow-md shadow-red-500/15">
-                {isLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                Kirim Pengajuan
-              </Button>
+              <div className="grid gap-5 md:grid-cols-2">
+                <div>
+                  <label htmlFor="ajrole" className="mb-1.5 block text-xs font-bold text-slate-700">Role yang Diajukan</label>
+                  <select id="ajrole" name="requested_role" value={formData.requested_role} onChange={handleChange} className={inputClass}>
+                    <option value="komisariat">Komisariat (Kontributor Lokal)</option>
+                    <option value="bidang">Bidang (Cabang)</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                  <p className="mt-1.5 text-[11px] text-slate-400">Role final ditentukan oleh admin.</p>
+                </div>
+                <div>
+                  <label htmlFor="ajalasan" className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-slate-700"><FileText className="h-3.5 w-3.5 text-slate-400" /> Alasan / Keterangan <span className="font-normal text-slate-400">(opsional)</span></label>
+                  <textarea id="ajalasan" name="reason" value={formData.reason} onChange={handleChange} rows={3} placeholder="Ceritakan kebutuhan akses Anda..." className={`${inputClass} resize-none`} />
+                </div>
+              </div>
+              <div className="border-t border-slate-100 pt-5">
+                <Button type="submit" disabled={isLoading} className="h-12 w-full rounded-xl bg-[#c20000] font-bold text-white shadow-lg shadow-red-900/15 hover:bg-[#a00000]">
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
+                  {isLoading ? 'Mengirim pengajuan...' : 'Kirim Pengajuan'}
+                </Button>
+                <p className="mt-3 text-center text-[11px] leading-5 text-slate-400">Dengan mengirim pengajuan, data Anda akan ditinjau oleh administrator portal.</p>
+              </div>
             </form>
-          </CardContent>
+          </section>
         </Card>
       </div>
     </main>

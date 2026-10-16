@@ -24,7 +24,7 @@ import MaintenancePage from "@/components/ui/MaintenancePage";
 export default async function KontakPage() {
   if (await checkMaintenance("maintenance_kontak")) return <MaintenancePage />;
   return (
-    <main className="min-h-screen bg-slate-50/70 pt-28 pb-20">
+    <main className="min-h-screen overflow-x-clip bg-slate-50/70 pt-28 pb-20">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         {/* Header Section */}
         <div className="text-center max-w-3xl mx-auto mb-16">

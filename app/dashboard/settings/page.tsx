@@ -90,6 +90,9 @@ export default function SettingsManagement() {
       setSettings(prev => ({ ...prev, [settingKey]: '' }));
       try {
         await api.post('/settings', { settings: [{ key: settingKey, value: '' }] });
+        if (type === 'icon') {
+          window.dispatchEvent(new CustomEvent('site-icon-updated', { detail: null }));
+        }
         toast.success('Gambar dihapus');
       } catch (error) {
         toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus gambar'));
@@ -112,6 +115,9 @@ export default function SettingsManagement() {
         site_icon: updatedSettings.site_icon ?? prev.site_icon,
         chairman_photo: updatedSettings.chairman_photo ?? prev.chairman_photo,
       }));
+      if (type === 'icon') {
+        window.dispatchEvent(new CustomEvent('site-icon-updated', { detail: updatedSettings.site_icon ?? null }));
+      }
       toast.success('Gambar berhasil diperbarui', { id: toastId });
     } catch (err: any) {
       console.error(err);

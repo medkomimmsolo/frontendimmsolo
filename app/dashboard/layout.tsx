@@ -78,6 +78,7 @@ export default function DashboardLayout({
     system: true,
   });
   const [siteLogo, setSiteLogo] = useState<string | null>(null);
+  const [siteIcon, setSiteIcon] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Floating Portal Tooltip State (untuk mode collapsed agar bebas dari overflow clipping)
@@ -97,6 +98,14 @@ export default function DashboardLayout({
   useEffect(() => {
     setActiveTooltip(null);
   }, [pathname, isDesktopCollapsed]);
+
+  useEffect(() => {
+    const handleSiteIconUpdate = (event: Event) => {
+      setSiteIcon((event as CustomEvent<string | null>).detail);
+    };
+    window.addEventListener("site-icon-updated", handleSiteIconUpdate);
+    return () => window.removeEventListener("site-icon-updated", handleSiteIconUpdate);
+  }, []);
 
   const handleItemMouseEnter = (
     e: React.MouseEvent<HTMLElement>,
@@ -305,9 +314,8 @@ export default function DashboardLayout({
         if (res.ok) {
           const json = await res.json();
           const settings = normalizeSettings(json?.data);
-          if (settings.site_logo) {
-            setSiteLogo(settings.site_logo);
-          }
+          setSiteLogo(settings.site_logo || null);
+          setSiteIcon(settings.site_icon || null);
           const isMaintenance = isSettingEnabled(settings, "maintenance_mode");
 
           const isSuperAdmin = user?.roles?.some(
@@ -479,11 +487,6 @@ export default function DashboardLayout({
             icon: <Settings className="w-4 h-4 shrink-0" />,
             permission: "manage-settings",
           },
-          {
-            name: "Profil Akun",
-            href: "/dashboard/profile",
-            icon: <User className="w-4 h-4 shrink-0" />,
-          },
         ],
       },
     ],
@@ -529,9 +532,16 @@ export default function DashboardLayout({
 
       {/* Sidebar Desktop & Mobile (Light White Style Sesuai Gambar) */}
       <aside
+        style={{
+          height: "100dvh",
+          minHeight: 0,
+          maxHeight: "100dvh",
+          display: "grid",
+          gridTemplateRows: "4rem auto minmax(0, 1fr)",
+        }}
         className={`fixed inset-y-0 left-0 z-50 bg-white text-slate-700 transition-all duration-300 ease-in-out transform 
           ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"} 
-          lg:translate-x-0 lg:static lg:block flex flex-col h-screen border-r border-slate-200/90 shadow-2xl lg:shadow-none
+          lg:translate-x-0 lg:static lg:block min-h-0 overflow-hidden border-r border-slate-200/90 shadow-2xl lg:shadow-none
           ${sidebarWidth}
         `}
       >
@@ -546,7 +556,7 @@ export default function DashboardLayout({
               className="w-10 h-10 rounded-2xl bg-white border border-slate-200 shadow-2xs flex items-center justify-center p-1.5 shrink-0 overflow-hidden hover:border-[#c20000]/40 transition-colors"
             >
               <img
-                src={siteLogo || "/icon-192.png"}
+                src={siteIcon || siteLogo || "/icon-192.png"}
                 alt="Logo IMM"
                 className="w-full h-full object-contain"
                 onError={(e) => {
@@ -562,7 +572,7 @@ export default function DashboardLayout({
             >
               <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200 shadow-2xs flex items-center justify-center p-1.5 shrink-0 overflow-hidden group-hover:border-[#c20000]/40 transition-colors">
                 <img
-                  src={siteLogo || "/icon-192.png"}
+                  src={siteIcon || siteLogo || "/icon-192.png"}
                   alt="Logo IMM"
                   className="w-full h-full object-contain"
                   onError={(e) => {
@@ -673,7 +683,13 @@ export default function DashboardLayout({
         {/* Navigation Bar dengan Scroll Halus & Akordeon */}
         <nav
           onScroll={handleItemMouseLeave}
-          className={`flex-1 overflow-y-auto py-3 custom-scrollbar ${isDesktopCollapsed ? "px-1.5 space-y-1" : "px-3 space-y-3"}`}
+          style={{
+            minHeight: 0,
+            overflowY: "auto",
+            overscrollBehaviorY: "contain",
+            WebkitOverflowScrolling: "touch",
+          }}
+          className={`min-h-0 overflow-y-auto overscroll-y-contain py-3 custom-scrollbar ${isDesktopCollapsed ? "px-1.5 space-y-1" : "px-3 space-y-3"}`}
         >
           {(() => {
             let totalRenderedItems = 0;

@@ -814,3 +814,59 @@ textarea:focus-visible,
   -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, black 25%, transparent 78%);
   mask-image: radial-gradient(ellipse 75% 65% at 50% 45%, black 25%, transparent 78%);
 }
+
+.admin-panel-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: #fff;
+}
+
+.admin-panel-table thead tr {
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.admin-panel-table thead th {
+  padding: 0.875rem 1rem;
+  white-space: nowrap;
+}
+
+.admin-panel-table thead th:first-child {
+  padding-left: 1.5rem;
+}
+
+.admin-panel-table thead th:last-child {
+  padding-right: 1.5rem;
+}
+
+.admin-panel-table tbody {
+  background-color: #fff;
+  font-size: 0.875rem;
+}
+
+.admin-panel-table tbody td:not([colspan]) {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.admin-panel-table tbody td:first-child:not([colspan]) {
+  padding-left: 1.5rem;
+}
+
+.admin-panel-table tbody td:last-child:not([colspan]) {
+  padding-right: 1.5rem;
+}
+
+.admin-panel-table tbody tr {
+  transition: background-color 150ms ease;
+}
+
+.admin-panel-table tbody tr:hover > td:not([colspan]) {
+  background-color: #f8fafc;
+}

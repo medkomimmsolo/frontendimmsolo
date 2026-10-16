@@ -27,6 +27,8 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
   const [logo, setLogo] = useState<string | null>(null);
   const [pngSize, setPngSize] = useState<number>(1000);
   const [isDownloading, setIsDownloading] = useState<number | null>(null);
+  const [generatedPeserta, setGeneratedPeserta] = useState<Set<number>>(() => new Set());
+  const [isGeneratingAll, setIsGeneratingAll] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -95,18 +97,34 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
     toast.success('Logo dihapus');
   };
 
-  /** Unduh PNG kartu peserta (QR unik + logo + nama). */
+  const generateQr = (pesertaId: number) => {
+    setGeneratedPeserta((current) => new Set(current).add(pesertaId));
+  };
+
+  const generateAllQr = async () => {
+    setIsGeneratingAll(true);
+    try {
+      for (const p of peserta) {
+        setGeneratedPeserta((current) => new Set(current).add(p.id));
+        await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
+      }
+      toast.success(`QR dibuat untuk ${peserta.length} peserta di halaman ini`);
+    } finally {
+      setIsGeneratingAll(false);
+    }
+  };
+
+  /** Unduh PNG yang hanya berisi QR dan logo opsional; nama dipakai untuk nama file. */
   const downloadPesertaPng = async (p: PresensiPeserta) => {
     setIsDownloading(p.id);
     try {
       await exportQrPng({
         svgId: `qr-peserta-${p.id}`,
-        fileName: `${presensi.slug}-${p.kode || p.id}-${p.nama}`,
+        fileName: p.nama,
         size: pngSize,
         logoDataUrl: logo,
-        caption: { title: p.nama, subtitle: p.kode ? `Kode ${p.kode}` : presensi.title },
       });
-      toast.success(`PNG ${p.nama} diunduh`);
+      toast.success(`QR ${p.nama} diunduh`);
     } catch (error) {
       toast.error((error as Error).message || 'Gagal mengunduh PNG');
     } finally {
@@ -116,8 +134,9 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
 
   /** Unduh semua kartu peserta sekaligus (diberi jeda agar browser tidak blokir). */
   const downloadAllPng = async () => {
-    if (peserta.length === 0) return;
-    for (const p of peserta) {
+    const generated = peserta.filter((p) => generatedPeserta.has(p.id));
+    if (generated.length === 0) return;
+    for (const p of generated) {
       await downloadPesertaPng(p);
       await new Promise((r) => setTimeout(r, 300));
     }
@@ -181,7 +200,7 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
           <CardHeader>
             <CardTitle className="text-base">QR Unik per Peserta — Scan Petugas</CardTitle>
             <p className="text-sm text-slate-500 mt-1">
-              Cetak kartu QR untuk tiap peserta. Petugas memindai QR ini di tab <strong>Scan</strong>. Menampilkan {peserta.length} peserta (halaman ini).
+              Pilih logo terlebih dahulu jika diperlukan, lalu klik Generate untuk membuat QR. Unduhan hanya berisi QR (tanpa nama atau keterangan); nama peserta digunakan sebagai nama file. Menampilkan {peserta.length} peserta di halaman ini.
             </p>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -226,8 +245,12 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
                   <option value={1000}>PNG 1000px</option>
                   <option value={1600}>PNG 1600px (cetak)</option>
                 </select>
-                <Button onClick={downloadAllPng} disabled={peserta.length === 0} variant="outline" className="h-9 px-3 rounded-lg text-xs font-bold">
-                  <ImageDown className="w-3.5 h-3.5 mr-1.5" /> Unduh Semua
+                <Button onClick={generateAllQr} disabled={peserta.length === 0 || isGeneratingAll} variant="outline" className="h-9 px-3 rounded-lg text-xs font-bold">
+                  {isGeneratingAll ? <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <QrCode className="w-3.5 h-3.5 mr-1.5" />}
+                  Generate Semua QR
+                </Button>
+                <Button onClick={downloadAllPng} disabled={!peserta.some((p) => generatedPeserta.has(p.id))} variant="outline" className="h-9 px-3 rounded-lg text-xs font-bold">
+                  <ImageDown className="w-3.5 h-3.5 mr-1.5" /> Unduh QR yang Dibuat
                 </Button>
               </div>
             </div>
@@ -238,22 +261,39 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {peserta.map((p) => (
                   <div key={p.id} className="border border-slate-200 rounded-xl p-3 text-center bg-white">
-                    <QRCodeSVG id={`qr-peserta-${p.id}`} value={`presensi:${presensi.id}:${p.token}`} size={120} level="H" marginSize={2} className="mx-auto" />
+                    {generatedPeserta.has(p.id) ? (
+                      <div className="relative mx-auto h-[120px] w-[120px]">
+                        <QRCodeSVG id={`qr-peserta-${p.id}`} value={`presensi:${presensi.id}:${p.token}`} size={120} level="H" marginSize={2} className="mx-auto" />
+                        {logo && (
+                          <div className="pointer-events-none absolute left-1/2 top-1/2 flex h-[27px] w-[27px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-md bg-white p-1">
+                            <img src={logo} alt="" className="h-full w-full object-contain" />
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex h-[120px] items-center justify-center rounded-lg bg-slate-50">
+                        <Button onClick={() => generateQr(p.id)} variant="outline" className="h-8 px-3 text-xs font-bold">
+                          <QrCode className="mr-1.5 h-3.5 w-3.5" /> Generate
+                        </Button>
+                      </div>
+                    )}
                     <div className="mt-2 text-sm font-semibold text-slate-800 line-clamp-1">{p.nama}</div>
                     {p.kode && <div className="text-xs text-slate-400">Kode {p.kode}</div>}
-                    <Button
-                      onClick={() => downloadPesertaPng(p)}
-                      disabled={isDownloading === p.id}
-                      variant="outline"
-                      className="mt-2 h-8 px-3 rounded-lg text-[11px] font-bold w-full"
-                    >
-                      {isDownloading === p.id ? (
-                        <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                      ) : (
-                        <Download className="w-3.5 h-3.5 mr-1.5" />
-                      )}
-                      PNG
-                    </Button>
+                    {generatedPeserta.has(p.id) && (
+                      <Button
+                        onClick={() => downloadPesertaPng(p)}
+                        disabled={isDownloading === p.id}
+                        variant="outline"
+                        className="mt-2 h-8 px-3 rounded-lg text-[11px] font-bold w-full"
+                      >
+                        {isDownloading === p.id ? (
+                          <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                        ) : (
+                          <Download className="w-3.5 h-3.5 mr-1.5" />
+                        )}
+                        Unduh QR
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>

@@ -192,7 +192,7 @@ export function PresensiImportModal({ isOpen, presensiId, onClose, onImported }:
                     Pratinjau ({parsed.length} baris)
                   </div>
                   <div className="max-h-48 overflow-y-auto">
-                    <table className="w-full text-left text-xs">
+                    <table className="admin-panel-table w-full text-left text-xs">
                       <thead className="bg-white border-b border-slate-100 text-slate-400">
                         <tr>
                           <th className="py-2 px-4">Nama</th>

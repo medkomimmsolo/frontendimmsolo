@@ -6,6 +6,7 @@ import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { QRCodeSVG } from 'qrcode.react';
 import { Badge } from '@/components/ui/Badge';
 import { Loader2, Users, QrCode, ClipboardCheck, Settings, Upload, Download, Plus, Trash2, Search, ArrowLeft, Save, ScanLine, Layers, RefreshCw, History, Copy, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -167,13 +168,13 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
 
   const activeSesi = sesis.find((s) => s.id === activeSesiId) || null;
 
-  const copyPublicCameraLink = async () => {
-    if (!activeSesi?.scan_token) {
-      toast.error('Token kamera belum termuat. Muat ulang halaman presensi terlebih dahulu.');
+  const copyPublicCameraLink = async (token: string | null | undefined) => {
+    if (!token) {
+      toast.error('Token kamera sesi belum tersedia. Muat ulang halaman presensi terlebih dahulu.');
       return;
     }
     try {
-      await navigator.clipboard.writeText(activeSesi.scan_token);
+      await navigator.clipboard.writeText(token);
       setCameraLinkCopied(true);
       toast.success('Token kamera disalin');
       setTimeout(() => setCameraLinkCopied(false), 2000);
@@ -181,6 +182,8 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
       toast.error(getUserFacingErrorMessage(error, 'Tidak dapat menyalin token kamera'));
     }
   };
+
+  const cameraSiteUrl = (process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://immsolo.or.id')).replace(/\/+$/, '');
 
   // Statistik yang ditampilkan mengikuti cakupan sesi aktif bila tersedia,
   // agar angka pada kartu konsisten dengan tabel peserta/kehadiran di bawahnya.
@@ -452,7 +455,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
 
           <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="admin-panel-table w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
                     <th className="py-3 px-4 pl-6 w-16">No</th>
@@ -557,40 +560,67 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
 
       {/* Scan — halaman khusus agar kamera punya ruang penuh. */}
       {tab === 'scan' && (
-        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs p-6 text-center">
-          <ScanLine className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <p className="text-sm font-bold text-slate-800 mb-1">
-            Scan QR{activeSesi ? ` — ${activeSesi.name}` : ''}
-          </p>
-          <p className="text-sm text-slate-500 mb-4">
-            Buka halaman kamera umum tanpa login, lalu masukkan token sesi ini untuk memilih presensi yang akan dipindai.
-          </p>
-          {activeSesi?.scan_token ? (
-            <div className="flex flex-col items-center gap-4">
+        <div className="space-y-5">
+          <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs sm:p-6">
+            <div className="flex items-start gap-3">
+              <div className="rounded-xl bg-red-50 p-2.5 text-[#c20000]"><ScanLine className="h-5 w-5" /></div>
               <div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Token untuk sesi ini</div>
-                <div className="mt-1 font-mono text-2xl font-bold tracking-[0.25em] text-slate-800">{activeSesi.scan_token}</div>
-              </div>
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <Link href="/camera" target="_blank" rel="noopener noreferrer">
-                  <Button className="h-11 px-6 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl font-bold">
-                    <ExternalLink className="w-4 h-4 mr-2" /> Buka Halaman Kamera
-                  </Button>
-                </Link>
-                <Button onClick={copyPublicCameraLink} variant="outline" className="h-11 px-5 rounded-xl font-bold">
-                  <Copy className="w-4 h-4 mr-2" /> {cameraLinkCopied ? 'Token Disalin' : 'Salin Token'}
-                </Button>
+                <h2 className="text-sm font-bold text-slate-900">QR Kamera per Sesi</h2>
+                <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-500">
+                  Setiap QR membuka kamera langsung untuk sesi terkait. Tampilkan atau bagikan QR sesi yang sesuai; seluruh sesi tersedia di bawah ini.
+                </p>
               </div>
             </div>
-          ) : activeSesi ? (
-            <div className="flex flex-col items-center gap-3">
-              <p className="text-sm text-amber-700">Token link kamera belum termuat. Muat ulang halaman untuk memperbarui data sesi.</p>
-              <Button onClick={() => window.location.reload()} variant="outline" className="h-10 rounded-xl font-bold">
-                <RefreshCw className="mr-2 h-4 w-4" /> Muat Ulang Halaman
-              </Button>
+          </div>
+          {sesis.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {sesis.map((sesi) => {
+                const cameraUrl = sesi.scan_token ? `${cameraSiteUrl}/camera/${sesi.scan_token}` : '';
+                return (
+                  <Card key={sesi.id} className="overflow-hidden rounded-2xl border-slate-200/90 shadow-2xs">
+                    <CardHeader className="border-b border-slate-100 bg-slate-50/80 p-4">
+                      <CardTitle className="flex items-center justify-between gap-2 text-sm">
+                        <span className="truncate">{sesi.name}</span>
+                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${sesi.is_open ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-200 text-slate-500'}`}>
+                          {sesi.is_open ? 'Dibuka' : 'Ditutup'}
+                        </span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-center gap-3 p-5">
+                      {cameraUrl ? (
+                        <>
+                          <div className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
+                            <QRCodeSVG value={cameraUrl} size={200} level="M" marginSize={3} />
+                          </div>
+                          <div className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-center">
+                            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Token Sesi</div>
+                            <code className="mt-0.5 block font-mono text-lg font-bold tracking-[0.2em] text-slate-800">{sesi.scan_token}</code>
+                          </div>
+                          <div className="flex w-full flex-wrap justify-center gap-2">
+                            <Link href={`/camera/${sesi.scan_token}`} target="_blank" rel="noopener noreferrer">
+                              <Button className="h-9 rounded-lg bg-[#c20000] px-3 text-xs font-bold text-white hover:bg-[#a30000]">
+                                <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Buka Kamera
+                              </Button>
+                            </Link>
+                            <Button onClick={() => copyPublicCameraLink(sesi.scan_token)} variant="outline" className="h-9 rounded-lg px-3 text-xs font-bold">
+                              <Copy className="mr-1.5 h-3.5 w-3.5" /> {cameraLinkCopied ? 'Disalin' : 'Salin Token'}
+                            </Button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex h-[280px] items-center justify-center text-center text-sm text-amber-700">
+                          Token sesi belum tersedia. Muat ulang halaman untuk memperbarui data.
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           ) : (
-            <p className="text-sm text-amber-700">Pilih sesi terlebih dahulu untuk membuka kamera.</p>
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+              Belum ada sesi presensi dengan token kamera.
+            </div>
           )}
         </div>
       )}
@@ -599,7 +629,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
       {tab === 'kehadiran' && (
         <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="admin-panel-table w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
                   <th className="py-3 px-4 pl-6">Nama</th>

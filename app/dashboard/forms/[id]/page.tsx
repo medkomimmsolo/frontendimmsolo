@@ -5,7 +5,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { ArrowLeft, Plus, Edit, Trash2, Loader2, ExternalLink, Download, Users, Copy, Eye, GripVertical, FileSpreadsheet, FolderArchive, Search, FileText, X, Settings, Upload, Image as ImageIcon, ShieldCheck, Crop, KeyRound, RotateCw } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, Loader2, ExternalLink, Download, Users, Copy, Eye, GripVertical, FileSpreadsheet, FolderArchive, Search, FileText, X, Settings, Upload, Image as ImageIcon, ShieldCheck, Crop, KeyRound } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import FormFillClient from '@/components/form/FormFillClient';
 import toast from 'react-hot-toast';
@@ -16,10 +16,23 @@ import ImageCropperModal from '@/components/dashboard/ImageCropperModal';
 import { resolveMediaUrl } from '@/lib/imageUtils';
 import { PageHeader } from '@/components/ui/PageHeader';
 
-const FILE_PRESETS: Record<string, { label: string; exts: string[] }> = {
-  images: { label: 'Gambar (jpg, png, webp — maks 2MB)', exts: ['jpg', 'jpeg', 'png', 'webp'] },
-  documents: { label: 'Dokumen (pdf, word, excel, ppt — maks 10MB)', exts: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'] },
-  all: { label: 'Gambar & Dokumen', exts: ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx'] },
+const FILE_TYPES = [
+  { extension: 'jpg', label: 'JPG', group: 'Gambar' },
+  { extension: 'jpeg', label: 'JPEG', group: 'Gambar' },
+  { extension: 'png', label: 'PNG', group: 'Gambar' },
+  { extension: 'webp', label: 'WEBP', group: 'Gambar' },
+  { extension: 'pdf', label: 'PDF', group: 'Dokumen' },
+  { extension: 'doc', label: 'DOC', group: 'Dokumen' },
+  { extension: 'docx', label: 'DOCX', group: 'Dokumen' },
+  { extension: 'xls', label: 'XLS', group: 'Dokumen' },
+  { extension: 'xlsx', label: 'XLSX', group: 'Dokumen' },
+  { extension: 'ppt', label: 'PPT', group: 'Dokumen' },
+  { extension: 'pptx', label: 'PPTX', group: 'Dokumen' },
+];
+
+const getDefaultFileSizeMb = (field: any): number => {
+  if (field.settings?.max_file_size_mb != null) return Number(field.settings.max_file_size_mb);
+  return 2;
 };
 
 const FIELD_TYPES = [
@@ -60,7 +73,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
-  const [fieldForm, setFieldForm] = useState({ label: '', description: '', type: 'text', optionsText: '', scaleMin: '1', scaleMax: '5', scaleMinLabel: '', scaleMaxLabel: '', required: false });
+  const [fieldForm, setFieldForm] = useState({ label: '', description: '', type: 'text', optionsText: '', scaleMin: '1', scaleMax: '5', scaleMinLabel: '', scaleMaxLabel: '', maxFileSizeMb: '2', required: false });
   const [isSaving, setIsSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedResponse, setSelectedResponse] = useState<any | null>(null);
@@ -100,6 +113,15 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       const res = await api.get(`/form-admin/${formId}`);
       const data = res.data.data;
       setForm(data);
+      setMonitorToken('');
+      if (data.monitor_token_enabled) {
+        try {
+          const tokenRes = await api.get(`/form-admin/${formId}/monitor-token`);
+          setMonitorToken(tokenRes.data.data.token || '');
+        } catch (tokenError) {
+          toast.error(getUserFacingErrorMessage(tokenError, 'Gagal memuat token pemantau'));
+        }
+      }
       setFields(data.fields || []);
       setSettingsTitle(data.title || '');
       setSettingsDescription(data.description || '');
@@ -148,16 +170,18 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
           optionsText: (item.options || []).join('\n'),
           scaleMin: String(item.settings?.min ?? 1), scaleMax: String(item.settings?.max ?? 5),
           scaleMinLabel: item.settings?.minLabel || '', scaleMaxLabel: item.settings?.maxLabel || '',
+          maxFileSizeMb: String(getDefaultFileSizeMb(item)),
           required: item.required,
         }
-      : { label: '', description: '', type: 'text', optionsText: '', scaleMin: '1', scaleMax: '5', scaleMinLabel: '', scaleMaxLabel: '', required: false });
+      : { label: '', description: '', type: 'text', optionsText: '', scaleMin: '1', scaleMax: '5', scaleMinLabel: '', scaleMaxLabel: '', maxFileSizeMb: '2', required: false });
     setIsModalOpen(true);
   };
 
   const handleSaveField = async (e: React.FormEvent) => {
     e.preventDefault();
-    const withOptions = needsOptions || fieldForm.type === 'file';
-    const rawOptions = withOptions ? fieldForm.optionsText.split('\n').map((o) => o.trim()).filter(Boolean) : [];
+    const rawOptions = needsOptions
+      ? fieldForm.optionsText.split('\n').map((o) => o.trim()).filter(Boolean)
+      : fieldForm.type === 'file' ? fieldForm.optionsText.split('\n').map((o) => o.trim()).filter(Boolean) : [];
     if (needsOptions) {
       if (rawOptions.length === 0) {
         toast.error('Isi minimal satu opsi pilihan');
@@ -178,6 +202,15 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
         return;
       }
     }
+    if (fieldForm.type === 'file' && rawOptions.length === 0) {
+      toast.error('Pilih minimal satu jenis file yang diizinkan');
+      return;
+    }
+    const maxFileSizeMb = Number(fieldForm.maxFileSizeMb);
+    if (fieldForm.type === 'file' && (!Number.isInteger(maxFileSizeMb) || maxFileSizeMb < 1 || maxFileSizeMb > 50)) {
+      toast.error('Ukuran maksimal file harus antara 1 sampai 50 MB');
+      return;
+    }
     const options = Array.from(new Set(rawOptions));
     setIsSaving(true);
     try {
@@ -186,6 +219,9 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
         const min = parseInt(fieldForm.scaleMin) || 0;
         const max = parseInt(fieldForm.scaleMax) || 5;
         payload.settings = { min: Math.min(min, max), max: Math.max(min, max), minLabel: fieldForm.scaleMinLabel, maxLabel: fieldForm.scaleMaxLabel };
+      }
+      if (fieldForm.type === 'file') {
+        payload.settings = { max_file_size_mb: maxFileSizeMb };
       }
       if (editing) {
         await api.put(`/form-fields/${editing.id}`, payload);
@@ -313,9 +349,10 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
 
   const handleGenerateMonitorToken = async () => {
     if (form?.monitor_token_enabled && !(await confirm({
-      title: 'Rotasi token pemantau?',
-      message: 'Token lama akan langsung tidak berlaku. Pemantau yang memakai token lama akan kehilangan akses.',
-      confirmText: 'Rotasi token',
+      title: 'Generate ulang token pemantau?',
+      message: 'Token lama akan langsung dinonaktifkan. Pemantau yang memakai token lama tidak dapat mengakses respons lagi.',
+      confirmText: 'Generate ulang',
+      tone: 'danger',
     }))) return;
 
     setIsGeneratingMonitorToken(true);
@@ -328,24 +365,6 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       toast.error(getUserFacingErrorMessage(error, 'Gagal membuat token pemantau'));
     } finally {
       setIsGeneratingMonitorToken(false);
-    }
-  };
-
-  const handleRevokeMonitorToken = async () => {
-    if (!(await confirm({
-      title: 'Cabut akses pemantau?',
-      message: 'Token yang sudah dibagikan tidak akan dapat digunakan lagi.',
-      confirmText: 'Cabut akses',
-      tone: 'danger',
-    }))) return;
-
-    try {
-      await api.delete(`/form-admin/${formId}/monitor-token`);
-      setMonitorToken('');
-      setForm((current: any) => ({ ...current, monitor_token_enabled: false }));
-      toast.success('Akses pemantau dicabut');
-    } catch (error) {
-      toast.error(getUserFacingErrorMessage(error, 'Gagal mencabut akses pemantau'));
     }
   };
 
@@ -620,7 +639,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               <div>
                 <h2 className="text-sm font-bold text-slate-900">Akses Pemantau Tanpa Akun</h2>
                 <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-600">
-                  Token memberi akses baca ke seluruh respons pendaftar. Bagikan hanya kepada pemantau tepercaya; siapa pun yang memiliki token dapat melihat data ini.
+                  Token 8 karakter memberi akses untuk melihat seluruh respons. Generate ulang token akan langsung menonaktifkan token sebelumnya; bagikan hanya kepada pemantau tepercaya.
                 </p>
               </div>
             </div>
@@ -629,27 +648,22 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                 onClick={handleGenerateMonitorToken}
                 disabled={isGeneratingMonitorToken}
                 size="sm"
-                className="h-9 bg-amber-700 text-white hover:bg-amber-800"
+                className="h-9 bg-amber-700 text-white hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isGeneratingMonitorToken
                   ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                  : form?.monitor_token_enabled ? <RotateCw className="mr-1.5 h-4 w-4" /> : <KeyRound className="mr-1.5 h-4 w-4" />}
-                {form?.monitor_token_enabled ? 'Rotasi Token' : 'Buat Token'}
+                  : <KeyRound className="mr-1.5 h-4 w-4" />}
+                {form?.monitor_token_enabled ? 'Generate Ulang Token' : 'Buat Token Pemantau'}
               </Button>
-              {form?.monitor_token_enabled && (
-                <Button onClick={handleRevokeMonitorToken} variant="outline" size="sm" className="h-9 border-red-200 text-red-700 hover:bg-red-50">
-                  Cabut Akses
-                </Button>
-              )}
             </div>
           </div>
           {monitorToken && (
             <div className="mt-4 rounded-xl border border-amber-200 bg-white p-3">
               <p className="mb-2 text-xs font-semibold text-amber-800">
-                Simpan token ini sekarang. Demi keamanan, token lengkap tidak ditampilkan kembali setelah halaman ditutup.
+                Token disimpan secara terenkripsi dan dapat ditampilkan kembali saat Anda membuka halaman ini. Generate ulang akan menonaktifkan token sebelumnya.
               </p>
               <div className="flex flex-col gap-2 sm:flex-row">
-                <code className="min-w-0 flex-1 break-all rounded-lg bg-slate-50 px-3 py-2 font-mono text-xs text-slate-800">{monitorToken}</code>
+                <code className="min-w-0 flex-1 break-all rounded-lg bg-slate-50 px-3 py-2 font-mono text-lg font-bold tracking-[0.25em] text-slate-800">{monitorToken}</code>
                 <Button
                   onClick={async () => {
                     try {
@@ -670,6 +684,11 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                 Pemantau membuka <Link href="/pantau-form" target="_blank" className="font-semibold text-[#c20000] underline">halaman Pantau Form</Link> lalu memasukkan token ini.
               </p>
             </div>
+          )}
+          {form?.monitor_token_enabled && !monitorToken && (
+            <p className="mt-4 rounded-xl border border-amber-200 bg-white p-3 text-xs leading-relaxed text-amber-800">
+              Token ini dibuat sebelum fitur penyimpanan token aktif sehingga nilainya tidak dapat dipulihkan. Generate ulang token untuk menonaktifkan token lama dan mendapatkan token baru yang dapat ditampilkan kembali.
+            </p>
           )}
         </section>
         <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xs">
@@ -748,7 +767,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
             <div className="flex items-center gap-3">
               <span className="font-semibold text-slate-700">fx</span>
               <span className="text-slate-500">
-                {selectedResponse ? `Baris terpilih: Pendaftar #${selectedResponse.id}` : `Formulir: ${form?.title || 'Form'} | Total Kolom: ${answerFields.length + (hasEmail ? 3 : 2)}`}
+                {selectedResponse ? `Baris terpilih: Respons #${selectedResponse.id}` : `Formulir: ${form?.title || 'Form'} | Total Kolom: ${answerFields.length + (hasEmail ? 2 : 1)}`}
               </span>
             </div>
             <span className="text-slate-400 hidden sm:inline">Klik baris atau tombol detail untuk melihat seluruh jawaban responden</span>
@@ -762,13 +781,12 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                 <tr className="bg-[#e9ecef] border-b border-slate-300 text-slate-600 font-mono text-[11px] font-bold">
                   <th className="w-12 text-center p-1 border-r border-slate-300 bg-[#dee2e6] text-slate-500 select-none">#</th>
                   <th className="p-1 px-3 border-r border-slate-300 text-center uppercase tracking-wider">{getColLetter(0)}</th>
-                  <th className="p-1 px-3 border-r border-slate-300 text-center uppercase tracking-wider">{getColLetter(1)}</th>
                   {hasEmail && (
-                    <th className="p-1 px-3 border-r border-slate-300 text-center uppercase tracking-wider">{getColLetter(2)}</th>
+                    <th className="p-1 px-3 border-r border-slate-300 text-center uppercase tracking-wider">{getColLetter(1)}</th>
                   )}
                   {answerFields.map((_, idx) => (
                     <th key={idx} className="p-1 px-3 border-r border-slate-300 text-center uppercase tracking-wider">
-                      {getColLetter(idx + (hasEmail ? 3 : 2))}
+                      {getColLetter(idx + (hasEmail ? 2 : 1))}
                     </th>
                   ))}
                   <th className="p-1 px-3 text-center uppercase tracking-wider bg-[#dee2e6] text-slate-500">AKSI</th>
@@ -777,7 +795,6 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                 {/* Row 2: Real Field Headers */}
                 <tr className="bg-[#f8f9fa] border-b border-slate-300 text-slate-700 font-semibold text-xs sticky top-0 z-10 shadow-sm">
                   <th className="w-12 text-center p-2.5 border-r border-slate-300 bg-[#e9ecef] text-slate-500 font-mono select-none">No</th>
-                  <th className="p-2.5 px-3 border-r border-slate-300 whitespace-nowrap min-w-[80px]">ID Pendaftar</th>
                   <th className="p-2.5 px-3 border-r border-slate-300 whitespace-nowrap min-w-[150px]">Waktu Submit</th>
                   {hasEmail && (
                     <th className="p-2.5 px-3 border-r border-slate-300 whitespace-nowrap min-w-[190px]">
@@ -804,7 +821,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               <tbody className="divide-y divide-slate-200 font-sans">
                 {filteredResponses.length === 0 ? (
                   <tr>
-                    <td colSpan={answerFields.length + (hasEmail ? 4 : 3)} className="p-14 text-center text-slate-500 bg-slate-50/50">
+                    <td colSpan={answerFields.length + (hasEmail ? 3 : 2)} className="p-14 text-center text-slate-500 bg-slate-50/50">
                       <FileSpreadsheet className="w-10 h-10 text-slate-300 mx-auto mb-2" />
                       <p className="font-semibold text-slate-700">
                         {searchQuery ? 'Tidak ada data yang sesuai dengan pencarian' : 'Belum ada data pendaftar pada formulir ini'}
@@ -832,12 +849,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                           {rowNumber}
                         </td>
 
-                        {/* Col A: ID */}
-                        <td className="p-2 px-3 border-r border-slate-200 font-mono text-slate-600 whitespace-nowrap">
-                          #{r.id}
-                        </td>
-
-                        {/* Col B: Waktu */}
+                        {/* Col A: Waktu */}
                         <td className="p-2 px-3 border-r border-slate-200 text-slate-600 whitespace-nowrap text-[11px]">
                           {new Date(r.created_at).toLocaleString('id-ID', {
                             day: 'numeric',
@@ -862,7 +874,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                           </td>
                         )}
 
-                        {/* Col C..: Answer Fields */}
+                        {/* Answer Fields */}
                         {answerFields.map((f: any) => {
                           const v = r.data?.[f.id] ?? r.data?.[String(f.id)];
                           const isFile = f.type === 'file' || (typeof v === 'string' && v.startsWith('/storage/'));
@@ -1450,25 +1462,48 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                 </div>
               )}
               {fieldForm.type === 'file' && (
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Jenis File yang Diizinkan</label>
-                  <div className="space-y-2">
-                    {Object.entries(FILE_PRESETS).map(([key, preset]) => {
-                      const current = fieldForm.optionsText.split('\n').map((o) => o.trim()).filter(Boolean);
-                      const selected = current.length > 0 && preset.exts.every((e) => current.includes(e));
-                      return (
-                        <label key={key} className={`flex items-center gap-2.5 p-3 border rounded-xl cursor-pointer text-sm transition-all ${selected ? 'border-[#c20000] bg-red-50/50 shadow-2xs' : 'border-slate-200 hover:bg-slate-50'}`}>
-                          <input
-                            type="radio"
-                            name="file-preset"
-                            checked={selected}
-                            onChange={() => setFieldForm({ ...fieldForm, optionsText: preset.exts.join('\n') })}
-                            className="w-4 h-4 accent-[#c20000]"
-                          />
-                          <span className="font-medium text-slate-700">{preset.label}</span>
-                        </label>
-                      );
-                    })}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Jenis file yang diizinkan</label>
+                    <p className="mb-3 text-xs text-slate-500">Pilih satu atau beberapa format secara terpisah.</p>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      {FILE_TYPES.map(({ extension, label, group }) => {
+                        const selected = fieldForm.optionsText.split('\n').includes(extension);
+                        return (
+                          <label key={extension} className={`flex items-center gap-2 rounded-lg border p-2.5 text-sm transition-colors ${selected ? 'border-[#c20000] bg-red-50/50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                            <input
+                              type="checkbox"
+                              checked={selected}
+                              onChange={(event) => {
+                                const current = fieldForm.optionsText.split('\n').filter(Boolean);
+                                const next = event.target.checked
+                                  ? [...current, extension]
+                                  : current.filter((value) => value !== extension);
+                                setFieldForm({ ...fieldForm, optionsText: next.join('\n') });
+                              }}
+                              className="h-4 w-4 rounded accent-[#c20000]"
+                            />
+                            <span className="font-medium text-slate-700">{label}</span>
+                            <span className="ml-auto text-[10px] text-slate-400">{group}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor="max-file-size-mb" className="mb-1.5 block text-sm font-semibold text-slate-700">Ukuran maksimal file (MB)</label>
+                    <input
+                      id="max-file-size-mb"
+                      type="number"
+                      min={1}
+                      max={50}
+                      step={1}
+                      required
+                      value={fieldForm.maxFileSizeMb}
+                      onChange={(event) => setFieldForm({ ...fieldForm, maxFileSizeMb: event.target.value })}
+                      className={inputClass}
+                    />
+                    <p className="mt-1 text-xs text-slate-500">Atur batas dari 1 sampai 50 MB untuk setiap file.</p>
                   </div>
                 </div>
               )}

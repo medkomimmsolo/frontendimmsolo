@@ -175,7 +175,14 @@ function ScanClient({ params }: { params: Promise<{ id: string }> }) {
       scannerRef.current = scanner;
       await scanner.start(
         cameraConfig,
-        { fps: 10, videoConstraints },
+        {
+          fps: 10,
+          videoConstraints,
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const size = Math.floor(Math.min(viewfinderWidth * 0.72, viewfinderHeight * 0.58, 300));
+            return { width: size, height: size };
+          },
+        },
         (decodedText) => { handlePayload(decodedText); },
         () => { /* abaikan error decode per-frame */ }
       );
@@ -289,6 +296,17 @@ function ScanClient({ params }: { params: Promise<{ id: string }> }) {
           }`}
         >
           <div id={SCANNER_ID} className="h-full w-full" />
+          {isScanning && (
+            <div className="pointer-events-none absolute inset-0 z-[5] flex items-center justify-center" aria-hidden="true">
+              <div className="relative aspect-square w-[min(72vw,300px)] overflow-hidden rounded-2xl border border-white/20">
+                <span className="absolute left-0 top-0 h-8 w-8 rounded-tl-2xl border-l-[3px] border-t-[3px] border-cyan-300" />
+                <span className="absolute right-0 top-0 h-8 w-8 rounded-tr-2xl border-r-[3px] border-t-[3px] border-cyan-300" />
+                <span className="absolute bottom-0 left-0 h-8 w-8 rounded-bl-2xl border-b-[3px] border-l-[3px] border-cyan-300" />
+                <span className="absolute bottom-0 right-0 h-8 w-8 rounded-br-2xl border-b-[3px] border-r-[3px] border-cyan-300" />
+                <span className="absolute inset-x-4 top-1/2 h-px -translate-y-1/2 bg-cyan-300/80 shadow-[0_0_12px_3px_rgba(103,232,249,0.45)]" />
+              </div>
+            </div>
+          )}
           {!isScanning && (
             <div className="absolute inset-0 flex items-center justify-center text-center text-slate-300 px-6">
               <div>
@@ -301,6 +319,13 @@ function ScanClient({ params }: { params: Promise<{ id: string }> }) {
             <span className={`inline-block w-2.5 h-2.5 rounded-full ${isScanning ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}`} />
             {isScanning ? 'Kamera aktif' : 'Kamera nonaktif'}
           </div>
+          {isScanning && (
+            <div className="pointer-events-none absolute inset-x-0 bottom-5 z-10 text-center">
+              <span className="rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">
+                Arahkan QR ke dalam kotak
+              </span>
+            </div>
+          )}
           <Button
             type="button"
             onClick={toggleFullscreen}
