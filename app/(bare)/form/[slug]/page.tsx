@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import FormFillClient from '@/components/form/FormFillClient';
+import { checkMaintenance } from '@/lib/maintenance';
+import MaintenancePage from '@/components/ui/MaintenancePage';
 
 async function getForm(slug: string) {
   try {
@@ -40,6 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function BareFormFillPage({ params }: { params: Promise<{ slug: string }> }) {
+  if (await checkMaintenance('maintenance_form')) return <MaintenancePage />;
   const { slug } = await params;
   const form = await getForm(slug);
   if (!form) notFound();
@@ -60,4 +63,3 @@ export default async function BareFormFillPage({ params }: { params: Promise<{ s
     </div>
   );
 }
-

@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ClipboardList, ArrowRight } from 'lucide-react';
 import { toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
+import { checkMaintenance } from '@/lib/maintenance';
+import MaintenancePage from '@/components/ui/MaintenancePage';
 
 export const metadata: Metadata = {
   title: 'Formulir Pendaftaran',
@@ -43,6 +45,7 @@ async function getForms() {
 }
 
 export default async function FormIndexPage() {
+  if (await checkMaintenance('maintenance_form')) return <MaintenancePage />;
   const forms = await getForms();
 
   return (

@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import { ArrowUpRight, BadgeCheck } from 'lucide-react';
 import ShareButton from './ShareButton';
 import LinkItemIcon from '@/components/post/LinkItemIcon';
+import { checkMaintenance } from '@/lib/maintenance';
+import MaintenancePage from '@/components/ui/MaintenancePage';
 
 async function getPage(slug: string) {
   try {
@@ -37,6 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function LinktreePage({ params }: { params: Promise<{ slug: string }> }) {
+  if (await checkMaintenance('maintenance_links')) return <MaintenancePage />;
   const { slug } = await params;
   const page = await getPage(slug);
   if (!page) notFound();

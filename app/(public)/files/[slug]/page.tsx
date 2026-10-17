@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { toAbsoluteMediaUrl, toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
 import FileActions from './FileActions';
+import { checkMaintenance } from '@/lib/maintenance';
+import MaintenancePage from '@/components/ui/MaintenancePage';
 
 export const revalidate = 60;
 
@@ -109,6 +111,7 @@ export default async function FileDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  if (await checkMaintenance('maintenance_dokumen')) return <MaintenancePage />;
   const resolvedParams = await params;
   const doc = await getDocument(resolvedParams.slug);
 
@@ -275,4 +278,3 @@ export default async function FileDetailPage({
     </main>
   );
 }
-

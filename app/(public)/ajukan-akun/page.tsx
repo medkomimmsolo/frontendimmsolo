@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
 import AjukanAkunClient from './AjukanAkunClient';
+import { checkMaintenance } from '@/lib/maintenance';
+import MaintenancePage from '@/components/ui/MaintenancePage';
 
 export const metadata: Metadata = {
   title: 'Pengajuan Akun',
@@ -10,6 +12,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AjukanAkunPage() {
+export default async function AjukanAkunPage() {
+  if (await checkMaintenance('maintenance_ajukan_akun')) return <MaintenancePage />;
   return <AjukanAkunClient />;
 }

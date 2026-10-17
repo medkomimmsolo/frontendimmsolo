@@ -1,6 +1,8 @@
 import { redirect, notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { headers } from 'next/headers';
+import { checkMaintenance } from '@/lib/maintenance';
+import MaintenancePage from '@/components/ui/MaintenancePage';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function ShortlinkRedirect({ params }: { params: Promise<{ slug: string }> }) {
+  if (await checkMaintenance('maintenance_shortlink')) return <MaintenancePage />;
   const { slug } = await params;
   let targetUrl = null;
   let isPending = false;

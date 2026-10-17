@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { PresensiSelfClient } from './PresensiSelfClient';
+import { checkMaintenance } from '@/lib/maintenance';
+import MaintenancePage from '@/components/ui/MaintenancePage';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PresensiSelfPage({ params }: { params: Promise<{ token: string }> }) {
+  if (await checkMaintenance('maintenance_presensi')) return <MaintenancePage />;
   const { token } = await params;
 
   return (

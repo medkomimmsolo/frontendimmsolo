@@ -3,6 +3,7 @@
 import { FormEvent, useState } from 'react';
 import { getApiBase } from '@/lib/settings';
 import { resolveMediaUrl } from '@/lib/imageUtils';
+import { backendOrigin } from '@/lib/env';
 import { Button } from '@/components/ui/Button';
 import { AlertCircle, ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, FileText, KeyRound, Loader2, RefreshCw, Search, ShieldCheck, X } from 'lucide-react';
 
@@ -51,6 +52,21 @@ function getFileName(path: string): string {
 function isPreviewableFile(path: string): boolean {
   const extension = getFileName(path).split('.').pop()?.toLowerCase();
   return ['pdf', 'jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'].includes(extension || '');
+}
+
+function getFilePreviewUrl(path: string): string {
+  const mediaUrl = resolveMediaUrl(path);
+
+  try {
+    const url = new URL(mediaUrl, window.location.origin);
+    if (url.origin === new URL(backendOrigin()).origin && url.pathname.startsWith('/storage/')) {
+      return `${url.pathname}${url.search}`;
+    }
+  } catch {
+    return mediaUrl;
+  }
+
+  return mediaUrl;
 }
 
 export function PantauFormClient() {
@@ -437,7 +453,7 @@ export function PantauFormClient() {
             <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-slate-100 p-2 sm:p-4">
               {isPreviewableFile(previewFile) ? (
                 getFileName(previewFile).toLowerCase().endsWith('.pdf') ? (
-                  <iframe title={`Pratinjau ${getFileName(previewFile)}`} src={resolveMediaUrl(previewFile)} className="h-full w-full rounded-lg border-0 bg-white" />
+                  <iframe title={`Pratinjau ${getFileName(previewFile)}`} src={getFilePreviewUrl(previewFile)} className="h-full w-full rounded-lg border-0 bg-white" />
                 ) : (
                   <img src={resolveMediaUrl(previewFile)} alt={`Pratinjau ${getFileName(previewFile)}`} className="max-h-full max-w-full rounded-lg object-contain" />
                 )

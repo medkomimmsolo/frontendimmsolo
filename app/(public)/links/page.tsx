@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, Link2 } from 'lucide-react';
 import { toAbsoluteSiteUrl } from '@/lib/absoluteUrl';
+import { checkMaintenance } from '@/lib/maintenance';
+import MaintenancePage from '@/components/ui/MaintenancePage';
 
 export const metadata: Metadata = {
   title: 'Tautan Resmi',
@@ -43,6 +45,7 @@ async function getPages() {
 }
 
 export default async function LinksIndexPage() {
+  if (await checkMaintenance('maintenance_links')) return <MaintenancePage />;
   const pages = await getPages();
 
   return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
@@ -16,7 +16,9 @@ import {
   Copy,
   Check,
   ExternalLink,
-  X
+  X,
+  RefreshCw,
+  ClipboardList,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
@@ -26,6 +28,7 @@ import { useDebounce } from 'use-debounce';
 import { PaginationControls } from '@/components/ui/PaginationControls';
 import { TransferOwnershipModal } from '@/components/ui/TransferOwnershipModal';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { getApiBase } from '@/lib/settings';
 
 export default function DocumentsManagement() {
   const { user } = useAuth();
@@ -33,6 +36,8 @@ export default function DocumentsManagement() {
   const isSuperAdmin = user?.roles?.some((r: any) => r.name === 'super-admin');
   const [documents, setDocuments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const fetchSequence = useRef(0);
   const [transferItem, setTransferItem] = useState<any>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
@@ -59,7 +64,9 @@ export default function DocumentsManagement() {
   const [isBulkLoading, setIsBulkLoading] = useState(false);
 
   const fetchDocuments = useCallback(async () => {
+    const requestSequence = ++fetchSequence.current;
     setIsLoading(true);
+    setLoadError(false);
     try {
       const params: any = {
         search: debouncedSearch || undefined,
@@ -68,6 +75,7 @@ export default function DocumentsManagement() {
       };
 
       const response = await api.get('/documents', { params });
+      if (requestSequence !== fetchSequence.current) return;
       
       const payload = response.data.data;
       if (payload && payload.data) {
@@ -90,10 +98,12 @@ export default function DocumentsManagement() {
       }
       setSelectedDocuments([]);
     } catch (error) {
+      if (requestSequence !== fetchSequence.current) return;
       console.error('Failed to fetch documents', error);
+      setLoadError(true);
       toast.error(getUserFacingErrorMessage(error, 'Gagal memuat data dokumen'));
     } finally {
-      setIsLoading(false);
+      if (requestSequence === fetchSequence.current) setIsLoading(false);
     }
   }, [debouncedSearch, currentPage]);
 
@@ -110,7 +120,11 @@ export default function DocumentsManagement() {
       try {
         await api.delete(`/documents/${id}`);
         toast.success('Dokumen berhasil dihapus');
-        fetchDocuments();
+        if (documents.length === 1 && currentPage > 1) {
+          setCurrentPage((page) => page - 1);
+        } else {
+          await fetchDocuments();
+        }
       } catch (error) {
         console.error('Failed to delete', error);
         toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus dokumen'));
@@ -120,18 +134,16 @@ export default function DocumentsManagement() {
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      setSelectedDocuments(documents.map(d => d.id));
+      setSelectedDocuments((current) => [...new Set([...current, ...documents.map((document) => document.id)])]);
     } else {
-      setSelectedDocuments([]);
+      setSelectedDocuments((current) => current.filter((id) => !documents.some((document) => document.id === id)));
     }
   };
 
   const handleSelectOne = (id: number) => {
-    if (selectedDocuments.includes(id)) {
-      setSelectedDocuments(selectedDocuments.filter(dId => dId !== id));
-    } else {
-      setSelectedDocuments([...selectedDocuments, id]);
-    }
+    setSelectedDocuments((current) => current.includes(id)
+      ? current.filter((documentId) => documentId !== id)
+      : [...current, id]);
   };
 
   const applyBulkAction = async () => {
@@ -139,9 +151,19 @@ export default function DocumentsManagement() {
       if (await confirm({ title: `Hapus ${selectedDocuments.length} dokumen?`, message: 'Dokumen yang dipilih akan dihapus.', confirmText: 'Hapus dokumen', tone: 'danger' })) {
         setIsBulkLoading(true);
         try {
-          await Promise.all(selectedDocuments.map(id => api.delete(`/documents/${id}`)));
-          toast.success(`${selectedDocuments.length} dokumen berhasil dihapus`);
-          fetchDocuments();
+          const results = await Promise.allSettled(selectedDocuments.map((id) => api.delete(`/documents/${id}`)));
+          const deletedIds = selectedDocuments.filter((_, index) => results[index].status === 'fulfilled');
+          const failedCount = results.length - deletedIds.length;
+          if (deletedIds.length > 0) toast.success(`${deletedIds.length} dokumen berhasil dihapus`);
+          if (failedCount > 0) toast.error(`${failedCount} dokumen gagal dihapus. Periksa izin akses dan coba lagi.`);
+          setSelectedDocuments((current) => current.filter((id) => !deletedIds.includes(id)));
+          const allVisibleDocumentsDeleted = documents.length > 0
+            && documents.every((document) => deletedIds.includes(document.id));
+          if (allVisibleDocumentsDeleted && currentPage > 1) {
+            setCurrentPage((page) => page - 1);
+          } else {
+            await fetchDocuments();
+          }
           setBulkAction('');
         } catch (error) {
           console.error('Failed to delete some documents', error);
@@ -225,38 +247,74 @@ export default function DocumentsManagement() {
         </Link>
       </PageHeader>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-        <div className="flex items-center gap-2">
-          <select 
-            value={bulkAction}
-            onChange={(e) => setBulkAction(e.target.value)}
-            className="bg-white border border-slate-200 rounded-sm px-3 py-1.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none h-10 min-w-[140px] shadow-sm"
-          >
-            <option value="">Aksi massal</option>
-            <option value="trash">Pindah ke sampah</option>
-          </select>
-          <button 
-            onClick={applyBulkAction}
-            disabled={!bulkAction || isBulkLoading}
-            className="h-10 px-4 border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 hover:text-[#c20000] disabled:opacity-50 rounded-sm text-sm font-medium shadow-sm transition-colors"
-          >
-            {isBulkLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Terapkan'}
-          </button>
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-3" aria-label="Ringkasan dokumen">
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200/90 bg-white px-4 py-3 shadow-2xs">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-[#c20000]"><ClipboardList className="h-5 w-5" /></span>
+          <div><p className="text-xs font-medium text-slate-500">Total dokumen</p><p className="text-lg font-bold text-slate-900">{totalItems}</p></div>
+        </div>
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200/90 bg-white px-4 py-3 shadow-2xs">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600"><FileText className="h-5 w-5" /></span>
+          <div><p className="text-xs font-medium text-slate-500">Di halaman ini</p><p className="text-lg font-bold text-slate-900">{documents.length}</p></div>
+        </div>
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200/90 bg-white px-4 py-3 shadow-2xs">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600"><Check className="h-5 w-5" /></span>
+          <div><p className="text-xs font-medium text-slate-500">Dipilih</p><p className="text-lg font-bold text-slate-900">{selectedDocuments.length}</p></div>
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-3 rounded-2xl border border-slate-200/90 bg-white p-4 shadow-2xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex items-center gap-2">
+            <select
+              aria-label="Aksi massal"
+              value={bulkAction}
+              onChange={(e) => setBulkAction(e.target.value)}
+              className="h-10 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] sm:min-w-[180px]"
+            >
+              <option value="">Aksi massal</option>
+              <option value="trash">Pindahkan ke sampah</option>
+            </select>
+            <Button
+              type="button"
+              onClick={applyBulkAction}
+              disabled={!bulkAction || selectedDocuments.length === 0 || isBulkLoading}
+              className="h-10 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-700 disabled:opacity-50"
+            >
+              {isBulkLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Terapkan'}
+            </Button>
+          </div>
+          {selectedDocuments.length > 0 && (
+            <button type="button" onClick={() => setSelectedDocuments([])} className="h-10 px-3 text-sm font-medium text-slate-500 hover:text-slate-900">
+              Batal pilih
+            </button>
+          )}
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Cari dokumen..." 
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="search"
+              aria-label="Cari dokumen"
+              placeholder="Cari judul dokumen..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white border border-slate-200 rounded-sm pl-10 pr-3 py-2.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none shadow-sm w-48 transition-all"
+              className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-700 outline-none transition-colors focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
             />
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            aria-label="Muat ulang daftar dokumen"
+            title="Muat ulang"
+            onClick={() => fetchDocuments()}
+            disabled={isLoading}
+            className="h-10 w-10 shrink-0 rounded-xl p-0"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
-      </div>
+      </section>
 
       <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
@@ -267,7 +325,8 @@ export default function DocumentsManagement() {
                   <input 
                     type="checkbox" 
                     onChange={handleSelectAll}
-                    checked={documents.length > 0 && selectedDocuments.length === documents.length}
+                    aria-label="Pilih semua dokumen di halaman ini"
+                    checked={documents.length > 0 && documents.every((document) => selectedDocuments.includes(document.id))}
                     className="rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" 
                   />
                 </th>
@@ -288,6 +347,16 @@ export default function DocumentsManagement() {
                     </div>
                   </td>
                 </tr>
+              ) : loadError ? (
+                <tr>
+                  <td colSpan={5} className="py-16 text-center">
+                    <p className="text-sm font-semibold text-slate-800">Daftar dokumen gagal dimuat</p>
+                    <p className="mt-1 text-xs text-slate-500">Periksa koneksi, lalu muat ulang daftar dokumen.</p>
+                    <Button type="button" variant="outline" onClick={() => fetchDocuments()} className="mt-4 rounded-xl">
+                      <RefreshCw className="mr-2 h-4 w-4" /> Coba lagi
+                    </Button>
+                  </td>
+                </tr>
               ) : documents.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-16 text-center">
@@ -296,7 +365,7 @@ export default function DocumentsManagement() {
                         <FileText className="w-6 h-6" />
                       </div>
                       <p className="text-sm font-semibold text-slate-700">Tidak ada dokumen ditemukan</p>
-                      <p className="text-xs text-slate-400 mt-1">Coba sesuaikan kata kunci atau filter tipe</p>
+                      <p className="text-xs text-slate-400 mt-1">Coba ubah kata kunci pencarian atau tambahkan dokumen baru.</p>
                     </div>
                   </td>
                 </tr>
@@ -388,7 +457,7 @@ export default function DocumentsManagement() {
                       
                       <div className="flex items-center gap-2 mt-2.5">
                         <a 
-                          href={`${process.env.NEXT_PUBLIC_API_URL}/documents/${doc.id}/download`} 
+                          href={`${getApiBase()}/documents/${doc.id}/download`}
                           target="_blank" 
                           rel="noreferrer" 
                           title="Unduh Berkas" 
@@ -456,12 +525,14 @@ export default function DocumentsManagement() {
       {/* Edit Document Modal */}
       {editingDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div role="dialog" aria-modal="true" aria-labelledby="edit-document-title" className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-              <h3 className="font-bold text-slate-900 text-lg">Edit Dokumen / Berkas</h3>
+              <h3 id="edit-document-title" className="font-bold text-slate-900 text-lg">Edit Dokumen / Berkas</h3>
               <button
                 type="button"
                 onClick={() => setEditingDoc(null)}
+                aria-label="Tutup edit dokumen"
+                disabled={isSavingEdit}
                 className="text-slate-400 hover:text-slate-600 p-1"
               >
                 <X className="w-5 h-5" />
