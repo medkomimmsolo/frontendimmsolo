@@ -166,6 +166,7 @@ export default function Footer() {
               <li><Link href="/links" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Tautan Resmi</Link></li>
               <li><Link href="/dokumen" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Dokumen</Link></li>
               <li><Link href="/kontak" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Kontak</Link></li>
+              <li><Link href="/docs" className="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Dokumentasi (Playbook)</Link></li>
             </ul>
           </div>
         </div>
