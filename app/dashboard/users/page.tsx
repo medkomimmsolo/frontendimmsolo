@@ -12,15 +12,87 @@ import {
   Edit, 
   Trash2, 
   Loader2,
-  Users as UsersIcon
+  Users as UsersIcon,
+  ShieldCheck,
+  Shield,
+  Power,
+  PowerOff,
+  X,
+  Lock,
+  Ban,
+  Zap,
+  Tag,
+  Newspaper,
+  CalendarDays,
+  Network,
+  FolderOpen,
+  Link2,
+  Image as ImageIcon,
+  Settings,
+  UserPlus,
+  ScrollText,
+  Inbox,
+  ClipboardList,
+  Megaphone,
+  Share2,
+  CheckCircle2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { User } from '@/types';
-import { ShieldCheck, Shield, Power, PowerOff } from 'lucide-react';
 import Link from 'next/link';
 import { PageHeader } from '@/components/ui/PageHeader';
+
+const PERM_LABELS: Record<string, string> = {
+  'manage-blog': 'Kelola Post',
+  'manage-event': 'Agenda Kegiatan',
+  'manage-struktural': 'Struktur Organisasi',
+  'manage-document': 'Dokumen',
+  'manage-shortlinks': 'Tautan Pendek',
+  'manage-media': 'Media Library',
+  'manage-settings': 'Pengaturan',
+  'manage-users': 'Pengguna & Hak Akses',
+  'manage-links': 'Linktree',
+  'manage-account-requests': 'Pengajuan Akun',
+  'manage-audit-logs': 'Log Aktivitas',
+  'manage-messages': 'Kotak Masuk',
+  'manage-forms': 'Formulir Pendaftaran',
+  'manage-announcements': 'Pengumuman Internal',
+};
+
+const PERM_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  'manage-blog': Newspaper,
+  'manage-event': CalendarDays,
+  'manage-struktural': Network,
+  'manage-document': FolderOpen,
+  'manage-shortlinks': Link2,
+  'manage-media': ImageIcon,
+  'manage-settings': Settings,
+  'manage-users': UsersIcon,
+  'manage-links': Share2,
+  'manage-account-requests': UserPlus,
+  'manage-audit-logs': ScrollText,
+  'manage-messages': Inbox,
+  'manage-forms': ClipboardList,
+  'manage-announcements': Megaphone,
+};
+
+const filterPerms = (perms: string[], query: string) => {
+  const q = query.trim().toLowerCase();
+  if (!q) return perms;
+  return perms.filter((perm) => (PERM_LABELS[perm] ?? perm).toLowerCase().includes(q) || perm.toLowerCase().includes(q));
+};
+
+const countArrayDiff = (a: unknown[], b: unknown[]) => {
+  const setA = new Set(a);
+  const setB = new Set(b);
+  let diff = 0;
+  new Set([...a, ...b]).forEach((v) => {
+    if (setA.has(v) !== setB.has(v)) diff += 1;
+  });
+  return diff;
+};
 
 export default function UsersManagement() {
   const { user } = useAuth();
@@ -40,6 +112,11 @@ export default function UsersManagement() {
   const [accessAllowedCats, setAccessAllowedCats] = useState<number[]>([]);
   const [accessLoading, setAccessLoading] = useState(false);
   const [accessSaving, setAccessSaving] = useState(false);
+  const [accessTab, setAccessTab] = useState<'modules' | 'categories'>('modules');
+  const [accessSearch, setAccessSearch] = useState('');
+  const [accessInitialDirect, setAccessInitialDirect] = useState<string[]>([]);
+  const [accessInitialDenied, setAccessInitialDenied] = useState<string[]>([]);
+  const [accessInitialCats, setAccessInitialCats] = useState<number[]>([]);
 
   // Role Management State
   const [isRolesModalOpen, setIsRolesModalOpen] = useState(false);
@@ -57,6 +134,8 @@ export default function UsersManagement() {
 
   const openAccessModal = async (u: User) => {
     setAccessModalUser(u);
+    setAccessTab('modules');
+    setAccessSearch('');
     setAccessLoading(true);
     try {
       const [permRes, rolesRes, catsRes, userCatsRes] = await Promise.all([
@@ -66,13 +145,20 @@ export default function UsersManagement() {
         api.get(`/users/${u.id}/categories`),
       ]);
       const catList = catsRes.data.data?.data || catsRes.data.data || [];
+      const allowedCats = userCatsRes.data.data?.allowed || [];
       setAccessAllCats(Array.isArray(catList) ? catList : []);
-      setAccessAllowedCats(userCatsRes.data.data?.allowed || []);
+      setAccessAllowedCats(allowedCats);
       setAccessAllPerms(rolesRes.data.data.permissions || []);
       const isSuper = u.roles?.some((r: any) => r.name === 'super-admin');
-      setAccessDirect(permRes.data.data.direct || []);
-      setAccessViaRole(isSuper ? (rolesRes.data.data.permissions || []) : (permRes.data.data.via_role || []));
-      setAccessDenied(isSuper ? [] : (permRes.data.data.denied || []));
+      const direct = permRes.data.data.direct || [];
+      const viaRoleList = isSuper ? (rolesRes.data.data.permissions || []) : (permRes.data.data.via_role || []);
+      const deniedList = isSuper ? [] : (permRes.data.data.denied || []);
+      setAccessDirect(direct);
+      setAccessViaRole(viaRoleList);
+      setAccessDenied(deniedList);
+      setAccessInitialDirect(direct);
+      setAccessInitialDenied(deniedList);
+      setAccessInitialCats(allowedCats);
     } catch (error) {
       toast.error(getUserFacingErrorMessage(error, 'Gagal memuat hak akses'));
     } finally {
@@ -125,23 +211,6 @@ export default function UsersManagement() {
     }
   };
 
-  const PERM_LABELS: Record<string, string> = {
-    'manage-blog': 'Kelola Post',
-    'manage-event': 'Agenda Kegiatan',
-    'manage-struktural': 'Struktur Organisasi',
-    'manage-document': 'Dokumen',
-    'manage-shortlinks': 'Tautan Pendek',
-    'manage-media': 'Media Library',
-    'manage-settings': 'Pengaturan',
-    'manage-users': 'Pengguna & Hak Akses',
-    'manage-links': 'Linktree',
-    'manage-account-requests': 'Pengajuan Akun',
-    'manage-audit-logs': 'Log Aktivitas',
-    'manage-messages': 'Kotak Masuk',
-    'manage-forms': 'Formulir Pendaftaran',
-    'manage-announcements': 'Pengumuman Internal',
-  };
-
 
   const fetchUsers = async (page = currentPage, search = searchQuery) => {
     setIsLoading(true);
@@ -166,6 +235,15 @@ export default function UsersManagement() {
   useEffect(() => {
     fetchUsers();
   }, [currentPage]);
+
+  useEffect(() => {
+    if (!accessModalUser) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setAccessModalUser(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [accessModalUser]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -259,6 +337,34 @@ export default function UsersManagement() {
     } finally {
       setSavingRoleId(null);
     }
+  };
+
+  const isSuperAccess = accessModalUser?.roles?.some((r: any) => r.name === 'super-admin') ?? false;
+  const accessQuery = accessSearch.trim().toLowerCase();
+  const visiblePerms = filterPerms(accessAllPerms, accessSearch);
+  const enabledCount = accessAllPerms.filter((perm) => !accessDenied.includes(perm) && (accessViaRole.includes(perm) || accessDirect.includes(perm))).length;
+  const accessChangeCount = accessModalUser
+    ? countArrayDiff(accessDirect, accessInitialDirect) + countArrayDiff(accessDenied, accessInitialDenied) + countArrayDiff(accessAllowedCats, accessInitialCats)
+    : 0;
+
+  const applyAllPerms = (enable: boolean) => {
+    const deniedSet = new Set(accessDenied);
+    const directSet = new Set(accessDirect);
+    filterPerms(accessAllPerms, accessSearch).forEach((perm) => {
+      if (accessViaRole.includes(perm)) {
+        if (enable) deniedSet.delete(perm);
+        else deniedSet.add(perm);
+      } else {
+        if (enable) directSet.add(perm);
+        else directSet.delete(perm);
+      }
+    });
+    setAccessDenied(Array.from(deniedSet));
+    setAccessDirect(Array.from(directSet));
+  };
+
+  const applyAllCats = (enable: boolean) => {
+    setAccessAllowedCats(enable ? accessAllCats.map((c: any) => c.id) : []);
   };
 
   return (
@@ -422,65 +528,271 @@ export default function UsersManagement() {
       </div>
 
       {accessModalUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4" onClick={() => setAccessModalUser(null)}>
-          <div className="bg-white rounded-sm shadow-xl max-w-2xl w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-bold text-slate-800 mb-1">Hak Akses Modul — {accessModalUser.name}</h2>
-            <p className="text-xs text-slate-500 mb-5">
-              Role: <span className="capitalize">{accessModalUser.roles?.[0]?.name || '-'}</span>
-              {accessModalUser.roles?.some((r: any) => r.name === 'super-admin') && ' (akses penuh, tidak dapat diubah)'}
-            </p>
-            {accessLoading ? (
-              <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-[#c20000]" /></div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {accessAllPerms.map((perm) => {
-                  const fromRole = accessViaRole.includes(perm);
-                  const isDenied = accessDenied.includes(perm);
-                  const checked = !isDenied && (fromRole || accessDirect.includes(perm));
-                  const locked = accessModalUser.roles?.some((r: any) => r.name === 'super-admin');
-                  return (
-                    <label key={perm} className={`flex items-center gap-3 p-3 border rounded-sm transition-colors ${checked ? 'border-[#c20000]/40 bg-[#c20000]/5' : 'border-slate-200'} ${locked ? 'opacity-60' : 'cursor-pointer hover:bg-slate-50'}`}>
-                      <input type="checkbox" checked={checked} disabled={locked} onChange={() => toggleAccessPerm(perm)} className="w-4 h-4 accent-[#c20000]" />
-                      <span className="text-sm font-medium text-slate-700">
-                        {PERM_LABELS[perm] ?? perm}
-                        {fromRole && !isDenied && <span className="ml-2 text-[10px] uppercase tracking-wide text-slate-400">via role</span>}
-                        {isDenied && <span className="ml-2 text-[10px] uppercase tracking-wide text-red-400">dimatikan</span>}
-                      </span>
-                    </label>
-                  );
-                })}
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-[#0f172a]/60 backdrop-blur-sm p-4 sm:p-6" onClick={() => setAccessModalUser(null)}>
+          <div
+            className="mx-auto flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white p-5 sm:px-6">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#c20000] to-[#900000] text-white shadow-sm">
+                <ShieldCheck className="h-5 w-5" />
               </div>
-            )}
-            {!accessModalUser.roles?.some((r: any) => r.name === 'super-admin') && (
-              <div className="mt-6 pt-5 border-t border-slate-100">
-                <h3 className="text-sm font-bold text-slate-800 mb-1">Akses Kategori Post</h3>
-                <p className="text-xs text-slate-500 mb-4">Kosongkan untuk mengizinkan semua kategori. Centang untuk membatasi.</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {accessAllCats.map((c: any) => {
-                    const checked = accessAllowedCats.includes(c.id);
-                    return (
-                      <label key={c.id} className={`flex items-center gap-3 p-3 border rounded-sm cursor-pointer transition-colors ${checked ? 'border-[#c20000]/40 bg-[#c20000]/5' : 'border-slate-200 hover:bg-slate-50'}`}>
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => setAccessAllowedCats((prev) => (prev.includes(c.id) ? prev.filter((x) => x !== c.id) : [...prev, c.id]))}
-                          className="w-4 h-4 accent-[#c20000]"
-                        />
-                        <span className="text-sm font-medium text-slate-700">{c.name}</span>
-                      </label>
-                    );
-                  })}
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-base font-bold tracking-tight text-slate-800 sm:text-lg" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
+                    Hak Akses Modul
+                  </h2>
+                  {accessModalUser.roles?.map((r: any) => (
+                    <span key={r.id} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600">
+                      {r.name.replace(/-/g, ' ')}
+                    </span>
+                  ))}
                 </div>
+                <p className="mt-0.5 truncate text-xs text-slate-500">
+                  Atur modul yang dapat diakses oleh{" "}
+                  <span className="font-semibold text-slate-700">{accessModalUser.name}</span>
+                </p>
               </div>
-            )}
-            <div className="flex justify-end gap-3 mt-6">
-              <Button variant="outline" onClick={() => setAccessModalUser(null)}>Batal</Button>
-              {!accessModalUser.roles?.some((r: any) => r.name === 'super-admin') && (
-                <Button onClick={saveAccess} disabled={accessSaving} className="bg-[#c20000] hover:bg-[#a30000] text-white">
-                  {accessSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                  Simpan
-                </Button>
+              <button
+                onClick={() => setAccessModalUser(null)}
+                title="Tutup"
+                className="-m-1 shrink-0 rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar">
+              {accessLoading ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-16">
+                  <Loader2 className="h-6 w-6 animate-spin text-[#c20000]" />
+                  <p className="text-xs font-medium text-slate-500">Memuat konfigurasi hak akses...</p>
+                </div>
+              ) : (
+                <>
+                  {isSuperAccess && (
+                    <div className="mx-5 mt-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3.5 sm:mx-6 sm:p-4">
+                      <Lock className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                      <div>
+                        <p className="text-xs font-bold text-amber-800">Akun Super Admin</p>
+                        <p className="mt-0.5 text-xs leading-relaxed text-amber-700/90">
+                          Pengguna ini memiliki akses penuh ke seluruh modul dan tidak dapat diubah.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {!isSuperAccess && (
+                    <div className="flex gap-2 px-5 pt-4 sm:px-6">
+                      <button
+                        onClick={() => setAccessTab('modules')}
+                        className={`inline-flex h-9 items-center gap-2 rounded-lg px-4 text-xs font-bold transition-colors ${accessTab === 'modules' ? 'bg-[#c20000] text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                      >
+                        <ShieldCheck className="h-4 w-4" />
+                        Modul Akses
+                        <span className={`rounded-full px-1.5 text-[10px] font-bold ${accessTab === 'modules' ? 'bg-white/25 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}>
+                          {enabledCount}/{accessAllPerms.length}
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => setAccessTab('categories')}
+                        className={`inline-flex h-9 items-center gap-2 rounded-lg px-4 text-xs font-bold transition-colors ${accessTab === 'categories' ? 'bg-[#c20000] text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                      >
+                        <Tag className="h-4 w-4" />
+                        Kategori Post
+                        <span className={`rounded-full px-1.5 text-[10px] font-bold ${accessTab === 'categories' ? 'bg-white/25 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}>
+                          {accessAllowedCats.length}/{accessAllCats.length}
+                        </span>
+                      </button>
+                    </div>
+                  )}
+
+                  {isSuperAccess ? (
+                    <div className="grid grid-cols-1 gap-2.5 p-5 sm:grid-cols-2 sm:px-6">
+                      {accessAllPerms.map((perm) => {
+                        const Icon = PERM_ICONS[perm] ?? Shield;
+                        return (
+                          <div key={perm} className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/50 p-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate text-sm font-semibold text-slate-800">
+                                {PERM_LABELS[perm] ?? perm}
+                              </div>
+                              <div className="mt-0.5 text-[11px] font-semibold text-emerald-600">Akses penuh</div>
+                            </div>
+                            <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : accessTab === 'modules' ? (
+                    <section className="space-y-4 p-5 sm:px-6 sm:pb-6">
+                      <div className="flex items-center gap-2 sm:flex-wrap">
+                        <div className="relative flex-1 min-w-0">
+                          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                          <input
+                            type="text"
+                            placeholder="Cari modul..."
+                            value={accessSearch}
+                            onChange={(e) => setAccessSearch(e.target.value)}
+                            className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-800 shadow-2xs placeholder:text-slate-400 focus:border-[#c20000] focus:outline-none focus:ring-1 focus:ring-[#c20000]"
+                          />
+                        </div>
+                        <button
+                          onClick={() => applyAllPerms(true)}
+                          className="h-9 shrink-0 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 shadow-2xs transition-colors hover:border-slate-300 hover:bg-slate-50"
+                        >
+                          Pilih semua
+                        </button>
+                        <button
+                          onClick={() => applyAllPerms(false)}
+                          className="h-9 shrink-0 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 shadow-2xs transition-colors hover:border-slate-300 hover:bg-slate-50"
+                        >
+                          Kosongkan
+                        </button>
+                      </div>
+                      {visiblePerms.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center gap-2 py-10 text-slate-400">
+                          <Search className="h-8 w-8 text-slate-200" />
+                          <p className="text-xs font-medium">Tidak ada modul yang cocok dengan pencarian</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                          {visiblePerms.map((perm) => {
+                            const fromRole = accessViaRole.includes(perm);
+                            const isDenied = accessDenied.includes(perm);
+                            const isDirect = accessDirect.includes(perm) && !isDenied;
+                            const isOn = !isDenied && (fromRole || accessDirect.includes(perm));
+                            const Icon = PERM_ICONS[perm] ?? Shield;
+                            return (
+                              <label
+                                key={perm}
+                                className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-all ${isDenied ? 'border-red-200 bg-red-50/50' : isOn ? 'border-[#c20000]/30 bg-[#c20000]/[0.04]' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                              >
+                                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${isOn ? 'bg-[#c20000]/10 text-[#c20000]' : isDenied ? 'bg-red-100 text-red-500' : 'bg-slate-100 text-slate-400'}`}>
+                                  <Icon className="h-4 w-4" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="truncate text-sm font-semibold text-slate-800">
+                                    {PERM_LABELS[perm] ?? perm}
+                                  </div>
+                                  <div className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold">
+                                    {fromRole && !isDenied && (
+                                      <span className="inline-flex items-center gap-0.5 text-violet-600">
+                                        <Lock className="h-3 w-3" />
+                                        Via role
+                                      </span>
+                                    )}
+                                    {isDenied && (
+                                      <span className="inline-flex items-center gap-0.5 text-red-500">
+                                        <Ban className="h-3 w-3" />
+                                        Diblokir
+                                      </span>
+                                    )}
+                                    {isDirect && !fromRole && (
+                                      <span className="inline-flex items-center gap-0.5 text-amber-600">
+                                        <Zap className="h-3 w-3" />
+                                        Akses khusus
+                                      </span>
+                                    )}
+                                    {!isOn && !isDenied && (
+                                      <span className="text-slate-400">Nonaktif</span>
+                                    )}
+                                  </div>
+                                </div>
+                                <input type="checkbox" className="sr-only peer" checked={isOn} onChange={() => toggleAccessPerm(perm)} />
+                                <span className="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full bg-slate-200 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:bg-[#c20000] peer-checked:after:translate-x-4" />
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </section>
+                  ) : (
+                    <section className="space-y-4 p-5 sm:px-6 sm:pb-6">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-[11px] text-slate-400">
+                          Kosongkan untuk mengizinkan semua kategori.
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => applyAllCats(true)}
+                            className="h-9 shrink-0 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 shadow-2xs transition-colors hover:border-slate-300 hover:bg-slate-50"
+                          >
+                            Pilih semua
+                          </button>
+                          <button
+                            onClick={() => applyAllCats(false)}
+                            className="h-9 shrink-0 rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 shadow-2xs transition-colors hover:border-slate-300 hover:bg-slate-50"
+                          >
+                            Kosongkan
+                          </button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                        {accessAllCats.map((c: any) => {
+                          const checked = accessAllowedCats.includes(c.id);
+                          return (
+                            <label
+                              key={c.id}
+                              className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3 transition-all ${checked ? 'border-[#c20000]/30 bg-[#c20000]/[0.04]' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                            >
+                              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${checked ? 'bg-[#c20000]/10 text-[#c20000]' : 'bg-slate-100 text-slate-400'}`}>
+                                <Tag className="h-4 w-4" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="truncate text-sm font-semibold text-slate-800">{c.name}</div>
+                                {c.slug && <div className="mt-0.5 truncate text-[11px] text-slate-400">{c.slug}</div>}
+                              </div>
+                              <input
+                                type="checkbox"
+                                className="sr-only peer"
+                                checked={checked}
+                                onChange={() =>
+                                  setAccessAllowedCats((prev) => (prev.includes(c.id) ? prev.filter((x: number) => x !== c.id) : [...prev, c.id]))
+                                }
+                              />
+                              <span className="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full bg-slate-200 transition-colors after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:bg-[#c20000] peer-checked:after:translate-x-4" />
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  )}
+                </>
               )}
+            </div>
+
+            <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-6">
+              {isSuperAccess ? (
+                <p className="text-[11px] text-slate-500">Akses penuh, tidak dapat diubah.</p>
+              ) : (
+                <p className="text-[11px] text-slate-500">
+                  {accessChangeCount > 0 ? (
+                    <span className="font-semibold text-amber-600">{accessChangeCount} perubahan belum disimpan</span>
+                  ) : (
+                    'Tidak ada perubahan'
+                  )}
+                </p>
+              )}
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => setAccessModalUser(null)} className="rounded-lg">
+                  Batal
+                </Button>
+                {!isSuperAccess && (
+                  <Button
+                    size="sm"
+                    onClick={saveAccess}
+                    disabled={accessSaving || accessChangeCount === 0}
+                    className="rounded-lg bg-[#c20000] text-white hover:bg-[#a30000]"
+                  >
+                    {accessSaving ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-1.5 h-4 w-4" />}
+                    Simpan Perubahan
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
