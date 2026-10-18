@@ -4,73 +4,82 @@ export interface ImageDimensions {
   ratio: number;
 }
 
-export const getImageDimensions = (file: File): Promise<ImageDimensions> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target?.result as string;
-      img.onload = () =>
-        resolve({
-          width: img.naturalWidth,
-          height: img.naturalHeight,
-          ratio: img.naturalWidth / img.naturalHeight,
-        });
-      img.onerror = (error) => reject(error);
-    };
-    reader.onerror = (error) => reject(error);
-    reader.readAsDataURL(file);
-  });
+interface DecodedImage {
+  source: CanvasImageSource;
+  width: number;
+  height: number;
+  cleanup: () => void;
+}
+
+const decodeOriented = async (file: File): Promise<DecodedImage> => {
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      return { source: bitmap, width: bitmap.width, height: bitmap.height, cleanup: () => bitmap.close() };
+    } catch {
+      /* Browser tidak mendukung opsi orientasi — fallback ke <img> */
+    }
+  }
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = (error) => reject(error);
+      el.src = url;
+    });
+    return { source: img, width: img.naturalWidth, height: img.naturalHeight, cleanup: () => URL.revokeObjectURL(url) };
+  } catch (err) {
+    URL.revokeObjectURL(url);
+    throw err;
+  }
+};
+
+export const getImageDimensions = async (file: File): Promise<ImageDimensions> => {
+  const decoded = await decodeOriented(file);
+  const dims: ImageDimensions = {
+    width: decoded.width,
+    height: decoded.height,
+    ratio: decoded.width / decoded.height,
+  };
+  decoded.cleanup();
+  return dims;
+};
 
 export const isRatioMatch = (actual: number, target: number, tolerance = 0.03): boolean =>
   target > 0 && Math.abs(actual - target) / target <= tolerance;
 
-export const convertToWebP = (file: File): Promise<File> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target?.result as string;
-      img.onload = () => {
-        const MAX_DIMENSION = 1600;
-        let width = img.width;
-        let height = img.height;
-        if (Math.max(width, height) > MAX_DIMENSION) {
-          const scale = MAX_DIMENSION / Math.max(width, height);
-          width = Math.round(width * scale);
-          height = Math.round(height * scale);
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Canvas context not found'));
-          return;
-        }
-        ctx.drawImage(img, 0, 0);
-        
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              reject(new Error('Blob conversion failed'));
-              return;
-            }
-            const webpFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
-              type: 'image/webp',
-              lastModified: Date.now(),
-            });
-            resolve(webpFile);
-          },
-          'image/webp',
-          0.8 // 80% quality
-        );
-      };
-      img.onerror = (error) => reject(error);
-    };
-    reader.onerror = (error) => reject(error);
-  });
+export const convertToWebP = async (file: File): Promise<File> => {
+  const decoded = await decodeOriented(file);
+  try {
+    const MAX_DIMENSION = 1600;
+    let width = decoded.width;
+    let height = decoded.height;
+    if (Math.max(width, height) > MAX_DIMENSION) {
+      const scale = MAX_DIMENSION / Math.max(width, height);
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Canvas context not found');
+    }
+    ctx.drawImage(decoded.source, 0, 0, width, height);
+
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/webp', 0.8));
+    if (!blob) {
+      throw new Error('Blob conversion failed');
+    }
+    return new File([blob], file.name.replace(/\.[^/.]+$/, '') + '.webp', {
+      type: 'image/webp',
+      lastModified: Date.now(),
+    });
+  } finally {
+    decoded.cleanup();
+  }
 };
 
 import api from '@/lib/api';
