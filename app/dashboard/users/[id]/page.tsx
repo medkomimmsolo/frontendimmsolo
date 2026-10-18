@@ -6,11 +6,16 @@ import { use } from 'react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { Save, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
+import { PageHeader } from '@/components/ui/PageHeader';
+
+const inputClass = "w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all text-sm shadow-2xs";
+const labelClass = "block text-xs font-bold text-slate-700 uppercase tracking-wider";
+const helperClass = "text-xs text-slate-500 leading-relaxed";
 
 export default function EditUser({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -109,138 +114,150 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
 
   if (isFetching) {
     return (
-      <div className="flex items-center justify-center h-64 text-[#0f172a]/70">
+      <div className="flex items-center justify-center h-64 text-slate-500">
         <Loader2 className="w-8 h-8 animate-spin mr-3 text-[#c20000]" />
         Memuat data pengguna...
       </div>
     );
   }
 
+  const roleSelect = (
+    <select
+      name="role"
+      required
+      value={formData.role}
+      onChange={handleChange}
+      className={`${inputClass} capitalize`}
+    >
+      {availableRoles.length > 0 ? (
+        availableRoles.map((r: any) => (
+          <option key={r.id} value={r.name}>
+            {r.name.replace(/-/g, ' ')} {r.name === 'super-admin' ? '(Akses Penuh)' : ''}
+          </option>
+        ))
+      ) : (
+        <>
+          <option value="komisariat">Komisariat (Kontributor Lokal)</option>
+          <option value="bidang">Bidang (Cabang)</option>
+          <option value="admin">Admin (Pengelola Konten)</option>
+          <option value="super-admin">Super Admin (Akses Penuh)</option>
+        </>
+      )}
+    </select>
+  );
+
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div className="flex items-center gap-4">
+    <form onSubmit={handleSubmit} className="w-full space-y-6">
+
+      {/* Page Header dengan Aksi */}
+      <PageHeader
+        title="Edit Pengguna"
+        description="Perbarui akses dan data identitas pengguna"
+        badge="Pengguna"
+      >
         <Link href="/dashboard/users">
-          <Button variant="outline" size="sm" className="h-10 w-10 p-0 rounded-sm">
-            <ArrowLeft className="w-5 h-5" />
+          <Button type="button" variant="outline" size="sm" className="h-10 px-4 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs">
+            Batal
           </Button>
         </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-            Edit Pengguna
-          </h1>
-          <p className="text-[#0f172a]/70 text-sm mt-1">Perbarui akses dan data identitas pengguna.</p>
-        </div>
-      </div>
+        <Button type="submit" disabled={isLoading} className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
+          {isLoading ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
+          {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+        </Button>
+      </PageHeader>
 
-      <form onSubmit={handleSubmit}>
-        <Card className="border-[#0f172a]/10 shadow-sm">
-          <CardContent className="p-6 space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-[#0f172a]/90">Nama Lengkap</label>
-              <input 
-                type="text" 
-                name="name"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
-              />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        {/* ─────────────── KIRI: Data Akun ─────────────── */}
+        <div className="lg:col-span-2">
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
+            <div className="bg-slate-50/70 px-6 py-4 border-b border-slate-200/80">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Data Akun Pengguna</h3>
             </div>
+            <CardContent className="p-6 sm:p-7 space-y-5">
+              <div className="space-y-1.5">
+                <label className={labelClass}>Nama Lengkap <span className="text-[#c20000]">*</span></label>
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-[#0f172a]/90">Username</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-mono">@</span>
-                <input 
-                  type="text" 
+              <div className="space-y-1.5">
+                <label className={labelClass}>Username</label>
+                <input
+                  type="text"
                   name="username"
                   placeholder="nama_pengguna"
                   value={formData.username}
                   onChange={handleChange}
-                  className="w-full bg-white border border-[#0f172a]/10 rounded-sm pl-8 pr-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors font-mono text-sm"
+                  className={`${inputClass} font-mono`}
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-[#0f172a]/90">Alamat Email</label>
-              <input 
-                type="email" 
-                name="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
-              />
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Alamat Email <span className="text-[#c20000]">*</span></label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={inputClass}
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-[#0f172a]/90">Password Baru <span className="text-slate-400 font-normal">(Opsional)</span></label>
-              <input 
-                type="password" 
-                name="password"
-                minLength={8}
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Kosongkan jika tidak ingin mengubah password"
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors"
-              />
-            </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Password Baru <span className="text-slate-400 font-semibold normal-case tracking-normal">(opsional)</span></label>
+                  <input
+                    type="password"
+                    name="password"
+                    minLength={8}
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Kosongkan jika tidak ingin mengubah password"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-[#0f172a]/90">Hak Akses (Role)</label>
-              <select 
-                name="role"
-                required
-                value={formData.role}
-                onChange={handleChange}
-                className="w-full bg-white border border-[#0f172a]/10 rounded-sm px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors capitalize"
-              >
-                {availableRoles.length > 0 ? (
-                  availableRoles.map((r: any) => (
-                    <option key={r.id} value={r.name}>
-                      {r.name.replace(/-/g, ' ')} {r.name === 'super-admin' ? '(Akses Penuh)' : ''}
-                    </option>
-                  ))
-                ) : (
-                  <>
-                    <option value="komisariat">Komisariat (Kontributor Lokal)</option>
-                    <option value="bidang">Bidang (Cabang)</option>
-                    <option value="admin">Admin (Pengelola Konten)</option>
-                    <option value="super-admin">Super Admin (Akses Penuh)</option>
-                  </>
-                )}
-              </select>
+        {/* ─────────────── KANAN: Hak Akses ─────────────── */}
+        <div>
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
+            <div className="bg-slate-50/70 px-5 py-4 border-b border-slate-200/80">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Hak Akses (Role)</h3>
             </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-[#0f172a]/5">
-              <Link href="/dashboard/users">
-                <Button type="button" variant="outline" className="rounded-sm px-6">
-                  Batal
-                </Button>
-              </Link>
-              <Button type="submit" disabled={isLoading} className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm px-6 shadow-md">
-                {isLoading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />}
-                {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </form>
+            <CardContent className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <label className={labelClass}>Tingkat Akses <span className="text-[#c20000]">*</span></label>
+                {roleSelect}
+                <p className={helperClass}>Menentukan modul dashboard yang dapat diakses oleh akun ini.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {isSuperAdmin && (
-        <Card className="border-[#0f172a]/10 shadow-sm">
-          <CardContent className="p-6 space-y-4">
-            <div>
-              <h2 className="text-base font-bold text-[#0f172a]">Akses Data Pengguna Lain</h2>
-              <p className="text-sm text-slate-500 mt-1">
-                Berikan izin untuk melihat data milik pengguna lain. Izin ini tidak memberi hak mengubah atau memindahkan data.
-              </p>
-            </div>
+        <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
+          <div className="bg-slate-50/70 px-6 py-4 border-b border-slate-200/80">
+            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Akses Data Pengguna Lain</h3>
+          </div>
+          <CardContent className="p-6 sm:p-7 space-y-4">
+            <p className={helperClass}>
+              Berikan izin untuk melihat data milik pengguna lain. Izin ini tidak memberi hak mengubah atau memindahkan data.
+            </p>
             {dataAccessUsers.length === 0 ? (
               <p className="text-sm text-slate-400">Tidak ada pengguna lain untuk dipilih.</p>
             ) : (
-              <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-sm">
+              <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-xl">
                 {dataAccessUsers.map((owner) => {
                   const checked = dataAccessUserIds.includes(Number(owner.id));
                   return (
@@ -269,7 +286,7 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
                 type="button"
                 onClick={saveDataAccess}
                 disabled={dataAccessSaving}
-                className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm px-5"
+                className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 {dataAccessSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Simpan Akses Data
@@ -278,6 +295,6 @@ export default function EditUser({ params }: { params: Promise<{ id: string }> }
           </CardContent>
         </Card>
       )}
-    </div>
+    </form>
   );
 }

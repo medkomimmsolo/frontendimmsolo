@@ -521,6 +521,16 @@ textarea:focus-visible,
   margin-bottom: 0.25em;
 }
 
+/* Quill 2 menyimpan bullet list sebagai <ol><li data-list="bullet"> —
+   tampilkan sebagai bullet, bukan angka. */
+.article-content ol li[data-list='bullet'] {
+  list-style-type: disc;
+}
+
+.article-content ol li[data-list='bullet']::marker {
+  font-weight: normal;
+}
+
 /* ── Strong / Bold ── */
 .article-content strong,
 .article-content b {

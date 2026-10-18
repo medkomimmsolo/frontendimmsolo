@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
@@ -8,8 +8,6 @@ import {
   Plus, 
   Search, 
   Loader2,
-  ChevronLeft,
-  ChevronRight,
   MessageSquare,
   FileText,
   Edit,
@@ -18,7 +16,6 @@ import {
 import toast from 'react-hot-toast';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
-import { formatDate } from '@/lib/utils';
 import { Blog, Category } from '@/types';
 import Link from 'next/link';
 import { useDebounce } from 'use-debounce';
@@ -33,7 +30,9 @@ export default function BlogManagement() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [transferItem, setTransferItem] = useState<any>(null);
+  const requestId = useRef(0);
   
   // Filters & Pagination
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,7 +59,9 @@ export default function BlogManagement() {
   };
 
   const fetchBlogs = useCallback(async () => {
+    const currentRequest = ++requestId.current;
     setIsLoading(true);
+    setLoadError(false);
     try {
       const params: any = {
         admin: 1,
@@ -72,10 +73,11 @@ export default function BlogManagement() {
       };
       
       if (categoryFilter) {
-        params.category_id = categoryFilter;
+        params.category = categoryFilter;
       }
 
       const response = await api.get('/blogs', { params });
+      if (currentRequest !== requestId.current) return;
       
       const payload = response.data.data;
       if (payload && payload.data) {
@@ -84,13 +86,17 @@ export default function BlogManagement() {
         setTotalItems(payload.total || 0);
       } else {
         setBlogs(payload || []);
+        setTotalPages(1);
+        setTotalItems(Array.isArray(payload) ? payload.length : 0);
       }
       setSelectedBlogs([]); // Reset selections on fetch
     } catch (error) {
+      if (currentRequest !== requestId.current) return;
       console.error('Failed to fetch blogs', error);
+      setLoadError(true);
       toast.error(getUserFacingErrorMessage(error, 'Gagal memuat data post'));
     } finally {
-      setIsLoading(false);
+      if (currentRequest === requestId.current) setIsLoading(false);
     }
   }, [debouncedSearch, statusFilter, reviewFilter, categoryFilter, currentPage]);
 
@@ -104,14 +110,22 @@ export default function BlogManagement() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, statusFilter, categoryFilter]);
+  }, [debouncedSearch, statusFilter, reviewFilter, categoryFilter]);
+
+  useEffect(() => () => {
+    requestId.current += 1;
+  }, []);
 
   const handleDelete = async (id: number) => {
-    if (await confirm({ title: 'Pindahkan post ke sampah?', message: 'Post tidak lagi tampil di halaman publik dan dapat dipulihkan dari tempat sampah.', confirmText: 'Pindahkan ke sampah', tone: 'danger' })) {
+    if (await confirm({ title: 'Hapus post secara permanen?', message: 'Post dan gambar unggulannya akan dihapus permanen dan tidak dapat dipulihkan.', confirmText: 'Hapus permanen', tone: 'danger' })) {
       try {
         await api.delete(`/blogs/${id}`);
         toast.success('Post berhasil dihapus');
-        fetchBlogs();
+        if (blogs.length === 1 && currentPage > 1) {
+          setCurrentPage((page) => page - 1);
+        } else {
+          await fetchBlogs();
+        }
       } catch (error) {
         console.error('Failed to delete', error);
         toast.error(getUserFacingErrorMessage(error, 'Gagal menghapus post'));
@@ -163,13 +177,21 @@ export default function BlogManagement() {
 
   const applyBulkAction = async () => {
     if (bulkAction === 'trash' && selectedBlogs.length > 0) {
-      if (await confirm({ title: `Hapus ${selectedBlogs.length} post?`, message: 'Post yang dipilih akan dihapus.', confirmText: 'Hapus post', tone: 'danger' })) {
+      if (await confirm({ title: `Hapus ${selectedBlogs.length} post secara permanen?`, message: 'Post terpilih dan gambar unggulannya akan dihapus permanen dan tidak dapat dipulihkan.', confirmText: 'Hapus permanen', tone: 'danger' })) {
         setIsBulkLoading(true);
         try {
-          // Send bulk delete request or delete one by one
-          await Promise.all(selectedBlogs.map(id => api.delete(`/blogs/${id}`)));
-          toast.success(`${selectedBlogs.length} post berhasil dihapus`);
-          fetchBlogs();
+          const results = await Promise.allSettled(selectedBlogs.map((id) => api.delete(`/blogs/${id}`)));
+          const deletedIds = selectedBlogs.filter((_, index) => results[index].status === 'fulfilled');
+          const failedCount = results.length - deletedIds.length;
+          if (deletedIds.length > 0) toast.success(`${deletedIds.length} post berhasil dihapus`);
+          if (failedCount > 0) toast.error(`${failedCount} post gagal dihapus. Periksa izin akses dan coba lagi.`);
+          setSelectedBlogs((current) => current.filter((id) => !deletedIds.includes(id)));
+          const allVisiblePostsDeleted = blogs.length > 0 && blogs.every((blog) => deletedIds.includes(blog.id));
+          if (allVisiblePostsDeleted && currentPage > 1) {
+            setCurrentPage((page) => page - 1);
+          } else {
+            await fetchBlogs();
+          }
           setBulkAction('');
         } catch (error) {
           console.error('Failed to delete some blogs', error);
@@ -204,7 +226,7 @@ export default function BlogManagement() {
       <ul className="flex flex-wrap gap-2 text-sm text-slate-500 mb-6 font-medium">
         <li>
           <button 
-            onClick={() => setStatusFilter('all')} 
+            onClick={() => { setStatusFilter('all'); setReviewFilter(''); }}
             className={`transition-colors pb-1 ${statusFilter === 'all' ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
           >
             Semua
@@ -213,7 +235,7 @@ export default function BlogManagement() {
         </li>
         <li>
           <button 
-            onClick={() => setStatusFilter('published')} 
+            onClick={() => { setStatusFilter('published'); setReviewFilter(''); }}
             className={`transition-colors pb-1 ${statusFilter === 'published' ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
           >
             Terbit
@@ -222,7 +244,7 @@ export default function BlogManagement() {
         </li>
         <li>
           <button 
-            onClick={() => setStatusFilter('draft')} 
+            onClick={() => { setStatusFilter('draft'); setReviewFilter(''); }}
             className={`transition-colors pb-1 ${statusFilter === 'draft' ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
           >
             Draf
@@ -235,6 +257,15 @@ export default function BlogManagement() {
             className={`transition-colors pb-1 ${reviewFilter === 'pending' ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
           >
             Menunggu Review
+          </button>
+          <span className="text-slate-300 mx-2">|</span>
+        </li>
+        <li>
+          <button
+            onClick={() => { setStatusFilter('archived'); setReviewFilter(''); }}
+            className={`transition-colors pb-1 ${statusFilter === 'archived' ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
+          >
+            Arsip
           </button>
         </li>
       </ul>
@@ -263,9 +294,9 @@ export default function BlogManagement() {
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="ml-2 bg-white border border-slate-200 rounded-sm px-3 py-1.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none h-9 shadow-sm"
           >
-            <option value="">All categories</option>
-            {categories.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+            <option value="">Semua kategori</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.slug}>{category.name}</option>
             ))}
           </select>
         </div>
@@ -294,7 +325,8 @@ export default function BlogManagement() {
                   <input 
                     type="checkbox" 
                     onChange={handleSelectAll}
-                    checked={blogs.length > 0 && selectedBlogs.length === blogs.length}
+                    aria-label="Pilih semua post di halaman ini"
+                    checked={blogs.length > 0 && blogs.every((blog) => selectedBlogs.includes(blog.id))}
                     className="rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" 
                   />
                 </th>
@@ -318,6 +350,16 @@ export default function BlogManagement() {
                     </div>
                   </td>
                 </tr>
+              ) : loadError ? (
+                <tr>
+                  <td colSpan={6} className="py-16 text-center">
+                    <p className="text-sm font-semibold text-slate-800">Berita gagal dimuat</p>
+                    <p className="mt-1 text-xs text-slate-500">Periksa koneksi, lalu coba muat ulang daftar berita.</p>
+                    <Button type="button" variant="outline" onClick={() => void fetchBlogs()} className="mt-4 rounded-xl">
+                      Coba lagi
+                    </Button>
+                  </td>
+                </tr>
               ) : blogs.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-16 text-center">
@@ -326,7 +368,7 @@ export default function BlogManagement() {
                         <FileText className="w-6 h-6" />
                       </div>
                       <p className="text-sm font-semibold text-slate-700">Tidak ada post ditemukan</p>
-                      <p className="text-xs text-slate-400 mt-1">Coba sesuaikan kata kunci atau filter status</p>
+                      <p className="text-xs text-slate-400 mt-1">Coba ubah kata kunci atau filter kategori dan status.</p>
                     </div>
                   </td>
                 </tr>
@@ -341,7 +383,7 @@ export default function BlogManagement() {
                         className="rounded border-slate-200 text-[#c20000] focus:ring-[#c20000] mt-1" 
                       />
                     </td>
-                    <td className="p-4\1align-top">
+                    <td className="p-4 align-top">
                       <div className="flex items-center gap-2">
                         <Link href={`/dashboard/blog/${blog.id}`} className="font-semibold text-[#0f172a] hover:text-[#c20000] transition-colors text-base">
                           {blog.title}
@@ -405,23 +447,23 @@ export default function BlogManagement() {
                         </Link>
                       </div>
                     </td>
-                    <td className="p-4\1align-top text-slate-600 hover:text-[#c20000] transition-colors cursor-pointer">
+                    <td className="p-4 align-top text-slate-600">
                       {blog.user?.name || 'Admin'}
                     </td>
-                    <td className="p-4\1align-top text-slate-600 hover:text-[#c20000] transition-colors cursor-pointer">
+                    <td className="p-4 align-top text-slate-600">
                       {blog.category?.name || 'Tanpa Kategori'}
                     </td>
-                    <td className="p-4\1align-top text-center text-slate-600">
+                    <td className="p-4 align-top text-center text-slate-600">
                       <div className="inline-flex items-center justify-center bg-slate-100 border border-slate-200 rounded-full px-2.5 py-0.5 text-xs font-medium group-hover:bg-white group-hover:border-[#c20000]/30 transition-all" title={`${blog.views_count} Views`}>
                         {blog.views_count || 0}
                       </div>
                     </td>
-                    <td className="p-4\1align-top pr-4">
+                    <td className="p-4 align-top pr-4">
                       <div className="text-[#0f172a] font-medium text-xs">
                         {blog.status === 'published' ? 'Terbit' : 'Terakhir Diubah'}
                       </div>
                       <div className="text-slate-500 text-xs mt-0.5">
-                        {new Date(blog.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        {new Date(blog.status === 'published' ? blog.published_at ?? blog.updated_at : blog.updated_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
                       </div>
                     </td>
                   </tr>
@@ -435,7 +477,8 @@ export default function BlogManagement() {
                   <input 
                     type="checkbox" 
                     onChange={handleSelectAll}
-                    checked={blogs.length > 0 && selectedBlogs.length === blogs.length}
+                    aria-label="Pilih semua post di halaman ini"
+                    checked={blogs.length > 0 && blogs.every((blog) => selectedBlogs.includes(blog.id))}
                     className="rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]" 
                   />
                 </th>

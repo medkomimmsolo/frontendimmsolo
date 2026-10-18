@@ -4,17 +4,18 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { ArrowLeft, Save, Loader2, Image as ImageIcon, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Save, Loader2, CheckCircle2, XCircle, AlertCircle, Plus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import Link from 'next/link';
 import { Category } from '@/types';
-import { convertToWebP, uploadInlineImage } from '@/lib/imageUtils';
+import { uploadInlineImage } from '@/lib/imageUtils';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 import dynamic from 'next/dynamic';
 import { useAuth } from '@/hooks/useAuth';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { hasMeaningfulBlogContent } from '@/lib/blogContent';
 
 // Import Rich Text Editor (dengan dukungan tabel) secara dinamis agar tidak error SSR
 const RichTextEditor = dynamic(() => import('@/components/post/RichTextEditor'), {
@@ -22,107 +23,163 @@ const RichTextEditor = dynamic(() => import('@/components/post/RichTextEditor'),
   loading: () => <div className="h-96 w-full flex items-center justify-center bg-gray-50 border border-gray-200 rounded-sm">Memuat Editor...</div>
 });
 
+const EMPTY_FORM = {
+  title: '',
+  category_id: '',
+  excerpt: '',
+  content: '',
+  status: 'draft',
+  published_at: '',
+  author_name: '',
+  editor_name: '',
+  author_role: '',
+  editor_role: '',
+  keywords: '',
+  meta_title: '',
+  meta_description: '',
+};
+
+const inputClass = "w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all text-sm shadow-2xs";
+const labelClass = "block text-xs font-bold text-slate-700 uppercase tracking-wider";
+const helperClass = "text-xs text-slate-500 leading-relaxed";
+
 export default function CreateBlog() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [categoriesError, setCategoriesError] = useState(false);
+  const [canAddCategory, setCanAddCategory] = useState(true);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSavingCategory, setIsSavingCategory] = useState(false);
+  const [draftReadyForUser, setDraftReadyForUser] = useState<number | null>(null);
   const [newCategoryName, setNewCategoryName] = useState('');
-  const [formData, setFormData] = useState({
-    title: '',
-    category_id: '',
-    excerpt: '',
-    content: '',
-    status: 'draft',
-    published_at: '',
-    author_name: '',
-    editor_name: '',
-    author_role: '',
-    editor_role: '',
-    keywords: '',
-    meta_title: '',
-    meta_description: '',
-  });
+  const [formData, setFormData] = useState(EMPTY_FORM);
   const [featuredImage, setFeaturedImage] = useState<File | string | null>(null);
+  const draftSaveErrorShown = useRef(false);
+  const isSuperAdmin = user?.roles?.some((role) => role.name === 'super-admin') ?? false;
 
   useEffect(() => {
     const loadCategories = async () => {
       try {
         const res = await api.get('/categories');
         let list: Category[] = res.data.data || [];
-        const isSuper = user?.roles?.some((r: any) => r.name === 'super-admin');
+        const isSuper = user?.roles?.some((role) => role.name === 'super-admin');
         if (user && !isSuper) {
           const allowed = await api.get(`/users/${user.id}/categories`);
           const ids: number[] = allowed.data.data?.allowed || [];
-          if (ids.length > 0) list = list.filter((c) => ids.includes(c.id));
+          if (ids.length > 0) {
+            list = list.filter((category) => ids.includes(category.id));
+            setCanAddCategory(false);
+          }
         }
         setCategories(list);
+        setCategoriesError(false);
       } catch (err) {
         console.error(err);
+        setCategoriesError(true);
+        toast.error(getUserFacingErrorMessage(err, 'Gagal memuat kategori artikel.'));
+      } finally {
+        setIsLoadingCategories(false);
       }
     };
-    if (user !== undefined) loadCategories();
-  }, [user]);
+    if (!isAuthLoading) void loadCategories();
+  }, [isAuthLoading, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((previous) => ({ ...previous, [e.target.name]: e.target.value }));
   };
 
   const handleContentChange = (value: string) => {
-    setFormData({ ...formData, content: value });
+    setFormData((previous) => ({ ...previous, content: value }));
   };
 
   const handleAddCategory = async () => {
-    if (!newCategoryName.trim()) return;
+    if (!newCategoryName.trim() || isSavingCategory) return;
+    setIsSavingCategory(true);
     try {
       const res = await api.post('/categories', { name: newCategoryName });
       const newCategory = res.data.data || res.data;
-      setCategories([...categories, newCategory]);
-      setFormData({ ...formData, category_id: newCategory.id });
+      setCategories((previous) => [...previous, newCategory]);
+      setFormData((previous) => ({ ...previous, category_id: newCategory.id }));
       setIsAddingCategory(false);
       setNewCategoryName('');
       toast.success('Kategori berhasil ditambahkan');
     } catch (error: any) {
       console.error(error);
-      toast.error(error.response?.data?.message || 'Gagal menambahkan kategori');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menambahkan kategori'));
+    } finally {
+      setIsSavingCategory(false);
     }
   };
 
-  // Autosave draft ke localStorage
+  // Draft disimpan per akun agar tidak tercampur pada browser bersama.
   useEffect(() => {
+    if (isAuthLoading || !user?.id || draftReadyForUser !== user.id) return;
     const hasContent = formData.title || formData.content || formData.excerpt;
     if (hasContent) {
       const timer = setTimeout(() => {
-        localStorage.setItem('blog_create_draft', JSON.stringify(formData));
+        try {
+          localStorage.setItem(`blog_create_draft_${user.id}`, JSON.stringify(formData));
+        } catch (error) {
+          console.error('Failed to save local blog draft', error);
+          if (!draftSaveErrorShown.current) {
+            toast.error('Draft otomatis tidak dapat disimpan di browser ini.');
+            draftSaveErrorShown.current = true;
+          }
+        }
       }, 800);
       return () => clearTimeout(timer);
     }
-  }, [formData]);
+  }, [draftReadyForUser, formData, isAuthLoading, isLoading, user?.id]);
 
-  // Pulihkan draft saat halaman dibuka
+  // Pulihkan draft setelah akun selesai dimuat.
   useEffect(() => {
-    const saved = localStorage.getItem('blog_create_draft');
-    if (saved) {
+    if (isAuthLoading) return;
+    const userId = user?.id ?? null;
+    setDraftReadyForUser(null);
+    setFormData(EMPTY_FORM);
+    if (userId) {
       try {
-        const parsed = JSON.parse(saved);
-        if (parsed.title || parsed.content) {
-          setFormData((prev) => ({ ...prev, ...parsed }));
-          toast.success('Draft terakhir dipulihkan');
+        const saved = localStorage.getItem(`blog_create_draft_${userId}`);
+        if (saved) {
+          const parsed: unknown = JSON.parse(saved);
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            const restoredDraft = { ...EMPTY_FORM };
+            for (const key of Object.keys(EMPTY_FORM) as Array<keyof typeof EMPTY_FORM>) {
+              const value = (parsed as Partial<typeof EMPTY_FORM>)[key];
+              if (typeof value === 'string') restoredDraft[key] = value;
+            }
+            if (restoredDraft.title || restoredDraft.content || restoredDraft.excerpt) {
+              setFormData(restoredDraft);
+              toast.success('Draft terakhir dipulihkan');
+            }
+          }
         }
-      } catch {
-        localStorage.removeItem('blog_create_draft');
+      } catch (error) {
+        console.error('Failed to restore local blog draft', error);
+        localStorage.removeItem(`blog_create_draft_${userId}`);
       }
     }
-  }, []);
+    setDraftReadyForUser(userId);
+  }, [isAuthLoading, user?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.content || formData.content === '<p><br></p>') {
-      toast.error('Isi post tidak boleh kosong');
+    if (!hasMeaningfulBlogContent(formData.content)) {
+      toast.error('Isi artikel harus berisi teks atau media.');
       return;
     }
-    
+    if (!formData.excerpt.trim()) {
+      toast.error('Ringkasan artikel tidak boleh kosong.');
+      return;
+    }
+    if (!formData.category_id) {
+      toast.error('Pilih kategori artikel terlebih dahulu.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const data = new FormData();
@@ -134,12 +191,18 @@ export default function CreateBlog() {
       }
 
       await api.post('/blogs', data);
-      localStorage.removeItem('blog_create_draft');
-      toast.success(formData.status === 'published' ? 'Post berhasil diterbitkan' : 'Draft berhasil disimpan');
+      if (user?.id) localStorage.removeItem(`blog_create_draft_${user.id}`);
+      toast.success(
+        !isSuperAdmin
+          ? 'Artikel berhasil dikirim untuk ditinjau admin.'
+          : formData.status === 'published'
+            ? 'Artikel berhasil diterbitkan.'
+            : 'Draft berhasil disimpan.',
+      );
       router.push('/dashboard/blog');
     } catch (error: any) {
       console.error(error);
-      toast.error(error.response?.data?.message || 'Gagal menyimpan post');
+      toast.error(getUserFacingErrorMessage(error, 'Gagal menyimpan artikel.'));
     } finally {
       setIsLoading(false);
     }
@@ -250,391 +313,435 @@ export default function CreateBlog() {
     return { checks, score };
   }, [formData]);
 
+  const slugPreview = formData.title
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-') || '-';
+
   return (
-    <div className="space-y-6 w-full pb-12">
-      {/* Modern Page Header */}
+    <form onSubmit={handleSubmit} className="w-full space-y-6">
+      {/* Page Header dengan Aksi */}
       <PageHeader
         title="Tulis Artikel Baru"
         description="Buat dan publikasikan artikel, berita kegiatan, atau rilis pers PC IMM Kota Surakarta"
         badge="Artikel"
       >
         <Link href="/dashboard/blog">
-          <Button variant="outline" size="sm" className="h-10 px-4 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs">
-            <ArrowLeft className="w-4 h-4 mr-1.5" />
-            Kembali
+          <Button type="button" variant="outline" size="sm" className="h-10 px-4 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs">
+            Batal
           </Button>
         </Link>
+        <Button type="submit" disabled={isLoading} className="h-10 px-5 bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
+          {isLoading ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Save className="w-4 h-4 mr-1.5" />}
+          {isLoading ? 'Menyimpan...' : formData.status === 'published' ? 'Terbitkan Artikel' : 'Simpan Draf'}
+        </Button>
       </PageHeader>
 
-      <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-6 items-start">
-        {/* LEFT COLUMN: Title, Content, Excerpt, Author, SEO */}
-        <div className="w-full lg:w-[70%] space-y-6">
-          
-          {/* WordPress-style Title Input */}
-          <div>
-            <input 
-              type="text" 
-              name="title"
-              required
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Add title" 
-              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-lg font-medium text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-shadow shadow-sm placeholder:text-slate-400"
-            />
-          </div>
-          {formData.title && (
-            <p className="text-xs text-slate-500 -mt-4">
-              Slug: <span className="font-mono text-slate-700">/post/{formData.title.toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/[\s_]+/g, '-').replace(/-+/g, '-')}</span>
-            </p>
-          )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        {/* ─────────────── KA: Konten Utama ─────────────── */}
+        <div className="lg:col-span-2 space-y-6">
 
-
-          {/* Editor Box */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
-            {/* React Quill Editor Container */}
-            <div className="quill-editor-container">
-              <style dangerouslySetInnerHTML={{__html: `
-                .quill-editor-container .ql-container {
-                  font-size: 1rem;
-                  min-height: 450px;
-                  border: none !important;
-                }
-                .quill-editor-container .ql-toolbar {
-                  border: none !important;
-                  border-bottom: 1px solid #e2e8f0 !important;
-                  background-color: #f8fafc;
-                  padding: 10px 15px !important;
-                }
-                .quill-editor-container .ql-editor {
-                  min-height: 450px;
-                  padding: 1.5rem;
-                  color: #0f172a;
-                  overflow-x: auto;
-                }
-                .quill-editor-container .ql-editor.ql-blank::before {
-                  color: #94a3b8;
-                  font-style: normal;
-                }
-                /* ── Tabel ─────────────────────────────────────────── */
-                .quill-editor-container .ql-editor table {
-                  border-collapse: collapse;
-                  table-layout: fixed;
-                  width: auto;
-                  min-width: 200px;
-                  margin: 0.5rem 0;
-                }
-                .quill-editor-container .ql-editor td,
-                .quill-editor-container .ql-editor th {
-                  border: 1px solid #cbd5e1;
-                  padding: 6px 10px;
-                  min-width: 40px;
-                  word-break: break-word;
-                  vertical-align: top;
-                }
-                .quill-editor-container .ql-editor th {
-                  background: #f1f5f9;
-                  font-weight: 600;
-                }
-                /* Tombol sisipkan tabel di toolbar */
-                .quill-editor-container .ql-table-insert-btn {
-                  border: none;
-                  background: transparent;
-                  border-radius: 3px;
-                  color: #444;
-                  line-height: 1;
-                }
-                .quill-editor-container .ql-table-insert-btn:hover {
-                  background: #e2e8f0;
-                  color: #0f172a;
-                }
-                /* Handle resize kolom (TableResizeBox) */
-                .table-up-resize-box-col-separator {
-                  background-color: #3b82f6 !important;
-                  width: 3px !important;
-                  opacity: 0.7;
-                }
-                /* Handle resize scale tabel (TableResizeScale) */
-                .table-up-resize-scale-handle {
-                  background-color: #3b82f6 !important;
-                  border-radius: 2px !important;
-                }
-                /* Selection multi-sel */
-                .table-up-selection-line {
-                  border-color: #3b82f6 !important;
-                }
-              `}} />
-              <RichTextEditor
-                value={formData.content}
-                onChange={handleContentChange}
-                modules={quillModules}
-                formats={quillFormats}
-                containerRef={quillRef}
-                placeholder="Start writing or type / to choose a block..."
-              />
-            </div>
-          </div>
-
-          {/* Excerpt Meta Box */}
+          {/* Judul & Isi Artikel */}
           <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
-            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
-              <CardTitle className="text-sm font-semibold text-[#0f172a]">Excerpt</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <textarea 
-                name="excerpt"
-                required
-                rows={3}
-                value={formData.excerpt}
-                onChange={handleChange}
-                placeholder="Write a short summary or meta description..." 
-                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors resize-none text-sm shadow-sm"
-              />
-              <p className="text-xs text-slate-500 mt-2">Excerpts are optional hand-crafted summaries of your content that can be used in your theme.</p>
+            <div className="bg-slate-50/70 px-6 py-4 border-b border-slate-200/80">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Judul &amp; Isi Artikel</h3>
+            </div>
+            <CardContent className="p-0">
+              <div className="p-6 sm:p-7 space-y-5">
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Judul Artikel <span className="text-[#c20000]">*</span></label>
+                  <input
+                    type="text"
+                    name="title"
+                    required
+                    value={formData.title}
+                    onChange={handleChange}
+                    placeholder="Tulis judul artikel..."
+                    className={inputClass}
+                  />
+                  <p className="text-xs text-slate-400">
+                    Slug: <span className="font-mono text-slate-600">/post/{slugPreview}</span>
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Isi Artikel <span className="text-[#c20000]">*</span></label>
+                  <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+                    <div className="quill-editor-container">
+                      <style dangerouslySetInnerHTML={{__html: `
+                        .quill-editor-container .ql-container {
+                          font-size: 1rem;
+                          min-height: 450px;
+                          border: none !important;
+                        }
+                        .quill-editor-container .ql-toolbar {
+                          border: none !important;
+                          border-bottom: 1px solid #e2e8f0 !important;
+                          background-color: #f8fafc;
+                          padding: 10px 15px !important;
+                        }
+                        .quill-editor-container .ql-editor {
+                          min-height: 450px;
+                          padding: 1.5rem;
+                          color: #0f172a;
+                          overflow-x: auto;
+                        }
+                        .quill-editor-container .ql-editor.ql-blank::before {
+                          color: #94a3b8;
+                          font-style: normal;
+                        }
+                        /* ── Tabel ─────────────────────────────────────────── */
+                        .quill-editor-container .ql-editor table {
+                          border-collapse: collapse;
+                          table-layout: fixed;
+                          width: auto;
+                          min-width: 200px;
+                          margin: 0.5rem 0;
+                        }
+                        .quill-editor-container .ql-editor td,
+                        .quill-editor-container .ql-editor th {
+                          border: 1px solid #cbd5e1;
+                          padding: 6px 10px;
+                          min-width: 40px;
+                          word-break: break-word;
+                          vertical-align: top;
+                        }
+                        .quill-editor-container .ql-editor th {
+                          background: #f1f5f9;
+                          font-weight: 600;
+                        }
+                        /* Tombol sisipkan tabel di toolbar */
+                        .quill-editor-container .ql-table-insert-btn {
+                          border: none;
+                          background: transparent;
+                          border-radius: 3px;
+                          color: #444;
+                          line-height: 1;
+                        }
+                        .quill-editor-container .ql-table-insert-btn:hover {
+                          background: #e2e8f0;
+                          color: #0f172a;
+                        }
+                        /* Handle resize kolom (TableResizeBox) */
+                        .table-up-resize-box-col-separator {
+                          background-color: #3b82f6 !important;
+                          width: 3px !important;
+                          opacity: 0.7;
+                        }
+                        /* Handle resize scale tabel (TableResizeScale) */
+                        .table-up-resize-scale-handle {
+                          background-color: #3b82f6 !important;
+                          border-radius: 2px !important;
+                        }
+                        /* Selection multi-sel */
+                        .table-up-selection-line {
+                          border-color: #3b82f6 !important;
+                        }
+                      `}} />
+                      <RichTextEditor
+                        value={formData.content}
+                        onChange={handleContentChange}
+                        modules={quillModules}
+                        formats={quillFormats}
+                        containerRef={quillRef}
+                        placeholder="Mulai tulis isi artikel..."
+                      />
+                    </div>
+                  </div>
+                  <p className={helperClass}>Gunakan toolbar untuk format teks, tautan, gambar, dan tabel.</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Author/Editor Meta Box */}
+          {/* Ringkasan Artikel */}
           <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
-            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
-              <CardTitle className="text-sm font-semibold text-[#0f172a]">Author & Editor Data</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-slate-50/70 px-6 py-4 border-b border-slate-200/80">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Ringkasan Artikel</h3>
+            </div>
+            <CardContent className="p-6 sm:p-7">
+              <div className="space-y-1.5">
+                <label className={labelClass}>Ringkasan <span className="text-[#c20000]">*</span></label>
+                <textarea
+                  name="excerpt"
+                  required
+                  rows={3}
+                  value={formData.excerpt}
+                  onChange={handleChange}
+                  placeholder="Tulis ringkasan singkat artikel..."
+                  className={`${inputClass} resize-none`}
+                />
+                <div className="flex items-center justify-between gap-4">
+                  <p className={helperClass}>Ditampilkan pada kartu berita dan dipakai sebagai deskripsi mesin pencari.</p>
+                  <span className="text-[11px] text-slate-400 font-medium shrink-0">{formData.excerpt.length} karakter</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Penulis & Editor */}
+          <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
+            <div className="bg-slate-50/70 px-6 py-4 border-b border-slate-200/80">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Penulis &amp; Editor</h3>
+            </div>
+            <CardContent className="p-6 sm:p-7">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Author Name</label>
-                    <input 
-                      type="text" 
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Nama Penulis</label>
+                    <input
+                      type="text"
                       name="author_name"
                       value={formData.author_name}
                       onChange={handleChange}
-                      placeholder="Leave blank if Admin" 
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                      placeholder="Kosongkan jika Admin"
+                      className={inputClass}
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Author Role</label>
-                    <input 
-                      type="text" 
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Jabatan Penulis</label>
+                    <input
+                      type="text"
                       name="author_role"
                       value={formData.author_role}
                       onChange={handleChange}
-                      placeholder="e.g. Ketua Umum, Anggota..." 
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                      placeholder="cth. Ketua Umum, Anggota..."
+                      className={inputClass}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Editor Name</label>
-                    <input 
-                      type="text" 
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Nama Editor</label>
+                    <input
+                      type="text"
                       name="editor_name"
                       value={formData.editor_name}
                       onChange={handleChange}
-                      placeholder="Name of editor..." 
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                      placeholder="Nama editor..."
+                      className={inputClass}
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Editor Role</label>
-                    <input 
-                      type="text" 
+                  <div className="space-y-1.5">
+                    <label className={labelClass}>Jabatan Editor</label>
+                    <input
+                      type="text"
                       name="editor_role"
                       value={formData.editor_role}
                       onChange={handleChange}
-                      placeholder="e.g. Pimpinan Redaksi..." 
-                      className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                      placeholder="cth. Pimpinan Redaksi..."
+                      className={inputClass}
                     />
                   </div>
                 </div>
               </div>
+              <p className={`${helperClass} mt-4`}>Data penulis dan editor ditampilkan pada halaman artikel publik (opsional).</p>
             </CardContent>
           </Card>
 
-          {/* SEO Analyzer Card */}
+          {/* Analisis SEO */}
           <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
-            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-[#0f172a]">SEO Analysis</CardTitle>
-              <div className={`px-2 py-0.5 rounded text-xs font-bold ${
-                seoStats.score >= 80 ? 'bg-emerald-100 text-emerald-700' : 
-                seoStats.score >= 40 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+            <div className="bg-slate-50/70 px-6 py-4 border-b border-slate-200/80 flex flex-row justify-between items-center gap-3">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Analisis SEO</h3>
+              <div className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                seoStats.score >= 80
+                  ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                  : seoStats.score >= 40
+                    ? 'bg-amber-50 text-amber-600 border-amber-200'
+                    : 'bg-red-50 text-[#c20000] border-red-200'
               }`}>
-                Score: {seoStats.score}/100
+                Skor {seoStats.score}/100
               </div>
-            </CardHeader>
-            <CardContent className="p-4 space-y-3">
-              {seoStats.checks.map((check, index) => (
-                <div key={index} className="flex items-start gap-3 border-b border-slate-50 pb-3 last:border-0 last:pb-0">
-                  <div className="mt-0.5">
-                    {check.passed ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                    ) : check.warning ? (
-                      <AlertCircle className="w-4 h-4 text-amber-500" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-red-500" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-[#0f172a]">{check.label}</p>
-                      <span className="text-xs font-semibold text-slate-500">{check.value}</span>
+            </div>
+            <CardContent className="p-6 sm:p-7">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2.5">
+                {seoStats.checks.map((check, index) => (
+                  <div key={index} className="flex items-start gap-2.5 py-1.5">
+                    <div className="mt-0.5 shrink-0">
+                      {check.passed ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      ) : check.warning ? (
+                        <AlertCircle className="w-4 h-4 text-amber-500" />
+                      ) : (
+                        <XCircle className="w-4 h-4 text-red-400" />
+                      )}
                     </div>
-                    <p className="text-xs text-slate-500 mt-0.5">{check.desc}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <p className="text-xs font-bold text-slate-700">{check.label}</p>
+                        <span className="text-[11px] text-slate-400 font-medium shrink-0">{check.value}</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-0.5">{check.desc}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* RIGHT COLUMN: Sidebar (Publish, Categories, Keywords, Image) */}
-        <div className="w-full lg:w-[30%] space-y-5 sticky top-6">
-          
-          {/* Publish Box */}
+        {/* ─────────────── KANAN: Sidebar Meta ─────────────── */}
+        <div className="space-y-6">
+
+          {/* Publikasi */}
           <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
-            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
-              <CardTitle className="text-sm font-semibold text-[#0f172a]">Publish</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-slate-600">Status:</span>
-                <select 
+            <div className="bg-slate-50/70 px-5 py-4 border-b border-slate-200/80">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Publikasi</h3>
+            </div>
+            <CardContent className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <label className={labelClass}>Status</label>
+                <select
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-sm text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] font-medium"
+                  className={inputClass}
                 >
                   <option value="draft">Draft</option>
-                  <option value="published">Published</option>
+                  <option value="published">Terbitkan</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Jadwal Tayang <span className="text-slate-400 font-normal">(opsional)</span></label>
+
+              <div className="space-y-1.5">
+                <label className={labelClass}>Jadwal Tayang <span className="text-slate-400 font-semibold normal-case tracking-normal">(opsional)</span></label>
                 <input
                   type="datetime-local"
                   name="published_at"
                   value={formData.published_at}
                   onChange={handleChange}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-[#0f172a] focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+                  className={inputClass}
                 />
-                <p className="text-[11px] text-slate-400 mt-1">Kosongkan untuk tayang langsung. Isi untuk tayang otomatis sesuai jadwal.</p>
+                <p className={helperClass}>Kosongkan untuk tayang langsung. Isi untuk tayang otomatis sesuai jadwal.</p>
               </div>
 
-              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                <Button type="button" onClick={() => router.push('/dashboard/blog')} variant="outline" className="flex-1 rounded-xl text-xs font-semibold border-slate-200 hover:text-[#c20000]">
-                  Batal
-                </Button>
-                <Button type="submit" disabled={isLoading} className="flex-1 rounded-xl text-xs font-bold bg-[#c20000] hover:bg-[#a30000] text-white shadow-sm transition-colors">
-                  {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                  {formData.status === 'published' ? 'Terbitkan' : 'Simpan Draf'}
-                </Button>
-              </div>
+              {!isSuperAdmin && (
+                <p className="rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-xs leading-relaxed text-amber-900">
+                  Artikel yang dikirim akan berstatus menunggu review admin sebelum diterbitkan.
+                </p>
+              )}
             </CardContent>
           </Card>
 
-          {/* Categories Box */}
+          {/* Kategori */}
           <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
-            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
-              <CardTitle className="text-sm font-semibold text-[#0f172a]">Kategori</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-4">
-              <select 
-                name="category_id"
-                required
-                value={formData.category_id}
-                onChange={handleChange}
-                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
-              >
-                <option value="" disabled>Pilih Kategori</option>
-                {categories.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-
-              <div>
-                <button 
-                  type="button" 
-                  onClick={() => setIsAddingCategory(!isAddingCategory)}
-                  className="text-sm text-[#c20000] hover:underline focus:outline-none"
+            <div className="bg-slate-50/70 px-5 py-4 border-b border-slate-200/80">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Kategori</h3>
+            </div>
+            <CardContent className="p-5 space-y-3">
+              <div className="space-y-1.5">
+                <label className={labelClass}>Pilih Kategori <span className="text-[#c20000]">*</span></label>
+                <select
+                  name="category_id"
+                  required
+                  disabled={isLoadingCategories || categoriesError || categories.length === 0}
+                  value={formData.category_id}
+                  onChange={handleChange}
+                  className={inputClass}
                 >
-                  {isAddingCategory ? 'Batal menambahkan' : '+ Add New Category'}
-                </button>
-                
-                {isAddingCategory && (
+                  <option value="" disabled>
+                    {isLoadingCategories ? 'Memuat kategori...' : categoriesError ? 'Kategori gagal dimuat' : categories.length === 0 ? 'Belum ada kategori' : 'Pilih kategori'}
+                  </option>
+                  {categories.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {canAddCategory && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingCategory(!isAddingCategory)}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#c20000] hover:underline focus:outline-none"
+                  >
+                    {isAddingCategory ? <Trash2 className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                    {isAddingCategory ? 'Batal menambahkan' : 'Tambah kategori baru'}
+                  </button>
+
+                  {isAddingCategory && (
                   <div className="flex gap-2 mt-2">
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={newCategoryName}
                       onChange={(e) => setNewCategoryName(e.target.value)}
-                      placeholder="Category name" 
-                      className="flex-1 bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                      placeholder="Nama kategori"
+                      maxLength={100}
+                      className="flex-1 bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs"
                     />
-                    <Button type="button" onClick={handleAddCategory} size="sm" className="bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl h-8 px-3 text-xs">
-                      Add
+                    <Button type="button" onClick={handleAddCategory} disabled={!newCategoryName.trim() || isSavingCategory} size="sm" className="bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl h-8 px-3 text-xs shrink-0">
+                      {isSavingCategory ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Tambah'}
                     </Button>
                   </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
-          {/* Meta SEO Box */}
+          {/* Meta SEO */}
           <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
-            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
-              <CardTitle className="text-sm font-semibold text-[#0f172a]">Meta SEO</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Meta Title</label>
+            <div className="bg-slate-50/70 px-5 py-4 border-b border-slate-200/80">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Meta SEO</h3>
+            </div>
+            <CardContent className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <label className={labelClass}>Meta Title</label>
                 <input
                   type="text"
                   name="meta_title"
                   value={formData.meta_title}
                   onChange={handleChange}
-                  placeholder="Default: judul post"
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                  placeholder="Default: judul artikel"
+                  maxLength={255}
+                  className={inputClass}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Meta Description</label>
+              <div className="space-y-1.5">
+                <label className={labelClass}>Meta Description</label>
                 <textarea
                   name="meta_description"
                   value={formData.meta_description}
                   onChange={handleChange}
                   rows={3}
-                  placeholder="Default: ringkasan post"
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
+                  placeholder="Default: ringkasan artikel"
+                  className={`${inputClass} resize-none`}
                 />
+                <p className={helperClass}>Kosongkan untuk memakai judul &amp; ringkasan secara otomatis.</p>
               </div>
             </CardContent>
           </Card>
 
-          {/* Keywords Box */}
+          {/* Kata Kunci */}
           <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
-            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
-              <CardTitle className="text-sm font-semibold text-[#0f172a]">Keywords</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <input 
-                type="text" 
-                name="keywords"
-                value={formData.keywords}
-                onChange={handleChange}
-                placeholder="e.g. pelantikan, musyda, kader" 
-                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-[#0f172a] text-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] shadow-sm"
-              />
-              <p className="text-xs text-slate-500 mt-2">Separate tags with commas.</p>
+            <div className="bg-slate-50/70 px-5 py-4 border-b border-slate-200/80">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Kata Kunci</h3>
+            </div>
+            <CardContent className="p-5">
+              <div className="space-y-1.5">
+                <label className={labelClass}>Keywords</label>
+                <input
+                  type="text"
+                  name="keywords"
+                  value={formData.keywords}
+                  onChange={handleChange}
+                  placeholder="cth. pelantikan, musyda, kader"
+                  className={inputClass}
+                />
+                <p className={helperClass}>Pisahkan setiap kata kunci dengan koma.</p>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Featured Image Box */}
+          {/* Gambar Utama */}
           <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
-            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50 px-4 py-3">
-              <CardTitle className="text-sm font-semibold text-[#0f172a]">Gambar Utama (Featured Image)</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
+            <div className="bg-slate-50/70 px-5 py-4 border-b border-slate-200/80">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Gambar Utama</h3>
+            </div>
+            <CardContent className="p-5">
               <ImageUploadPicker
                 value={featuredImage}
                 onChange={(val) => setFeaturedImage(val)}
@@ -646,8 +753,7 @@ export default function CreateBlog() {
           </Card>
 
         </div>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 }
-
