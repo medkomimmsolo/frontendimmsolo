@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Search, Menu } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { getApiBase, normalizeSettings } from '@/lib/settings';
 
 interface Props {
@@ -30,14 +30,6 @@ export default function DocsHeader({ query, onQueryChange, onMenu }: Props) {
   return (
     <header className="sticky top-0 z-30 h-16 shrink-0 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="flex h-full items-center gap-3 px-4 sm:gap-4">
-        <button
-          onClick={onMenu}
-          className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 lg:hidden"
-          aria-label="Buka menu dokumentasi"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
-
         <div className="flex min-w-0 items-center gap-2.5">
           <img
             src={siteLogo || '/icon-192.png'}
