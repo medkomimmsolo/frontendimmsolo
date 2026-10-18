@@ -258,7 +258,7 @@ export default function EditStruktural({ params }: { params: Promise<{ id: strin
                 onChange={(val) => setFoto(val)}
                 aspectRatio="square"
                 allowedFolder="struktural"
-                description="Pilih dari Media Library atau unggah dari perangkat. Rasio 1:1 (persegi) disarankan."
+                description="Pilih dari Media Library atau unggah dari perangkat. Resolusi bebas — rasio wajib 1:1 (persegi), rasio pas tidak terpotong."
               />
             </CardContent>
           </Card>

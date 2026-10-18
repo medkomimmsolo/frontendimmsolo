@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { convertToWebP, resolveMediaUrl } from '@/lib/imageUtils';
+import { convertToWebP, resolveMediaUrl, getImageDimensions, isRatioMatch } from '@/lib/imageUtils';
 import MediaPickerModal from './MediaPickerModal';
 import ImageCropperModal from './ImageCropperModal';
 import { 
@@ -48,22 +48,24 @@ export default function ImageUploadPicker({
   const [isFromLibrary, setIsFromLibrary] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const getNumericRatio = (): number | null => {
+  const getAspectTarget = (): { ratio: number | null; label: string } => {
     switch (aspectRatio) {
       case 'banner':
       case 'form-banner':
-        return 4 / 1;
+        return { ratio: 4 / 1, label: '4:1' };
       case 'medium':
-        return 21 / 9;
+        return { ratio: 21 / 9, label: '21:9' };
       case 'wide':
       case 'video':
-        return 16 / 9;
+        return { ratio: 16 / 9, label: '16:9' };
       case 'square':
-        return 1;
+        return { ratio: 1, label: '1:1' };
       case 'portrait':
-        return 3 / 4;
+        return { ratio: 3 / 4, label: '3:4' };
+      case 'natural':
+      case 'auto':
       default:
-        return 4 / 1;
+        return { ratio: null, label: 'bebas (rasio asli)' };
     }
   };
 
@@ -93,13 +95,21 @@ export default function ImageUploadPicker({
       try {
         const webpFile = await convertToWebP(rawFile);
         if (webpFile.size > 2 * 1024 * 1024) {
-          toast.error('Ukuran gambar setelah kompresi masih lebih dari 2MB. Silakan pilih foto dengan resolusi lebih kecil.');
+          toast.error('Ukuran gambar setelah kompresi masih lebih dari 2MB. Silakan pilih gambar dengan ukuran berkas lebih kecil.');
           return;
         }
         setIsFromLibrary(false);
         const objUrl = URL.createObjectURL(webpFile);
         onChange(webpFile, objUrl);
-        toast.success('Gambar dari perangkat siap digunakan');
+
+        const { width, height, ratio } = await getImageDimensions(rawFile);
+        const target = getAspectTarget();
+        if (target.ratio && !isRatioMatch(ratio, target.ratio)) {
+          toast.error(`Resolusi ${width}×${height} tetap diterima (resolusi bebas). Namun rasio gambar belum sesuai — wajib ${target.label}. Silakan sesuaikan potongan (crop).`);
+          setIsCropperOpen(true);
+          return;
+        }
+        toast.success(`Gambar rasio sesuai (${width}×${height} px) siap digunakan`);
       } catch (err) {
         console.error('Gagal konversi ke WebP', err);
         toast.error(getUserFacingErrorMessage(err, 'Gagal memproses gambar'));
@@ -492,7 +502,7 @@ export default function ImageUploadPicker({
             setPreviewUrl(croppedPreviewUrl);
             setIsFromLibrary(false);
           }}
-          initialAspectRatio={getNumericRatio()}
+          initialAspectRatio={getAspectTarget().ratio}
           title="Tarik & Sesuaikan Potongan Banner Header (Crop)"
         />
       )}

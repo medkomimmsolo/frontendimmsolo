@@ -747,7 +747,7 @@ export default function CreateBlog() {
                 onChange={(val) => setFeaturedImage(val)}
                 aspectRatio="video"
                 allowedFolder="blogs"
-                description="Pilih foto dari Media Library atau unggah file baru dari perangkat (rasio 16:9 disarankan)."
+                description="Pilih foto dari Media Library atau unggah file baru dari perangkat (resolusi bebas — rasio 16:9 disarankan, rasio pas tidak terpotong)."
               />
             </CardContent>
           </Card>

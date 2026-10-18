@@ -1,3 +1,30 @@
+export interface ImageDimensions {
+  width: number;
+  height: number;
+  ratio: number;
+}
+
+export const getImageDimensions = (file: File): Promise<ImageDimensions> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () =>
+        resolve({
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+          ratio: img.naturalWidth / img.naturalHeight,
+        });
+      img.onerror = (error) => reject(error);
+    };
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+
+export const isRatioMatch = (actual: number, target: number, tolerance = 0.03): boolean =>
+  target > 0 && Math.abs(actual - target) / target <= tolerance;
+
 export const convertToWebP = (file: File): Promise<File> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

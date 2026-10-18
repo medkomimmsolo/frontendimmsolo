@@ -468,7 +468,7 @@ export default function FormsManagement() {
                   onChange={(val) => setHeaderImageValue(val)}
                   aspectRatio={formData.header_image_size as any || 'banner'}
                   allowedFolder="forms"
-                  description="Pilih dari Media Library atau unggah gambar banner header dari perangkat."
+                  description="Resolusi bebas — rasio mengikuti format frame yang dipilih; rasio pas tidak terpotong."
                 />
 
                 <div className="pt-2 border-t border-slate-200/60">
@@ -477,10 +477,10 @@ export default function FormsManagement() {
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
-                      { id: 'banner', label: 'Banner 4:1', desc: 'Google Form (1600×400)' },
-                      { id: 'medium', label: 'Sedang 21:9', desc: 'Proporsi sistem (1600×680)' },
-                      { id: 'wide', label: 'Lebar 16:9', desc: 'Standar video (1600×900)' },
-                      { id: 'natural', label: 'Proporsional', desc: 'Tinggi utuh asli (Auto)' },
+                      { id: 'banner', label: 'Banner 4:1', desc: 'Rasio Google Form (4:1)' },
+                      { id: 'medium', label: 'Sedang 21:9', desc: 'Rasio proporsi sistem (21:9)' },
+                      { id: 'wide', label: 'Lebar 16:9', desc: 'Rasio standar video (16:9)' },
+                      { id: 'natural', label: 'Proporsional', desc: 'Rasio utuh asli (Auto)' },
                     ].map((opt) => (
                       <button
                         key={opt.id}

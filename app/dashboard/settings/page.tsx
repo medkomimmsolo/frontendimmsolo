@@ -525,7 +525,7 @@ export default function SettingsManagement() {
                       onChange={(val) => handleLogoChange(val, 'chairman_photo')}
                       aspectRatio="square"
                       allowedFolder="struktural"
-                      description="Foto resmi Ketua Umum (rasio 1:1 persegi)."
+                      description="Resolusi bebas — rasio wajib 1:1 (persegi), rasio pas tidak terpotong."
                     />
                   </div>
 

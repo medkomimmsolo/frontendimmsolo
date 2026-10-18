@@ -35,6 +35,8 @@ const ASPECT_OPTIONS: AspectRatioOption[] = [
   { id: '4:1', label: 'Banner Google Forms (4:1)', ratio: 4 / 1 },
   { id: '21:9', label: 'Banner Sedang (21:9)', ratio: 21 / 9 },
   { id: '16:9', label: 'Standar Lebar (16:9)', ratio: 16 / 9 },
+  { id: '1:1', label: 'Kotak (1:1)', ratio: 1 },
+  { id: '3:4', label: 'Portrait (3:4)', ratio: 3 / 4 },
   { id: 'free', label: 'Bebas / Utuh (Full)', ratio: null },
 ];
 
@@ -92,11 +94,13 @@ export default function ImageCropperModal({
       return;
     }
 
-    let targetW = imgW * 0.95;
+    // Rasio terkunci: kotak crop seluas mungkin (100%) di dalam gambar.
+    // Ketika rasio gambar sama dengan rasio target, kotak = gambar utuh (tanpa terpotong sama sekali).
+    let targetW = imgW;
     let targetH = targetW / ratio;
 
-    if (targetH > imgH * 0.95) {
-      targetH = imgH * 0.95;
+    if (targetH > imgH) {
+      targetH = imgH;
       targetW = targetH * ratio;
     }
 
@@ -324,7 +328,7 @@ export default function ImageCropperModal({
                 {title}
               </h2>
               <p className="text-[11px] text-slate-400">
-                Tarik kotak untuk memotong dan menyesuaikan area header yang ingin ditampilkan.
+                Resolusi bebas — cukup sesuaikan rasio potongan. Ketika rasio sudah pas, gambar utuh tanpa terpotong.
               </p>
             </div>
           </div>

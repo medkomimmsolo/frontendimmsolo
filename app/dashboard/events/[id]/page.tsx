@@ -300,7 +300,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
                 onChange={(val) => setBannerImage(val)}
                 aspectRatio="banner"
                 allowedFolder="events"
-                description="Pilih dari Media Library atau unggah dari perangkat. Rasio disarankan: 21:9 atau 1200x630px."
+                description="Pilih dari Media Library atau unggah dari perangkat. Resolusi bebas — yang dinilai hanya rasio banner 4:1; rasio pas tidak akan terpotong."
               />
             </CardContent>
           </Card>

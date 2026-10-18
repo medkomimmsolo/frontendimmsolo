@@ -996,7 +996,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                 onChange={(val) => setHeaderImageVal(val)}
                 aspectRatio={settingsHeaderImageSize}
                 allowedFolder="forms"
-                description="Pilih dari Media Library atau unggah berkas gambar baru dari perangkat."
+                description="Resolusi bebas — rasio mengikuti format frame yang dipilih; rasio pas tidak terpotong."
               />
 
               {/* Fitur Tarik & Sesuaikan Potongan Crop ala Google Forms */}
@@ -1041,10 +1041,10 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {[
-                    { id: 'banner', label: 'Banner Ramping (4:1)', desc: 'Standar Google Forms (1600×400 px)' },
-                    { id: 'medium', label: 'Banner Sedang (21:9)', desc: 'Proporsi sedang sistem (1600×680 px)' },
-                    { id: 'wide', label: 'Standar Lebar (16:9)', desc: 'Format landscape video (1600×900 px)' },
-                    { id: 'natural', label: 'Proporsional Asli (Auto)', desc: 'Tinggi utuh tanpa terpotong' },
+                    { id: 'banner', label: 'Banner Ramping (4:1)', desc: 'Rasio standar Google Forms (4:1)' },
+                    { id: 'medium', label: 'Banner Sedang (21:9)', desc: 'Rasio proporsi sedang sistem (21:9)' },
+                    { id: 'wide', label: 'Standar Lebar (16:9)', desc: 'Rasio landscape video (16:9)' },
+                    { id: 'natural', label: 'Proporsional Asli (Auto)', desc: 'Rasio utuh asli, tanpa terpotong' },
                   ].map((opt) => (
                     <button
                       key={opt.id}
