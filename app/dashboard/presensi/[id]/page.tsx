@@ -559,68 +559,81 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
         <PresensiQrPanel presensi={presensi} peserta={peserta} activeSesi={activeSesi} onRefreshPeserta={fetchPeserta} stats={scopeStats} />
       )}
 
-      {/* Scan — halaman khusus agar kamera punya ruang penuh. */}
+      {/* Scan — tabel token sesi untuk copy/paste ke kamera. */}
       {tab === 'scan' && (
-        <div className="space-y-5">
+        <div className="space-y-4">
           <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs sm:p-6">
             <div className="flex items-start gap-3">
               <div className="rounded-xl bg-red-50 p-2.5 text-[#c20000]"><ScanLine className="h-5 w-5" /></div>
               <div>
-                <h2 className="text-sm font-bold text-slate-900">QR Kamera per Sesi</h2>
+                <h2 className="text-sm font-bold text-slate-900">Token Sesi Scan</h2>
                 <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-500">
-                  Setiap QR membuka kamera langsung untuk sesi terkait. Tampilkan atau bagikan QR sesi yang sesuai; seluruh sesi tersedia di bawah ini.
+                  Salin token sesi dan buka <code className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px] font-mono">/camera/TOKEN_SESI</code> di HP petugas untuk memindai QR peserta.
                 </p>
               </div>
             </div>
           </div>
           {sesis.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {sesis.map((sesi) => {
-                const cameraUrl = sesi.scan_token ? `${cameraSiteUrl}/camera/${sesi.scan_token}` : '';
-                return (
-                  <Card key={sesi.id} className="overflow-hidden rounded-2xl border-slate-200/90 shadow-2xs">
-                    <CardHeader className="border-b border-slate-100 bg-slate-50/80 p-4">
-                      <CardTitle className="flex items-center justify-between gap-2 text-sm">
-                        <span className="truncate">{sesi.name}</span>
-                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-2xs font-semibold ${sesi.is_open ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-200 text-slate-500'}`}>
-                          {sesi.is_open ? 'Dibuka' : 'Ditutup'}
-                        </span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center gap-3 p-5">
-                      {cameraUrl ? (
-                        <>
-                          <div className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
-                            <QRCodeSVG value={cameraUrl} size={200} level="M" marginSize={3} />
+            <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="admin-panel-table w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                      <th className="py-3 px-4 pl-6 w-16">No</th>
+                      <th className="py-3 px-4">Nama Sesi</th>
+                      <th className="py-3 px-4 w-40">Status</th>
+                      <th className="py-3 px-4 w-80">Token Sesi</th>
+                      <th className="py-3 px-4 w-56 pr-6">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-sm bg-white">
+                    {sesis.map((sesi, i) => (
+                      <tr key={sesi.id} className="hover:bg-slate-50/80">
+                        <td className="py-3 px-4 pl-6 text-slate-400 text-xs">{i + 1}</td>
+                        <td className="py-3 px-4">
+                          <div className="font-semibold text-slate-800">{sesi.name}</div>
+                          <div className="text-xs text-slate-400">
+                            {sesi.starts_at && `Mulai: ${formatDateTime(sesi.starts_at)}`}
+                            {sesi.ends_at && ` · Selesai: ${formatDateTime(sesi.ends_at)}`}
                           </div>
-                          <div className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-center">
-                            <div className="text-2xs font-semibold uppercase tracking-wider text-slate-400">Token Sesi</div>
-                            <code className="mt-0.5 block font-mono text-lg font-bold tracking-[0.2em] text-slate-800">{sesi.scan_token}</code>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${sesi.is_open ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                            {sesi.is_open ? 'Dibuka' : 'Ditutup'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <code className="font-mono text-sm font-bold tracking-[0.2em] text-slate-800 bg-slate-50 px-2 py-1 rounded border border-slate-200 block break-all">{sesi.scan_token || '—'}</code>
+                        </td>
+                        <td className="py-3 px-4 pr-6 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {sesi.scan_token && (
+                              <>
+                                <Button
+                                  onClick={() => copyPublicCameraLink(sesi.scan_token)}
+                                  variant="outline"
+                                  className="h-9 rounded-lg px-3 text-xs font-bold"
+                                >
+                                  <Copy className="mr-1.5 h-3.5 w-3.5" /> Salin Token
+                                </Button>
+                                <Link href={`/camera/${sesi.scan_token}`} target="_blank" rel="noopener noreferrer">
+                                  <Button className="h-9 rounded-lg bg-[#c20000] px-3 text-xs font-bold text-white hover:bg-[#a30000]">
+                                    <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Buka Kamera
+                                  </Button>
+                                </Link>
+                              </>
+                            )}
                           </div>
-                          <div className="flex w-full flex-wrap justify-center gap-2">
-                            <Link href={`/camera/${sesi.scan_token}`} target="_blank" rel="noopener noreferrer">
-                              <Button className="h-9 rounded-lg bg-[#c20000] px-3 text-xs font-bold text-white hover:bg-[#a30000]">
-                                <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Buka Kamera
-                              </Button>
-                            </Link>
-                            <Button onClick={() => copyPublicCameraLink(sesi.scan_token)} variant="outline" className="h-9 rounded-lg px-3 text-xs font-bold">
-                              <Copy className="mr-1.5 h-3.5 w-3.5" /> {cameraLinkCopied ? 'Disalin' : 'Salin Token'}
-                            </Button>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="flex h-[280px] items-center justify-center text-center text-sm text-amber-700">
-                          Token sesi belum tersedia. Muat ulang halaman untuk memperbarui data.
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ) : (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
-              Belum ada sesi presensi dengan token kamera.
+              Belum ada sesi presensi. Tambah sesi di tab <strong>Sesi</strong> untuk membuat token kamera.
             </div>
           )}
         </div>
