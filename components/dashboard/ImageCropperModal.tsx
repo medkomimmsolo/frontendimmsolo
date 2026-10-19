@@ -327,7 +327,7 @@ export default function ImageCropperModal({
               <h2 className="text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-2">
                 {title}
               </h2>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-2xs text-slate-400">
                 Resolusi bebas — cukup sesuaikan rasio potongan. Ketika rasio sudah pas, gambar utuh tanpa terpotong.
               </p>
             </div>
@@ -344,7 +344,7 @@ export default function ImageCropperModal({
         {/* Toolbar: Aspect Ratio & Controls */}
         <div className="px-5 py-2.5 border-b border-slate-800 bg-slate-950/50 flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-semibold text-slate-400 mr-1 flex items-center gap-1">
+            <span className="text-2xs font-semibold text-slate-400 mr-1 flex items-center gap-1">
               <Maximize2 className="w-3 h-3 text-red-400" /> Rasio:
             </span>
             {ASPECT_OPTIONS.map((opt) => {
@@ -360,7 +360,7 @@ export default function ImageCropperModal({
                     setAspectRatio(opt.ratio);
                     initCropBox(opt.ratio);
                   }}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                  className={`px-2.5 py-1 rounded-md text-2xs font-medium transition-all ${
                     isSelected
                       ? 'bg-[#c20000] text-white shadow-xs font-bold'
                       : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
@@ -376,7 +376,7 @@ export default function ImageCropperModal({
             <button
               type="button"
               onClick={() => initCropBox(aspectRatio)}
-              className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-md transition-colors"
+              className="inline-flex items-center gap-1 px-2.5 py-1 text-2xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-md transition-colors"
               title="Reset ke ukuran default"
             >
               <RotateCcw className="w-3 h-3" /> Reset
@@ -515,7 +515,7 @@ export default function ImageCropperModal({
 
                   {/* Live Dimensions Pill */}
                   <div className="absolute bottom-2 left-2 pointer-events-none">
-                    <span className="px-2 py-0.5 rounded-sm bg-black/80 text-[10px] font-mono text-white/90 backdrop-blur-xs">
+                    <span className="px-2 py-0.5 rounded-sm bg-black/80 text-2xs font-mono text-white/90 backdrop-blur-xs">
                       {crop.width} × {crop.height} px
                     </span>
                   </div>

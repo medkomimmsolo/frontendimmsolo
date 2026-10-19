@@ -387,7 +387,7 @@ export default function DocumentsManagement() {
                           {doc.title}
                         </span>
                         {doc.status === 'draft' && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 uppercase">
+                          <span className="px-2 py-0.5 rounded text-2xs font-semibold bg-amber-100 text-amber-700 uppercase">
                             Draft
                           </span>
                         )}
@@ -408,12 +408,12 @@ export default function DocumentsManagement() {
                             {copiedId === doc.id ? (
                               <>
                                 <Check className="w-3 h-3 text-emerald-600" />
-                                <span className="text-[11px] font-medium text-emerald-600">Tersalin</span>
+                                <span className="text-2xs font-medium text-emerald-600">Tersalin</span>
                               </>
                             ) : (
                               <>
                                 <Copy className="w-3 h-3 text-slate-500" />
-                                <span className="text-[11px] font-medium">Salin Link</span>
+                                <span className="text-2xs font-medium">Salin Link</span>
                               </>
                             )}
                           </button>

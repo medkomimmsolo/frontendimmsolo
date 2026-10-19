@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -45,6 +45,25 @@ export default function DashboardOverview() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(true);
 
+  // Rentang waktu analitik: preset (hari) atau kustom (tanggal mulai–selesai)
+  const [rangeDays, setRangeDays] = useState(30);
+  const [isCustom, setIsCustom] = useState(false);
+  const [customStart, setCustomStart] = useState('');
+  const [customEnd, setCustomEnd] = useState('');
+
+  const isCustomRangeValid = Boolean(customStart && customEnd && customStart <= customEnd);
+
+  const rangeParams = useMemo(() => {
+    if (isCustom && isCustomRangeValid) {
+      return { start_date: customStart, end_date: customEnd };
+    }
+    return { days: rangeDays };
+  }, [isCustom, isCustomRangeValid, customStart, customEnd, rangeDays]);
+
+  const rangeLabel = isCustom && isCustomRangeValid
+    ? `${new Date(customStart).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })} – ${new Date(customEnd).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`
+    : `${rangeDays} Hari`;
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -77,15 +96,18 @@ export default function DashboardOverview() {
   useEffect(() => {
     if (!user) return;
 
+    if (isCustom && !isCustomRangeValid) return;
+
     const fetchAnalytics = async () => {
+      setIsAnalyticsLoading(true);
       try {
         const isSuper = user?.roles?.some((r: any) => r.name === 'super-admin');
         const canShortlink = isSuper || user?.all_permissions?.includes('manage-shortlinks');
         const canLinks = isSuper || user?.all_permissions?.includes('manage-links');
 
         const [shortlinkRes, linkRes] = await Promise.allSettled([
-          canShortlink ? api.get('/shortlinks/analytics', { params: { days: 30 } }) : Promise.reject('no-perm'),
-          canLinks ? api.get('/links/analytics', { params: { days: 30 } }) : Promise.reject('no-perm'),
+          canShortlink ? api.get('/shortlinks/analytics', { params: rangeParams }) : Promise.reject('no-perm'),
+          canLinks ? api.get('/links/analytics', { params: rangeParams }) : Promise.reject('no-perm'),
         ]);
         if (shortlinkRes.status === 'fulfilled' && shortlinkRes.value?.data?.success) {
           setShortlinkAnalytics(shortlinkRes.value.data.data);
@@ -101,7 +123,7 @@ export default function DashboardOverview() {
     };
 
     fetchAnalytics();
-  }, [user]);
+  }, [user, rangeParams]);
 
   // Helper untuk ucapan salam dinamis berdasarkan jam
   const getGreeting = () => {
@@ -268,6 +290,57 @@ export default function DashboardOverview() {
         </div>
       )}
 
+      {/* Rentang waktu analitik */}
+      <div className="flex flex-col sm:flex-row sm:items-center flex-wrap gap-3 mb-4">
+        <span className="text-xs font-bold text-[#0f172a]/70 uppercase tracking-wide">Rentang Analitik:</span>
+        <div className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
+          {[7, 30, 90].map((days) => (
+            <button
+              key={days}
+              type="button"
+              onClick={() => { setIsCustom(false); setRangeDays(days); }}
+              className={`px-3 py-1 rounded-md text-xs font-bold transition-colors ${!isCustom && rangeDays === days ? 'bg-[#c20000] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              {days} Hari
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              if (!customStart || !customEnd) {
+                const today = new Date();
+                const toIso = (d: Date) => d.toISOString().slice(0, 10);
+                setCustomStart(toIso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 29)));
+                setCustomEnd(toIso(today));
+              }
+              setIsCustom(true);
+            }}
+            className={`px-3 py-1 rounded-md text-xs font-bold transition-colors ${isCustom ? 'bg-[#c20000] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+          >
+            Kustom
+          </button>
+        </div>
+        {isCustom && (
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={customStart}
+              max={customEnd || undefined}
+              onChange={(e) => setCustomStart(e.target.value)}
+              className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#c20000]/40"
+            />
+            <span className="text-xs text-slate-400">s/d</span>
+            <input
+              type="date"
+              value={customEnd}
+              min={customStart || undefined}
+              onChange={(e) => setCustomEnd(e.target.value)}
+              className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-[#0f172a] focus:outline-none focus:ring-2 focus:ring-[#c20000]/40"
+            />
+          </div>
+        )}
+      </div>
+
       {/* Main Content Area */}
       <div className="grid lg:grid-cols-3 gap-6">
         
@@ -277,7 +350,7 @@ export default function DashboardOverview() {
             <div className="p-6 border-b border-[#0f172a]/5 flex items-center justify-between">
               <h2 className="text-lg font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
                 <LinkIcon className="w-5 h-5 inline mr-2 text-[#c20000]" />
-                Analitik Klik Shortlink (30 Hari)
+                Analitik Klik Shortlink ({rangeLabel})
               </h2>
             </div>
             <CardContent className="p-0">
@@ -335,7 +408,7 @@ export default function DashboardOverview() {
             <div className="p-6 border-b border-[#0f172a]/5 flex items-center justify-between">
               <h2 className="text-lg font-bold text-[#0f172a]" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
                 <BarChart2 className="w-5 h-5 inline mr-2 text-[#c20000]" />
-                Analitik Klik Linktree (30 Hari)
+                Analitik Klik Linktree ({rangeLabel})
               </h2>
             </div>
             <CardContent className="p-0">

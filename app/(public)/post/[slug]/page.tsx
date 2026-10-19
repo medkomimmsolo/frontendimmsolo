@@ -168,7 +168,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
         dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
       />
 
-      <main className="min-h-screen bg-white pt-24 pb-16 selection:bg-[#c20000]/20 selection:text-[#c20000]">
+      <main className="panel-typography min-h-screen bg-white pt-24 pb-16 selection:bg-[#c20000]/20 selection:text-[#c20000]">
         
         {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="max-w-7xl mx-auto px-4 md:px-6 mb-8">
@@ -204,7 +204,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                 {/* Category Badge */}
                 <div className="flex items-center gap-3 mb-5">
                   <Link href={post.category?.slug ? `/post?category=${post.category.slug}` : '/post'}>
-                    <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] px-3.5 py-1 text-[11px] font-bold tracking-[0.12em] uppercase rounded-full border-none shadow-sm cursor-pointer transition-colors">
+                    <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] px-3.5 py-1 text-2xs font-semibold tracking-[0.12em] uppercase rounded-full border-none shadow-sm cursor-pointer transition-colors">
                       {post.category?.name || 'Berita'}
                     </Badge>
                   </Link>
@@ -218,7 +218,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                 
                 {/* Title */}
                 <h1 
-                  className="text-[1.75rem] sm:text-3xl md:text-4xl lg:text-[2.65rem] font-extrabold text-[#0f172a] leading-[1.25] mb-6"
+                  className="text-xl sm:text-3xl md:text-4xl lg:text-3xl font-extrabold text-[#0f172a] leading-[1.25] mb-6"
                   style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
                 >
                   {post.title}
@@ -239,14 +239,14 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                         )}
                       </div>
                       <div className="flex flex-col min-w-0">
-                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 leading-none mb-0.5">
+                        <span className="text-2xs sm:text-2xs font-semibold uppercase tracking-wider text-slate-400 leading-none mb-0.5">
                               Penulis
                             </span>
-                        <span className="text-[13px] sm:text-sm font-bold text-[#0f172a] leading-tight truncate">
+                        <span className="text-xs sm:text-sm font-bold text-[#0f172a] leading-tight truncate">
                           {post.author_name || post.user?.name || 'Admin IMM'}
                         </span>
                         {post.author_role && (
-                          <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 mt-0.5 truncate">
+                          <span className="text-2xs sm:text-2xs font-medium text-slate-500 mt-0.5 truncate">
                             {post.author_role}
                           </span>
                         )}
@@ -262,14 +262,14 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                             <User className="w-3.5 h-3.5" />
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-slate-400 leading-none mb-0.5">
+                            <span className="text-2xs sm:text-2xs font-semibold uppercase tracking-wider text-slate-400 leading-none mb-0.5">
                               Editor
                             </span>
-                            <span className="text-[13px] sm:text-sm font-bold text-[#0f172a] leading-tight truncate">
+                            <span className="text-xs sm:text-sm font-bold text-[#0f172a] leading-tight truncate">
                               {post.editor_name}
                             </span>
                             {post.editor_role && (
-                              <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 mt-0.5 truncate">
+                              <span className="text-2xs sm:text-2xs font-medium text-slate-500 mt-0.5 truncate">
                                 {post.editor_role}
                               </span>
                             )}
@@ -280,7 +280,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                   </div>
 
                   {/* Date + Time + Reading Time */}
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3.5 text-[11px] sm:text-xs font-medium text-slate-500">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3.5 text-2xs sm:text-xs font-medium text-slate-500">
                     <div className="flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-[#c20000]" />
                       <time dateTime={publishDate.toISOString()} className="text-slate-600">
@@ -314,7 +314,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                 </div>
                 {/* Image caption area */}
                 {post.image_caption && (
-                  <figcaption className="mt-2.5 text-[11px] sm:text-xs text-slate-400 text-center italic font-medium">
+                  <figcaption className="mt-2.5 text-2xs sm:text-xs text-slate-400 text-center italic font-medium">
                     {post.image_caption}
                   </figcaption>
                 )}
@@ -440,12 +440,12 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
                             {/* Title + Date */}
                             <div className="flex-1 min-w-0 flex flex-col justify-center">
                               <h4 
-                                className="text-[13px] font-bold text-[#0f172a] group-hover:text-[#c20000] leading-snug mb-1.5 transition-colors duration-200 line-clamp-2" 
+                                className="text-xs font-bold text-[#0f172a] group-hover:text-[#c20000] leading-snug mb-1.5 transition-colors duration-200 line-clamp-2" 
                                 style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
                               >
                                 {rPost.title}
                               </h4>
-                              <span className="text-[11px] font-medium text-slate-400">
+                              <span className="text-2xs font-medium text-slate-400">
                                 {new Date(rPost.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })}
                               </span>
                             </div>

@@ -30,7 +30,7 @@ export default function DocsSidebar({ open, onClose, query }: Props) {
         if (visible.length === 0) return null;
         return (
           <div key={group.label}>
-            <p className="mb-2 px-2 text-[0.6875rem] font-bold uppercase tracking-wider text-slate-400">{group.label}</p>
+            <p className="mb-2 px-2 text-2xs font-semibold uppercase tracking-wider text-slate-400">{group.label}</p>
             <ul className="space-y-0.5">
               {visible.map((slug) => {
                 const pb = getPlaybook(slug);
@@ -76,7 +76,7 @@ export default function DocsSidebar({ open, onClose, query }: Props) {
             </span>
             <span>
               <span className="block text-sm font-bold text-slate-900">Playbook</span>
-              <span className="block text-[0.6875rem] text-slate-500">PC IMM Kota Surakarta</span>
+              <span className="block text-2xs text-slate-500">PC IMM Kota Surakarta</span>
             </span>
           </Link>
           <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 lg:hidden" aria-label="Tutup menu">

@@ -231,7 +231,7 @@ export default function PresensiManagement() {
                         <Users className="w-3.5 h-3.5 text-slate-400" />
                         {item.pesertas_count ?? 0}
                       </div>
-                      <div className="text-[11px] text-emerald-600 mt-0.5">
+                      <div className="text-2xs text-emerald-600 mt-0.5">
                         {item.kehadirans_count ?? 0} hadir
                       </div>
                     </td>

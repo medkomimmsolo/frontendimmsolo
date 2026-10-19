@@ -207,7 +207,7 @@ export default function ImageUploadPicker({
             {/* Details & Actions */}
             <div className="flex-1 min-w-0 space-y-2">
               <div className="flex items-center gap-2">
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white ${
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold text-white ${
                   isFromLibrary ? 'bg-indigo-600' : 'bg-emerald-600'
                 }`}>
                   {isFromLibrary ? (
@@ -222,7 +222,7 @@ export default function ImageUploadPicker({
                     </>
                   )}
                 </span>
-                <span className="text-[11px] text-slate-500 font-medium truncate">
+                <span className="text-2xs text-slate-500 font-medium truncate">
                   {value instanceof File ? value.name : 'Avatar Profil Terpilih'}
                 </span>
               </div>
@@ -278,7 +278,7 @@ export default function ImageUploadPicker({
               <p className="text-xs font-bold text-slate-800 group-hover:text-[#c20000] transition-colors">
                 Pilih Avatar / Logo Profil
               </p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-2xs text-slate-400 mt-0.5">
                 Klik untuk memilih dari Media Library atau unggah file baru dari perangkat.
               </p>
             </div>
@@ -314,7 +314,7 @@ export default function ImageUploadPicker({
 
             {/* Source Badge (Kiri Atas) */}
             <div className="absolute top-2 left-2 z-10">
-              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold backdrop-blur-md shadow-sm text-white ${
+              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-2xs font-semibold backdrop-blur-md shadow-sm text-white ${
                 isFromLibrary ? 'bg-indigo-600/90' : 'bg-emerald-600/90'
               }`}>
                 {isFromLibrary ? (
@@ -332,7 +332,7 @@ export default function ImageUploadPicker({
             </div>
 
             {/* Mode Pratinjau: Utuh (Fit) vs Penuh (Cover) di Kanan Atas */}
-            <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-slate-900/80 backdrop-blur-md rounded-lg p-0.5 border border-white/10 text-[10px] shadow-sm">
+            <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-slate-900/80 backdrop-blur-md rounded-lg p-0.5 border border-white/10 text-2xs shadow-sm">
               <button
                 type="button"
                 onClick={(e) => {
@@ -448,7 +448,7 @@ export default function ImageUploadPicker({
           <p className="text-xs sm:text-sm font-bold text-slate-800 mb-1 group-hover:text-[#c20000] transition-colors">
             Pilih atau Unggah Media
           </p>
-          <p className="text-[11px] text-slate-400 max-w-xs mb-4">
+          <p className="text-2xs text-slate-400 max-w-xs mb-4">
             Klik untuk membuka Media Library atau unggah file baru langsung dari komputer Anda.
           </p>
 

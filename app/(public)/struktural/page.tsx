@@ -192,12 +192,12 @@ export default async function StrukturalPage({ searchParams }: { searchParams: P
                             {/* Area Nama & Jabatan */}
                             <div className="p-4 sm:p-5 flex-1 flex flex-col items-center text-center bg-white">
                               <h4 
-                                className="text-[13px] md:text-sm font-semibold text-slate-900 tracking-tight leading-snug mb-1 break-words w-full" 
+                                className="text-xs md:text-sm font-semibold text-slate-900 tracking-tight leading-snug mb-1 break-words w-full" 
                                 style={{ fontFamily: 'var(--font-poppins), sans-serif' }}
                               >
                                 {person.name}
                               </h4>
-                              <p className={`text-[10px] uppercase tracking-wider leading-snug mb-4 ${
+                              <p className={`text-2xs uppercase tracking-wider leading-snug mb-4 ${
                                 person.jabatan?.toLowerCase().includes('ketua') 
                                   ? 'font-bold text-[#c20000]' 
                                   : 'font-semibold text-slate-500'

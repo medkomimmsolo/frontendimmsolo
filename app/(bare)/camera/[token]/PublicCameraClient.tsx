@@ -265,11 +265,11 @@ export default function PublicCameraClient({ token }: { token?: string }) {
               <h1 className="truncate text-sm font-bold sm:text-lg">{session.presensi_title}</h1>
               <p className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-slate-200 sm:text-sm"><Layers className="h-3.5 w-3.5" />{session.sesi_name}</p>
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold sm:text-xs ${session.is_receiving ? 'text-emerald-200' : 'text-amber-200'}`}>
+                <span className={`inline-flex items-center gap-1.5 text-2xs font-semibold sm:text-xs ${session.is_receiving ? 'text-emerald-200' : 'text-amber-200'}`}>
                   <span className={`h-2 w-2 rounded-full ${session.is_receiving ? 'bg-emerald-400' : 'bg-amber-400'}`} />
                   {session.is_receiving ? 'Presensi dibuka' : 'Presensi ditutup'}
                 </span>
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-white sm:text-xs">
+                <span className="inline-flex items-center gap-1.5 text-2xs font-semibold text-white sm:text-xs">
                   <span className={`h-2 w-2 rounded-full ${isScanning ? 'animate-pulse bg-emerald-400' : 'bg-slate-400'}`} />
                   {isScanning ? 'Kamera aktif' : 'Kamera nonaktif'}
                 </span>

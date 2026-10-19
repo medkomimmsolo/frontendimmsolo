@@ -65,6 +65,71 @@
   --animate-slide-in-from-left: slide-in-from-left 0.2s ease-out both;
 }
 
+/* ════════════════════════════════════════════════════════════════════════
+   TYPOGRAPHY — Skala emas (φ = 1.618) TERBATAS untuk Panel Admin,
+   Postingan & Agenda (halaman lain memakai skala default Tailwind).
+
+   Tailwind 4 menghasilkan utility `text-*` sebagai
+   `font-size: var(--text-*)` — jadi cukup menimpa variabel lewat class
+   `.panel-typography` di wrapper scope; semua `text-xs` dst. di dalamnya
+   otomatis ikut skala emas tanpa mengubah classNames.
+
+   Skala (langkah × √φ ≈ 1.272 mulai 16px):
+     16 → 20 → 26 (φ¹) → 33 → 42 (φ²) → 54 → 68 → 87 → 111
+
+   Kebijakan ketebalan (UI/UX hierarchy — jangan semua bold):
+     h1/hero → font-extrabold   |  h2/h3 → font-bold
+     h4/subtitle → font-semibold |  label mikro → font-semibold
+     body → font-normal          |  angka tabel padat → font-medium
+     Momen dekoratif/watermark boleh font-black.
+
+   --text-2xs (11px) global untuk badge hasil migrasi micro-value
+   (sebelumnya berpencar text-[8–11px]).
+   ════════════════════════════════════════════════════════════════════════ */
+@theme {
+  --text-2xs: 0.6875rem; /* 11px — badge mikro dari migrate text-[8–11px] */
+  --text-2xs--line-height: 1.125rem; /* 18px */
+}
+
+/* Scope skala emas: panel admin + postingan + agenda */
+.panel-typography {
+  --text-xs: 0.8125rem;  /* 13px = 16/√φ */
+  --text-xs--line-height: 1.3125rem;   /* 21px ≈ 1.618 */
+
+  --text-sm: 0.875rem;   /* 14px — setengah langkah untuk kepadatan */
+  --text-sm--line-height: 1.4375rem;   /* 23px */
+
+  --text-base: 1rem;     /* 16px */
+  --text-base--line-height: 1.625rem;  /* 26px = 1.618 persis */
+
+  --text-lg: 1.25rem;    /* 20px = 16 × √φ */
+  --text-lg--line-height: 1.75rem;
+
+  --text-xl: 1.625rem;   /* 26px = φ¹ */
+  --text-xl--line-height: 2.1875rem;   /* 35px */
+
+  --text-2xl: 2.0625rem; /* 33px */
+  --text-2xl--line-height: 2.5625rem;  /* 41px */
+
+  --text-3xl: 2.625rem;  /* 42px = φ² */
+  --text-3xl--line-height: 3.125rem;   /* 50px */
+
+  --text-4xl: 3.375rem;  /* 54px */
+  --text-4xl--line-height: 4rem;       /* 64px */
+
+  --text-5xl: 4.25rem;   /* 68px */
+  --text-5xl--line-height: 5rem;       /* 80px */
+
+  --text-6xl: 5.4375rem; /* 87px */
+  --text-6xl--line-height: 6.0625rem;  /* 97px */
+
+  --text-7xl: 6.9375rem; /* 111px */
+  --text-7xl--line-height: 7.125rem;   /* 114px */
+
+  font-size: 1rem;
+  line-height: 1.625rem; /* body 16/26 = φ */
+}
+
 @layer utilities {
   @keyframes fade-in {
     from { opacity: 0; }
@@ -384,7 +449,7 @@ textarea:focus-visible,
 /* ── Paragraphs ── */
 .article-content p {
   font-size: 1rem;
-  line-height: 1.9;
+  line-height: 1.618; /* golden ratio — optimal keterbacaan 16px */
   margin-bottom: 1.5em;
   color: rgba(15, 23, 42, 0.82);
   font-weight: 400;
@@ -405,7 +470,9 @@ textarea:focus-visible,
 }
 
 .article-content h2 {
-  font-size: 1.5rem;
+  font-size: 1.625rem; /* 26px = φ¹ dari body 16px */
+  line-height: 1.35;
+  font-weight: 800;
   margin-top: 2.8em;
   margin-bottom: 1em;
   padding-bottom: 0.6em;
@@ -413,13 +480,17 @@ textarea:focus-visible,
 }
 
 .article-content h3 {
-  font-size: 1.25rem;
+  font-size: 1.25rem; /* 20px = 16 × √φ */
+  line-height: 1.4;
+  font-weight: 700;
   margin-top: 2.2em;
   margin-bottom: 0.8em;
 }
 
 .article-content h4 {
-  font-size: 1.125rem;
+  font-size: 1rem; /* 16px */
+  line-height: 1.45;
+  font-weight: 600;
   margin-top: 1.8em;
   margin-bottom: 0.6em;
 }
@@ -464,7 +535,7 @@ textarea:focus-visible,
 
 .article-content figcaption {
   text-align: center;
-  font-size: 0.8rem;
+  font-size: 0.8125rem; /* 13px — token xs skala emas */
   color: rgba(15, 23, 42, 0.45);
   margin-top: 0.75em;
   font-style: italic;
@@ -638,11 +709,13 @@ textarea:focus-visible,
   }
 
   .article-content h2 {
-    font-size: 1.3rem;
+    font-size: 1.25rem; /* 20px — tetap di skala emas */
+    font-weight: 800;
   }
 
   .article-content h3 {
-    font-size: 1.15rem;
+    font-size: 1rem; /* 16px */
+    font-weight: 700;
   }
 
   .article-content blockquote {
@@ -835,8 +908,8 @@ textarea:focus-visible,
   border-bottom: 1px solid #e2e8f0;
   background-color: #f8fafc;
   color: #64748b;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.8125rem; /* 13px — token xs skala emas */
+  font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }

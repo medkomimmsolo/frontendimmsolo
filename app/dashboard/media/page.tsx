@@ -452,12 +452,12 @@ export default function MediaLibrary() {
                       </a>
                       <CardContent className="space-y-2 p-3">
                         <p className="truncate text-xs font-semibold text-slate-800" title={file.name}>{file.name}</p>
-                        <div className="flex items-center justify-between gap-2 text-[10px] text-slate-500">
+                        <div className="flex items-center justify-between gap-2 text-2xs text-slate-500">
                           <span className="truncate capitalize">{file.group}</span>
                           <span className="shrink-0">{formatBytes(Number(file.size))}</span>
                         </div>
                         <div className="flex items-center justify-between gap-2 border-t border-slate-100 pt-2">
-                          <span className="flex min-w-0 items-center gap-1 truncate text-[10px] text-slate-400" title={formatDate(Number(file.timestamp))}>
+                          <span className="flex min-w-0 items-center gap-1 truncate text-2xs text-slate-400" title={formatDate(Number(file.timestamp))}>
                             <Calendar className="h-3 w-3 shrink-0" />{formatDate(Number(file.timestamp))}
                           </span>
                           <div className="flex shrink-0 items-center gap-1">

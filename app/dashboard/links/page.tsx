@@ -240,7 +240,7 @@ export default function LinksManagement() {
                     {p.description && <div className="text-xs text-slate-500 mt-1 line-clamp-1">{p.description}</div>}
                     {p.user?.name && (
                       <div className="text-xs text-slate-500 mt-1">
-                        <span className="text-[11px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">
+                        <span className="text-2xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">
                           Oleh: {p.user.name}
                         </span>
                       </div>
@@ -360,7 +360,7 @@ export default function LinksManagement() {
                       </option>
                     ))}
                   </select>
-                  <p className="text-[11px] text-slate-400 mt-1">
+                  <p className="text-2xs text-slate-400 mt-1">
                     Pilih akun pengurus atau bidang yang akan mengelola tautan ini.
                   </p>
                 </div>
@@ -418,7 +418,7 @@ export default function LinksManagement() {
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, bg_color: '', accent_color: '', text_color: '', btn_bg_color: '', btn_text_color: '' })}
-                    className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 hover:underline"
+                    className="text-2xs font-semibold text-slate-500 hover:text-slate-800 hover:underline"
                   >
                     Reset Default
                   </button>
@@ -457,8 +457,8 @@ export default function LinksManagement() {
                       className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0 p-0 shrink-0" 
                     />
                     <div className="min-w-0">
-                      <span className="font-semibold block text-[11px]">Latar Halaman</span>
-                      <span className="text-[10px] font-mono text-slate-400 truncate">{formData.bg_color || '#0b1120'}</span>
+                      <span className="font-semibold block text-2xs">Latar Halaman</span>
+                      <span className="text-2xs font-mono text-slate-400 truncate">{formData.bg_color || '#0b1120'}</span>
                     </div>
                   </label>
 
@@ -470,15 +470,15 @@ export default function LinksManagement() {
                       className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0 p-0 shrink-0" 
                     />
                     <div className="min-w-0">
-                      <span className="font-semibold block text-[11px]">Aksen Cahaya</span>
-                      <span className="text-[10px] font-mono text-slate-400 truncate">{formData.accent_color || '#c20000'}</span>
+                      <span className="font-semibold block text-2xs">Aksen Cahaya</span>
+                      <span className="text-2xs font-mono text-slate-400 truncate">{formData.accent_color || '#c20000'}</span>
                     </div>
                   </label>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
-                  <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-700 bg-white border border-slate-200/90 rounded-xl p-2.5 cursor-pointer shadow-2xs">
-                    <span className="font-semibold text-[10px] text-slate-500 uppercase">Teks Utama</span>
+                  <label className="flex flex-col gap-1 text-2xs font-medium text-slate-700 bg-white border border-slate-200/90 rounded-xl p-2.5 cursor-pointer shadow-2xs">
+                    <span className="font-semibold text-2xs text-slate-500 uppercase">Teks Utama</span>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <input 
                         type="color" 
@@ -486,12 +486,12 @@ export default function LinksManagement() {
                         onChange={(e) => setFormData({ ...formData, text_color: e.target.value })} 
                         className="w-6 h-6 rounded-md cursor-pointer bg-transparent border-0 p-0 shrink-0" 
                       />
-                      <span className="text-[10px] font-mono text-slate-400 truncate">{formData.text_color || 'Default'}</span>
+                      <span className="text-2xs font-mono text-slate-400 truncate">{formData.text_color || 'Default'}</span>
                     </div>
                   </label>
 
-                  <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-700 bg-white border border-slate-200/90 rounded-xl p-2.5 cursor-pointer shadow-2xs">
-                    <span className="font-semibold text-[10px] text-slate-500 uppercase">Latar Tombol</span>
+                  <label className="flex flex-col gap-1 text-2xs font-medium text-slate-700 bg-white border border-slate-200/90 rounded-xl p-2.5 cursor-pointer shadow-2xs">
+                    <span className="font-semibold text-2xs text-slate-500 uppercase">Latar Tombol</span>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <input 
                         type="color" 
@@ -499,12 +499,12 @@ export default function LinksManagement() {
                         onChange={(e) => setFormData({ ...formData, btn_bg_color: e.target.value })} 
                         className="w-6 h-6 rounded-md cursor-pointer bg-transparent border-0 p-0 shrink-0" 
                       />
-                      <span className="text-[10px] font-mono text-slate-400 truncate">{formData.btn_bg_color || 'Otomatis'}</span>
+                      <span className="text-2xs font-mono text-slate-400 truncate">{formData.btn_bg_color || 'Otomatis'}</span>
                     </div>
                   </label>
 
-                  <label className="flex flex-col gap-1 text-[11px] font-medium text-slate-700 bg-white border border-slate-200/90 rounded-xl p-2.5 cursor-pointer shadow-2xs">
-                    <span className="font-semibold text-[10px] text-slate-500 uppercase">Teks Tombol</span>
+                  <label className="flex flex-col gap-1 text-2xs font-medium text-slate-700 bg-white border border-slate-200/90 rounded-xl p-2.5 cursor-pointer shadow-2xs">
+                    <span className="font-semibold text-2xs text-slate-500 uppercase">Teks Tombol</span>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <input 
                         type="color" 
@@ -512,7 +512,7 @@ export default function LinksManagement() {
                         onChange={(e) => setFormData({ ...formData, btn_text_color: e.target.value })} 
                         className="w-6 h-6 rounded-md cursor-pointer bg-transparent border-0 p-0 shrink-0" 
                       />
-                      <span className="text-[10px] font-mono text-slate-400 truncate">{formData.btn_text_color || '#ffffff'}</span>
+                      <span className="text-2xs font-mono text-slate-400 truncate">{formData.btn_text_color || '#ffffff'}</span>
                     </div>
                   </label>
                 </div>
@@ -530,7 +530,7 @@ export default function LinksManagement() {
                   <span className="text-xs font-bold text-slate-800 block">
                     Publikasikan Halaman Link Ini
                   </span>
-                  <span className="text-[11px] text-slate-500 leading-relaxed block mt-0.5">
+                  <span className="text-2xs text-slate-500 leading-relaxed block mt-0.5">
                     Jika dicentang, halaman dapat diakses oleh publik melalui URL tautan.
                   </span>
                 </div>

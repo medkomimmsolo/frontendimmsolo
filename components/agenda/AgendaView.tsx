@@ -286,13 +286,13 @@ export default function AgendaView({ events }: { events: AgendaEvent[] }) {
                     {dayEvents.slice(0, 2).map((ev) => (
                       <span
                         key={ev.id}
-                        className="block text-[10px] font-semibold text-white bg-[#c20000] rounded px-1 truncate leading-relaxed"
+                        className="block text-2xs font-semibold text-white bg-[#c20000] rounded px-1 truncate leading-relaxed"
                       >
                         {ev.title}
                       </span>
                     ))}
                     {dayEvents.length > 2 && (
-                      <span className="text-[10px] text-slate-400 font-medium">
+                      <span className="text-2xs text-slate-400 font-medium">
                         +{dayEvents.length - 2} lagi
                       </span>
                     )}

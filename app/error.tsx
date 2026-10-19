@@ -39,7 +39,7 @@ export default function ErrorBoundary({
         </p>
 
         {error?.digest && (
-          <p className="text-[11px] font-mono text-slate-400 bg-slate-50 border border-slate-100 rounded px-2 py-1 mb-6 truncate">
+          <p className="text-2xs font-mono text-slate-400 bg-slate-50 border border-slate-100 rounded px-2 py-1 mb-6 truncate">
             Error ID: {error.digest}
           </p>
         )}

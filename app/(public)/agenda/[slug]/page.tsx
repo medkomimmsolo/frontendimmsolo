@@ -111,7 +111,7 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ s
   };
 
   return (
-    <main className="min-h-screen bg-white pt-24 pb-20">
+    <main className="panel-typography min-h-screen bg-white pt-24 pb-20">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(eventJsonLd) }}

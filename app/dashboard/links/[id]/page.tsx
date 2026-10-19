@@ -325,7 +325,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
               {page?.user?.name && (
-                <span className="text-[11px] bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
+                <span className="text-2xs bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded font-medium inline-flex items-center gap-1">
                   <UserCheck className="w-3 h-3" /> Pemilik: <strong>{page.user.name}</strong>
                 </span>
               )}
@@ -459,7 +459,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-slate-900 text-sm truncate">{item.title}</h3>
                         <p className="text-xs text-slate-400 font-mono truncate mt-0.5">{item.url}</p>
-                        <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-500">
+                        <div className="flex items-center gap-3 mt-2 text-2xs text-slate-500">
                           <span className="bg-slate-100 px-2 py-0.5 rounded font-medium">{item.clicks || 0} Klik</span>
                           <button 
                             onClick={() => toggleActive(item)}
@@ -756,7 +756,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
             <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
               <Smartphone className="w-4 h-4 text-[#c20000]" /> Pratinjau Langsung (Live Preview)
             </span>
-            <span className="text-[11px] text-slate-400">Otomatis update realtime</span>
+            <span className="text-2xs text-slate-400">Otomatis update realtime</span>
           </div>
 
           {/* Smartphone Frame */}
@@ -853,7 +853,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-semibold truncate" style={{ color: previewBtnText }}>{item.title}</p>
-                          <p className="text-[10px] opacity-70 truncate" style={{ color: previewBtnText }}>
+                          <p className="text-2xs opacity-70 truncate" style={{ color: previewBtnText }}>
                             {item.url.replace(/^https?:\/\//, '').split('/')[0]}
                           </p>
                         </div>
@@ -864,7 +864,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
               </div>
 
               {/* Watermark Bottom */}
-              <div className="pt-8 text-center text-[10px] font-semibold opacity-60" style={{ color: previewTextColor }}>
+              <div className="pt-8 text-center text-2xs font-semibold opacity-60" style={{ color: previewTextColor }}>
                 immsolo.or.id
               </div>
             </div>
@@ -911,7 +911,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
                   <button
                     type="button"
                     onClick={() => setItemFormData({ ...itemFormData, icon: '' })}
-                    className={`flex flex-col items-center gap-1 p-2 rounded-sm border text-[10px] font-medium transition-colors ${!itemFormData.icon ? 'border-[#c20000] bg-[#c20000]/5 text-[#c20000]' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}
+                    className={`flex flex-col items-center gap-1 p-2 rounded-sm border text-2xs font-medium transition-colors ${!itemFormData.icon ? 'border-[#c20000] bg-[#c20000]/5 text-[#c20000]' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}
                   >
                     <span className="w-5 h-5 inline-flex items-center justify-center font-bold">–</span>
                     Tanpa Icon
@@ -924,7 +924,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
                         type="button"
                         onClick={() => setItemFormData({ ...itemFormData, icon: opt.id })}
                         title={opt.label}
-                        className={`flex flex-col items-center gap-1 p-2 rounded-sm border text-[10px] font-medium transition-colors ${active ? 'border-[#c20000] bg-[#c20000]/5 text-[#c20000]' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}
+                        className={`flex flex-col items-center gap-1 p-2 rounded-sm border text-2xs font-medium transition-colors ${active ? 'border-[#c20000] bg-[#c20000]/5 text-[#c20000]' : 'border-slate-200 text-slate-500 hover:border-slate-300'}`}
                       >
                         <LinkItemIcon id={opt.id} className="w-5 h-5" />
                         {opt.label}
@@ -1038,14 +1038,14 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-slate-800">{qrLogo ? 'Logo siap digunakan' : 'Tanpa logo'}</p>
-                    <p className="mt-0.5 text-[11px] text-slate-500">PNG, JPG, atau WebP · maksimal 2 MB</p>
+                    <p className="mt-0.5 text-2xs text-slate-500">PNG, JPG, atau WebP · maksimal 2 MB</p>
                   </div>
                   <div className="flex shrink-0 flex-col gap-1.5">
-                    <Button type="button" onClick={() => qrLogoInputRef.current?.click()} variant="outline" size="sm" className="h-8 px-2.5 text-[11px] font-semibold">
+                    <Button type="button" onClick={() => qrLogoInputRef.current?.click()} variant="outline" size="sm" className="h-8 px-2.5 text-2xs font-semibold">
                       <Upload className="mr-1 h-3.5 w-3.5" /> {qrLogo ? 'Ganti' : 'Pilih Logo'}
                     </Button>
                     {qrLogo && (
-                      <button type="button" onClick={() => setQrLogo(null)} className="text-[11px] font-semibold text-slate-500 hover:text-red-600">
+                      <button type="button" onClick={() => setQrLogo(null)} className="text-2xs font-semibold text-slate-500 hover:text-red-600">
                         Hapus logo
                       </button>
                     )}
@@ -1054,7 +1054,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
 
                 <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5">
                   <p className="text-xs font-bold text-blue-900">Tips agar hasil pindai tetap bagus</p>
-                  <ul className="mt-2 space-y-1.5 text-[11px] leading-relaxed text-blue-800/80">
+                  <ul className="mt-2 space-y-1.5 text-2xs leading-relaxed text-blue-800/80">
                     <li>• Gunakan logo sederhana dengan latar transparan atau putih.</li>
                     <li>• Cetak QR hitam di atas latar putih dan jangan memotong bagian tepinya.</li>
                     <li>• Coba pindai QR sebelum dicetak dalam jumlah banyak.</li>

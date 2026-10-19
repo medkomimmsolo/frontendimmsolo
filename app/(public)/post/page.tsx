@@ -91,7 +91,7 @@ export default async function PostPage(props: Props) {
     : 'Post & Artikel';
 
   return (
-    <main className="min-h-screen bg-slate-50/70 pt-28 pb-20">
+    <main className="panel-typography min-h-screen bg-slate-50/70 pt-28 pb-20">
       
       {/* Breadcrumb & Title Section */}
       <section className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-8">
@@ -191,7 +191,7 @@ export default async function PostPage(props: Props) {
                         />
                       </Link>
                       <div className="absolute bottom-3 left-3">
-                        <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] border-none shadow-sm text-[10px] px-2.5 py-0.5 rounded-full font-semibold">
+                        <Badge className="bg-[#c20000] text-white hover:bg-[#a30000] border-none shadow-sm text-2xs px-2.5 py-0.5 rounded-full font-semibold">
                           {post.category?.name || 'Artikel'}
                         </Badge>
                       </div>
@@ -205,7 +205,7 @@ export default async function PostPage(props: Props) {
                           {post.title}
                         </h3>
                       </Link>
-                      <div className="mt-auto pt-3 flex items-center text-[11px] text-slate-400 font-medium">
+                      <div className="mt-auto pt-3 flex items-center text-2xs text-slate-400 font-medium">
                         <Calendar className="w-3 h-3 mr-1" />
                         {new Date(post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' })}
                       </div>

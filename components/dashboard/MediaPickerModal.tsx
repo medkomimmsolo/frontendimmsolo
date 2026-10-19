@@ -384,10 +384,10 @@ export default function MediaPickerModal({
                             )}
                           </div>
                           <div className="p-1.5 bg-white border-t border-slate-100">
-                            <p className="text-[11px] font-medium text-slate-700 truncate" title={file.name}>
+                            <p className="text-2xs font-medium text-slate-700 truncate" title={file.name}>
                               {file.name}
                             </p>
-                            <p className="text-[9px] text-slate-400 flex items-center justify-between">
+                            <p className="text-2xs text-slate-400 flex items-center justify-between">
                               <span className="capitalize">{file.group || 'media'}</span>
                               <span>{formatBytes(file.size)}</span>
                             </p>
@@ -428,7 +428,7 @@ export default function MediaPickerModal({
                       </div>
                       <div>
                         <span className="font-medium text-slate-700 block">URL Path:</span>
-                        <p className="truncate text-slate-400 font-mono text-[10px]" title={selectedFile.url}>
+                        <p className="truncate text-slate-400 font-mono text-2xs" title={selectedFile.url}>
                           {selectedFile.url}
                         </p>
                       </div>

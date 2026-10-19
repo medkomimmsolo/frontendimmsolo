@@ -347,7 +347,7 @@ export default function SplashScreen({ iconUrl }: SplashScreenProps) {
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200/90 shadow-2xs"
           >
             <span className="w-2 h-2 rounded-full bg-[#c20000] animate-pulse" />
-            <span className="text-[11px] font-bold tracking-widest uppercase text-slate-700">
+            <span className="text-2xs font-semibold tracking-widest uppercase text-slate-700">
               PC IMM KOTA SURAKARTA
             </span>
           </div>
@@ -497,7 +497,7 @@ export default function SplashScreen({ iconUrl }: SplashScreenProps) {
               <span className="w-1.5 h-1.5 rounded-full bg-[#c20000] animate-ping" />
               <span
                 ref={statusTextRef}
-                className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400"
+                className="text-2xs font-semibold uppercase tracking-[0.2em] text-slate-400"
               >
                 Menghubungkan ke Portal...
               </span>

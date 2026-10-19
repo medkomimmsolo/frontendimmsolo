@@ -556,7 +556,7 @@ export default function StrukturalManagement() {
                                                             {(providedAnggota) => (
                                                               <table className="admin-panel-table w-full text-left border-collapse">
                                                                 <thead>
-                                                                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-[11px] font-bold uppercase tracking-wider">
+                                                                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-2xs font-semibold uppercase tracking-wider">
                                                                     <th className="p-3 w-8"></th>
                                                                     <th className="p-3 pl-2">Nama Pengurus</th>
                                                                     <th className="p-3">Jabatan</th>
@@ -602,7 +602,7 @@ export default function StrukturalManagement() {
                                                                                   ))}
                                                                                 </div>
                                                                               ) : item.instagram_url ? (
-                                                                                <a href={item.instagram_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline text-[10px] mt-0.5 inline-block">
+                                                                                <a href={item.instagram_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline text-2xs mt-0.5 inline-block">
                                                                                   @instagram
                                                                                 </a>
                                                                               ) : null}
@@ -694,7 +694,7 @@ export default function StrukturalManagement() {
                   />
                   <label htmlFor="copyStructure" className="text-xs text-slate-700 cursor-pointer leading-relaxed">
                     Salin struktur jabatan dari periode <span className="font-bold text-slate-900">{selectedPeriod}</span> 
-                    <br /><span className="text-[11px] text-slate-400">(hanya menyalin format jabatannya, nama pengurus akan otomatis dikosongkan)</span>
+                    <br /><span className="text-2xs text-slate-400">(hanya menyalin format jabatannya, nama pengurus akan otomatis dikosongkan)</span>
                   </label>
                 </div>
               )}

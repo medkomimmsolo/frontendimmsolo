@@ -124,7 +124,7 @@ export default function AjukanAkunClient() {
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-8 ring-emerald-50/60">
               <CheckCircle2 className="h-8 w-8" />
             </div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-2xs font-semibold uppercase tracking-wider text-emerald-700">
               <ShieldCheck className="h-3.5 w-3.5" /> Pengajuan diterima
             </span>
             <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
@@ -134,7 +134,7 @@ export default function AjukanAkunClient() {
               Pengajuan akun Anda sedang menunggu verifikasi Super Admin. Kami akan mengaktifkan akun setelah permohonan ditinjau.
             </p>
             <div className="my-6 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-left">
-              <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">Ringkasan pengajuan</p>
+              <p className="mb-3 text-2xs font-semibold uppercase tracking-wider text-slate-500">Ringkasan pengajuan</p>
               <div className="grid gap-3 text-sm sm:grid-cols-2">
                 <div className="min-w-0"><span className="block text-xs text-slate-500">Username</span><span className="break-all font-semibold text-slate-800">@{submittedData.username}</span></div>
                 <div className="min-w-0"><span className="block text-xs text-slate-500">Email</span><span className="break-all font-medium text-slate-800">{submittedData.email}</span></div>
@@ -182,7 +182,7 @@ export default function AjukanAkunClient() {
               <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white shadow-lg shadow-black/10">
                 <UserPlus className="h-7 w-7" />
               </div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-2xs font-semibold uppercase tracking-[0.18em] text-white/70">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#fcd34d]" /> Portal Keanggotaan
               </span>
               <h1 className="mt-5 max-w-sm text-3xl font-bold leading-tight tracking-tight sm:text-4xl" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
@@ -202,7 +202,7 @@ export default function AjukanAkunClient() {
                 <div><p className="text-sm font-semibold text-white">Kredensial aman</p><p className="mt-1 text-xs leading-5 text-slate-400">Gunakan username unik dan kata sandi minimal 8 karakter.</p></div>
               </div>
             </div>
-            <p className="mt-8 hidden text-[11px] tracking-wide text-slate-500 lg:block">PC IMM KOTA SURAKARTA</p>
+            <p className="mt-8 hidden text-2xs tracking-wide text-slate-500 lg:block">PC IMM KOTA SURAKARTA</p>
           </aside>
 
           <section className="px-6 py-7 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
@@ -221,7 +221,7 @@ export default function AjukanAkunClient() {
                 <div>
                   <label htmlFor="ajusername" className="mb-1.5 block text-xs font-bold text-slate-700">Username Login</label>
                   <div className="relative"><AtSign className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input id="ajusername" type="text" name="username" autoComplete="username" minLength={3} maxLength={60} pattern="[A-Za-z0-9_-]+" required value={formData.username} onChange={handleChange} placeholder="contoh_username" className={iconInputClass} /></div>
-                  <p className="mt-1.5 text-[11px] text-slate-400">Huruf, angka, _ atau - (min. 3 karakter).</p>
+                  <p className="mt-1.5 text-2xs text-slate-400">Huruf, angka, _ atau - (min. 3 karakter).</p>
                 </div>
               </div>
               <div>
@@ -232,7 +232,7 @@ export default function AjukanAkunClient() {
                 <div>
                   <label htmlFor="ajpassword" className="mb-1.5 block text-xs font-bold text-slate-700">Kata Sandi</label>
                   <div className="relative"><LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input id="ajpassword" type={showPassword ? 'text' : 'password'} name="password" autoComplete="new-password" minLength={8} required aria-invalid={formData.password.length > 0 && formData.password.length < 8} aria-describedby="ajpassword-hint ajpassword-error" value={formData.password} onChange={handleChange} placeholder="Minimal 8 karakter" className={`${iconInputClass} pr-11`} /><button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:text-slate-700" aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div>
-                  <p id="ajpassword-hint" className="mt-1.5 text-[11px] text-slate-400">Minimal 8 karakter.</p>
+                  <p id="ajpassword-hint" className="mt-1.5 text-2xs text-slate-400">Minimal 8 karakter.</p>
                   {validationErrors.password && <p id="ajpassword-error" role="alert" className="mt-1 text-xs font-medium text-red-600">{validationErrors.password}</p>}
                 </div>
                 <div>
@@ -249,7 +249,7 @@ export default function AjukanAkunClient() {
                     <option value="bidang">Bidang (Cabang)</option>
                     <option value="admin">Admin</option>
                   </select>
-                  <p className="mt-1.5 text-[11px] text-slate-400">Role final ditentukan oleh admin.</p>
+                  <p className="mt-1.5 text-2xs text-slate-400">Role final ditentukan oleh admin.</p>
                 </div>
                 <div>
                   <label htmlFor="ajalasan" className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-slate-700"><FileText className="h-3.5 w-3.5 text-slate-400" /> Alasan / Keterangan <span className="font-normal text-slate-400">(opsional)</span></label>
@@ -261,7 +261,7 @@ export default function AjukanAkunClient() {
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
                   {isLoading ? 'Mengirim pengajuan...' : 'Kirim Pengajuan'}
                 </Button>
-                <p className="mt-3 text-center text-[11px] leading-5 text-slate-400">Dengan mengirim pengajuan, data Anda akan ditinjau oleh administrator portal.</p>
+                <p className="mt-3 text-center text-2xs leading-5 text-slate-400">Dengan mengirim pengajuan, data Anda akan ditinjau oleh administrator portal.</p>
               </div>
             </form>
           </section>

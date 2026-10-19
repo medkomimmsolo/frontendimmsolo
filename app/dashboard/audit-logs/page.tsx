@@ -139,14 +139,14 @@ export default function AuditLogsPage() {
                             {l.user?.name || l.user_name}
                           </p>
                           {l.user?.username && (
-                            <p className="text-[11px] font-mono text-slate-400 truncate mt-0.5">
+                            <p className="text-2xs font-mono text-slate-400 truncate mt-0.5">
                               @{l.user.username}
                             </p>
                           )}
                         </div>
                       </div>
                     ) : (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-500">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-2xs font-medium bg-slate-100 text-slate-500">
                         Sistem
                       </span>
                     )}

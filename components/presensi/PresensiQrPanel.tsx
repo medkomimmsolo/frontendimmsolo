@@ -29,7 +29,15 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
   const [logo, setLogo] = useState<string | null>(null);
   const [pngSize, setPngSize] = useState<number>(1000);
   const [isDownloading, setIsDownloading] = useState<number | null>(null);
-  const [generatedPeserta, setGeneratedPeserta] = useState<Set<number>>(() => new Set());
+  const [generatedPeserta, setGeneratedPeserta] = useState<Set<number>>(() => {
+    if (typeof window === 'undefined') return new Set();
+    try {
+      const raw = localStorage.getItem(`imm_presensi_qr_generated_${presensi.id}`);
+      return raw ? new Set(JSON.parse(raw) as number[]) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
   const [isGeneratingAll, setIsGeneratingAll] = useState(false);
   const [isSendingPng, setIsSendingPng] = useState<number | null>(null);
   const [isSendingAll, setIsSendingAll] = useState(false);
@@ -43,20 +51,22 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
   // Pulihkan daftar QR yang pernah di-generate tiap masuk/refresh halaman
   // (kunci per presensi; hanya berlaku selama sesi browser ini).
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     try {
-      const raw = sessionStorage.getItem(`imm_presensi_qr_generated_${presensi.id}`);
+      const raw = localStorage.getItem(`imm_presensi_qr_generated_${presensi.id}`);
       setGeneratedPeserta(raw ? new Set(JSON.parse(raw) as number[]) : new Set());
     } catch {
       setGeneratedPeserta(new Set());
     }
   }, [presensi.id]);
 
-  // Catat perubahan daftar ke sessionStorage.
+  // Catat perubahan daftar ke localStorage.
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     try {
-      sessionStorage.setItem(`imm_presensi_qr_generated_${presensi.id}`, JSON.stringify(Array.from(generatedPeserta)));
+      localStorage.setItem(`imm_presensi_qr_generated_${presensi.id}`, JSON.stringify(Array.from(generatedPeserta)));
     } catch {
-      /* sessionStorage bisa diblokir; abaikan. */
+      /* localStorage bisa diblokir; abaikan. */
     }
   }, [generatedPeserta, presensi.id]);
 
@@ -142,6 +152,10 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
 
   /** Unduh PNG yang hanya berisi QR dan logo opsional; nama dipakai untuk nama file. */
   const downloadPesertaPng = async (p: PresensiPeserta) => {
+    if (!generatedPeserta.has(p.id)) {
+      setGeneratedPeserta((current) => new Set(current).add(p.id));
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
+    }
     setIsDownloading(p.id);
     try {
       await exportQrPng({
@@ -305,7 +319,7 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
                   {logo ? (
                     <img src={logo} alt="Logo QR" className="w-full h-full object-contain" />
                   ) : (
-                    <span className="text-[10px] text-slate-400 text-center leading-tight px-1">Tanpa<br />logo</span>
+                    <span className="text-2xs text-slate-400 text-center leading-tight px-1">Tanpa<br />logo</span>
                   )}
                 </div>
                 <div className="min-w-0">
@@ -373,10 +387,10 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
                 className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-[#c20000] resize-y"
               />
               <div className="flex items-center justify-between mt-1.5">
-                <span className="text-[11px] text-slate-400">
+                <span className="text-2xs text-slate-400">
                   Ditampilkan menonjol di dalam email yang dikirim ke peserta.
                 </span>
-                <span className="text-[11px] text-slate-400 tabular-nums">{pesanEmail.length}/500</span>
+                <span className="text-2xs text-slate-400 tabular-nums">{pesanEmail.length}/500</span>
               </div>
             </div>
 
@@ -410,7 +424,7 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
                         onClick={() => downloadPesertaPng(p)}
                         disabled={isDownloading === p.id}
                         variant="outline"
-                        className="h-8 px-3 rounded-lg text-[11px] font-bold w-full"
+                        className="h-8 px-3 rounded-lg text-2xs font-semibold w-full"
                       >
                         {isDownloading === p.id ? (
                           <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" />
@@ -425,7 +439,7 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
                         onClick={() => kirimEmailPeserta(p)}
                         disabled={isSendingPng !== null || isSendingAll}
                         variant="outline"
-                        className="h-8 px-3 rounded-lg text-[11px] font-bold w-full text-[#c20000] border-[#c20000]/40 hover:bg-[#c20000]/5"
+                        className="h-8 px-3 rounded-lg text-2xs font-semibold w-full text-[#c20000] border-[#c20000]/40 hover:bg-[#c20000]/5"
                       >
                         {isSendingPng === p.id ? (
                           <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" />

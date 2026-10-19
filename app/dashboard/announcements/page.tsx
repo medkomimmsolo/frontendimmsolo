@@ -234,11 +234,11 @@ export default function AnnouncementsPage() {
                         {badge.label}
                       </span>
                       {item.is_active && !isExpired ? (
-                        <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-200">
+                        <span className="text-2xs font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-200">
                           Aktif
                         </span>
                       ) : (
-                        <span className="text-[11px] font-semibold bg-slate-100 text-slate-500 px-2 py-0.5 rounded">
+                        <span className="text-2xs font-semibold bg-slate-100 text-slate-500 px-2 py-0.5 rounded">
                           {isExpired ? 'Kedaluwarsa' : 'Nonaktif'}
                         </span>
                       )}
@@ -398,7 +398,7 @@ export default function AnnouncementsPage() {
                   onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
                   className="w-full px-3 py-2 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000]"
                 />
-                <p className="text-[11px] text-slate-400 mt-1">
+                <p className="text-2xs text-slate-400 mt-1">
                   Kosongkan jika ingin pengumuman tayang selamanya sampai dinonaktifkan secara manual.
                 </p>
               </div>

@@ -82,7 +82,7 @@ export default function AnnouncementBanner() {
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 <span className="font-bold text-sm">{a.title}</span>
                 {a.type === 'urgent' && (
-                  <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${cfg.badge}`}>
+                  <span className={`text-2xs uppercase font-bold px-1.5 py-0.5 rounded ${cfg.badge}`}>
                     Penting
                   </span>
                 )}

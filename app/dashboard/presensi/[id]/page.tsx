@@ -508,7 +508,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                                 {statusLabel(p.kehadiran.status)}
                               </span>
                               <span
-                                className={`inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-semibold border ${methodBadgeClass(p.kehadiran.method)}`}
+                                className={`inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-semibold border ${methodBadgeClass(p.kehadiran.method)}`}
                                 title={methodHint(p.kehadiran.method)}
                               >
                                 {methodLabel(p.kehadiran.method)}
@@ -523,7 +523,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                                 key={st}
                                 onClick={() => handleMarkStatus(p, st)}
                                 disabled={p.kehadiran?.status === st}
-                                className="px-2 py-0.5 text-[11px] font-semibold rounded border border-slate-200 text-slate-600 hover:border-[#c20000] hover:text-[#c20000] transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:border-slate-200 disabled:hover:text-slate-600"
+                                className="px-2 py-0.5 text-2xs font-semibold rounded border border-slate-200 text-slate-600 hover:border-[#c20000] hover:text-[#c20000] transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:border-slate-200 disabled:hover:text-slate-600"
                                 title={`Tandai ${st}`}
                               >
                                 {st}
@@ -582,7 +582,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                     <CardHeader className="border-b border-slate-100 bg-slate-50/80 p-4">
                       <CardTitle className="flex items-center justify-between gap-2 text-sm">
                         <span className="truncate">{sesi.name}</span>
-                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${sesi.is_open ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-200 text-slate-500'}`}>
+                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-2xs font-semibold ${sesi.is_open ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-200 text-slate-500'}`}>
                           {sesi.is_open ? 'Dibuka' : 'Ditutup'}
                         </span>
                       </CardTitle>
@@ -594,7 +594,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                             <QRCodeSVG value={cameraUrl} size={200} level="M" marginSize={3} />
                           </div>
                           <div className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-center">
-                            <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Token Sesi</div>
+                            <div className="text-2xs font-semibold uppercase tracking-wider text-slate-400">Token Sesi</div>
                             <code className="mt-0.5 block font-mono text-lg font-bold tracking-[0.2em] text-slate-800">{sesi.scan_token}</code>
                           </div>
                           <div className="flex w-full flex-wrap justify-center gap-2">
@@ -658,7 +658,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-semibold border ${methodBadgeClass(k.method)}`}
+                          className={`inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-semibold border ${methodBadgeClass(k.method)}`}
                           title={methodHint(k.method)}
                         >
                           {methodLabel(k.method)}

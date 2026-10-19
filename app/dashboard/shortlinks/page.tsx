@@ -284,7 +284,7 @@ export default function ShortlinksPage() {
                         </div>
                         {item.user?.name && (
                           <div className="text-xs text-slate-500 mt-1">
-                            <span className="text-[11px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">
+                            <span className="text-2xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">
                               Oleh: {item.user.name}
                             </span>
                           </div>
@@ -303,7 +303,7 @@ export default function ShortlinksPage() {
                           <div className="flex flex-col items-center gap-1">
                             <span className="px-2.5 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full text-xs font-semibold">Pending</span>
                             {item.activation_token && (
-                              <button type="button" className="border-0 bg-slate-100 px-1 text-left text-[10px] font-mono font-bold text-slate-500 rounded cursor-pointer" onClick={async () => {
+                              <button type="button" className="border-0 bg-slate-100 px-1 text-left text-2xs font-mono font-bold text-slate-500 rounded cursor-pointer" onClick={async () => {
                                 try {
                                   await navigator.clipboard.writeText(item.activation_token);
                                   toast.success('Token aktivasi berhasil disalin.');
@@ -415,7 +415,7 @@ export default function ShortlinksPage() {
                       Acak
                     </Button>
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                  <p className="text-2xs text-slate-500 mt-1.5 leading-relaxed">
                     Tanpa spasi, hanya huruf, angka, strip (-), dan underscore (_).<br/>
                     Akan menjadi: <span className="text-[#c20000] font-medium">immsolo.or.id/{formData.slug || '...'}</span>
                   </p>

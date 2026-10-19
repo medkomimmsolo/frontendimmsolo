@@ -20,7 +20,7 @@ export default function DocsHeader({ query, onQueryChange, onMenu }: Props) {
           <img src="/icon-192.png" alt="Logo PC IMM Kota Surakarta" className="h-9 w-9 shrink-0 rounded-xl" />
           <span className="min-w-0 leading-tight">
             <span className="block truncate text-sm font-bold text-slate-900">Pusat Digital</span>
-            <span className="block truncate text-[0.6875rem] text-slate-500">PC IMM Kota Surakarta</span>
+            <span className="block truncate text-2xs text-slate-500">PC IMM Kota Surakarta</span>
           </span>
         </div>
 

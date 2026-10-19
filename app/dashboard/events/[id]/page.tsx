@@ -199,7 +199,7 @@ export default function EditEvent({ params }: { params: Promise<{ id: string }> 
                       value={formData.description}
                       onChange={handleDescriptionChange}
                       modules={modules}
-                      className="border-none [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-slate-200 [&_.ql-container]:border-none [&_.ql-editor]:min-h-[280px] [&_.ql-editor]:text-[15px]"
+                      className="border-none [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-slate-200 [&_.ql-container]:border-none [&_.ql-editor]:min-h-[280px] [&_.ql-editor]:text-sm"
                       placeholder="Tulis deskripsi agenda di sini..."
                     />
                   </div>

@@ -185,7 +185,7 @@ export default function AccountRequestsPage() {
                     <div className="font-bold text-[#0f172a]">{r.name}</div>
                     {r.username && <div className="text-slate-600 text-xs mt-0.5">@{r.username}</div>}
                     <div className="text-slate-500 text-xs mt-0.5">{r.email}</div>
-                    <div className="text-slate-400 text-[11px] font-mono mt-0.5">{new Date(r.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                    <div className="text-slate-400 text-2xs font-mono mt-0.5">{new Date(r.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                   </td>
                   <td className="p-4"><span className="capitalize text-slate-700 font-semibold text-xs bg-slate-100 px-2 py-0.5 rounded-md">{r.requested_role}</span></td>
                   <td className="p-4"><span className="text-slate-600 text-xs line-clamp-2 max-w-xs block leading-relaxed">{r.reason || '-'}</span></td>

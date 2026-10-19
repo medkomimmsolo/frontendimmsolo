@@ -591,10 +591,10 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                             <div className="flex-1 min-w-0">
                               <p className="font-bold text-slate-900 text-sm">{f.label} {f.required && f.type !== 'section' && <span className="text-red-500">*</span>}</p>
                               {f.description && <p className="text-xs text-slate-500 mt-0.5">{f.description}</p>}
-                              <p className="text-[10px] font-mono font-semibold text-slate-400 mt-1 uppercase tracking-wider">{FIELD_TYPES.find((t) => t.value === f.type)?.label}{f.type === 'file' ? ` • ${(f.options || []).join(', ') || 'semua'}` : f.options?.length ? ` • ${f.options.join(', ')}` : ''}{f.type === 'linear_scale' ? ` • ${f.settings?.min ?? 1}–${f.settings?.max ?? 5}` : ''}</p>
+                              <p className="text-2xs font-mono font-semibold text-slate-400 mt-1 uppercase tracking-wider">{FIELD_TYPES.find((t) => t.value === f.type)?.label}{f.type === 'file' ? ` • ${(f.options || []).join(', ') || 'semua'}` : f.options?.length ? ` • ${f.options.join(', ')}` : ''}{f.type === 'linear_scale' ? ` • ${f.settings?.min ?? 1}–${f.settings?.max ?? 5}` : ''}</p>
                             </div>
                             {f.type === 'section' && (
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-violet-600 bg-violet-50 border border-violet-200 rounded-full px-2.5 py-1 shrink-0">Section</span>
+                              <span className="text-2xs font-semibold uppercase tracking-wider text-violet-600 bg-violet-50 border border-violet-200 rounded-full px-2.5 py-1 shrink-0">Section</span>
                             )}
                           </div>
                           <div className="flex items-center justify-end gap-1 px-4 py-2.5 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl">
@@ -763,7 +763,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
           </div>
 
           {/* Spreadsheet Formula / Sheet Status Bar */}
-          <div className="bg-[#f1f3f4] border-b border-slate-300 px-4 py-1.5 flex items-center justify-between text-[11px] text-slate-600 font-mono select-none">
+          <div className="bg-[#f1f3f4] border-b border-slate-300 px-4 py-1.5 flex items-center justify-between text-2xs text-slate-600 font-mono select-none">
             <div className="flex items-center gap-3">
               <span className="font-semibold text-slate-700">fx</span>
               <span className="text-slate-500">
@@ -778,7 +778,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
             <table className="w-full text-left border-collapse text-xs border border-slate-300 bg-white min-w-max">
               <thead>
                 {/* Row 1: Spreadsheet Column Letters (A, B, C, D...) */}
-                <tr className="bg-[#e9ecef] border-b border-slate-300 text-slate-600 font-mono text-[11px] font-bold">
+                <tr className="bg-[#e9ecef] border-b border-slate-300 text-slate-600 font-mono text-2xs font-semibold">
                   <th className="w-12 text-center p-1 border-r border-slate-300 bg-[#dee2e6] text-slate-500 select-none">#</th>
                   <th className="p-1 px-3 border-r border-slate-300 text-center uppercase tracking-wider">{getColLetter(0)}</th>
                   {hasEmail && (
@@ -808,7 +808,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                     <th key={f.id} className="p-2.5 px-3 border-r border-slate-300 whitespace-nowrap min-w-[180px] max-w-[280px]">
                       <div className="flex items-center justify-between gap-2">
                         <span className="truncate" title={f.label}>{f.label}</span>
-                        <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-slate-200 text-slate-600 uppercase shrink-0">
+                        <span className="text-2xs font-mono px-1 py-0.5 rounded bg-slate-200 text-slate-600 uppercase shrink-0">
                           {f.type}
                         </span>
                       </div>
@@ -845,12 +845,12 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                         }`}
                       >
                         {/* Row Index (Excel row number) */}
-                        <td className="w-12 text-center p-2 border-r border-slate-300 bg-[#f8f9fa] text-slate-500 font-mono text-[11px] select-none">
+                        <td className="w-12 text-center p-2 border-r border-slate-300 bg-[#f8f9fa] text-slate-500 font-mono text-2xs select-none">
                           {rowNumber}
                         </td>
 
                         {/* Col A: Waktu */}
-                        <td className="p-2 px-3 border-r border-slate-200 text-slate-600 whitespace-nowrap text-[11px]">
+                        <td className="p-2 px-3 border-r border-slate-200 text-slate-600 whitespace-nowrap text-2xs">
                           {new Date(r.created_at).toLocaleString('id-ID', {
                             day: 'numeric',
                             month: 'short',
@@ -862,7 +862,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
 
                         {/* Col Email (jika ada) */}
                         {hasEmail && (
-                          <td className="p-2 px-3 border-r border-slate-200 text-slate-800 whitespace-nowrap text-[11px] font-mono">
+                          <td className="p-2 px-3 border-r border-slate-200 text-slate-800 whitespace-nowrap text-2xs font-mono">
                             {r.email ? (
                               <span className="inline-flex items-center gap-1.5 text-emerald-900 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
@@ -891,16 +891,16 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   onClick={(e) => e.stopPropagation()}
-                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-[11px] font-medium transition-colors"
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-2xs font-medium transition-colors"
                                   title="Klik untuk membuka / mengunduh file"
                                 >
                                   <ExternalLink className="w-3 h-3 shrink-0" />
                                   <span className="truncate max-w-[150px]">{v.split('/').pop() || 'Lihat File'}</span>
                                 </a>
                               ) : isFile ? (
-                                <span className="text-slate-300 italic text-[11px]">- tidak ada file -</span>
+                                <span className="text-slate-300 italic text-2xs">- tidak ada file -</span>
                               ) : Array.isArray(v) ? (
-                                <span className="font-mono text-[11px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">
+                                <span className="font-mono text-2xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">
                                   {v.join(', ')}
                                 </span>
                               ) : v != null && v !== '' ? (
@@ -918,7 +918,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                             <button
                               onClick={() => setSelectedResponse(r)}
                               title="Lihat detail lengkap responden"
-                              className="px-2 py-1 text-[11px] font-medium text-slate-600 hover:text-emerald-700 bg-white hover:bg-emerald-50 border border-slate-200 rounded-sm transition-colors inline-flex items-center gap-1"
+                              className="px-2 py-1 text-2xs font-medium text-slate-600 hover:text-emerald-700 bg-white hover:bg-emerald-50 border border-slate-200 rounded-sm transition-colors inline-flex items-center gap-1"
                             >
                               <FileText className="w-3 h-3 text-emerald-600" /> Detail
                             </button>
@@ -1008,11 +1008,11 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                   <div>
                     <h4 className="text-xs font-bold text-slate-800 flex items-center gap-2">
                       Tarik & Potong Posisi Banner (Interactive Crop)
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="px-2 py-0.5 rounded-full text-2xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         Ala Google Form
                       </span>
                     </h4>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
+                    <p className="text-2xs text-slate-500 mt-0.5">
                       Buka jendela pemotong interaktif untuk menggeser kotak crop atau menarik sudutnya agar bagian gambar yang tampil pas di banner.
                     </p>
                   </div>
@@ -1028,7 +1028,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                     <span>Tarik / Crop Banner Sekarang</span>
                   </button>
                 ) : (
-                  <span className="text-[11px] text-slate-400 italic">
+                  <span className="text-2xs text-slate-400 italic">
                     Pilih gambar di atas terlebih dahulu untuk memotong
                   </span>
                 )}
@@ -1060,7 +1060,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                         {opt.label}
                         {settingsHeaderImageSize === opt.id && <span className="w-1.5 h-1.5 rounded-full bg-[#c20000]"></span>}
                       </div>
-                      <div className="text-[10px] text-slate-500 mt-1 leading-tight">
+                      <div className="text-2xs text-slate-500 mt-1 leading-tight">
                         {opt.desc}
                       </div>
                     </button>
@@ -1121,7 +1121,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                   <div>
                     <span className="text-sm font-semibold text-slate-800 flex items-center gap-2">
                       Tanpa Batas Kuota (Unlimited)
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="px-2 py-0.5 rounded-full text-2xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         Bebas Kuota
                       </span>
                     </span>
@@ -1252,7 +1252,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 sm:p-7 my-8 max-h-[90vh] overflow-y-auto border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between border-b border-slate-200 pb-4 mb-5">
               <div>
-                <span className="text-[11px] font-mono px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold uppercase">
+                <span className="text-2xs font-mono px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold uppercase">
                   Data Responden #{selectedResponse.id}
                 </span>
                 <h3 className="text-lg font-bold text-[#0f172a] mt-2">
@@ -1290,7 +1290,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                       <span className="text-xs font-bold text-slate-700">
                         {idx + 1}. {f.label}
                       </span>
-                      <span className="text-[10px] font-mono uppercase text-slate-500 bg-white px-2 py-0.5 border border-slate-200 rounded-md">
+                      <span className="text-2xs font-mono uppercase text-slate-500 bg-white px-2 py-0.5 border border-slate-200 rounded-md">
                         {f.type}
                       </span>
                     </div>
@@ -1371,7 +1371,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
               }}
               preview
             />
-            <p className="text-center text-[11px] text-slate-400 mt-4">Mode pratinjau — isian tidak tersimpan.</p>
+            <p className="text-center text-2xs text-slate-400 mt-4">Mode pratinjau — isian tidak tersimpan.</p>
           </div>
         </div>
       )}
@@ -1418,7 +1418,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                       <label className="block text-sm font-semibold text-slate-700">
                         Opsi Pilihan <span className="text-slate-400 font-normal">(satu per baris)</span>
                       </label>
-                      <span className={`text-[11px] font-medium ${hasDups ? 'text-red-600 font-bold' : 'text-slate-500'}`}>
+                      <span className={`text-2xs font-medium ${hasDups ? 'text-red-600 font-bold' : 'text-slate-500'}`}>
                         {lines.length} opsi {hasDups && '(duplikat terdeteksi)'}
                       </span>
                     </div>
@@ -1430,11 +1430,11 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                       className={`${inputClass} resize-none font-mono ${hasDups ? 'border-red-400 focus:border-red-500' : ''}`}
                     />
                     {hasDups ? (
-                      <p className="text-[11px] text-red-600 font-semibold mt-1">
+                      <p className="text-2xs text-red-600 font-semibold mt-1">
                         ⚠️ Ditemukan opsi duplikat: &quot;{Array.from(dups).join('", "')}&quot;. Setiap opsi harus unik.
                       </p>
                     ) : (
-                      <p className="text-[11px] text-slate-400 mt-1">
+                      <p className="text-2xs text-slate-400 mt-1">
                         Tulis setiap pilihan pada baris baru. Setiap opsi harus unik.
                       </p>
                     )}
@@ -1484,7 +1484,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                               className="h-4 w-4 rounded accent-[#c20000]"
                             />
                             <span className="font-medium text-slate-700">{label}</span>
-                            <span className="ml-auto text-[10px] text-slate-400">{group}</span>
+                            <span className="ml-auto text-2xs text-slate-400">{group}</span>
                           </label>
                         );
                       })}

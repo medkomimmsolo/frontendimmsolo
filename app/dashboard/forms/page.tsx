@@ -243,7 +243,7 @@ export default function FormsManagement() {
                     </div>
                     {f.user?.name && (
                       <div className="text-xs text-slate-500 mt-1">
-                        <span className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">
+                        <span className="text-2xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">
                           Oleh: {f.user.name}
                         </span>
                       </div>
@@ -429,7 +429,7 @@ export default function FormsManagement() {
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, max_responses: '' })}
-                      className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline"
+                      className="text-2xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
                     >
                       Set Unlimited (Tanpa Batas)
                     </button>
@@ -442,7 +442,7 @@ export default function FormsManagement() {
                     placeholder="Kosongkan untuk Unlimited (Tanpa Batas Kuota)"
                     className={inputClass}
                   />
-                  <p className="text-[11px] text-slate-500 mt-1.5">
+                  <p className="text-2xs text-slate-500 mt-1.5">
                     {formData.max_responses ? (
                       <span className="text-amber-700 font-semibold">
                         Pendaftaran otomatis tertutup setelah mencapai {formData.max_responses} responden.
@@ -496,7 +496,7 @@ export default function FormsManagement() {
                           <span>{opt.label}</span>
                           {formData.header_image_size === opt.id && <span className="w-1.5 h-1.5 rounded-full bg-[#c20000]"></span>}
                         </div>
-                        <div className="text-[10px] text-slate-400 font-normal mt-0.5 leading-tight">
+                        <div className="text-2xs text-slate-400 font-normal mt-0.5 leading-tight">
                           {opt.desc}
                         </div>
                       </button>
@@ -520,7 +520,7 @@ export default function FormsManagement() {
                   />
                   <div>
                     <span className="font-bold text-slate-800 block text-xs">Wajibkan Pengisian Email (Anti-Spam)</span>
-                    <p className="text-slate-500 mt-0.5 text-[11px] leading-relaxed">
+                    <p className="text-slate-500 mt-0.5 text-2xs leading-relaxed">
                       Memerlukan alamat email aktif pendaftar yang diverifikasi otomatis untuk mencegah bot dan respon spam.
                     </p>
                   </div>
@@ -538,7 +538,7 @@ export default function FormsManagement() {
                     <span className={`font-bold block text-xs ${!formData.require_email ? 'text-slate-400' : 'text-slate-800'}`}>
                       Batasi 1 Tanggapan per Email
                     </span>
-                    <p className="text-slate-500 mt-0.5 text-[11px] leading-relaxed">
+                    <p className="text-slate-500 mt-0.5 text-2xs leading-relaxed">
                       Mencegah pengisian berulang kali dengan alamat email yang sama.
                     </p>
                   </div>
@@ -553,7 +553,7 @@ export default function FormsManagement() {
                   />
                   <div>
                     <span className="font-bold text-slate-800 block text-xs">Buka Pendaftaran (Terima Tanggapan)</span>
-                    <p className="text-slate-500 mt-0.5 text-[11px] leading-relaxed">
+                    <p className="text-slate-500 mt-0.5 text-2xs leading-relaxed">
                       Aktifkan untuk membuka formulir ke publik. Nonaktifkan jika formulir masih draf atau pendaftaran ditutup.
                     </p>
                   </div>

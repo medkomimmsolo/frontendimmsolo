@@ -449,7 +449,7 @@ export default function UsersManagement() {
                       <div className="font-bold text-[#0f172a]">{u.name}</div>
                       <div className="flex items-center gap-2 mt-1">
                         {u.username && (
-                          <span className="text-[11px] font-mono font-semibold text-[#c20000] bg-red-50 px-1.5 py-0.5 rounded border border-red-100">
+                          <span className="text-2xs font-mono font-semibold text-[#c20000] bg-red-50 px-1.5 py-0.5 rounded border border-red-100">
                             @{u.username}
                           </span>
                         )}
@@ -543,7 +543,7 @@ export default function UsersManagement() {
                     Hak Akses Modul
                   </h2>
                   {accessModalUser.roles?.map((r: any) => (
-                    <span key={r.id} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-600">
+                    <span key={r.id} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-2xs font-semibold uppercase tracking-wide text-slate-600">
                       {r.name.replace(/-/g, ' ')}
                     </span>
                   ))}
@@ -590,7 +590,7 @@ export default function UsersManagement() {
                       >
                         <ShieldCheck className="h-4 w-4" />
                         Modul Akses
-                        <span className={`rounded-full px-1.5 text-[10px] font-bold ${accessTab === 'modules' ? 'bg-white/25 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}>
+                        <span className={`rounded-full px-1.5 text-2xs font-semibold ${accessTab === 'modules' ? 'bg-white/25 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}>
                           {enabledCount}/{accessAllPerms.length}
                         </span>
                       </button>
@@ -600,7 +600,7 @@ export default function UsersManagement() {
                       >
                         <Tag className="h-4 w-4" />
                         Kategori Post
-                        <span className={`rounded-full px-1.5 text-[10px] font-bold ${accessTab === 'categories' ? 'bg-white/25 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}>
+                        <span className={`rounded-full px-1.5 text-2xs font-semibold ${accessTab === 'categories' ? 'bg-white/25 text-white' : 'border border-slate-200 bg-white text-slate-500'}`}>
                           {accessAllowedCats.length}/{accessAllCats.length}
                         </span>
                       </button>
@@ -620,7 +620,7 @@ export default function UsersManagement() {
                               <div className="truncate text-sm font-semibold text-slate-800">
                                 {PERM_LABELS[perm] ?? perm}
                               </div>
-                              <div className="mt-0.5 text-[11px] font-semibold text-emerald-600">Akses penuh</div>
+                              <div className="mt-0.5 text-2xs font-semibold text-emerald-600">Akses penuh</div>
                             </div>
                             <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
                           </div>
@@ -678,7 +678,7 @@ export default function UsersManagement() {
                                   <div className="truncate text-sm font-semibold text-slate-800">
                                     {PERM_LABELS[perm] ?? perm}
                                   </div>
-                                  <div className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold">
+                                  <div className="mt-0.5 flex items-center gap-1 text-2xs font-semibold">
                                     {fromRole && !isDenied && (
                                       <span className="inline-flex items-center gap-0.5 text-violet-600">
                                         <Lock className="h-3 w-3" />
@@ -713,7 +713,7 @@ export default function UsersManagement() {
                   ) : (
                     <section className="space-y-4 p-5 sm:px-6 sm:pb-6">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-2xs text-slate-400">
                           Kosongkan untuk mengizinkan semua kategori.
                         </p>
                         <div className="flex items-center gap-2">
@@ -744,7 +744,7 @@ export default function UsersManagement() {
                               </div>
                               <div className="min-w-0 flex-1">
                                 <div className="truncate text-sm font-semibold text-slate-800">{c.name}</div>
-                                {c.slug && <div className="mt-0.5 truncate text-[11px] text-slate-400">{c.slug}</div>}
+                                {c.slug && <div className="mt-0.5 truncate text-2xs text-slate-400">{c.slug}</div>}
                               </div>
                               <input
                                 type="checkbox"
@@ -767,9 +767,9 @@ export default function UsersManagement() {
 
             <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-6">
               {isSuperAccess ? (
-                <p className="text-[11px] text-slate-500">Akses penuh, tidak dapat diubah.</p>
+                <p className="text-2xs text-slate-500">Akses penuh, tidak dapat diubah.</p>
               ) : (
-                <p className="text-[11px] text-slate-500">
+                <p className="text-2xs text-slate-500">
                   {accessChangeCount > 0 ? (
                     <span className="font-semibold text-amber-600">{accessChangeCount} perubahan belum disimpan</span>
                   ) : (
@@ -840,7 +840,7 @@ export default function UsersManagement() {
                         onChange={(e) => setNewRoleName(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
                         className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#c20000]"
                       />
-                      <p className="text-[11px] text-slate-400">Gunakan huruf kecil dan tanda hubung (-).</p>
+                      <p className="text-2xs text-slate-400">Gunakan huruf kecil dan tanda hubung (-).</p>
                     </div>
 
                     <div className="space-y-2">
@@ -889,7 +889,7 @@ export default function UsersManagement() {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-slate-800 capitalize text-sm">{r.name.replace(/-/g, ' ')}</span>
-                              <Badge variant="outline" className={isSystemRole ? 'bg-slate-100 text-slate-600 border-slate-300 text-[10px]' : 'bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]'}>
+                              <Badge variant="outline" className={isSystemRole ? 'bg-slate-100 text-slate-600 border-slate-300 text-2xs' : 'bg-emerald-50 text-emerald-700 border-emerald-200 text-2xs'}>
                                 {isSystemRole ? 'Sistem Bawaan' : 'Custom Role'}
                               </Badge>
                             </div>
@@ -948,7 +948,7 @@ export default function UsersManagement() {
                             <div className="flex flex-wrap gap-1">
                               {r.permissions && r.permissions.length > 0 ? (
                                 r.permissions.map((p: string) => (
-                                  <span key={p} className="px-2 py-0.5 rounded-sm bg-slate-100 text-slate-600 text-[11px]">
+                                  <span key={p} className="px-2 py-0.5 rounded-sm bg-slate-100 text-slate-600 text-2xs">
                                     {PERM_LABELS[p] ?? p}
                                   </span>
                                 ))

@@ -21,7 +21,7 @@ export function PageHeader({ title, description, badge, children }: PageHeaderPr
             {title}
           </h1>
           {badge && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-[#c20000] border border-red-200/60 uppercase tracking-wider">
+            <span className="text-2xs font-semibold px-2 py-0.5 rounded-full bg-red-50 text-[#c20000] border border-red-200/60 uppercase tracking-wider">
               {badge}
             </span>
           )}

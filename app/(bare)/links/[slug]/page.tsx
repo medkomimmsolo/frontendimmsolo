@@ -118,7 +118,7 @@ export default async function LinktreePage({ params }: { params: Promise<{ slug:
               <BadgeCheck className="w-4 h-4" style={{ color: accent }} />
             </span>
           </div>
-          <h1 className="text-[26px] leading-tight font-bold tracking-tight" style={{ fontFamily: 'var(--font-poppins), sans-serif', color: textColor }}>
+          <h1 className="text-2xl leading-tight font-bold tracking-tight" style={{ fontFamily: 'var(--font-poppins), sans-serif', color: textColor }}>
             {page.title}
           </h1>
           {page.description && <p className="text-sm mt-2 leading-relaxed max-w-[19rem] mx-auto font-light" style={{ color: subTextColor }}>{page.description}</p>}
@@ -156,11 +156,11 @@ export default async function LinktreePage({ params }: { params: Promise<{ slug:
               >
                 <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                 <span className="w-11 h-11 shrink-0 inline-flex items-center justify-center rounded-xl border border-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_4px_12px_rgba(0,0,0,0.3)]" style={{ background: `linear-gradient(135deg, ${accent}d9, ${accent}59)` }}>
-                  {item.icon ? <LinkItemIcon id={item.icon} className="w-[22px] h-[22px]" /> : <span className="text-[15px] font-bold">{item.title.charAt(0).toUpperCase()}</span>}
+                  {item.icon ? <LinkItemIcon id={item.icon} className="w-[22px] h-[22px]" /> : <span className="text-sm font-bold">{item.title.charAt(0).toUpperCase()}</span>}
                 </span>
                 <span className="flex-1 min-w-0">
-                  <span className="block font-semibold text-[15px] tracking-wide truncate" style={{ color: btnText }} title={item.title}>{item.title}</span>
-                  <span className="block text-[11px] truncate font-normal mt-0.5 opacity-75" style={{ color: btnText }}>
+                  <span className="block font-semibold text-sm tracking-wide truncate" style={{ color: btnText }} title={item.title}>{item.title}</span>
+                  <span className="block text-2xs truncate font-normal mt-0.5 opacity-75" style={{ color: btnText }}>
                     {item.url.replace(/^https?:\/\//, '').split('/')[0]}
                   </span>
                 </span>
@@ -178,8 +178,8 @@ export default async function LinktreePage({ params }: { params: Promise<{ slug:
       <footer className="fixed bottom-0 inset-x-0 z-20">
         <div className="max-w-md mx-auto px-4 py-2.5 flex justify-center">
           <a href="https://immsolo.or.id" target="_blank" rel="noopener noreferrer" className="group inline-flex items-center gap-1.5 transition-all">
-            {/* <span className="w-4 h-4 rounded-full inline-flex items-center justify-center text-[8px] font-black text-white" style={{ background: `linear-gradient(135deg, ${accent}, ${accent}77)` }}>I</span> */}
-            <span className="text-[10px] font-semibold tracking-[0.18em] transition-colors" style={{ color: footColor }}>immsolo.or.id</span>
+            {/* <span className="w-4 h-4 rounded-full inline-flex items-center justify-center text-2xs font-black text-white" style={{ background: `linear-gradient(135deg, ${accent}, ${accent}77)` }}>I</span> */}
+            <span className="text-2xs font-semibold tracking-[0.18em] transition-colors" style={{ color: footColor }}>immsolo.or.id</span>
           </a>
         </div>
       </footer>

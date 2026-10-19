@@ -163,7 +163,7 @@ export default function DokumenClient({ documents }: { documents: DocumentItem[]
                     {getFileIcon(doc.file_type)}
                   </div>
                   {doc.file_type && (
-                    <span className="shrink-0 px-2.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full uppercase tracking-wider">
+                    <span className="shrink-0 px-2.5 py-0.5 bg-slate-100 text-slate-600 text-2xs font-semibold rounded-full uppercase tracking-wider">
                       {doc.file_type}
                     </span>
                   )}

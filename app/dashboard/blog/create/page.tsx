@@ -476,7 +476,7 @@ export default function CreateBlog() {
                 />
                 <div className="flex items-center justify-between gap-4">
                   <p className={helperClass}>Ditampilkan pada kartu berita dan dipakai sebagai deskripsi mesin pencari.</p>
-                  <span className="text-[11px] text-slate-400 font-medium shrink-0">{formData.excerpt.length} karakter</span>
+                  <span className="text-2xs text-slate-400 font-medium shrink-0">{formData.excerpt.length} karakter</span>
                 </div>
               </div>
             </CardContent>
@@ -547,7 +547,7 @@ export default function CreateBlog() {
           <Card className="border border-slate-200/90 shadow-2xs rounded-2xl overflow-hidden bg-white">
             <div className="bg-slate-50/70 px-6 py-4 border-b border-slate-200/80 flex flex-row justify-between items-center gap-3">
               <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Analisis SEO</h3>
-              <div className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+              <div className={`inline-flex px-2.5 py-1 rounded-full text-2xs font-semibold border ${
                 seoStats.score >= 80
                   ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
                   : seoStats.score >= 40
@@ -573,9 +573,9 @@ export default function CreateBlog() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline justify-between gap-3">
                         <p className="text-xs font-bold text-slate-700">{check.label}</p>
-                        <span className="text-[11px] text-slate-400 font-medium shrink-0">{check.value}</span>
+                        <span className="text-2xs text-slate-400 font-medium shrink-0">{check.value}</span>
                       </div>
-                      <p className="text-[11px] text-slate-400 mt-0.5">{check.desc}</p>
+                      <p className="text-2xs text-slate-400 mt-0.5">{check.desc}</p>
                     </div>
                   </div>
                 ))}

@@ -72,7 +72,7 @@ export function ActivityTrendChart({ data, title = 'Tren Aktivitas Organisasi (6
             <XAxis
               dataKey="month"
               stroke="#94a3b8"
-              fontSize={12}
+              fontSize={11}
               tickLine={false}
               axisLine={{ stroke: '#e2e8f0' }}
             />
@@ -89,7 +89,7 @@ export function ActivityTrendChart({ data, title = 'Tren Aktivitas Organisasi (6
               verticalAlign="top"
               align="right"
               iconType="circle"
-              wrapperStyle={{ paddingBottom: 16, fontSize: 12 }}
+              wrapperStyle={{ paddingBottom: 16, fontSize: 11 }}
             />
             <Bar dataKey="blogs" name="Post / Berita" fill="#c20000" radius={[3, 3, 0, 0]} />
             <Bar dataKey="events" name="Agenda Kegiatan" fill="#f59e0b" radius={[3, 3, 0, 0]} />

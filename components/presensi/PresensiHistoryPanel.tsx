@@ -124,13 +124,13 @@ export function PresensiHistoryPanel({ presensiId, activeSesiId, sesis }: Props)
                     <td className="py-3 px-4 text-xs">
                       <div className="flex items-center gap-1.5">
                         {log.status_before && (
-                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium border ${statusBadgeClass(log.status_before)}`}>
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-medium border ${statusBadgeClass(log.status_before)}`}>
                             {statusLabel(log.status_before)}
                           </span>
                         )}
                         {log.action === 'updated' && <span className="text-slate-400">→</span>}
                         {log.status_after && (
-                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium border ${statusBadgeClass(log.status_after)}`}>
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-medium border ${statusBadgeClass(log.status_after)}`}>
                             {statusLabel(log.status_after)}
                           </span>
                         )}

@@ -82,7 +82,7 @@ export function PresensiProjectorModal({
             <div className="text-sm font-bold text-white flex items-center gap-2">
               <span>{presensi.title}</span>
               {activeSesi && (
-                <span className="px-2 py-0.5 rounded-full bg-[#c20000] text-[11px] font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-[#c20000] text-2xs font-semibold">
                   {activeSesi.name}
                 </span>
               )}

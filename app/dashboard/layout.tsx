@@ -587,7 +587,7 @@ export default function DashboardLayout({
                 >
                   IMM Solo Hub
                 </span>
-                <span className="text-[11px] font-medium text-slate-500 leading-tight truncate mt-0.5">
+                <span className="text-2xs font-medium text-slate-500 leading-tight truncate mt-0.5">
                   Powered by <span className="font-bold">Tim Dev IMM Solo</span>
                 </span>
               </div>
@@ -628,14 +628,14 @@ export default function DashboardLayout({
                   <X className="w-3.5 h-3.5" />
                 </button>
               ) : (
-                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-mono font-bold text-slate-400 bg-slate-200/60 border border-slate-200 px-1 py-0.5 rounded pointer-events-none">
+                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-2xs font-mono font-bold text-slate-400 bg-slate-200/60 border border-slate-200 px-1 py-0.5 rounded pointer-events-none">
                   Ctrl K
                 </span>
               )}
             </div>
 
             {/* Quick Helper / Collapse All Button */}
-            <div className="flex items-center justify-between px-1 text-[10px] text-slate-400 font-medium">
+            <div className="flex items-center justify-between px-1 text-2xs text-slate-400 font-medium">
               {menuSearch.trim() ? (
                 <span>Hasil pencarian modul</span>
               ) : (
@@ -743,11 +743,11 @@ export default function DashboardLayout({
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           {isGroupCollapsed && groupBadgeTotal > 0 && (
-                            <span className="min-w-4 h-4 px-1 bg-[#c20000] text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none shadow-xs">
+                            <span className="min-w-4 h-4 px-1 bg-[#c20000] text-white text-2xs font-semibold rounded-full flex items-center justify-center leading-none shadow-xs">
                               {groupBadgeTotal}
                             </span>
                           )}
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-semibold border border-slate-200/60">
+                          <span className="text-2xs font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-semibold border border-slate-200/60">
                             {visibleItems.length}
                           </span>
                           <ChevronDown
@@ -790,7 +790,7 @@ export default function DashboardLayout({
                                     {item.name}
                                   </span>
                                   {(item as any).badge > 0 && (
-                                    <span className="ml-auto shrink-0 min-w-5 h-4.5 px-1.5 bg-[#c20000] text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none shadow-sm">
+                                    <span className="ml-auto shrink-0 min-w-5 h-4.5 px-1.5 bg-[#c20000] text-white text-2xs font-semibold rounded-full flex items-center justify-center leading-none shadow-sm">
                                       {(item as any).badge > 99
                                         ? "99+"
                                         : (item as any).badge}
@@ -825,7 +825,7 @@ export default function DashboardLayout({
 
                         {/* Bulatan Badge Count di Pojok Kanan Atas (Sesuai Gambar 1 & 2) */}
                         <span
-                          className={`absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full text-[9px] font-bold flex items-center justify-center leading-none border border-white shadow-2xs ${
+                          className={`absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full text-2xs font-semibold flex items-center justify-center leading-none border border-white shadow-2xs ${
                             groupBadgeTotal > 0
                               ? "bg-[#c20000] text-white"
                               : "bg-slate-200/90 text-slate-600"
@@ -890,7 +890,7 @@ export default function DashboardLayout({
                   <p className="text-xs font-bold text-slate-800">
                     Modul Tidak Ditemukan
                   </p>
-                  <p className="text-[11px] text-slate-400 mt-1">
+                  <p className="text-2xs text-slate-400 mt-1">
                     Tidak ada modul cocok dengan &ldquo;{menuSearch}&rdquo;
                   </p>
                   <button
@@ -995,7 +995,7 @@ export default function DashboardLayout({
                     >
                       <Bell className="w-4.5 h-4.5" />
                       {totalNotifs > 0 && (
-                        <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-[#c20000] text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none border-2 border-white shadow-xs">
+                        <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-[#c20000] text-white text-2xs font-semibold rounded-full flex items-center justify-center leading-none border-2 border-white shadow-xs">
                           {totalNotifs > 99 ? "99+" : totalNotifs}
                         </span>
                       )}
@@ -1008,7 +1008,7 @@ export default function DashboardLayout({
                           <span className="text-xs font-bold text-slate-800">
                             Pemberitahuan
                           </span>
-                          <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                          <span className="text-2xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
                             {totalNotifs} Perhatian
                           </span>
                         </div>
@@ -1027,7 +1027,7 @@ export default function DashboardLayout({
                                 <p className="text-xs font-semibold text-slate-800 truncate">
                                   Pesan Kontak Baru
                                 </p>
-                                <p className="text-[11px] text-slate-500">
+                                <p className="text-2xs text-slate-500">
                                   {notifCounts.unread_messages} pesan belum
                                   dibaca
                                 </p>
@@ -1048,7 +1048,7 @@ export default function DashboardLayout({
                                 <p className="text-xs font-semibold text-slate-800 truncate">
                                   Pengajuan Akun
                                 </p>
-                                <p className="text-[11px] text-slate-500">
+                                <p className="text-2xs text-slate-500">
                                   {notifCounts.pending_account_requests} akun
                                   menunggu persetujuan
                                 </p>
@@ -1069,7 +1069,7 @@ export default function DashboardLayout({
                                 <p className="text-xs font-semibold text-slate-800 truncate">
                                   Berita Pending
                                 </p>
-                                <p className="text-[11px] text-slate-500">
+                                <p className="text-2xs text-slate-500">
                                   {notifCounts.pending_blogs} artikel menunggu
                                   review
                                 </p>
@@ -1083,7 +1083,7 @@ export default function DashboardLayout({
                               <p className="text-xs font-semibold text-slate-700">
                                 Semua Beres!
                               </p>
-                              <p className="text-[11px] text-slate-400 mt-0.5">
+                              <p className="text-2xs text-slate-400 mt-0.5">
                                 Tidak ada notifikasi yang membutuhkan tindakan.
                               </p>
                             </div>
@@ -1116,7 +1116,7 @@ export default function DashboardLayout({
                   <span className="text-xs font-bold text-slate-800 truncate max-w-[130px]">
                     {user?.name || "Administrator"}
                   </span>
-                  <span className="text-[10px] font-medium text-slate-500 mt-0.5 truncate max-w-[130px]">
+                  <span className="text-2xs font-medium text-slate-500 mt-0.5 truncate max-w-[130px]">
                     {user?.roles?.[0]?.name || "Super Admin"}
                   </span>
                 </div>
@@ -1129,10 +1129,10 @@ export default function DashboardLayout({
                     <p className="text-xs font-bold text-slate-900 truncate">
                       {user?.name || "Administrator"}
                     </p>
-                    <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                    <p className="text-2xs text-slate-400 truncate mt-0.5">
                       {user?.email || "admin@immsolo.or.id"}
                     </p>
-                    <span className="inline-block mt-1.5 text-[9px] font-bold text-slate-600 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
+                    <span className="inline-block mt-1.5 text-2xs font-semibold text-slate-600 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
                       {user?.roles?.[0]?.name || "Super Admin"}
                     </span>
                   </div>
@@ -1175,8 +1175,8 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-slate-50/50">
+        {/* Page Content — scope tipografi skala emas khusus panel admin */}
+        <main className="panel-typography flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-slate-50/50">
           <div className="w-full">
             <AnnouncementBanner />
             {children}
@@ -1219,11 +1219,11 @@ export default function DashboardLayout({
               {activeTooltip.text}
             </span>
             {activeTooltip.badge !== undefined && activeTooltip.badge > 0 && (
-              <span className="bg-[#c20000] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none shadow-xs">
+              <span className="bg-[#c20000] text-white text-2xs font-semibold px-1.5 py-0.5 rounded-full leading-none shadow-xs">
                 {activeTooltip.badge > 99 ? "99+" : activeTooltip.badge}
               </span>
             )}
-            <span className="text-[10px] font-medium text-slate-400">
+            <span className="text-2xs font-medium text-slate-400">
               ({activeTooltip.category})
             </span>
           </div>,

@@ -158,7 +158,7 @@ export function PresensiSesiPanel({ presensiId, sesis, activeSesiId, onSelect, o
                 </div>
               </button>
               <span
-                className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold border ${
+                className={`inline-flex items-center px-2 py-0.5 rounded text-2xs font-semibold border ${
                   s.is_open ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'
                 }`}
               >
@@ -168,7 +168,7 @@ export function PresensiSesiPanel({ presensiId, sesis, activeSesiId, onSelect, o
                 onClick={() => handleToggle(s)}
                 disabled={toggling === s.id}
                 variant="outline"
-                className="h-8 px-2.5 rounded-lg text-[11px] font-bold"
+                className="h-8 px-2.5 rounded-lg text-2xs font-semibold"
                 title={s.is_open ? 'Tutup sesi' : 'Buka sesi'}
               >
                 {toggling === s.id ? (

@@ -134,7 +134,7 @@ export function PantauFormClient() {
         <button
           type="button"
           onClick={(event) => { event.stopPropagation(); setPreviewFile(values[0] as string); }}
-          className="inline-flex max-w-[220px] items-center gap-1.5 truncate rounded border border-blue-200 bg-blue-50 px-2 py-1 text-left text-[11px] font-medium text-blue-700 transition-colors hover:bg-blue-100"
+          className="inline-flex max-w-[220px] items-center gap-1.5 truncate rounded border border-blue-200 bg-blue-50 px-2 py-1 text-left text-2xs font-medium text-blue-700 transition-colors hover:bg-blue-100"
           title="Pratinjau berkas"
         >
           <FileText className="h-3.5 w-3.5 shrink-0" />
@@ -237,7 +237,7 @@ export function PantauFormClient() {
               </div>
             )}
 
-            <div className="flex items-center justify-between border-b border-slate-300 bg-[#f1f3f4] px-4 py-2 text-[11px] font-mono text-slate-600">
+            <div className="flex items-center justify-between border-b border-slate-300 bg-[#f1f3f4] px-4 py-2 text-2xs font-mono text-slate-600">
               <span><strong className="mr-3 text-slate-700">fx</strong>Formulir: {monitorData.form.title} | Total Kolom: {monitorData.fields.length + (hasEmail ? 2 : 1)}</span>
               <span className="hidden sm:inline">Geser tabel untuk melihat seluruh kolom</span>
             </div>
@@ -280,7 +280,7 @@ export function PantauFormClient() {
             <div className="max-h-[70vh] overflow-auto border-b border-slate-300">
               <table className="w-full min-w-max border-collapse border border-slate-300 bg-white text-left text-xs">
                 <thead>
-                  <tr className="border-b border-slate-300 bg-[#e9ecef] font-mono text-[11px] font-bold text-slate-600">
+                  <tr className="border-b border-slate-300 bg-[#e9ecef] font-mono text-2xs font-semibold text-slate-600">
                     <th className="w-12 border-r border-slate-300 bg-[#dee2e6] p-1 text-center text-slate-500">#</th>
                     <th className="border-r border-slate-300 px-3 py-1 text-center">{getColumnLetter(0)}</th>
                     {hasEmail && <th className="border-r border-slate-300 px-3 py-1 text-center">{getColumnLetter(1)}</th>}
@@ -298,7 +298,7 @@ export function PantauFormClient() {
                       <th key={field.id} className="min-w-[180px] max-w-[280px] border-r border-slate-300 px-3 py-2.5">
                         <div className="flex items-center justify-between gap-2">
                           <span className="truncate" title={field.label}>{field.label}</span>
-                          <span className="shrink-0 rounded bg-slate-200 px-1 py-0.5 text-[9px] font-mono uppercase text-slate-600">{field.type}</span>
+                          <span className="shrink-0 rounded bg-slate-200 px-1 py-0.5 text-2xs font-mono uppercase text-slate-600">{field.type}</span>
                         </div>
                       </th>
                     ))}
@@ -318,14 +318,14 @@ export function PantauFormClient() {
                       onClick={() => setSelectedResponse(item)}
                       className={`cursor-pointer align-top transition-colors hover:bg-emerald-50/40 ${index % 2 ? 'bg-slate-50/40' : 'bg-white'}`}
                     >
-                      <td className="w-12 select-none border-r border-slate-300 bg-[#f8f9fa] p-2 text-center font-mono text-[11px] text-slate-500">
+                      <td className="w-12 select-none border-r border-slate-300 bg-[#f8f9fa] p-2 text-center font-mono text-2xs text-slate-500">
                         {(page - 1) * monitorData.responses.per_page + index + 1}
                       </td>
-                      <td className="whitespace-nowrap border-r border-slate-200 px-3 py-2 text-[11px] text-slate-600">
+                      <td className="whitespace-nowrap border-r border-slate-200 px-3 py-2 text-2xs text-slate-600">
                         {new Date(item.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </td>
                       {hasEmail && (
-                        <td className="whitespace-nowrap border-r border-slate-200 px-3 py-2 font-mono text-[11px] text-slate-800">
+                        <td className="whitespace-nowrap border-r border-slate-200 px-3 py-2 font-mono text-2xs text-slate-800">
                           {item.email ? <span className="inline-flex items-center gap-1.5 rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-emerald-900"><ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />{item.email}</span> : <span className="text-slate-300">-</span>}
                         </td>
                       )}
@@ -380,7 +380,7 @@ export function PantauFormClient() {
           >
             <div className="mb-5 flex items-start justify-between border-b border-slate-200 pb-4">
               <div>
-                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-mono font-semibold uppercase text-emerald-800">Data Responden #{selectedResponse.id}</span>
+                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-2xs font-mono font-semibold uppercase text-emerald-800">Data Responden #{selectedResponse.id}</span>
                 <h2 id="response-detail-title" className="mt-2 text-lg font-bold text-[#0f172a]">Rincian Jawaban Formulir</h2>
                 <p className="mt-0.5 text-xs text-slate-500">Disubmit pada: {new Date(selectedResponse.created_at).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}</p>
               </div>
@@ -402,7 +402,7 @@ export function PantauFormClient() {
                   <div key={field.id} className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-4">
                     <div className="mb-1.5 flex items-center justify-between gap-2">
                       <span className="text-xs font-bold text-slate-700">{index + 1}. {field.label}</span>
-                      <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-mono uppercase text-slate-500">{field.type}</span>
+                      <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-2xs font-mono uppercase text-slate-500">{field.type}</span>
                     </div>
                     {hasFile ? (
                       <button

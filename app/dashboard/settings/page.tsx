@@ -597,7 +597,7 @@ export default function SettingsManagement() {
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-bold text-slate-900 text-sm">Mode maintenance global</h3>
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${settings.maintenance_mode === 'true' ? 'bg-red-100 text-[#a30000]' : 'bg-emerald-50 text-emerald-700'}`}>
+                      <span className={`rounded-full px-2 py-0.5 text-2xs font-semibold uppercase tracking-wide ${settings.maintenance_mode === 'true' ? 'bg-red-100 text-[#a30000]' : 'bg-emerald-50 text-emerald-700'}`}>
                         {settings.maintenance_mode === 'true' ? 'Aktif' : 'Nonaktif'}
                       </span>
                     </div>
@@ -620,7 +620,7 @@ export default function SettingsManagement() {
                         <h3 className="text-sm font-bold text-slate-900">Maintenance per modul</h3>
                         <p className="mt-1 text-xs text-slate-500">Atur modul satu per satu tanpa menutup bagian website lainnya.</p>
                       </div>
-                      <span className="w-fit rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                      <span className="w-fit rounded-full bg-slate-100 px-2.5 py-1 text-2xs font-semibold text-slate-600">
                         {enabledMaintenanceModules} dari {maintenanceModuleOptions.length} modul aktif
                       </span>
                     </div>
@@ -759,7 +759,7 @@ export default function SettingsManagement() {
                                 <span className="min-w-0">
                                   <span className="block text-sm font-semibold text-slate-800">{label}</span>
                                   <span className="mt-1 block text-xs leading-relaxed text-slate-500">{description}</span>
-                                  <span className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${enabled ? 'bg-orange-100 text-orange-800' : 'bg-slate-100 text-slate-500'}`}>
+                                  <span className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-2xs font-semibold uppercase tracking-wide ${enabled ? 'bg-orange-100 text-orange-800' : 'bg-slate-100 text-slate-500'}`}>
                                     {enabled ? 'Maintenance aktif' : 'Tersedia'}
                                   </span>
                                 </span>

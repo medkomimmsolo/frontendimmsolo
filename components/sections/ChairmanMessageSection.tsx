@@ -125,7 +125,7 @@ export default function ChairmanMessageSection({
                 <p className="text-xs font-semibold text-[#c20000] uppercase tracking-wider mt-0.5">
                   Ketua Umum • {chairmanPeriod}
                 </p>
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-2xs text-slate-500 mt-1">
                   PC IMM Kota Surakarta
                 </p>
               </div>
@@ -163,7 +163,7 @@ export default function ChairmanMessageSection({
                 <span className="font-semibold text-slate-600 italic">
                   &ldquo;Anggun dalam Moral, Unggul dalam Intelektual&rdquo;
                 </span>
-                <span className="font-mono text-[#c20000] font-bold text-[11px] uppercase tracking-wider">
+                <span className="font-mono text-[#c20000] font-semibold text-2xs uppercase tracking-wider">
                   Fastabiqul Khairat
                 </span>
               </div>

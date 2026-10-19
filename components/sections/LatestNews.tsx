@@ -156,7 +156,7 @@ export default function LatestNews({ posts = [] }: LatestNewsProps) {
                           {post.category?.name || 'Berita'}
                         </span>
                         <span 
-                          className="text-[11px] text-slate-400 font-medium inline-flex items-center gap-1"
+                          className="text-2xs text-slate-400 font-medium inline-flex items-center gap-1"
                           suppressHydrationWarning
                         >
                           <Calendar className="w-3 h-3 text-slate-400" />

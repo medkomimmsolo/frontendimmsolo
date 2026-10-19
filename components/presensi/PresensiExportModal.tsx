@@ -254,10 +254,10 @@ export function PresensiExportModal({
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Kolom</label>
               <div className="flex gap-2">
-                <button type="button" onClick={() => setColumns([...DEFAULT_COLUMNS, ...formFields.filter((field) => !['nama', 'email', 'phone', 'asal'].includes(field.key)).map((field) => `form_${field.key}`)])} className="text-[11px] font-semibold text-[#c20000] hover:underline">
+                <button type="button" onClick={() => setColumns([...DEFAULT_COLUMNS, ...formFields.filter((field) => !['nama', 'email', 'phone', 'asal'].includes(field.key)).map((field) => `form_${field.key}`)])} className="text-2xs font-semibold text-[#c20000] hover:underline">
                   Semua
                 </button>
-                <button type="button" onClick={() => setColumns([])} className="text-[11px] font-semibold text-slate-400 hover:underline">
+                <button type="button" onClick={() => setColumns([])} className="text-2xs font-semibold text-slate-400 hover:underline">
                   Kosongkan
                 </button>
               </div>

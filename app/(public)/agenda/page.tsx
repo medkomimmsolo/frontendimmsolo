@@ -117,7 +117,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
   }
 
   return (
-    <main className="min-h-screen bg-slate-50/70 pt-28 pb-20">
+    <main className="panel-typography min-h-screen bg-slate-50/70 pt-28 pb-20">
       
       {/* Breadcrumb & Title Section */}
       <section className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-8">

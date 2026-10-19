@@ -177,7 +177,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
               <CheckCircle2 className="w-7 h-7 text-emerald-600" />
             </div>
             <div>
-              <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              <span className="text-2xs font-semibold text-emerald-700 uppercase tracking-wider bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                 Berhasil Dikirim
               </span>
               <h1 className="text-xl sm:text-2xl font-bold text-[#0f172a] mt-1" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
@@ -338,7 +338,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
                 Alamat email aktif untuk verifikasi identitas pendaftar & mencegah spam.
               </p>
             </div>
-            <span className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold shrink-0">
+            <span className="inline-flex items-center gap-1 text-2xs font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold shrink-0">
               <ShieldCheck className="w-3 h-3 text-emerald-600" /> Wajib Email
             </span>
           </div>
@@ -356,7 +356,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
             />
           </div>
 
-          <p className="text-[11px] text-slate-400 mt-2 italic">
+          <p className="text-2xs text-slate-400 mt-2 italic">
             {form.limit_one_response
               ? '● Formulir ini dibatasi 1 kali pengisian untuk setiap alamat email.'
               : '● Tanggapan formulir ini akan tercatat atas nama email Anda.'}
@@ -713,7 +713,7 @@ export default function FormFillClient({ form, preview = false }: { form: any; p
         </button>
       </div>
 
-      <p className="text-center text-[11px] text-slate-400 pt-6">
+      <p className="text-center text-2xs text-slate-400 pt-6">
         Formulir resmi ini dibuat dan dikelola oleh PC IMM Kota Surakarta.
       </p>
     </form>

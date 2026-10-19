@@ -488,7 +488,7 @@ export default function Navbar() {
                 <LogIn className="w-4 h-4" />
                 <span>Masuk ke Panel Admin</span>
               </Link>
-              <p className="text-[11px] text-center text-slate-400 font-mono">
+              <p className="text-2xs text-center text-slate-400 font-mono">
                 Fastabiqul Khairat • immsolo.or.id
               </p>
             </div>

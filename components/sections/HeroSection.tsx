@@ -129,7 +129,7 @@ export default function HeroSection({ stats, events = [] }: HeroProps) {
                           className="shrink-0 text-center w-[58px] bg-slate-950/80 rounded-md py-2 border border-slate-800 group-hover:border-red-500/40 transition-colors shadow-inner" 
                           suppressHydrationWarning
                         >
-                          <div className="text-[10px] text-[#ff4d4d] font-bold uppercase tracking-wider mb-0.5 leading-none" suppressHydrationWarning>
+                          <div className="text-2xs text-[#ff4d4d] font-bold uppercase tracking-wider mb-0.5 leading-none" suppressHydrationWarning>
                             {new Date(event.event_date).toLocaleDateString('id-ID', { month: 'short', timeZone: 'Asia/Jakarta' })}
                           </div>
                           <div className="text-xl font-black text-white leading-none" suppressHydrationWarning>
@@ -142,7 +142,7 @@ export default function HeroSection({ stats, events = [] }: HeroProps) {
                           <h3 className="text-xs sm:text-sm font-bold text-white mb-1.5 group-hover:text-[#ff6666] transition-colors line-clamp-1 leading-snug">
                             {event.title}
                           </h3>
-                          <div className="flex flex-col gap-1 text-[11px] text-slate-400 font-medium">
+                          <div className="flex flex-col gap-1 text-2xs text-slate-400 font-medium">
                             <div className="flex items-center gap-1.5 truncate">
                               <MapPin className="w-3 h-3 shrink-0 text-[#ff4d4d]"/> 
                               <span className="truncate">{event.location || 'Surakarta'}</span>

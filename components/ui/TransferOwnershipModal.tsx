@@ -122,7 +122,7 @@ export function TransferOwnershipModal({
                 ))}
               </select>
             )}
-            <p className="text-[11px] text-slate-400">
+            <p className="text-2xs text-slate-400">
               User baru akan dapat melihat, mengedit, dan mengelola data ini di dashboard mereka.
             </p>
           </div>
