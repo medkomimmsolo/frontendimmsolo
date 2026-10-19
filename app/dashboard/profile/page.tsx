@@ -19,6 +19,7 @@ export default function ProfileSettings() {
     name: '',
     username: '',
     email: '',
+    current_password: '',
     password: '',
     password_confirmation: '',
   });
@@ -32,6 +33,7 @@ export default function ProfileSettings() {
           name: user.name || '',
           username: user.username || '',
           email: user.email || '',
+          current_password: '',
           password: '',
           password_confirmation: '',
         });
@@ -59,21 +61,29 @@ export default function ProfileSettings() {
       setIsLoading(false);
       return;
     }
-    
+
+    if (profile.password && !profile.current_password) {
+      toast.error('Isi kata sandi saat ini untuk mengganti kata sandi');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       await api.put('/profile', {
         name: profile.name,
         username: profile.username || undefined,
         email: profile.email,
+        current_password: profile.password ? profile.current_password : undefined,
         password: profile.password || undefined,
         password_confirmation: profile.password_confirmation || undefined,
       });
-      
+
       toast.success('Profil berhasil diperbarui');
-      
+
       // Clear password fields after successful update
       setProfile(prev => ({
         ...prev,
+        current_password: '',
         password: '',
         password_confirmation: '',
       }));
@@ -206,28 +216,43 @@ export default function ProfileSettings() {
           <div className="flex-1 min-w-0">
             <Card className="rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden bg-white">
               <CardContent className="p-6 sm:p-8 space-y-6">
-                
+
+                <div>
+                  <label className={labelClass}>Kata Sandi Saat Ini</label>
+                  <input
+                    type="password"
+                    name="current_password"
+                    value={profile.current_password}
+                    onChange={handleChange}
+                    className={inputClass}
+                    placeholder="Wajib diisi untuk mengganti kata sandi"
+                    autoComplete="current-password"
+                  />
+                </div>
+
                 <div>
                   <label className={labelClass}>Kata Sandi Baru</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     name="password"
                     value={profile.password}
                     onChange={handleChange}
                     className={inputClass}
                     placeholder="Biarkan kosong jika tidak diubah"
+                    autoComplete="new-password"
                   />
                 </div>
 
                 <div>
                   <label className={labelClass}>Konfirmasi Kata Sandi Baru</label>
-                  <input 
-                    type="password" 
+                  <input
+                    type="password"
                     name="password_confirmation"
                     value={profile.password_confirmation}
                     onChange={handleChange}
                     className={inputClass}
                     placeholder="Ketik ulang kata sandi baru"
+                    autoComplete="new-password"
                   />
                 </div>
 

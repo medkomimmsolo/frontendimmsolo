@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import api from '@/lib/api';
+import { siteUrl } from '@/lib/env';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { QRCodeSVG } from 'qrcode.react';
@@ -71,17 +72,11 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isPageSaving, setIsPageSaving] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [siteOrigin, setSiteOrigin] = useState(process.env.NEXT_PUBLIC_SITE_URL || 'https://immsolo.or.id');
+  const [siteOrigin, setSiteOrigin] = useState(siteUrl());
 
   useEffect(() => {
     params.then((p) => setPageId(p.id));
   }, [params]);
-
-  useEffect(() => {
-    if (!process.env.NEXT_PUBLIC_SITE_URL) {
-      setSiteOrigin(window.location.origin);
-    }
-  }, []);
 
   const fetchPage = useCallback(async () => {
     if (!pageId) return;

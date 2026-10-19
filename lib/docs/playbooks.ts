@@ -34,7 +34,7 @@ export interface PlaybookGroup {
   slugs: string[];
 }
 
-const RBAC_INTRO = `Hak akses ditentukan oleh role + permission. **Denied (blokir) selalu mengalahkan allow**, dan pembatasan kategori post berlaku per pengguna. Menu sidebar otomatis tampil hanya untuk permission yang dimiliki.`;
+const ATURAN_IZIN = `Aturannya sederhana: jika sebuah menu **diblokir** untuk Anda, menu itu tertutup walau peran Anda sebesar apa pun. Menu yang tidak Anda miliki izinnya tidak akan tampil — jadi tampilan dashboard Anda bisa berbeda dengan rekan, dan itu wajar.`;
 
 export const playbookGroups: PlaybookGroup[] = [
   { label: 'Memulai', slugs: ['panduan-cepat', 'pengenalan-sistem', 'beranda-dashboard', 'autentikasi-profil'] },
@@ -50,7 +50,7 @@ export const playbooks: Playbook[] = [
   {
     slug: 'panduan-cepat',
     title: 'Panduan Cepat Pengurus Baru',
-    short: 'Cukup 10 menit: masuk, ganti sandi, lengkapi profil, dan pahami cara kerja dashboard.',
+    short: 'Baru dapat akun? Ikuti langkah 10 menit ini sampai Anda nyaman memakai dashboard.',
     icon: 'rocket',
     group: 'Memulai',
     related: ['pengenalan-sistem', 'autentikasi-profil', 'faq-pemecahan-masalah'],
@@ -61,14 +61,14 @@ export const playbooks: Playbook[] = [
         blocks: [
           {
             type: 'p',
-            text: 'Anda baru mendapat akun dan tidak tahu mulai dari mana? Playbook ini untuk Anda. Dashboard adalah "ruang belakang" website: semua yang Anda buat di sini akan tampil di halaman publik — berita di /post, agenda di /agenda, formulir di /form/[slug], dan seterusnya.',
+            text: 'Cara paling mudah memahaminya: **dashboard** adalah dapur tempat kita menyiapkan isi website. Semua yang Anda buat di dashboard akan tampil sendiri di halaman publik — berita, agenda, formulir, dan lain-lain.',
           },
           {
             type: 'list',
             items: [
-              'Menu di sidebar hanya menampilkan modul yang **Anda punya izinnya** — menu yang hilang berarti belum diizinkan, bukan rusak.',
-              'Semua modul mengikuti pola yang sama: **daftar → tombol Tambah → formulir → simpan → cek pratinjau publik**.',
-              'Gambar otomatis dikompres ke WebP; yang perlu Anda perhatikan hanya **rasio**.',
+              'Menu di sebelah kiri hanya menampilkan menu yang **Anda beri izin**. Menu rekan Anda tidak ada di tempat Anda? Itu wajar, karena wewenangnya berbeda.',
+              'Semua menu punya pola yang sama: **buka menu → tombol Tambah → isi formulir → Simpan**. Setelah faham satu, sisanya jadi mudah.',
+              'Foto yang diunggah otomatis diringkas oleh sistem agar website tetap cepat. Anda hanya perlu memperhatikan **bentuk (rasio) fotonya** — sistem akan memberi tahu bila bentuknya kurang pas.',
             ],
           },
         ],
@@ -80,33 +80,32 @@ export const playbooks: Playbook[] = [
           {
             type: 'steps',
             items: [
-              { title: 'Login', desc: 'immsolo.or.id/login dengan kredensial dari super-admin.' },
-              { title: 'Ganti kata sandi', desc: 'Buka /dashboard/profile dan ganti sandi sementara Anda.' },
-              { title: 'Lengkapi profil', desc: 'Nama tampilan, foto, dan kontak — dipakai di audit log dan tulisan "oleh" pada konten.' },
-              { title: 'Jelajahi dashboard', desc: 'Klik satu per satu menu di sidebar; halaman Beranda Dashboard merangkum data terbaru.' },
-              { title: 'Coba menulis', desc: 'Buat artikel draft di /dashboard/blog → Tambah — aman, karena draft tidak tampil publik sampai Anda publish.' },
+              { title: 'Masuk ke dashboard', desc: 'Kunjungi immsolo.or.id/login, lalu masukkan nama akun dan kata sandi dari super-admin.' },
+              { title: 'Ganti kata sandi', desc: 'Klik foto profil di pojok atas → Profil, lalu ganti kata sandi sementara Anda.' },
+              { title: 'Lengkapi profil', desc: 'Isi nama tampilan, foto, dan kontak. Ini dipakai sebagai tanda "karya siapa ini" pada konten.' },
+              { title: 'Jalan-jalan dulu', desc: 'Klik satu per satu menu di sebelah kiri. Aman — yang belum ditekan Simpan tidak akan berubah apa-apa.' },
+              { title: 'Coba membuat', desc: 'Buat satu artikel "Draf" di menu Berita. Draf tidak tampil di publik sampai Anda pilih tombol tayang.' },
             ],
           },
         ],
       },
       {
         id: 'prinsip-kerja',
-        title: 'Prinsip Kerja',
+        title: 'Tiga Kebiasaan Baik',
         blocks: [
           {
             type: 'list',
             items: [
-              '**Draft dulu, publish kemudian** — konten penting sebaiknya direview rekan sebelum tayang.',
-              '**Pratinjau sebelum tayang** — hampir semua modul punya tombol pratinjau/tautan publik.',
-              '**Blokir menang atas izin** — kalau module diblokir per pengguna, role apa pun tidak menolong.',
-              '**Jangan simpan sandi di tempat umum** — satu akun = satu orang, agar audit log akurat.',
+              '**Draf dulu, tayang kemudian** — selesaikan isinya, cek pratinjau, baru tayangkan.',
+              '**Minta teman membaca dahulu** — mata kedua sangat membantu menangkap salah tulis.',
+              '**Jangan bagikan kata sandi** — satu akun untuk satu orang, supaya riwayat catatan tetap jujur.',
             ],
           },
           {
             type: 'callout',
             tone: 'info',
-            title: 'Tersesat / bingung?',
-            text: 'Cek playbook modul terkait di sidebar, atau lompat ke **Pemecahan Masalah & FAQ** — daftar masalah umum dan solusinya.',
+            title: 'Bingung atau macet?',
+            text: 'Buka playbuk menu yang sedang Anda pakai lewat daftar di kiri, atau langsung ke bagian **Pemecahan Masalah & FAQ**.',
           },
         ],
       },
@@ -115,7 +114,7 @@ export const playbooks: Playbook[] = [
   {
     slug: 'pengenalan-sistem',
     title: 'Pengenalan Sistem',
-    short: 'Peta modul, arsitektur, peran bawaan, dan aturan hak akses yang menjadi fondasi seluruh playbook.',
+    short: 'Daftar menu dashboard, peran pengurus, dan aturan izin akses — paham ini, sisanya gampang.',
     icon: 'book',
     group: 'Memulai',
     related: ['panduan-cepat', 'pengguna-role-hak-akses', 'faq-pemecahan-masalah'],
@@ -126,46 +125,53 @@ export const playbooks: Playbook[] = [
         blocks: [
           {
             type: 'p',
-            text: 'Playbook ini adalah panduan penggunaan **sistem website PC IMM Kota Surakarta** untuk pengurus dan admin. Mirip playbook SATUSEHAT, dokumen ini bukan sekadar tutorial langkah demi langkah, melainkan kumpulan modul panduan yang saling berkaitan: setiap modul dashboard punya playbook sendiri yang bisa dibuka dari sidebar.',
+            text: 'Playbuk ini adalah buku petunjuk memakai website PC IMM Kota Surakarta, ditulis untuk **pengurus**, bukan untuk programmer. Setiap menu di dashboard punya satu playbuk sendiri — dibuka lewat daftar di sebelah kiri.',
           },
           {
             type: 'p',
-            text: 'Sistem terdiri dari dua sisi: **halaman publik** (immsolo.or.id — konten yang dibaca masyarakat) dan **dashboard admin** (immsolo.or.id/dashboard — tempat pengurus mengelola konten). Setiap playbook menjelaskan keduanya.',
+            text: 'Dua kata yang akan sering muncul: **halaman publik** (yang dilihat masyarakat di immsolo.or.id) dan **dashboard** (ruang kerja pengurus di immsolo.or.id/dashboard).',
           },
           {
             type: 'callout',
             tone: 'info',
-            title: 'Cara pakai playbook',
-            text: 'Gunakan sidebar kiri untuk berpindah modul, dan panel **"Di halaman ini"** untuk melompat ke sub-bagian. Tautan berwarna merah mengarah ke halaman/fitur terkait.',
+            title: 'Cara memakai playbuk',
+            text: 'Cari menu playbuk di sebelah kiri, atau lompat cepat ke sub-bagian memakai daftar "Di halaman ini" di sebelah kanan. Tautan warna merah menuju halaman terkait.',
           },
         ],
       },
       {
-        id: 'arsitektur',
-        title: 'Arsitektur Singkat',
+        id: 'kamus-istilah',
+        title: 'Kamus Istilah',
         blocks: [
           {
-            type: 'list',
-            items: [
-              '**Frontend** — Next.js (App Router) di immsolo.or.id: halaman publik + dashboard, dengan PWA (bisa offline).',
-              '**Backend** — Laravel REST API (`/api/v1`, 26 controller): otentikasi token, validasi, audit log.',
-              '**Storage** — file & gambar disimpan sebagai **WebP** (dikompres otomatis saat upload di browser).',
-              '**Keamanan** — RBAC berbasis permission, captcha, rate limit, dan maintenance mode.',
+            type: 'table',
+            head: ['Istilah', 'Artinya'],
+            rows: [
+              ['Dashboard', 'Ruang kerja pengurus untuk mengatur isi website (harus masuk dengan akun).'],
+              ['Playbuk', 'Buku petunjuk pemakaian satu fitur/menu.'],
+              ['Izin akses (permission)', 'Kunci yang menentukan menu apa saja yang boleh dibuka seseorang.'],
+              ['Peran (role)', 'Sekumpulan kunci izin yang dipakai bersama, contohnya peran "admin" atau "bidang".'],
+              ['Draf (draft)', 'Konten yang belum tayang — hanya Anda yang melihatnya.'],
+              ['Tayangkan (publish)', 'Membuat konten tampil di halaman publik.'],
+              ['Pratinjau', 'Melihat tampilan konten sebenarnya sebelum tayang.'],
+              ['WebP', 'Bentuk gambar yang lebih ringan; sistem mengubahnya otomatis saat unggah.'],
+              ['Mode perawatan (maintenance)', 'Keadaan ketika suatu halaman ditutup sementara untuk perbaikan.'],
+              ['Riwayat catatan (log)', 'Catatan otomatis: siapa mengerjakan apa, dan kapan.'],
             ],
-          },
-          {
-            type: 'flow',
-            items: ['Browser', 'Next.js (Publik / Dashboard)', 'REST API Laravel', 'Database & Storage'],
           },
         ],
       },
       {
         id: 'peta-modul',
-        title: 'Peta Modul',
+        title: 'Peta Menu Dashboard',
         blocks: [
           {
+            type: 'p',
+            text: 'Berikut daftar semua menu yang ada di dashboard beserta kode izinnya. Anda tidak perlu menghafalnya — cukup tunjukkan kode ini kepada super-admin bila butuh diatur.',
+          },
+          {
             type: 'table',
-            head: ['Modul', 'Route Dashboard', 'Permission'],
+            head: ['Menu', 'Alamat Dashboard', 'Kode Izin'],
             rows: [
               ['Berita & Kategori', '/dashboard/blog', 'manage-blog'],
               ['Agenda Kegiatan', '/dashboard/events', 'manage-event'],
@@ -174,100 +180,52 @@ export const playbooks: Playbook[] = [
               ['Dokumen', '/dashboard/documents', 'manage-document'],
               ['Formulir Pendaftaran', '/dashboard/forms', 'manage-forms'],
               ['Presensi Digital', '/dashboard/presensi', 'manage-presensi'],
-              ['Biolink (Linktree)', '/dashboard/links', 'manage-links'],
+              ['Biolink (Kumpulan Tautan)', '/dashboard/links', 'manage-links'],
               ['Tautan Pendek', '/dashboard/shortlinks', 'manage-shortlinks'],
               ['Kotak Masuk', '/dashboard/messages', 'manage-messages'],
-              ['Pengumuman Internal', '/dashboard/announcements', 'manage-announcements'],
-              ['Media Library', '/dashboard/media', 'manage-media'],
+              ['Pengumuman', '/dashboard/announcements', 'manage-announcements'],
+              ['Media Library (Gudang Foto)', '/dashboard/media', 'manage-media'],
               ['Pengajuan Akun', '/dashboard/account-requests', 'manage-account-requests'],
-              ['Pengguna, Role & Hak Akses', '/dashboard/users', 'manage-users (super-admin)'],
-              ['Log Aktivitas', '/dashboard/audit-logs', 'manage-audit-logs'],
-              ['Pengaturan Portal', '/dashboard/settings', 'manage-settings'],
+              ['Pengguna, Peran & Izin', '/dashboard/users', 'super-admin'],
+              ['Riwayat Catatan', '/dashboard/audit-logs', 'manage-audit-logs'],
+              ['Pengaturan Website', '/dashboard/settings', 'manage-settings'],
             ],
           },
         ],
       },
       {
         id: 'peran-bawaan',
-        title: 'Peran (Role) Bawaan',
+        title: 'Peran Pengurus',
         blocks: [
           {
             type: 'table',
-            head: ['Role', 'Cakupan'],
+            head: ['Peran', 'Wilayah kerjanya'],
             rows: [
-              ['super-admin', 'Akses penuh seluruh modul, tidak bisa dibatasi, mengelola user/role/hak akses.'],
-              ['admin', 'Pengelola inti PC: konten, formulir, presensi, media, pengaturan (sesuai permission yang diberikan).'],
-              ['bidang', 'Pengurus bidang: konten dan data milik bidangnya.'],
-              ['komisariat', 'Pengurus komisariat: umumnya mengelola artikel yang butuh review, dan data miliknya.'],
-              ['Role custom', 'Dapat dibuat super-admin dengan kombinasi permission bebas.'],
+              ['super-admin', 'Pengurus tertinggi: semua menu terbuka, termasuk mengatur akun dan izin orang lain.'],
+              ['admin', 'Pengurus harian PC — mengisi website dan layanan sesuai izin yang diberikan.'],
+              ['bidang', 'Pengurus salah satu bidang — mengurus isi dan data milik bidangnya sendiri.'],
+              ['komisariat', 'Pengurus komisariat — biasanya menulis berita yang perlu diperiksa pengurus pusat dahulu.'],
+              ['Peran lain (custom)', ' bisa dibuat oleh super-admin sesuai kebutuhan, misalnya "humas" atau "editor-foto".'],
             ],
           },
-          { type: 'callout', tone: 'info', title: 'Aturan hak akses', text: RBAC_INTRO },
+          { type: 'callout', tone: 'info', title: 'Aturan izin akses', text: ATURAN_IZIN },
         ],
       },
       {
         id: 'konvensi-gambar',
-        title: 'Konvensi Upload Gambar',
+        title: 'Aturan Mengunggah Foto',
         blocks: [
           {
             type: 'p',
-            text: 'Semua upload gambar dinilai berdasarkan **rasio**, bukan resolusi — resolusi berapa pun diterima (maks berkas 2MB setelah kompresi).',
+            text: 'Aturan utamanya cuma satu: **bentuk (rasio) foto** supaya sesuai tempatnya — berapa pun ukurannya (tetap di bawah 2MB setelah diperiksa sistem).',
           },
           {
             type: 'list',
             items: [
-              'Gambar otomatis dikompres ke **WebP** di browser — cepat dimuat, hemat kuota.',
-              'Jika rasio sudah pas (mis. 16:9), gambar diutuhkan **tanpa dipotong**.',
-              'Jika rasio beda, alat potong (crop) terbuka otomatis agar Anda memilih bagian yang ditampilkan.',
-              'Format rasio: banner Google Form **4:1**, banner sedang **21:9**, standar **16:9**, avatar/logo **1:1**, portrait **3:4**.',
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    slug: 'autentikasi-profil',
-    title: 'Akun, Login & Profil',
-    short: 'Masuk ke dashboard, ganti kata sandi, atur profil, dan pemulihan akses.',
-    icon: 'key',
-    group: 'Memulai',
-    route: '/login',
-    sections: [
-      {
-        id: 'login',
-        title: 'Login ke Dashboard',
-        blocks: [
-          {
-            type: 'steps',
-            items: [
-              { title: 'Buka halaman login', desc: 'Kunjungi immsolo.or.id/login atau klik tombol Masuk di navbar.' },
-              { title: 'Isi kredensial', desc: 'Email/username + kata sandi yang diberikan super-admin.' },
-              { title: 'Masuk dashboard', desc: 'Menu sidebar hanya menampilkan modul sesuai hak akses Anda.' },
-            ],
-          },
-          {
-            type: 'callout',
-            tone: 'warning',
-            title: 'Batasi percobaan',
-            text: 'Kesalahan login berulang memicu pembatasan (throttle) sementara. Jika lupa kata sandi, hubungi super-admin — bukan mencoba berulang.',
-          },
-        ],
-      },
-      {
-        id: 'profil',
-        title: 'Profil & Kata Sandi',
-        blocks: [
-          {
-            type: 'p',
-            text: 'Di **/dashboard/profile** Anda dapat mengubah nama, data kontak, dan kata sandi. Kata sandi baru berlaku pada login berikutnya.',
-          },
-          {
-            type: 'list',
-            items: [
-              'Keluar (logout) menghapus sesi di browser tersebut.',
-              'Akun yang **dinonaktifkan** oleh super-admin tidak bisa login sampai diaktifkan kembali.',
-              'Status login dijaga dengan token + cookie penanda sesi; jangan bagikan kredensial ke orang lain.',
+              'Sistem otomatis memperbandingkan foto agar halaman tetap cepat — jangan khawatir soal ukuran.',
+              'Bentuk foto sudah pas → foto **tidak dipotong sama sekali**.',
+              'Bentuknya belum pas → jendela potong (crop) terbuka otomatis; tinggal geser bingkai ke bagian yang diinginkan.',
+              'Bentuk yang lazim: banner Google Form **4:1** (4 lebar : 1 tinggi), banner sedang **21:9**, banner standar **16:9**, foto profil/logo **1:1**, dan potret **3:4**.',
             ],
           },
         ],
@@ -277,7 +235,7 @@ export const playbooks: Playbook[] = [
   {
     slug: 'beranda-dashboard',
     title: 'Beranda Dashboard',
-    short: 'Pusat ringkasan: sambutan, statistik situs, grafik analitik, dan artikel terbaru.',
+    short: 'Halaman pertama setelah masuk: sapaan, angka ringkas, grafik klik, dan artikel terbaru.',
     icon: 'home',
     group: 'Memulai',
     route: '/dashboard',
@@ -285,55 +243,103 @@ export const playbooks: Playbook[] = [
     sections: [
       {
         id: 'isi-beranda',
-        title: 'Apa yang Ada di Beranda',
+        title: 'Yang Tampil di Beranda',
         blocks: [
           {
             type: 'p',
-            text: 'Beranda dashboard adalah halaman pertama setelah login — ringkasan kondisi situs dalam satu layar.',
+            text: 'Beranda adalah layar pembuka setelah masuk — gambaran ringkas "kondisi website hari ini".',
           },
           {
             type: 'list',
             items: [
-              '**Sambutan dinamis** — "Selamat Pagi/Siang/Sore/Malam" mengikuti jam perangkat, plus tanggal hari ini (format Indonesia).',
-              '**Kartu statistik** — total & artikel terpublikasi, total & agenda mendatang, jumlah pengguna, dan jumlah lembaga/komisariat.',
-              '**Grafik tren aktivitas** — aktivitas konten 6 bulan terakhir.',
-              '**Artikel terbaru** — 4 artikel terpublikasi, klik untuk membuka/edit.',
+              '**Sapaan** mengikuti jam (Selamat Pagi/Siang/Sore/Malam) dengan tanggal hari ini dalam Bahasa Indonesia.',
+              '**Kartu angka** — jumlah artikel (total dan yang sudah tayang), agenda mendatang, jumlah pengguna, dan jumlah lembaga.',
+              '**Grafik garis** — geliat isi website 6 bulan terakhir.',
+              '**Artikel terbaru** — empat artikel terakhir yang tayang; klik untuk membuka atau menyuntingnya.',
             ],
           },
         ],
       },
       {
         id: 'analitik',
-        title: 'Analitik Klik',
+        title: 'Grafik Jumlah Klik',
         blocks: [
           {
             type: 'p',
-            text: 'Dua grafik klik 30 hari terakhir tampil di beranda — namun hanya untuk modul yang Anda izinkan:',
+            text: 'Ada dua grafik klik 30 hari terakhir. Grafik hanya tampil bila Anda punya izin menunya:',
           },
           {
             type: 'list',
             items: [
-              '**Shortlink** (permission manage-shortlinks): total klik tautan pendek, daftar tautan terpopuler.',
-              '**Biolink** (permission manage-links): total klik halaman & item tautan, halaman terpopuler.',
+              '**Tautan Pendek** (izin manage-shortlinks): seberapa laku tautan pendek diklik, dan mana yang terpopuler.',
+              '**Biolink** (manage-links): klik pada halaman dan tombol tautannya.',
             ],
           },
           {
             type: 'callout',
             tone: 'info',
-            text: 'Statistik & analitik di beranda bersifat baca — tidak ada aksi yang bisa dilakukan di sini selain menjadikan data ini dasar keputusan (mis. konten apa yang perlu dipromosikan).',
+            text: 'Angka-angka di beranda hanya untuk dilihat, tidak bisa diubah dari sini. Manfaatnya: menyusun rencana konten atau promosi berikutnya.',
           },
         ],
       },
       {
         id: 'pintasan',
-        title: 'Pintasan & Notifikasi',
+        title: 'Pintasan & Berita Duka',
         blocks: [
           {
             type: 'list',
             items: [
               'Tombol aksi cepat membawa Anda langsung ke formulir buat konten (artikel, agenda, dsb).',
-              'Pesan baru di **Kotak Masuk** muncul sebagai badge di header/sidebar.',
-              'Pengumuman internal aktif tampil sebagai banner di bagian atas dashboard.',
+              'Pesan baru di **Kotak Masuk** muncul sebagai lencana merah berangka di pojok halaman.',
+              'Pengumuman aktif tampil sebagai tiang bendera di bagian atas dashboard.',
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    slug: 'autentikasi-profil',
+    title: 'Masuk, Profil & Kata Sandi',
+    short: 'Cara masuk ke dashboard, mengganti kata sandi, mengisi profil, dan solusi bila lupa sandi.',
+    icon: 'key',
+    group: 'Memulai',
+    route: '/login',
+    sections: [
+      {
+        id: 'login',
+        title: 'Masuk ke Dashboard',
+        blocks: [
+          {
+            type: 'steps',
+            items: [
+              { title: 'Buka halaman masuk', desc: 'immsolo.or.id/login, atau klik tombol Masuk di navbar website.' },
+              { title: 'Masukkan data', desc: 'Alamat surel/username dan kata sandi yang diberikan super-admin.' },
+              { title: 'Anda sudah masuk', desc: 'Menu di kiri hanya memuat menu yang Anda berizin buka.' },
+            ],
+          },
+          {
+            type: 'callout',
+            tone: 'warning',
+            title: 'Jangan mencoba terus-terusan',
+            text: 'Salah kata sandi berulang membuat sistem sangat mengingat ("terlalu banyak percobaan"). Bila lupa, hubungi super-admin.',
+          },
+        ],
+      },
+      {
+        id: 'profil',
+        title: 'Profil & Kata Sandi',
+        blocks: [
+          {
+            type: 'p',
+            text: 'Di halaman **Profil** (klik foto di pojok atas) Anda bisa mengganti nama tampilan, foto, kontak, dan kata sandi. Kata sandi baru berlaku saat masuk berikutnya.',
+          },
+          {
+            type: 'list',
+            items: [
+              '**Keluar** mengakhiri sesi di perangkat itu — pastikan bila memakai komputer umum.',
+              'Akun yang **dinonaktifkan** oleh super-admin tak bisa masuk sampai diaktifkan kembali.',
+              'Jangan berikan kata sandi kepada siapa pun, termasuk rekan pewaris.',
             ],
           },
         ],
@@ -344,8 +350,8 @@ export const playbooks: Playbook[] = [
   // ── Konten & Publikasi ──────────────────────────────────────────────────
   {
     slug: 'berita-artikel',
-    title: 'Berita & Artikel (Blog)',
-    short: 'Menulis artikel, mengelola kategori & tag, alur review komisariat, dan publikasi.',
+    title: 'Berita & Artikel',
+    short: 'Menulis berita, atur kategori & kata kunci, minta diperiksa bila perlu, lalu tayangkan.',
     icon: 'newspaper',
     group: 'Konten & Publikasi',
     route: '/dashboard/blog',
@@ -359,47 +365,47 @@ export const playbooks: Playbook[] = [
         blocks: [
           {
             type: 'p',
-            text: 'Modul blog mengelola **berita dan artikel** yang tampil di halaman publik /post. Mendukung kategori, tag, gambar utama, gambar inline di isi, draft/published, serta alur review untuk pengurus komisariat.',
+            text: 'Modul ini untuk menulis **berita dan artikel** yang tampil di halaman Beranda (/post). Artikel boleh diberi kategori, kata kunci (tag), foto utama, dan foto tepat di dalam tulisan.',
           },
         ],
       },
       {
         id: 'alur-publikasi',
-        title: 'Alur Publikasi',
+        title: 'Alur Sebelum Artikel Tayang',
         blocks: [
           {
             type: 'flow',
-            items: ['Buat Draft', 'Tulis Isi (Editor)', 'Publish', 'Tampil Publik'],
+            items: ['Tulis draf', 'Pratinjau', 'Tayangkan', 'Tampil di /post'],
           },
           {
             type: 'p',
-            text: 'Pengguna dengan role **komisariat** (dan peran pembatas lain) menghasilkan artikel berstatus menunggu review: alurnya menjadi **Buat Draft → Ajukan Review → Disetujui Super Admin → Tampil Publik**. Super-admin dapat menyetujui (approve) atau menolak (reject) beserta catatan review — penulis mendapat notifikasi di dashboard.',
+            text: 'Untuk pengurus komisariat (dan peran lain yang diatur), alurnya sedikit beda: tulisan yang Anda tayangkan akan menunggu **pemeriksaan** pengurus pusat dulu. Bila disetujui — tayang; bila ditolak, ada catatan alasannya dan Anda bisa membenahi lalu mengajukan ulang.',
           },
           {
             type: 'callout',
             tone: 'info',
-            text: 'Artikel yang ditolak tidak hilang — ubah isinya lalu ajukan ulang. Status badge di daftar artikel menunjukkan draft, pending, published, atau rejected.',
+            text: 'Artikel yang ditolak tidak hilang. Statusnya jelas di daftar: Draf, Menunggu, Tayang, atau Ditolak.',
           },
         ],
       },
       {
         id: 'langkah-menulis',
-        title: 'Langkah Menulis Artikel',
+        title: 'Langkah Menulis',
         blocks: [
           {
             type: 'steps',
             items: [
-              { title: 'Buka /dashboard/blog → Tambah Artikel', desc: 'Isi judul, kategori, dan ringkasan.' },
-              { title: 'Unggah gambar utama', desc: 'Resolusi bebas, rasio 16:9 disarankan; rasio pas tidak terpotong. Gambar otomatis jadi WebP.' },
-              { title: 'Tulis isi dengan editor', desc: 'Editor mendukung teks rapi, daftar, tautan, dan gambar inline (unggah langsung dari editor).' },
-              { title: 'Isi tag & SEO', desc: 'Tag memudahkan pencarian; slug otomatis dari judul namun bisa diedit.' },
-              { title: 'Simpan / Publish', desc: 'Simpan sebagai draft untuk melanjutkan nanti, atau langsung publish (sesuai hak).' },
+              { title: 'Menu Berita → Tambah Artikel', desc: 'Isi judul, kategori, dan ringkasan singkat.' },
+              { title: 'Unggah foto utama', desc: 'Bentuk terbaik 16:9 (lebar, seperti layar televisi). Bila bentuk sudah pas, fotonya tidak dipotong.' },
+              { title: 'Tulis isi artikel', desc: 'Tombol di kotak tulisan: huruf tebal, daftar, tautan, dan menyisip foto langsung dari komputer.' },
+              { title: 'Isi kata kunci', desc: 'Kata kunci memudahkan pembaca menemukan artikel; alamat artikel otomatis terbentuk dari judul (masih bisa Anda ubah).' },
+              { title: 'Simpan / Tayangkan', desc: 'Simpan sebagai Draf untuk disambung nanti, atau Tayangkan bila siap (sesuai wewenang Anda).' },
             ],
           },
           {
             type: 'callout',
             tone: 'success',
-            text: 'Gunakan tombol **Pratinjau** untuk melihat tampilan artikel sebelum dipublikasikan.',
+            text: 'Selalu tekan tombol **Pratinjau** — lihat bagaimana rupa artikelnya sebelum tayang.',
           },
         ],
       },
@@ -410,9 +416,9 @@ export const playbooks: Playbook[] = [
           {
             type: 'list',
             items: [
-              'Kategori dikelola dari form blog (tambah/edit/hapus) dan muncul sebagai filter di halaman publik.',
-              'Super-admin dapat **membatasi kategori** per pengguna di modul Pengguna → Hak Akses Modul → tab Kategori Post. Pengguna yang dibatasi hanya dapat membaca/menulis kategori tersebut.',
-              'Kosongkan pilihan kategori = pengguna boleh semua kategori.',
+              'Kategori (mis. "Kegiatan", "Opini") dibuat seperlunya dari menu Berita, dan jadi filter di halaman publik.',
+              'Super-admin dapat **menjatah kategori** tertentu kepada pengguna tertentu lewat menu Pengguna → Hak Akses Modul → tab Kategori Post. Yang bersangkutan hanya bisa mengerjakan kategori itu.',
+              'Kosongkan kategori = kategori apa pun boleh.',
             ],
           },
         ],
@@ -422,7 +428,7 @@ export const playbooks: Playbook[] = [
   {
     slug: 'agenda-kegiatan',
     title: 'Agenda & Kegiatan',
-    short: 'Kelola agenda kegiatan PC/PA/PS/komisariat, badge timeline otomatis, dan unduh ICS.',
+    short: 'Kalender kegiatan PC/PA/PS: pamflet, rentang tanggal, lokasi, dan tautan kalender untuk pengunjung.',
     icon: 'calendar',
     group: 'Konten & Publikasi',
     route: '/dashboard/events',
@@ -435,7 +441,7 @@ export const playbooks: Playbook[] = [
         blocks: [
           {
             type: 'p',
-            text: 'Agenda menampilkan kegiatan yang akan datang dan yang berlangsung di halaman publik /agenda. Setiap kegiatan punya rentang tanggal, lokasi, pamflet/banner, dan deskripsi.',
+            text: 'Agenda adalah daftar **acara/kegiatan** yang tampil di halaman Agenda (/agenda). Isinya cukup: judul, rentang tanggal, lokasi, pamflet (gambar acara), dan keterangan.',
           },
         ],
       },
@@ -446,31 +452,31 @@ export const playbooks: Playbook[] = [
           {
             type: 'steps',
             items: [
-              { title: 'Buka /dashboard/events → Tambah', desc: 'Isi judul, tanggal mulai–selesai, lokasi, dan deskripsi.' },
-              { title: 'Unggah banner/pamflet', desc: 'Resolusi bebas — rasio banner 4:1 dinilai; rasio pas tidak terpotong.' },
-              { title: 'Simpan', desc: 'Agenda langsung muncul di daftar dan halaman publik sesuai tanggalnya.' },
+              { title: 'Menu Agenda → Tambah', desc: 'Isi judul, tanggal mulai–selesai, lokasi, dan keterangan.' },
+              { title: 'Unggah pamflet', desc: 'Bentuk banner 4:1 (banner lebar). Bila bentuknya sudah pas, tidak dipotong.' },
+              { title: 'Simpan', desc: 'Agenda langsung tampil di daftar dan halaman publik mengikuti tanggalnya.' },
             ],
           },
         ],
       },
       {
         id: 'badge-timeline',
-        title: 'Badge Timeline Otomatis',
+        title: 'Label Otomatis',
         blocks: [
           {
             type: 'table',
-            head: ['Waktu', 'Badge'],
+            head: ['Kapan', 'Label yang Tampil'],
             rows: [
               ['Sebelum tanggal mulai', 'Akan Datang'],
-              ['Hari H (di rentang tanggal)', 'Berlangsung'],
-              ['Setelah tanggal selesai', 'Selesai'],
+              ['Sedang dalam rentang tanggal', 'Berlangsung'],
+              ['Lewat tanggal selesai', 'Selesai'],
             ],
           },
           {
             type: 'callout',
             tone: 'info',
-            title: 'Unduh ICS',
-            text: 'Di halaman detail agenda publik tersedia tombol **Unduh ICS** — berkas .ics yang bisa diimpor ke Google Calendar / Outlook.',
+            title: 'Tambah ke kalender saku',
+            text: 'Di halaman publiknya ada tombol mengunduh berkas kalender (.ics) — pengunjung bisa menyimpan acara langsung ke Google Calendar/Outlook di ponselnya.',
           },
         ],
       },
@@ -479,7 +485,7 @@ export const playbooks: Playbook[] = [
   {
     slug: 'struktur-lembaga',
     title: 'Struktur Organisasi & Lembaga',
-    short: 'Bagan pengurus (drag-drop urutan), foto 1:1, dan direktori komisariat/lembaga.',
+    short: 'Isi bagan pengurus (kartunya bisa diseret untuk mengatur urutan) dan profil komisariat/lembaga.',
     icon: 'network',
     group: 'Konten & Publikasi',
     route: '/dashboard/struktural',
@@ -488,36 +494,36 @@ export const playbooks: Playbook[] = [
     sections: [
       {
         id: 'struktural',
-        title: 'Struktur Organisasi',
+        title: 'Bagan Pengurus',
         blocks: [
           {
             type: 'p',
-            text: 'Modul struktural menyusun **bagan pengurus** yang tampil di /struktural: Ketua, Sekretaris, Bendahara, Bidang, hingga komisariat. Setiap kartu berisi nama, jabatan, kategori (BPH/Bidang), kelompok bidang, foto, dan periode.',
+            text: 'Bagan pengurus adalah peta siapa memegang jabatan apa — Ketua, Sekretaris, Bendahara, Bidang, dan seterusnya — yang tampil di halaman /struktural.',
           },
           {
             type: 'steps',
             items: [
-              { title: 'Tambah pengurus', desc: 'Isi nama, jabatan, kategori, dan unggah foto rasio 1:1 (persegi, resolusi bebas).' },
-              { title: 'Susun urutan', desc: 'Seret kartu (drag & drop) — urutan tersimpan otomatis tanpa tombol simpan.' },
-              { title: 'Filter periode', desc: 'Bagan publik dapat difilter per periode kepengurusan.' },
+              { title: 'Tambah jabatan', desc: 'Isi nama, jabatan, kategori (BPH/Bidang), kelompok bidang, foto persegi (1:1), dan masa bakti.' },
+              { title: 'Atur urutan sesuai jabatan', desc: '**Tahan lalu seret (drag)** kartunya — susunan tersimpan otomatis, tanpa tombol Simpan.' },
+              { title: 'Pilih periode', desc: 'Bagan publik bisa disaring per masa jabatan (mis. 2024–2026).' },
             ],
           },
         ],
       },
       {
         id: 'lembaga',
-        title: 'Lembaga & Komisariat',
+        title: 'Profil Komisariat & Lembaga',
         blocks: [
           {
             type: 'p',
-            text: 'Direktori /lembaga memuat profil **Komisariat, Lembaga, dan Otonomi Sosial Organisasi (LSO)**: logo, sejarah, visi-misi, dan tautan resmi.',
+            text: 'Halaman /lembaga memuat daftar Komisariat, Lembaga, dan Otonomi Sosial Organisasi (LSO): logo, sejarah singkat, visi-misi, dan tautan resmi.',
           },
           {
             type: 'list',
             items: [
-              'Logo memakai rasio 1:1, resolusi bebas, otomatis WebP.',
-              'Tipe lembaga memengaruhi filter halaman publik (Komisariat/LSO/Lembaga).',
-              'Slug duplikat akan ditolak dengan pesan validasi yang jelas.',
+              'Logo memakai bentuk persegi (1:1); resolusinya bebas — otomatis diringkas.',
+              'Jenis lembaga mengatur filter halaman publik (Komisariat / LSO / Lembaga).',
+              'Alamat tautan (slug) yang sama persis dengan lembaga lain akan ditolak, dengan pesan yang jelas.',
             ],
           },
         ],
@@ -527,7 +533,7 @@ export const playbooks: Playbook[] = [
   {
     slug: 'dokumen',
     title: 'Dokumen & Berkas',
-    short: 'Upload dokumen (PDF/Word/Excel), kategori, dan akses unduh publik via /dokumen & /files.',
+    short: 'Tempat berbagi berkas (PDF/Word/Excel) kepada masyarakat lewat halaman /dokumen.',
     icon: 'folder',
     group: 'Konten & Publikasi',
     route: '/dashboard/documents',
@@ -536,28 +542,28 @@ export const playbooks: Playbook[] = [
     sections: [
       {
         id: 'upload',
-        title: 'Upload & Kelola Dokumen',
+        title: 'Unggah & Kelola Dokumen',
         blocks: [
           {
             type: 'steps',
             items: [
-              { title: 'Buka /dashboard/documents/create', desc: 'Isi judul, kategori, dan deskripsi.' },
-              { title: 'Pilih berkas', desc: 'Format: PDF, Word, Excel, PowerPoint, ZIP, gambar — maksimal 10MB.' },
-              { title: 'Simpan', desc: 'Dokumen tampil di /dokumen dengan filter kategori dan pencarian.' },
+              { title: 'Menu Dokumen → Tambah', desc: 'Isi judul, kategori, dan deskripsi singkat.' },
+              { title: 'Pilih berkas', desc: 'Format: PDF, Word, Excel, PowerPoint, ZIP, atau gambar — sampai 10MB.' },
+              { title: 'Simpan', desc: 'Dokumen tampil di /dokumen, bisa dicari dan disaring per kategori.' },
             ],
           },
         ],
       },
       {
         id: 'akses-publik',
-        title: 'Akses Publik & Slug',
+        title: 'Tautan Unduh',
         blocks: [
           {
             type: 'list',
             items: [
-              'Pengunjung mengunduh lewat tombol Unduh/Buka di /dokumen.',
-              'Setiap dokumen punya tautan ramah **/files/[slug]** — bagus untuk dibagikan di WhatsApp/caption.',
-              'Modul dapat dijaga permission: tanpa manage-document, menu dan API ditolak (403).',
+              'Pengunjung mengunduh langsung dari halaman /dokumen lewat tombol Unduh/Buka.',
+              'Setiap dokumen punya alamat rapi **/files/nama-dokumen** — nyaman dibagikan lewat WhatsApp atau di keterangan/kanal.',
+              'Menu ini hanya terbuka bagi yang diberi izin; selain itu tombolnya tidak akan muncul.',
             ],
           },
         ],
@@ -569,7 +575,7 @@ export const playbooks: Playbook[] = [
   {
     slug: 'formulir-pendaftaran',
     title: 'Formulir Pendaftaran',
-    short: 'Builder formulir ala Google Forms: banner, field drag-drop, validasi, export Excel/CSV/ZIP.',
+    short: 'Buat formulir seperti Google Forms: banner, susun pertanyaan, batasi satu orang satu e-mail, unduh hasilnya.',
     icon: 'clipboard',
     group: 'Interaksi & Layanan Publik',
     route: '/dashboard/forms',
@@ -583,69 +589,69 @@ export const playbooks: Playbook[] = [
           {
             type: 'steps',
             items: [
-              { title: 'Buat formulir baru', desc: 'Di /dashboard/forms → Tambah: judul + slug (alamat halaman publik).' },
-              { title: 'Unggah banner header', desc: 'Resolusi bebas; rasio mengikuti format frame yang dipilih (4:1 / 21:9 / 16:9 / proporsional).' },
-              { title: 'Pilih format frame', desc: 'Banner Ramping (4:1), Sedang (21:9), Lebar (16:9), atau Proporsional Asli (tinggi utuh).' },
-              { title: 'Atur email & limit', desc: 'Centang "Wajib Email" dan "Batasi 1 per Email" bila perlu — mencegah pendaftaran ganda.' },
-              { title: 'Aktifkan formulir', desc: 'Formulir aktif langsung bisa diakses publik di /form/[slug].' },
+              { title: 'Menu Formulir → Tambah', desc: 'Isi judul + alamat unik formulir (mis. lomba-17an) yang menjadi bagian tautannya.' },
+              { title: 'Unggah banner atas', desc: 'Ukurannya bebas; bagian yang terpotong bisa Anda atur sendiri bila bentuknya belum pas.' },
+              { title: 'Pilih bentuk banner', desc: 'Ramping (4:1), Sedang (21:9), Lebar (16:9), atau Utuh (tinggi aslinya, tak terpotong).' },
+              { title: 'Aturan e-mail', desc: 'Centang "**Wajib E-mail**" dan "**Batasi 1 per e-mail**" supaya satu orang tak bisa mendaftar berkali-kali.' },
+              { title: 'Aktifkan formulir', desc: 'Formulir yang aktif langsung dapat dibuka masyarakat di /form/[alamat].' },
             ],
           },
           {
             type: 'callout',
             tone: 'info',
             title: 'Alat potong banner',
-            text: 'Sama seperti modul lain: jika rasio gambar belum pas, alat "Tarik & Sesuaikan Potongan" terbuka agar Anda memilih bagian banner yang tampil.',
+            text: 'Bila bentuk gambar belum sama dengan slotnya, jendela "Tarik & Sesuaikan Potongan" terbuka agar Anda memilih bagian banner yang ditampilkan.',
           },
         ],
       },
       {
         id: 'builder-field',
-        title: 'Builder Field',
+        title: 'Menyusun Pertanyaan',
         blocks: [
           {
             type: 'p',
-            text: 'Susun pertanyaan seperti Google Forms: teks pendek/panjang, email, dropdown, radio, checkbox, skala, dan file upload. Field dapat diatur **wajib**, diberi opsi jawaban, serta diurutkan dengan drag & drop (tersimpan otomatis).',
+            text: 'Susun pertanyaan seperti di Google Forms: tulisan pendek/panjang, surel, pilihan dropdown, radio, centang, skala 1–10, dan unggah berkas. Tiap pertanyaan bisa dibuat **wajib**, diberi pilihan jawaban, dan **diseret** untuk mengatur urutan (tersimpan otomatis).',
           },
           {
             type: 'callout',
             tone: 'warning',
-            title: 'Field file upload',
-            text: 'Pendaftar dapat melampirkan berkas (mis. foto/scan). Ukuran maksimum mengikuti pengaturan formulir; format diatur per field.',
+            title: 'Pertanyaan unggah berkas',
+            text: 'Pendaftar dapat melampirkan foto/scan (mis. bukti bayar). Batas ukurannya mengikuti pengaturan formulir; jenis berkasnya diatur per pertanyaan.',
           },
         ],
       },
       {
         id: 'halaman-publik',
-        title: 'Halaman Publik & Validasi',
+        title: 'Halaman Isi & Pengaman',
         blocks: [
           {
             type: 'list',
             items: [
-              'Formulir tampil tanpa navbar/footer (halaman khusus) — cocok dibagikan via QR/tautan.',
-              'Email ganda ditolak dengan pesan "email sudah digunakan" bila limit diaktifkan.',
-              'Ada honeypot anti-spam dan pembatasan jumlah pengiriman per menit.',
+              'Halaman isinya bersih (tanpa navbar/footer) — pas untuk dibagikan lewat tautan atau QR.',
+              'E-mail kembar otomatis ditolak bila batasan e-mail diaktifkan — dengan pesan yang mudah dipahami pendaftar.',
+              'Ada perangkap muatan (anti-spam) dan pembatasan kirim per menit supaya tidak dibanjiri.',
             ],
           },
         ],
       },
       {
         id: 'data-pendaftar',
-        title: 'Data Pendaftar & Export',
+        title: 'Melihat & Mengunduh Data Pendaftar',
         blocks: [
           {
             type: 'steps',
             items: [
-              { title: 'Tab Data Pendaftar', desc: 'Tabel No/ID/Waktu/Email/Jawaban + pencarian; klik baris untuk detail lengkap.' },
-              { title: 'Export Excel/CSV', desc: 'Unduh .xlsx atau .csv — semua kolom termasuk email.' },
-              { title: 'Export ZIP', desc: 'Berisi Excel + folder lampiran per pengisi — praktis untuk panitia seleksi.' },
-              { title: 'Hapus respons', desc: 'Respons per baris dapat dihapus; tindakan tercatat di log aktivitas.' },
+              { title: 'Tab Data Pendaftar', desc: 'Tabel No/Waktu/E-mail/Jawaban + kotak pencarian; klik baris untuk melihat detail.' },
+              { title: 'Unduh Excel / CSV', desc: 'Untuk diolah — semua kolom termasuk e-mail.' },
+              { title: 'Unduh ZIP', desc: 'Berisi Excel + folder lampiran tiap pendaftar — memudahkan panitia menilai berkas.' },
+              { title: 'Hapus respons', desc: 'Boleh per baris; setiap penghapusan tercatat di Riwayat Catatan.' },
             ],
           },
           {
             type: 'callout',
             tone: 'danger',
-            title: 'Lindungi data pendaftar',
-            text: 'Rekap respons TIDAK dapat diakses publik — hanya lewat dashboard dengan permission manage-forms.',
+            title: 'Data pendaftar itu rahasia',
+            text: 'Rekap jawaban TIDAK dapat dilihat masyarakat — hanya lewat dashboard oleh yang diberi izin.',
           },
         ],
       },
@@ -654,7 +660,7 @@ export const playbooks: Playbook[] = [
   {
     slug: 'presensi-digital',
     title: 'Presensi Digital',
-    short: 'Presensi QR/form: sesi kegiatan, impor peserta Excel, scan kamera, anti titip absen, export.',
+    short: 'Absensi tanpa kertas: peserta pindai QR sendiri, atau petugas yang memindai — lengkap dan bisa diekspor.',
     icon: 'qr',
     group: 'Interaksi & Layanan Publik',
     route: '/dashboard/presensi',
@@ -664,111 +670,112 @@ export const playbooks: Playbook[] = [
     sections: [
       {
         id: 'konsep',
-        title: 'Konsep & Mode',
+        title: 'Dua Cara Presensi',
         blocks: [
           {
             type: 'p',
-            text: 'Presensi digital menggantikan daftar hadir kertas. Ada **dua mode**:',
+            text: 'Presensi digital menggantikan daftar hadir kertas. Ada **dua cara**:',
           },
           {
             type: 'list',
             items: [
-              '**Mode Form** — peserta memindai QR lalu mengisi formulir presensi (tidak perlu daftar nama terlebih dahulu, tidak perlu login). Cocok untuk kegiatan terbuka.',
-              '**Mode Scan Peserta** — daftar peserta sudah disiapkan (manual/impor Excel); petugas memindai kode peserta. Cocok untuk kegiatan tertutup/undangan.',
+              '**Peserta isi sendiri (Mode Form)** — tampilkan QR di layar; peserta memindainya lalu mengisi formulir presensi di ponselnya sendiri. Tak perlu masuk akun. Cocok untuk acara terbuka.',
+              '**Petugas memindai (Mode Scan)** — daftar peserta sudah disiapkan; petugas berkeliling memindai kode peserta. Cocok untuk acara tertutup/undangan.',
             ],
           },
           {
             type: 'callout',
             tone: 'info',
             title: 'Sesi kegiatan',
-            text: 'Satu kegiatan bisa punya banyak **sesi** (mis. Sesi 1 pagi, Sesi 2 siang) — peserta sama, catatan kehadiran terpisah per sesi. Presensi harus dibuka (toggle buka/tutup) agar bisa diisi/ discan.',
+            text: 'Satu kegiatan boleh punya **banyak sesi** (mis. Sesi 1 pagi, Sesi 2 siang) — pesertanya sama, catatan kehadirannya terpisah per sesi. Presensi harus **dibuka** (nyalakan saklarnya) agar bisa diisi atau dipindai.',
           },
         ],
       },
       {
         id: 'membuat-presensi',
-        title: 'Membuat Presensi',
+        title: 'Membuat Presensi Baru',
         blocks: [
           {
             type: 'steps',
             items: [
-              { title: '/dashboard/presensi → Tambah', desc: 'Isi judul kegiatan, jadwal, dan pilih mode (Form / Scan Peserta).' },
-              { title: 'Susun field formulir', desc: 'Pada mode Form: tambah/hapus field (nama, email, instansi, dll), atur wajib/tidak.' },
-              { title: 'Atur limit perangkat', desc: 'Aktifkan **device limit** untuk anti titip absen (1 perangkat = 1 peserta).' },
-              { title: 'Buat sesi', desc: 'Tambahkan sesi kegiatan bila kegiatan punya beberapa gelombang.' },
-              { title: 'Buka presensi', desc: 'Toggle status menjadi terbuka; QR aktif.' },
+              { title: 'Menu Presensi → Tambah', desc: 'Isi judul kegiatan, jadwal, dan pilih caranya (Peserta Isi Sendiri / Petugas Memindai).' },
+              { title: 'Susun pertanyaan', desc: 'Untuk Mode Form: tambah/hapus pertanyaan (nama, asal instansi, dll) dan tandai mana yang wajib.' },
+              { title: 'Pasang pengaman', desc: 'Aktifkan **batas 1 per perangkat** supaya satu ponsel hanya bisa mengisi satu orang (anti titip absen).' },
+              { title: 'Buat sesi', desc: 'Tambahkan sesi bila kegiatannya berlapis (gelombang 1, gelombang 2, dll).' },
+              { title: 'Buka presensi', desc: 'Nyalakan saklar — QR aktif dan siap dipindai.' },
             ],
           },
         ],
       },
       {
         id: 'peserta-impor-excel',
-        title: 'Peserta & Impor Excel',
+        title: 'Daftar Peserta & Impor Excel',
         blocks: [
           {
             type: 'p',
-            text: 'Peserta dapat ditambahkan manual (nama/kode/asal) atau **diimpor massal dari Excel**. Impor Excel dinilai berdasarkan **nama kolom pada header** (tidak peduli urutan):',
+            text: 'Peserta bisa diketik satu-satu atau **diimpor sekaligus dari berkas Excel**. Yang dibaca sistem adalah **nama kolom di baris pertama** (urutan kolom bebas):',
           },
           {
             type: 'table',
-            head: ['Kolom', 'Wajib?', 'Keterangan'],
+            head: ['Kolom', 'Wajib?', 'Artinya'],
             rows: [
-              ['nama', 'Ya', 'Baris tanpa nama dilewati otomatis.'],
-              ['email', 'Tidak', 'Jika ada, dipakai sebagai kunci unik peserta.'],
+              ['nama', 'Ya, harus ada', 'Baris tanpa nama otomatis dilewati.'],
+              ['email', 'Tidak', 'Kalau ada, dipakai mengenal orangnya (tidak boleh kembar).'],
               ['phone', 'Tidak', 'Nomor HP/WhatsApp.'],
-              ['asal', 'Tidak', 'Instansi/komisariat/universitas.'],
-              ['kode', 'Tidak', 'Kode peserta; jika kosong, diisi otomatis 001, 002, … sesuai urutan.'],
+              ['asal', 'Tidak', 'Instansi / komisariat / universitas.'],
+              ['kode', 'Tidak', 'Kode peserta versi Anda; bila kosong, sistem menomori sendiri: 001, 002, 003, …'],
             ],
           },
           {
             type: 'steps',
             items: [
-              { title: 'Unduh template', desc: 'Di modal Impor Peserta, klik Template untuk mendapatkan contoh .xlsx.' },
-              { title: 'Isi data', desc: 'Satu baris = satu peserta; header harus berisi kolom nama (kolom lain opsional).' },
-              { title: 'Unggah & pratinjau', desc: 'Sistem menampilkan pratinjau jumlah baris terbaca sebelum diimpor.' },
-              { title: 'Impor', desc: 'Baris ganda dilewati; jumlah berhasil dilaporkan di akhir.' },
+              { title: 'Unduh contoh berkas', desc: 'Di jendela Impor Peserta, klik tombol Template.' },
+              { title: 'Isi datanya', desc: 'Satu baris = satu peserta. Baris pertama harus memuat kolom nama.' },
+              { title: 'Unggah & lihat ringkasan', desc: 'Sistem menyebut berapa baris yang terbaca sebelum benar-benar diimpor.' },
+              { title: 'Impor', desc: 'Baris kembar dilewati otomatis; hasil akhirnya dilaporkan.' },
             ],
           },
           {
             type: 'callout',
             tone: 'info',
-            title: 'Aturan duplikat impor',
-            text: 'Punya email → duplikat dicek via **email** (tidak peduli huruf besar/kecil). Tanpa email → via kombinasi **nama + asal**. Kode yang sudah terpakai tidak dipakai ulang (kode kosong otomatis diurutkan).',
+            title: 'Cara mengenali baris kembar',
+            text: 'Ada e-mail → dibanding lewat **e-mail** (huruf besar/kecil diabaikan). Tanpa e-mail → lewat pasangan **nama + asal**. Kode yang sudah dipakai tidak akan dipakai ulang.',
           },
           {
             type: 'callout',
             tone: 'success',
-            title: 'Impor dari Formulir',
-            text: 'Alternatif: impor peserta langsung dari **respons formulir pendaftaran** — sistem mengambil field berlabel "nama", "instansi/asal/komisariat/kampus", "hp/telepon/WA", dan email pendaftar.',
+            title: 'Ambil dari Formulir',
+            text: 'Alternatif yang manis: impor peserta langsung dari jawaban **formulir pendaftaran** — sistem mengambil kolom "nama", "instansi/asal/kampus", "HP/WA", dan e-mail pendaftar.',
           },
         ],
       },
       {
         id: 'scan-checkin',
-        title: 'QR, Scan & Check-in Publik',
+        title: 'QR, Pemindaian & Isi di Ponsel',
         blocks: [
           {
             type: 'list',
             items: [
-              '**QR Code** di dashboard bisa ditampilkan ke layar proyektor (mode TV) — peserta memindai lalu mengisi formulir presensi di ponselnya (tanpa login).',
-              '**Halaman presensi publik** (/presensi/[token]) menampilkan skema formulir sesi aktif; check-in langsung mencatat kehadiran.',
-              '**Scan petugas** (/dashboard/presensi/[id]/scan) memakai kamera: pindai kode/tiket peserta → kehadiran tercatat; scan ganda ditolak.',
-              '**Device limit**: satu perangkat hanya boleh check-in satu peserta — mencegah titip absen.',
+              '**QR di dashboard** bisa diproyeksikan ke layar besar (mode TV) — peserta memindainya dengan kamera ponselnya dan langsung masuk formulir presensi.',
+              '**Halaman publik presensi** (/presensi/[tautan]) menampilkan formulir sesi yang sedang aktif — tanpa perlu masuk akun.',
+              '**Pemindaian petugas** (menu presensi → Pindai) memakai kamera: pindai kode peserta → kehadirannya tercatat; pindai kembar ditolak.',
+              '**Batas 1 per perangkat**: setiap ponsel hanya boleh mengisi satu orang — mencegah titip absen.',
+              '**Kirim QR via email**: tombol "**Kirim QR via Email**" mengirim QR personal ke email tiap peserta yang punya alamat e-mail (QR tampil sebagai gambar besar + lampiran di email). Kirim satu per satu lewat kartu peserta, atau semuanya sekaligus; peserta tanpa e-mail dilewati otomatis. Anda juga bisa menulis **pesan utama** (opsional) yang ikut tampil menonjol di dalam email — cukup sekali diisi, dipakai untuk semua email yang dikirim.',
             ],
           },
         ],
       },
       {
         id: 'kehadiran-export',
-        title: 'Kehadiran, Riwayat & Export',
+        title: 'Melihat Kehadiran & Mengunduh Laporan',
         blocks: [
           {
             type: 'list',
             items: [
-              'Status kehadiran: **hadir, telat, izin, tidak_hadir, belum**. Petugas bisa menandai manual (hadir/izin/tidak hadir) dari tab Kehadiran.',
-              'Setiap baris menampilkan **metode** kehadiran (Form / Scan / Manual).',
-              'Tab **Riwayat** mencatat semua perubahan kehadiran: status sebelum → sesudah, metode, pelaku, dan waktu.',
-              '**Export Excel** bisa difilter: pilih sesi, status, dan kolom (termasuk jawaban field formulir). Sheet Ringkasan menampilkan jumlah baris yang diekspor.',
+              'Status kehadiran: **Hadir, Telat, Izin, Tidak Hadir, Belum**. Petugas boleh menandai manual lewat tab Kehadiran.',
+              'Tiap baris kehadiran mencantumkan **datanya dari mana**: Form / Pindai / Manual — transparan.',
+              'Tab **Riwayat** mencatat semua perubahan: status lama → baru, siapa, dan kapan.',
+              '**Unduh Excel** dengan filter: pilih sesi + status + kolom (termasuk jawaban formulir). Lembar Ringkasan menyebut jumlah baris yang ikut.',
             ],
           },
         ],
@@ -777,8 +784,8 @@ export const playbooks: Playbook[] = [
   },
   {
     slug: 'biolink-linktree',
-    title: 'Biolink (Linktree)',
-    short: 'Halaman tautan dengan tema kustom, live preview, urutan drag-drop, dan analitik klik.',
+    title: 'Biolink (Kumpulan Tautan)',
+    short: 'Halaman kumpulan tautan dengan desain sendiri — seperti Linktree, untuk ditempel di bio media sosial.',
     icon: 'link',
     group: 'Interaksi & Layanan Publik',
     route: '/dashboard/links',
@@ -792,25 +799,25 @@ export const playbooks: Playbook[] = [
           {
             type: 'steps',
             items: [
-              { title: 'Buat halaman', desc: '/dashboard/links → Tambah: judul + slug (alamat /links/[slug]).' },
-              { title: 'Tentukan tema', desc: 'Warna latar, warna tombol, dan font — pratinjau ponsel berubah live.' },
-              { title: 'Tambah item', desc: 'Tombol tautan, teks bio, atau gambar; avatar/logo rasio 1:1.' },
-              { title: 'Atur urutan', desc: 'Seret item — urutan publik mengikuti.' },
+              { title: 'Menu Biolink → Tambah', desc: 'Judul + alamat unik yang menjadi bagian tautannya (/links/[alamat]).' },
+              { title: 'Pilih tema warna', desc: 'Warna latar, warna tombol, dan huruf — pratinjau ponsel di sebelah kanan langsung berubah.' },
+              { title: 'Tambah isinya', desc: 'Tombol tautan, tulisan bio, atau gambar; avatar/logo bentuk persegi (1:1).' },
+              { title: 'Atur urutan', desc: 'Seret itemnya — urutan di halaman publik ikut berubah.' },
             ],
           },
         ],
       },
       {
         id: 'publik-analitik',
-        title: 'Publik & Analitik',
+        title: 'Publik & Statistik Klik',
         blocks: [
           {
             type: 'list',
             items: [
-              'Halaman publik tampil penuh (tanpa navbar) — ala Linktree, pas untuk bio Instagram.',
-              'Setiap klik tombol dicatat (counter +1) lewat tautan pintas internal.',
-              'Analitik dashboard: grafik 30 hari dan item terpopuler.',
-              'Super-admin dapat **memindahkan kepemilikan** halaman ke pengguna lain.',
+              'Halaman publik tampil penuh layar (tanpa navbar) — seperti Linktree pada umumnya.',
+              'Setiap klik tombol dicatat (angkanya naik) lewat tautan pintas internal.',
+              'Analitik dashboard: grafik 30 hari dan item terfavorit.',
+              'Super-admin dapat **memindahkan pemilik** halaman ke pengguna lain.',
             ],
           },
         ],
@@ -819,8 +826,8 @@ export const playbooks: Playbook[] = [
   },
   {
     slug: 'tautan-pendek',
-    title: 'Tautan Pendek (Shortlink)',
-    short: 'Pengajuan link publik dengan kuota, aktivasi admin, QR, dan analitik klik.',
+    title: 'Tautan Pendek',
+    short: 'Tautan panjang dijadikan pendek: masyarakat mengajukan, admin mengaktifkan, lalu dihitung kliknya.',
     icon: 'zap',
     group: 'Interaksi & Layanan Publik',
     route: '/dashboard/shortlinks',
@@ -829,50 +836,50 @@ export const playbooks: Playbook[] = [
     sections: [
       {
         id: 'pengajuan-publik',
-        title: 'Pengajuan Publik',
+        title: 'Pengajuan dari Masyarakat',
         blocks: [
           {
             type: 'flow',
-            items: ['Publik Ajukan', 'Status Pending', 'Aktivasi Admin', 'Link Aktif'],
+            items: ['Mengajukan', 'Menunggu', 'Diaktifkan Admin', 'Aktif'],
           },
           {
             type: 'list',
             items: [
-              'Warga/pengurus mengajukan di /shortlink: URL tujuan + alias (opsional) + nomor WhatsApp.',
-              'Kuota harian **per nomor WhatsApp** mencegah penyalahgunaan.',
-              'Status dapat dipantau di /shortlink/pending dengan slug/alias.',
+              'Warga atau pengurus mengajukan di /shortlink: tautan tujuan + nama pendek (opsional) + nomor WhatsApp.',
+              'Jatah harian **per nomor WhatsApp** menjaga agar tidak disalahgunakan.',
+              'Status pengajuan bisa dipantau di /shortlink/pending.',
             ],
           },
         ],
       },
       {
         id: 'aktivasi-admin',
-        title: 'Aktivasi & Kelola Admin',
+        title: 'Mengaktifkan & Mengelola',
         blocks: [
           {
             type: 'steps',
             items: [
-              { title: 'Review pengajuan', desc: 'Dashboard shortlink memuat daftar beserta status.' },
-              { title: 'Aktivasi', desc: 'Aktifkan link — selama pending, pengunjung diberi halaman menunggu.' },
-              { title: 'Bagikan', desc: 'Alamat pendek /s/[slug] (alias /[slug] juga berlaku) + QR dapat diunduh.' },
+              { title: 'Periksa pengajuan', desc: 'Dashboard tautan pendek memuat daftar pengajuan beserta statusnya.' },
+              { title: 'Aktivasi', desc: 'Nyalakan tautannya — selama menunggu, pengunjung melihat halaman "sedang menunggu".' },
+              { title: 'Bagikan', desc: 'Alamat pendeknya /s/[nama] (alias /[nama] juga berlaku) + QR yang bisa diunduh.' },
             ],
           },
           {
             type: 'callout',
             tone: 'warning',
-            text: 'Alias tertentu diblokir (reserved) untuk melindungi route sistem; alias duplikat ditolak.',
+            text: 'Beberapa nama pendek sudah dicadangkan (dipakai sistem); nama kembar juga ditolak.',
           },
         ],
       },
       {
         id: 'analitik',
-        title: 'Analitik',
+        title: 'Statistik Klik',
         blocks: [
           {
             type: 'list',
             items: [
-              'Setiap redirect menambah counter klik.',
-              'Grafik klik 30 hari + tautan terpopuler tampil di dashboard overview dan modul shortlink.',
+              'Setiap kunjungan tautan menambah hitungan klik.',
+              'Grafik 30 hari + tautan terpopuler tampil di Beranda Dashboard dan di menu ini.',
             ],
           },
         ],
@@ -883,8 +890,8 @@ export const playbooks: Playbook[] = [
   // ── Komunikasi ──────────────────────────────────────────────────────────
   {
     slug: 'kontak-kotak-masuk',
-    title: 'Kontak & Kotak Masuk',
-    short: 'Pesan dari halaman kontak masuk ke dashboard: badge belum dibaca, tandai, hapus.',
+    title: 'Kotak Masuk',
+    short: 'Pesan dari halaman Kontak tiba di sini: ada tanda belum dibaca, tandai, dan hapus.',
     icon: 'inbox',
     group: 'Komunikasi',
     route: '/dashboard/messages',
@@ -897,14 +904,14 @@ export const playbooks: Playbook[] = [
         blocks: [
           {
             type: 'flow',
-            items: ['Publik /kontak', 'Pesan Masuk', 'Tandai Dibaca', 'Tindak Lanjut / Hapus'],
+            items: ['Publik /kontak', 'Masuk Kotak Masuk', 'Ditandai dibaca', 'Ditindaklanjuti / Hapus'],
           },
           {
             type: 'list',
             items: [
-              'Form kontak publik terbatas 5 pengiriman/menit untuk mencegah spam.',
-              'Pesan masuk menandai badge belum dibaca di dashboard (header + sidebar).',
-              'Tindakan: tandai dibaca, balas via kontak yang tertulis, atau hapus.',
+              'Formulir kontak publik dibatasi 5 kirim per menit menahan spam.',
+              'Pesan baru menyalakan tanda merah di dashboard (pojok halaman dan menu kiri).',
+              'Tindakan yang tersedia: tandai dibaca, membalas lewat kontak yang tertulis, atau menghapus.',
             ],
           },
         ],
@@ -913,8 +920,8 @@ export const playbooks: Playbook[] = [
   },
   {
     slug: 'pengumuman-internal',
-    title: 'Pengumuman Internal',
-    short: 'Banner informasi yang tampil di seluruh halaman publik dan dashboard admin.',
+    title: 'Pengumuman',
+    short: 'Tulisan singkat yang muncul sebagai banner di seluruh halaman — baik publik maupun dashboard.',
     icon: 'megaphone',
     group: 'Komunikasi',
     route: '/dashboard/announcements',
@@ -928,15 +935,15 @@ export const playbooks: Playbook[] = [
           {
             type: 'steps',
             items: [
-              { title: 'Buka /dashboard/announcements', desc: 'Buat pengumuman: judul + isi + level prioritas.' },
+              { title: 'Menu Pengumuman → Tambah', desc: 'Judul + isi + tingkat kepentingan (prioritas).' },
               { title: 'Aktifkan', desc: 'Pengumuman aktif tampil sebagai banner di halaman publik dan dashboard.' },
-              { title: 'Nonaktifkan / hapus', desc: 'Banner langsung hilang dari semua halaman.' },
+              { title: 'Nonaktifkan / hapus', desc: 'Banner langsung menghilang dari semua halaman.' },
             ],
           },
           {
             type: 'callout',
             tone: 'info',
-            text: 'Pengumuman cocok untuk info singkat berjangka (pendaftaran dibuka, kegiatan darurat, perubahan jam). Untuk konten permanen, gunakan Berita/Agenda.',
+            text: 'Pengumuman cocok untuk info berjangka (pendaftaran dibuka, perubahan jam). Untuk konten yang ingin tetap diingat, gunakan Berita/Agenda.',
           },
         ],
       },
@@ -946,8 +953,8 @@ export const playbooks: Playbook[] = [
   // ── Administrasi & Keamanan ─────────────────────────────────────────────
   {
     slug: 'media-library',
-    title: 'Media Library',
-    short: 'Pusat penyimpanan gambar: upload WebP otomatis, salin URL, hapus massal.',
+    title: 'Gudang Foto (Media Library)',
+    short: 'Penyimpanan bersama foto website: unggah sekali, pakai di semua menu.',
     icon: 'image',
     group: 'Administrasi & Keamanan',
     route: '/dashboard/media',
@@ -956,34 +963,34 @@ export const playbooks: Playbook[] = [
     sections: [
       {
         id: 'upload',
-        title: 'Upload & Optimasi',
+        title: 'Unggah & Penyempurnaan Otomatis',
         blocks: [
           {
             type: 'list',
             items: [
-              'Format diterima: PNG, JPG, JPEG, WebP — maksimal 2MB per berkas.',
-              'Semua gambar otomatis dikompres ke **WebP**; rasio asli dipertahankan.',
-              'Gambar disimpan per folder modul (blogs, events, forms, dsb) agar rapi.',
+              'Format PNG, JPG, JPEG, WebP — sampai 2MB per berkas.',
+              'Semua foto otomatis diringkas menjadi **WebP**; bentuk aslinya dipertahankan.',
+              'Foto disimpan rapi per folder menu (blogs, events, forms, dll) agar mudah dicari.',
             ],
           },
         ],
       },
       {
         id: 'pemakaian',
-        title: 'Pemakaian',
+        title: 'Memakai Foto',
         blocks: [
           {
             type: 'list',
             items: [
-              'Media Library menjadi sumber pilihan gambar di semua modul (tombol "Buka Media Library").',
-              'URL gambar dapat disalin untuk dipakai di isi artikel/pengumuman.',
-              'Hapus massal tersedia — berkas di storage dan datanya ikut terhapus; tautan lama menjadi tidak valid.',
+              'Gudang foto menjadi sumber pilihan gambar di semua menu (tombol "Buka Media Library").',
+              'Tautan foto bisa disalin untuk ditempel ke isi artikel/pengumuman.',
+              'Hapus banyak sekaligus tersedia — berkas di penyimpanan dan datanya ikut hilang.',
             ],
           },
           {
             type: 'callout',
             tone: 'warning',
-            text: 'Jangan menghapus gambar yang masih dipakai artikel/banner aktif — cek pemakaiannya dahulu.',
+            text: 'Jangan asal menghapus foto yang masih dipakai banner/artikel aktif — periksa dahulu.',
           },
         ],
       },
@@ -991,8 +998,8 @@ export const playbooks: Playbook[] = [
   },
   {
     slug: 'pengaturan-portal',
-    title: 'Pengaturan Portal',
-    short: 'Identitas situs, logo, sambutan ketua, kontak, dan mode maintenance.',
+    title: 'Pengaturan Website',
+    short: 'Wajah website: nama, logo, sambutan ketua, kontak, dan mode perawatan.',
     icon: 'settings',
     group: 'Administrasi & Keamanan',
     route: '/dashboard/settings',
@@ -1001,14 +1008,14 @@ export const playbooks: Playbook[] = [
     sections: [
       {
         id: 'identitas',
-        title: 'Identitas & Konten Statis',
+        title: 'Identitas & Halaman Statis',
         blocks: [
           {
             type: 'list',
             items: [
-              'Nama situs, deskripsi, dan SEO global (meta + og image) digunakan di seluruh halaman.',
+              'Nama website, deskripsi, dan gambar berbagi (og image) dipakai di seluruh halaman.',
               'Halaman statis: Tentang, Sejarah, Kebijakan Privasi, Syarat & Ketentuan — diatur dari sini.',
-              'Sambutan Ketua Umum (nama, periode, pesan, foto rasio 1:1) tampil real-time di beranda.',
+              'Sambutan Ketua Umum (nama, masa, pesan, foto persegi) tampil langsung di beranda.',
             ],
           },
         ],
@@ -1020,22 +1027,22 @@ export const playbooks: Playbook[] = [
           {
             type: 'list',
             items: [
-              'Logo utama, logo putih (untuk latar gelap), favicon — semuanya otomatis WebP, rasio 1:1.',
-              'Kontak (WhatsApp, alamat, email) dipakai di navbar, footer, dan halaman kontak.',
+              'Logo utama, logo putih (untuk latar gelap), dan favicon — semuanya otomatis WebP, bentuk persegi.',
+              'Kontak (WhatsApp, alamat, surel) dipakai di navbar, footer, dan halaman kontak.',
             ],
           },
         ],
       },
       {
         id: 'maintenance',
-        title: 'Mode Maintenance',
+        title: 'Mode Perawatan',
         blocks: [
           {
             type: 'list',
             items: [
-              '**Global**: seluruh halaman publik menampilkan halaman perawatan; super-admin tetap bisa masuk dashboard.',
-              '**Per modul**: mis. hanya modul Dokumen yang ditutup sementara; modul lain normal.',
-              'Jangan lupa mematikan kembali maintenance setelah selesai.',
+              '**Global**: seluruh halaman publik menampilkan tulisan "sedang dibereskan"; super-admin tetap bisa masuk.',
+              '**Per menu**: misal hanya menu Dokumen yang ditutup; menu lain tetap normal.',
+              'Jangan lupa menutup kembali mode perawatan setelah selesai.',
             ],
           },
         ],
@@ -1044,8 +1051,8 @@ export const playbooks: Playbook[] = [
   },
   {
     slug: 'pengguna-role-hak-akses',
-    title: 'Pengguna, Role & Hak Akses',
-    short: 'Kelola akun pengurus, role custom, permission per modul, dan pembatasan kategori.',
+    title: 'Pengguna, Peran & Izin Akses',
+    short: 'Kelola akun pengurus, siapa boleh membuka apa, pembatasan kategori berita, dan jalannya akun.',
     icon: 'shield',
     group: 'Administrasi & Keamanan',
     route: '/dashboard/users',
@@ -1054,48 +1061,48 @@ export const playbooks: Playbook[] = [
     sections: [
       {
         id: 'kelola-user',
-        title: 'Kelola Pengguna',
+        title: 'Kelola Akun',
         blocks: [
           {
             type: 'steps',
             items: [
-              { title: 'Tambah pengguna', desc: '/dashboard/users/create: nama, email, username, role, komisariat/lembaga.' },
-              { title: 'Aktif / Nonaktif', desc: 'Pengguna nonaktif tidak bisa login; akun sendiri tidak bisa dinonaktifkan.' },
-              { title: 'Hapus', desc: 'Permanen — pastikan datanya tidak dibutuhkan lagi.' },
+              { title: 'Tambah akun', desc: '/dashboard/users/create: nama, surel, username, peran, komisariat/lembaga.' },
+              { title: 'Aktif / Nonaktif', desc: 'Akun nonaktif tak bisa masuk; akun Anda sendiri tak bisa dinonaktifkan.' },
+              { title: 'Hapus', desc: 'Permanen — pastikan datanya tak dibutuhkan lagi.' },
             ],
           },
         ],
       },
       {
         id: 'hak-akses-modul',
-        title: 'Hak Akses Modul (Per Pengguna)',
+        title: 'Hak Akses Per Orang',
         blocks: [
           {
             type: 'p',
-            text: 'Tombol **Hak Akses Modul** di daftar pengguna membuka pengaturan rinci: tab **Modul Akses** (checkbox per modul) dan tab **Kategori Post** (pembatasan kategori artikel).',
+            text: 'Tombol **Hak Akses Modul** di daftar pengguna membuka jendela pengaturan khusus orang itu: tab **Modul Akses** (menu apa saja yang boleh) dan tab **Kategori Post** (jatah kategori berita).',
           },
           {
             type: 'table',
-            head: ['Status Akses', 'Arti'],
+            head: ['Status tampil', 'Artinya'],
             rows: [
-              ['Via role', 'Diberikan oleh role pengguna — blokir untuk menonaktifkan per modul.'],
-              ['Akses khusus', 'Diberikan langsung ke pengguna (di luar role).'],
-              ['Diblokir', 'Ditegaskan secara eksplisit — menang atas allow role maupun direct.'],
+              ['Via peran', 'Datang dari perannya — blokir untuk mematikan satu menu saja.'],
+              ['Akses khusus', 'Diberikan langsung kepada orang itu (di luar perannya).'],
+              ['Diblokir', 'Tegak dilarang — berlaku di atas semua aturan lain.'],
             ],
           },
-          { type: 'callout', tone: 'info', text: RBAC_INTRO },
+          { type: 'callout', tone: 'info', text: ATURAN_IZIN },
         ],
       },
       {
         id: 'kelola-role',
-        title: 'Kelola Role',
+        title: 'Kelola Peran',
         blocks: [
           {
             type: 'list',
             items: [
-              'Role bawaan: super-admin, admin, bidang, komisariat — tidak dapat dihapus, permission-nya bisa diubah.',
-              'Role custom dapat dibuat bebas (mis. "humas", "editor-media") dengan kombinasi permission pilihan.',
-              'Perubahan permission role berlaku untuk semua pengguna yang memakainya.',
+              'Peran bawaan: super-admin, admin, bidang, komisariat — tak bisa dihapus; isinya (izin) boleh diubah.',
+              'Peran tambahan bisa dibuat bebas (mis. "humas", "editor-media") dengan kombinasi izin pilihan.',
+              'Mengubah isi peran berlaku untuk semua orang yang memakainya.',
             ],
           },
         ],
@@ -1105,7 +1112,7 @@ export const playbooks: Playbook[] = [
   {
     slug: 'pengajuan-akun',
     title: 'Pengajuan Akun',
-    short: 'Warga mengajukan akun pengurus; super-admin menyetujui atau menolak.',
+    short: 'Orang mengajukan akun pengurus dari halaman publik; super-admin menyetujui atau menolak.',
     icon: 'user-plus',
     group: 'Administrasi & Keamanan',
     route: '/dashboard/account-requests',
@@ -1114,18 +1121,18 @@ export const playbooks: Playbook[] = [
     sections: [
       {
         id: 'alur',
-        title: 'Alur Pengajuan',
+        title: 'Alurnya',
         blocks: [
           {
             type: 'flow',
-            items: ['Publik Mengajukan', 'Admin Review', 'Approve / Reject', 'Akun Aktif'],
+            items: ['Pengajuan', 'Ditinjau Admin', 'Disetujui / Ditolak', 'Akun Aktif'],
           },
           {
             type: 'list',
             items: [
-              'Pengajuan dilakukan di /ajukan-akun (dengan pembatasan rate + captcha bila diaktifkan).',
-              'Super-admin meninjau data pengaju lalu menyetujui (membuat akun) atau menolak dengan alasan.',
-              'Pengaju diberi tahu hasilnya sesuai kontak yang terdaftar.',
+              'Pengajuan dilakukan di /ajukan-akun (ada pembatasan laju + captcha bila diaktifkan).',
+              'Super-admin membaca data pengaju lalu memutuskan: setujui (langsung jadi akun) atau tolak dengan alasan.',
+              'Pengaju diberi tahu hasilnya lewat kontak yang tertulis.',
             ],
           },
         ],
@@ -1134,8 +1141,8 @@ export const playbooks: Playbook[] = [
   },
   {
     slug: 'log-aktivitas',
-    title: 'Log Aktivitas (Audit)',
-    short: 'Jejak seluruh tindakan admin: siapa, aksi apa, modul mana, kapan.',
+    title: 'Riwayat Catatan (Log Aktivitas)',
+    short: 'Catatan otomatis seluruh tindakan pengurus: siapa, apa, di menu mana, dan kapan.',
     icon: 'audit',
     group: 'Administrasi & Keamanan',
     route: '/dashboard/audit-logs',
@@ -1144,21 +1151,21 @@ export const playbooks: Playbook[] = [
     sections: [
       {
         id: 'fungsi',
-        title: 'Fungsi & Pemakaian',
+        title: 'Untuk Apa & Cara Memakainya',
         blocks: [
           {
             type: 'list',
             items: [
-              'Setiap operasi CRUD penting (buat/ubah/hapus, approve, import, dsb) tercatat dengan **pengguna, aksi, modul, dan waktu**.',
-              'Gunakan filter/pencarian untuk menelusuri riwayat per modul atau per pengguna.',
-              'Log bersifat baca saja — tidak bisa diedit/dihapus dari UI.',
+              'Setiap tindakan penting (buat/ubah/hapus, setujui, impor, dll) tercatat lengkap: **siapa, apa yang dilakukan, di menu mana, dan kapan**.',
+              'Gunakan pencarian dan filter untuk menelusuri per menu atau per orang.',
+              'Catatan bersifat **baca saja** — tak bisa diubah atau dihapus dari halaman ini.',
             ],
           },
           {
             type: 'callout',
             tone: 'info',
-            title: 'Untuk apa?',
-            text: 'Audit log membantu investigasi (mis. artikel terhapus siapa) dan menjadi bukti pertanggungjawaban organisasi.',
+            title: 'Manfaatnya',
+            text: 'Ketika muncul pertanyaan "siapa yang menghapus data ini?", jawabannya ada di sini. Ini juga bukti kerja yang bisa ditunjukkan.',
           },
         ],
       },
@@ -1169,39 +1176,39 @@ export const playbooks: Playbook[] = [
   {
     slug: 'faq-pemecahan-masalah',
     title: 'Pemecahan Masalah & FAQ',
-    short: 'Masalah yang paling sering ditemui — upload, login, artikel tak tayang, duplikat pendaftar — beserta solusinya.',
+    short: 'Kegagalan yang sering ditemui — unggahan, masuk akun, konten tak tayang, data kembar — beserta solusinya.',
     icon: 'help',
     group: 'Rujukan',
     related: ['panduan-cepat', 'pengenalan-sistem', 'pengguna-role-hak-akses'],
     sections: [
       {
         id: 'upload-gambar',
-        title: 'Upload & Gambar',
+        title: 'Unggah & Foto',
         blocks: [
           {
             type: 'table',
-            head: ['Masalah', 'Penyebab', 'Solusi'],
+            head: ['Masalah', 'Sebabnya', 'Caranya'],
             rows: [
-              ['Upload gagal "melebihi batas"', 'Berkas >2MB setelah kompresi', 'Kompres/kurangi dimensi sebelum unggah; gambar besar otomatis dipadatkan, tapi 2MB adalah batas akhir.'],
-              ['Gambar terpotong tidak sesuai keinginan', 'Rasio tidak sesuai target', 'Biarkan alat potong terbuka, geser bingkai sesuai bagian yang diinginkan, lalu simpan.'],
-              ['Foto lama tampil berputar 90°', 'Data orientasi kamera (EXIF) foto lama', 'Unggah ulang foto tersebut — versi sistem baru membaca orientasi secara otomatis.'],
-              ['Logo buram saat dikecilkan', 'Sumber resolusi terlalu kecil', 'Unggah versi resolusi lebih tinggi; rasio 1:1, resolusi bebas.'],
+              ['Unggahan ditolak melebihi batas', 'Berkas lebih besar dari 2MB', 'Perkecil ukurannya sebelum diunggah; sistem sudah ikut memadatkan, tapi 2MB adalah batas akhir.'],
+              ['Foto terpotong tak sesuai keinginan', 'Bentuknya tidak sama dengan slotnya', 'Atur jendela potong saat terbuka — geser bingkai ke bagian yang diinginkan, lalu simpan.'],
+              ['Foto lama tampil miring 90°', 'Data arah kamera (EXIF) pada foto lama', 'Unggah ulang foto itu — versi sistem baru sudah membaca arah otomatis.'],
+              ['Logo tampak buram', 'Sumbernya resolusinya terlalu kecil', 'Unggah versi yang lebih besar; bentuk persegi, resolusinya bebas.'],
             ],
           },
         ],
       },
       {
         id: 'login-akses',
-        title: 'Login & Akses',
+        title: 'Masuk Akun & Izin',
         blocks: [
           {
             type: 'table',
-            head: ['Masalah', 'Penyebab', 'Solusi'],
+            head: ['Masalah', 'Sebabnya', 'Caranya'],
             rows: [
-              ['"Terlalu banyak percobaan"', 'Throttle login salah berulang', 'Tunggu beberapa menit, lalu coba lagi dengan benar.'],
-              ['Login berhasil tapi menu kosong', 'Belum punya permission', 'Hubungi super-admin untuk mengatur hak akses.'],
-              ['Tidak bisa login sama sekali', 'Akun dinonaktifkan', 'Minta super-admin mengaktifkan kembali akun Anda.'],
-              ['Lupa kata sandi', '—', 'Hubungi super-admin untuk atur ulang; alamat email profil harus valid.'],
+              ['"Terlalu banyak percobaan"', 'Salah sandi berulang', 'Tunggu beberapa menit, lalu coba lagi dengan benar.'],
+              ['Masuk tapi menu kosong', 'Belum diberi izin', 'Minta super-admin mengatur hak akses Anda.'],
+              ['Tidak bisa masuk sama sekali', 'Akun dinonaktifkan', 'Minta super-admin mengaktifkan kembali akun Anda.'],
+              ['Lupa kata sandi', '—', 'Hubungi super-admin untuk mengaturnya ulang; pastikan surel di profil valid.'],
             ],
           },
         ],
@@ -1213,10 +1220,10 @@ export const playbooks: Playbook[] = [
           {
             type: 'list',
             items: [
-              '**Artikel tidak muncul di /post** — cek status: draft belum tayang; pending menunggu approve; rejected perlu diubah lalu diajukan ulang.',
-              '**Artikel tayang tapi tidak ada di kategori** — cek kategori yang dipilih, atau cek apakah akun Anda dibatasi kategori tertentu.',
-              '**Formulir tidak bisa diakses publik** — pastikan formulir berstatus aktif dan slug benar (alamat: /form/[slug]).',
-              '**Agenda tidak tampil** — agenda tampil sesuai rentang tanggalnya; cek tanggal mulai/selesai.',
+              '**Artikel tidak muncul di /post** — periksa statusnya: Draf belum tayang; Menunggu sedang diperiksa; Ditolak perlu dibenahi lalu diajukan ulang.',
+              '**Artikel tayang tapi tak tampak di kategori** — cek kategori yang dipilih, atau cek apakah akun Anda dijatah kategori tertentu.',
+              '**Formulir tak bisa dibuka publik** — pastikan formulirnya aktif dan alamatnya benar (/form/[alamat]).',
+              '**Agenda tak tampak** — agenda tampil mengikuti tanggalnya; periksa tanggal mulai/selesai.',
             ],
           },
         ],
@@ -1227,29 +1234,29 @@ export const playbooks: Playbook[] = [
         blocks: [
           {
             type: 'table',
-            head: ['Masalah', 'Penyebab', 'Solusi'],
+            head: ['Masalah', 'Sebabnya', 'Caranya'],
             rows: [
-              ['Pendaftar ganda', 'Limit 1 per email belum aktif', 'Aktifkan "Wajib Email" + "Batasi 1 per Email" di formulir.'],
-              ['Impor Excel "0 baris terbaca"', 'Header kolom tidak mengandung "nama"', 'Pastikan baris pertama berisi kolom: nama (wajib), email, phone, asal, kode (opsional).'],
-              ['Kode peserta menabrak', 'Kode sudah terpakai', 'Biarkan kolom kode kosong agar sistem mengurutkan otomatis (001, 002, …).'],
-              ['Scan gagal / kamera tak terbuka', 'Izin kamera browser mati atau perangkat tanpa kamera', 'Aktifkan izin kamera; gunakan perangkat dengan kamera; pastikan HTTPS.'],
-              ['Seseorang bisa absen 2x', 'Device limit belum diaktifkan', 'Aktifkan limit perangkat pada presensi; satu perangkat hanya untuk satu peserta.'],
+              ['Pendaftar kembar', 'Batasan e-mail belum diaktifkan', 'Aktifkan "Wajib E-mail" + "Batasi 1 per e-mail" di formulir.'],
+              ['Impor Excel "0 baris terbaca"', 'Baris pertama tak berisi kolom nama', 'Pastikan baris pertama berisi kolom: nama (wajib), email, phone, asal, kode (tak wajib).'],
+              ['Kode peserta bertabrakan', 'Kode sudah dipakai orang lain', 'Biarkan kolom kode kosong supaya sistem menomori sendiri (001, 002, …).'],
+              ['Kamera tak terbuka saat memindai', 'Izin kamera browser mati / perangkat tanpa kamera', 'Aktifkan izin kamera; pastikan membuka lewat HTTPS.'],
+              ['Seseorang bisa absen 2 kali', 'Batas per perangkat belum aktif', 'Aktifkan batas 1 per perangkat di presensi; satu ponsel hanya untuk satu orang.'],
             ],
           },
         ],
       },
       {
         id: 'tautan',
-        title: 'Tautan & Shortlink',
+        title: 'Tautan & Tautan Pendek',
         blocks: [
           {
             type: 'table',
-            head: ['Masalah', 'Penyebab', 'Solusi'],
+            head: ['Masalah', 'Sebabnya', 'Caranya'],
             rows: [
-              ['Pengajuan ditolak "alias reserved"', 'Alias menabrak route sistem', 'Gunakan alias lain.'],
-              ['Pengunjung lihat "menunggu aktivasi"', 'Shortlink masih pending', 'Super-admin/penanggung jawab mengaktifkan dari dashboard.'],
-              ['Kuota pengajuan habis', 'Batas harian per nomor WhatsApp', 'Tunggu hari berikutnya atau ajukan melalui admin langsung.'],
-              ['Link biolink tidak terdaftar', 'Halaman tidak aktif', 'Aktifkan halaman di /dashboard/links.'],
+              ['Nama pendek ditolak "reserved"', 'Nama itu dicadangkan sistem', 'Pakai nama lain.'],
+              ['Pengunjung melihat "menunggu aktivasi"', 'Tautannya masih pending', 'Super-admin/penanggung jawab mengaktifkannya dari dashboard.'],
+              ['Jatah pengajuan habis', 'Batas harian per nomor WhatsApp', 'Tunggu keesokan harinya atau ajukan lewat admin langsung.'],
+              ['Biolink tak terbuka', 'Halamannya tidak aktif', 'Aktifkan halaman di /dashboard/links.'],
             ],
           },
         ],
@@ -1261,17 +1268,17 @@ export const playbooks: Playbook[] = [
           {
             type: 'list',
             items: [
-              '**Seluruh situs tampil halaman perawatan** — maintenance global menyala; hanya super-admin yang bisa masuk; hubungi super-admin untuk mematikan.',
-              '**Modul tertentu "dalam perawatan"** — maintenance per modul menyala; atur di Pengaturan Portal.',
-              '**Tidak yakin siapa yang mengubah data** — telusuri Log Aktivitas: siapa, aksi, modul, waktu.',
-              '**Masih buntu** — hubungi super-admin PC dan cantumkan halaman yang bermasalah + screenshot.',
+              '**Semua halaman menampilkan tulisan perawatan** — mode perawatan global menyala; hanya super-admin yang bisa masuk; hubungi mereka untuk mematikan.',
+              '**Hanya menu tertentu yang tertutup** — mode perawatan per menu; aturnya di Pengaturan Website.',
+              '**Tidak yakin siapa yang mengubah data?** — telusuri Riwayat Catatan: siapa, tindakan apa, di mana, dan kapan.',
+              '**Masih belum terpecahkan?** — hubungi super-admin dan kirimkan: menu bermasalah + langkah yang Anda lakukan + tangkapan layar.',
             ],
           },
           {
             type: 'callout',
             tone: 'success',
-            title: 'Laporkan dengan format ini',
-            text: '`Modul` + `yang saya lakukan` + `yang muncul` + `screenshot`. Laporan yang lengkap mempercepat perbaikan jauh.',
+            title: 'Cara melapor yang cepat ditanggapi',
+            text: 'Sebut: `Menu` + `Yang saya lakukan` + `Yang muncul` + `Tangkapan layar`. Laporan yang lengkap mempercepat perbaikan.',
           },
         ],
       },

@@ -1,3 +1,4 @@
+import { getApiBase } from "@/lib/settings";
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Download, FileText, HardDrive, Globe, Archive } from 'lucide-react';
@@ -57,7 +58,7 @@ export const metadata: Metadata = {
 
 async function getDocuments() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/documents?public=true`, {
+    const res = await fetch(`${getApiBase()}/documents?public=true`, {
       next: { revalidate: 60 },
     });
     if (!res.ok) return [];

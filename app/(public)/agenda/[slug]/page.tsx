@@ -1,3 +1,4 @@
+import { getApiBase } from "@/lib/settings";
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
@@ -13,7 +14,7 @@ export const revalidate = 60;
 
 async function getEvent(slug: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${slug}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${getApiBase()}/events/${slug}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     const json = await res.json();
     return json.data;
@@ -190,7 +191,7 @@ export default async function AgendaDetailPage({ params }: { params: Promise<{ s
           <div className="ml-auto flex items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-2 hidden sm:block">Bagikan:</span>
             <ShareIconButtons title={event.title} slug={event.slug} basePath="/agenda" />
-            <a href={`${process.env.NEXT_PUBLIC_API_URL}/events/${event.slug}/ics`} download>
+            <a href={`${getApiBase()}/events/${event.slug}/ics`} download>
               <Button variant="outline" size="icon" className="w-10 h-10 rounded-full border-slate-200 text-slate-600 hover:text-emerald-600 hover:border-emerald-600 hover:bg-emerald-50" title="Tambah ke Kalender (.ics)">
                 <Download className="w-4 h-4" />
               </Button>

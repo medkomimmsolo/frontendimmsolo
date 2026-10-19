@@ -1,3 +1,4 @@
+import { getApiBase } from "@/lib/settings";
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, Link2 } from 'lucide-react';
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
 
 async function getPages() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/links`, { next: { revalidate: 60 } });
+    const res = await fetch(`${getApiBase()}/links`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     const json = await res.json();
     return json.data || [];

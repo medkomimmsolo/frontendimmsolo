@@ -1,3 +1,4 @@
+import { getApiBase } from "@/lib/settings";
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Building2, GraduationCap, Landmark, ArrowRight, ExternalLink } from 'lucide-react';
@@ -63,7 +64,7 @@ async function getLembaga(tipe?: string): Promise<any[]> {
     const params = new URLSearchParams();
     if (tipe) params.set('tipe', tipe);
     const qs = params.toString();
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/lembaga${qs ? `?${qs}` : ''}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${getApiBase()}/lembaga${qs ? `?${qs}` : ''}`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     const json = await res.json();
     return json.data || [];

@@ -1,5 +1,6 @@
 'use client';
 
+import { getApiBase } from "@/lib/settings";
 import { CalendarPlus, Download } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -32,7 +33,7 @@ export default function AddToCalendarButtons({
     `&details=${encodeURIComponent(plainDesc)}` +
     `&location=${encodeURIComponent(location || '')}`;
 
-  const icsUrl = `${process.env.NEXT_PUBLIC_API_URL}/events/${slug}/ics`;
+  const icsUrl = `${getApiBase()}/events/${slug}/ics`;
 
   return (
     <div className="flex flex-wrap items-center gap-3 mt-8">

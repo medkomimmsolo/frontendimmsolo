@@ -1,3 +1,4 @@
+import { getApiBase } from "@/lib/settings";
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowUpRight, Users } from 'lucide-react';
@@ -40,7 +41,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 
 async function getStruktural() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/struktural`, { next: { revalidate: 60 } });
+    const res = await fetch(`${getApiBase()}/struktural`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     const json = await res.json();
     return json.data?.data || json.data || [];

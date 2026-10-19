@@ -9,6 +9,9 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    // Backup hasil build lama — berisi ribuan file vendor/minified,
+    // tidak relevan untuk lint.
+    ".next-rootbak/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

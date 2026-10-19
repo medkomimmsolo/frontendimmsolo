@@ -1,5 +1,6 @@
 'use client';
 
+import { getApiBase } from "@/lib/settings";
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Download, FileText, HardDrive, Globe, Archive, Search, X, Image as ImageIcon } from 'lucide-react';
@@ -215,7 +216,7 @@ export default function DokumenClient({ documents }: { documents: DocumentItem[]
                     className="bg-[#c20000] text-white hover:bg-[#a00000] border-none rounded-xl px-4 h-9 shadow-sm transition-colors text-xs font-semibold shrink-0"
                   >
                     <a
-                      href={`${process.env.NEXT_PUBLIC_API_URL}/documents/${doc.id}/download`}
+                      href={`${getApiBase()}/documents/${doc.id}/download`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >

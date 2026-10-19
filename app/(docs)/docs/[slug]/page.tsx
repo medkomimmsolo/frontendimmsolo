@@ -30,8 +30,8 @@ export default async function PlaybookPage({ params }: Props) {
   const next = idx < playbookOrder.length - 1 ? getPlaybook(playbookOrder[idx + 1]) : undefined;
 
   return (
-    <div className="mx-auto flex max-w-7xl gap-10 px-6 py-12 sm:px-10 lg:px-14">
-      <article className="min-w-0 max-w-3xl flex-1">
+    <div className="mx-auto flex max-w-[100rem] gap-10 px-6 py-12 sm:px-10 lg:px-14">
+      <article className="min-w-0 max-w-4xl flex-1">
         <nav className="flex items-center gap-1.5 text-xs text-slate-400" aria-label="Breadcrumb">
           <Link href="/docs" className="hover:text-[#c20000]">
             Playbook
@@ -141,7 +141,7 @@ export default async function PlaybookPage({ params }: Props) {
         </nav>
       </article>
 
-      <aside className="sticky top-24 hidden h-fit w-56 shrink-0 xl:block">
+      <aside className="sticky top-24 ml-auto hidden h-fit w-56 shrink-0 lg:block">
         <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Di halaman ini</p>
         <ul className="mt-3 space-y-1.5 border-l-2 border-slate-100">
           {pb.sections.map((section) => (

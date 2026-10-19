@@ -1,3 +1,4 @@
+import { getApiBase } from "@/lib/settings";
 import { redirect, notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { headers } from 'next/headers';
@@ -33,7 +34,7 @@ export default async function ShortlinkRedirect({ params }: { params: Promise<{ 
     if (userAgent) fetchHeaders['User-Agent'] = userAgent;
     if (referer) fetchHeaders['Referer'] = referer;
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/s/${slug}`, {
+    const res = await fetch(`${getApiBase()}/s/${slug}`, {
       cache: 'no-store',
       headers: fetchHeaders,
     });

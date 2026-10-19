@@ -1,3 +1,4 @@
+import { getApiBase } from "@/lib/settings";
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -12,7 +13,7 @@ export const revalidate = 60;
 
 async function getBlog(slug: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs/${slug}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${getApiBase()}/blogs/${slug}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     const json = await res.json();
     return json.data;
@@ -24,7 +25,7 @@ async function getBlog(slug: string) {
 
 async function getTrendingBlogs() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs?per_page=6`, { next: { revalidate: 60 } });
+    const res = await fetch(`${getApiBase()}/blogs?per_page=6`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     const json = await res.json();
     // Assuming the API returns a paginated list or an array directly

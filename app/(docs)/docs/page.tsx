@@ -17,7 +17,7 @@ const ROLE_LEGEND = [
 
 export default function DocsIndexPage() {
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12 sm:px-10 lg:px-14">
+    <div className="mx-auto max-w-6xl px-6 py-12 sm:px-10 lg:px-14">
       <section className="rounded-3xl bg-gradient-to-br from-[#c20000] via-[#a30000] to-[#900000] px-7 py-12 text-white sm:px-12">
         <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
           <BookOpen className="h-4 w-4" /> Playbook
@@ -49,7 +49,7 @@ export default function DocsIndexPage() {
         {playbookGroups.map((group) => (
           <div key={group.label} className="mt-8">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">{group.label}</h3>
-            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {group.slugs.map((slug) => {
                 const pb = getPlaybook(slug);
                 if (!pb) return null;

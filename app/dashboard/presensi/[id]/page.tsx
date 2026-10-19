@@ -3,6 +3,7 @@
 import { use, useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
+import { siteUrl } from '@/lib/env';
 import { Button } from '@/components/ui/Button';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -183,7 +184,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
     }
   };
 
-  const cameraSiteUrl = (process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://immsolo.or.id')).replace(/\/+$/, '');
+  const cameraSiteUrl = siteUrl();
 
   // Statistik yang ditampilkan mengikuti cakupan sesi aktif bila tersedia,
   // agar angka pada kartu konsisten dengan tabel peserta/kehadiran di bawahnya.

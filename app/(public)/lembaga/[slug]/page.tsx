@@ -1,3 +1,4 @@
+import { getApiBase } from "@/lib/settings";
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -15,7 +16,7 @@ const TIPE_LABEL: Record<string, string> = {
 
 async function getLembaga(slug: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/lembaga/${slug}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${getApiBase()}/lembaga/${slug}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     const json = await res.json();
     return json.data;

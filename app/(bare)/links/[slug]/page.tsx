@@ -1,3 +1,4 @@
+import { getApiBase } from "@/lib/settings";
 import { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -9,7 +10,7 @@ import MaintenancePage from '@/components/ui/MaintenancePage';
 
 async function getPage(slug: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/links/${slug}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${getApiBase()}/links/${slug}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     const json = await res.json();
     return json.data;
@@ -138,7 +139,7 @@ export default async function LinktreePage({ params }: { params: Promise<{ slug:
             {items.map((item: any) => (
               <li key={item.id}>
               <a
-                href={`${process.env.NEXT_PUBLIC_API_URL}/links/go/${item.id}`}
+                href={`${getApiBase()}/links/go/${item.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{

@@ -1,3 +1,4 @@
+import { getApiBase } from "@/lib/settings";
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -7,7 +8,7 @@ import MaintenancePage from '@/components/ui/MaintenancePage';
 
 async function getForm(slug: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/forms/${slug}`, { next: { revalidate: 30 } });
+    const res = await fetch(`${getApiBase()}/forms/${slug}`, { next: { revalidate: 30 } });
     if (!res.ok) return null;
     const json = await res.json();
     return json.data;

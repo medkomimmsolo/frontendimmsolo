@@ -1,3 +1,4 @@
+import { getApiBase } from "@/lib/settings";
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
@@ -53,7 +54,7 @@ export const revalidate = 30;
 
 async function getEvents() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`, { next: { revalidate: 30 } });
+    const res = await fetch(`${getApiBase()}/events`, { next: { revalidate: 30 } });
     if (!res.ok) return [];
     const json = await res.json();
     return json.data.data || json.data || [];

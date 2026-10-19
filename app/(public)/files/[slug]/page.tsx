@@ -1,3 +1,4 @@
+import { getApiBase } from "@/lib/settings";
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -41,7 +42,7 @@ interface DocumentData {
 
 async function getDocument(slug: string): Promise<DocumentData | null> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/files/${encodeURIComponent(slug)}`, {
+    const res = await fetch(`${getApiBase()}/files/${encodeURIComponent(slug)}`, {
       next: { revalidate: 60 },
     });
     if (!res.ok) return null;
@@ -122,7 +123,7 @@ export default async function FileDetailPage({
   const isImage = doc.file_type === 'image';
   const isPdf = doc.file_type === 'pdf';
   const directFileUrl = doc.file_path ? toAbsoluteMediaUrl(doc.file_path) : doc.file_url || null;
-  const downloadApiUrl = `${process.env.NEXT_PUBLIC_API_URL}/files/${doc.slug}/download`;
+  const downloadApiUrl = `${getApiBase()}/files/${doc.slug}/download`;
 
   const formattedDate = new Date(doc.created_at).toLocaleDateString('id-ID', {
     day: 'numeric',

@@ -1,3 +1,4 @@
+import { getApiBase } from "@/lib/settings";
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -56,7 +57,7 @@ async function getBlogs(category?: string, page: number = 1) {
   try {
     const params = new URLSearchParams({ page: String(page), per_page: '12' });
     if (category) params.set('category', category);
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blogs?${params}`, { next: { revalidate: 30 } });
+    const res = await fetch(`${getApiBase()}/blogs?${params}`, { next: { revalidate: 30 } });
     if (!res.ok) return { items: [], currentPage: 1, lastPage: 1 };
     const json = await res.json();
     const payload = json.data || {};
