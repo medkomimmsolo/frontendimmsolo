@@ -3,13 +3,11 @@
 import { use, useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
-import { siteUrl } from '@/lib/env';
 import { Button } from '@/components/ui/Button';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { QRCodeSVG } from 'qrcode.react';
 import { Badge } from '@/components/ui/Badge';
-import { Loader2, Users, QrCode, ClipboardCheck, Settings, Upload, Download, Plus, Trash2, Search, ArrowLeft, Save, ScanLine, Layers, RefreshCw, History, Copy, ExternalLink } from 'lucide-react';
+import { Loader2, Users, QrCode, ClipboardCheck, Settings, Upload, Download, Plus, Trash2, Search, ArrowLeft, Save, Layers, RefreshCw, History } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
@@ -30,7 +28,7 @@ import { DEFAULT_PRESENSI_FORM_FIELDS } from '@/lib/presensi';
 const inputCls =
   'w-full bg-white border border-slate-200 rounded-sm px-3.5 py-2.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none shadow-sm transition-all';
 
-type Tab = 'peserta' | 'qr' | 'scan' | 'kehadiran' | 'riwayat' | 'sesi' | 'settings';
+type Tab = 'peserta' | 'qr' | 'kehadiran' | 'riwayat' | 'sesi' | 'settings';
 
 export default function PresensiDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -48,7 +46,6 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
   const [showManualModal, setShowManualModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
-  const [cameraLinkCopied, setCameraLinkCopied] = useState(false);
 
   // Peserta
   const [peserta, setPeserta] = useState<PresensiPeserta[]>([]);
@@ -146,7 +143,7 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
 
   useEffect(() => { fetchDetail(); }, [fetchDetail]);
   useEffect(() => {
-    if (tab === 'peserta' || tab === 'scan') fetchPeserta();
+    if (tab === 'peserta') fetchPeserta();
     if (tab === 'kehadiran') fetchKehadiran();
   }, [tab, fetchPeserta, fetchKehadiran]);
   useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter, activeSesiId]);
@@ -168,23 +165,6 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
   const refreshAll = () => { fetchDetail(); fetchPeserta(); };
 
   const activeSesi = sesis.find((s) => s.id === activeSesiId) || null;
-
-  const copyPublicCameraLink = async (token: string | null | undefined) => {
-    if (!token) {
-      toast.error('Token kamera sesi belum tersedia. Muat ulang halaman presensi terlebih dahulu.');
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(token);
-      setCameraLinkCopied(true);
-      toast.success('Token kamera disalin');
-      setTimeout(() => setCameraLinkCopied(false), 2000);
-    } catch (error) {
-      toast.error(getUserFacingErrorMessage(error, 'Tidak dapat menyalin token kamera'));
-    }
-  };
-
-  const cameraSiteUrl = siteUrl();
 
   // Statistik yang ditampilkan mengikuti cakupan sesi aktif bila tersedia,
   // agar angka pada kartu konsisten dengan tabel peserta/kehadiran di bawahnya.
@@ -295,12 +275,9 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: 'peserta', label: 'Peserta', icon: <Users className="w-4 h-4" /> },
     { key: 'qr', label: 'QR Code', icon: <QrCode className="w-4 h-4" /> },
-    ...(presensi.mode === 'scan' || presensi.mode === 'both'
-      ? [{ key: 'scan' as const, label: 'Scan', icon: <ScanLine className="w-4 h-4" /> }]
-      : []),
     { key: 'kehadiran', label: 'Kehadiran', icon: <ClipboardCheck className="w-4 h-4" /> },
     { key: 'riwayat', label: 'Riwayat', icon: <History className="w-4 h-4" /> },
-    { key: 'sesi', label: 'Sesi', icon: <Layers className="w-4 h-4" /> },
+    { key: 'sesi', label: 'Sesi & Kamera', icon: <Layers className="w-4 h-4" /> },
     { key: 'settings', label: 'Pengaturan', icon: <Settings className="w-4 h-4" /> },
   ];
 
@@ -557,86 +534,6 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
       {/* QR */}
       {tab === 'qr' && presensi && (
         <PresensiQrPanel presensi={presensi} peserta={peserta} activeSesi={activeSesi} onRefreshPeserta={fetchPeserta} stats={scopeStats} />
-      )}
-
-      {/* Scan — tabel token sesi untuk copy/paste ke kamera. */}
-      {tab === 'scan' && (
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs sm:p-6">
-            <div className="flex items-start gap-3">
-              <div className="rounded-xl bg-red-50 p-2.5 text-[#c20000]"><ScanLine className="h-5 w-5" /></div>
-              <div>
-                <h2 className="text-sm font-bold text-slate-900">Token Sesi Scan</h2>
-                <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-500">
-                  Salin token sesi dan buka <code className="bg-slate-100 px-1.5 py-0.5 rounded text-[10px] font-mono">/camera/TOKEN_SESI</code> di HP petugas untuk memindai QR peserta.
-                </p>
-              </div>
-            </div>
-          </div>
-          {sesis.length > 0 ? (
-            <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="admin-panel-table w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                      <th className="py-3 px-4 pl-6 w-16">No</th>
-                      <th className="py-3 px-4">Nama Sesi</th>
-                      <th className="py-3 px-4 w-40">Status</th>
-                      <th className="py-3 px-4 w-80">Token Sesi</th>
-                      <th className="py-3 px-4 w-56 pr-6">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-sm bg-white">
-                    {sesis.map((sesi, i) => (
-                      <tr key={sesi.id} className="hover:bg-slate-50/80">
-                        <td className="py-3 px-4 pl-6 text-slate-400 text-xs">{i + 1}</td>
-                        <td className="py-3 px-4">
-                          <div className="font-semibold text-slate-800">{sesi.name}</div>
-                          <div className="text-xs text-slate-400">
-                            {sesi.starts_at && `Mulai: ${formatDateTime(sesi.starts_at)}`}
-                            {sesi.ends_at && ` · Selesai: ${formatDateTime(sesi.ends_at)}`}
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${sesi.is_open ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
-                            {sesi.is_open ? 'Dibuka' : 'Ditutup'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <code className="font-mono text-sm font-bold tracking-[0.2em] text-slate-800 bg-slate-50 px-2 py-1 rounded border border-slate-200 block break-all">{sesi.scan_token || '—'}</code>
-                        </td>
-                        <td className="py-3 px-4 pr-6 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {sesi.scan_token && (
-                              <>
-                                <Button
-                                  onClick={() => copyPublicCameraLink(sesi.scan_token)}
-                                  variant="outline"
-                                  className="h-9 rounded-lg px-3 text-xs font-bold"
-                                >
-                                  <Copy className="mr-1.5 h-3.5 w-3.5" /> Salin Token
-                                </Button>
-                                <Link href={`/camera/${sesi.scan_token}`} target="_blank" rel="noopener noreferrer">
-                                  <Button className="h-9 rounded-lg bg-[#c20000] px-3 text-xs font-bold text-white hover:bg-[#a30000]">
-                                    <ExternalLink className="mr-1.5 h-3.5 w-3.5" /> Buka Kamera
-                                  </Button>
-                                </Link>
-                              </>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
-              Belum ada sesi presensi. Tambah sesi di tab <strong>Sesi</strong> untuk membuat token kamera.
-            </div>
-          )}
-        </div>
       )}
 
       {/* Kehadiran */}
