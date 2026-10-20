@@ -16,7 +16,6 @@ import {
   Copy,
   Check,
   ExternalLink,
-  X,
   RefreshCw,
   ClipboardList,
 } from 'lucide-react';
@@ -29,6 +28,7 @@ import { PaginationControls } from '@/components/ui/PaginationControls';
 import { TransferOwnershipModal } from '@/components/ui/TransferOwnershipModal';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { RowActions } from '@/components/ui/RowActions';
+import { Modal } from '@/components/ui/Modal';
 import { getApiBase } from '@/lib/settings';
 
 export default function DocumentsManagement() {
@@ -334,14 +334,15 @@ export default function DocumentsManagement() {
                 <th className="py-3.5 px-4">Detail Dokumen</th>
                 <th className="py-3.5 px-4 w-40">Tipe File</th>
                 <th className="py-3.5 px-4 w-32">Ukuran</th>
-                <th className="py-3.5 px-4 w-32 pr-6">Unduhan</th>
+                <th className="py-3.5 px-4 w-32">Unduhan</th>
+                <th className="py-3.5 px-4 pr-6 text-right">Aksi</th>
               </tr>
             </thead>
             
             <tbody className="divide-y divide-slate-100 text-sm bg-white">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="py-16 text-center">
+                  <td colSpan={6} className="py-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-500">
                       <Loader2 className="w-8 h-8 animate-spin text-[#c20000] mb-2" />
                       <span className="text-sm font-medium">Memuat data dokumen...</span>
@@ -350,7 +351,7 @@ export default function DocumentsManagement() {
                 </tr>
               ) : loadError ? (
                 <tr>
-                  <td colSpan={5} className="py-16 text-center">
+                  <td colSpan={6} className="py-16 text-center">
                     <p className="text-sm font-semibold text-slate-800">Daftar dokumen gagal dimuat</p>
                     <p className="mt-1 text-xs text-slate-500">Periksa koneksi, lalu muat ulang daftar dokumen.</p>
                     <Button type="button" variant="outline" onClick={() => fetchDocuments()} className="mt-4 rounded-xl">
@@ -360,7 +361,7 @@ export default function DocumentsManagement() {
                 </tr>
               ) : documents.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-16 text-center">
+                  <td colSpan={6} className="py-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-400">
                       <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3 text-slate-300">
                         <FileText className="w-6 h-6" />
@@ -455,8 +456,18 @@ export default function DocumentsManagement() {
                           Pemilik: <span className="font-medium text-slate-700">{doc.user.name}</span>
                         </div>
                       )}
-                      
-                      <div className="mt-2.5">
+                    </td>
+                    <td className="p-4 align-top">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-600 uppercase border border-slate-200">{doc.file_type}</span>
+                    </td>
+                    <td className="p-4 align-top text-slate-600 font-medium">
+                      {doc.file_size ? doc.file_size : '-'}
+                    </td>
+                    <td className="p-4 align-top text-slate-600 font-medium">
+                      {doc.downloads_count}
+                    </td>
+                    <td className="p-4 align-top pr-6">
+                      <div className="flex justify-end">
                         <RowActions
                           label={`Aksi untuk ${doc.title}`}
                           actions={[
@@ -486,15 +497,6 @@ export default function DocumentsManagement() {
                         />
                       </div>
                     </td>
-                    <td className="p-4 align-top">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-600 uppercase border border-slate-200">{doc.file_type}</span>
-                    </td>
-                    <td className="p-4 align-top text-slate-600 font-medium">
-                      {doc.file_size ? doc.file_size : '-'}
-                    </td>
-                    <td className="p-4 align-top text-slate-600 font-medium">
-                      {doc.downloads_count}
-                    </td>
                   </tr>
                 ))
               )}
@@ -514,104 +516,88 @@ export default function DocumentsManagement() {
       </div>
 
       {/* Edit Document Modal */}
-      {editingDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div role="dialog" aria-modal="true" aria-labelledby="edit-document-title" className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-              <h3 id="edit-document-title" className="font-bold text-slate-900 text-lg">Edit Dokumen / Berkas</h3>
-              <button
-                type="button"
-                onClick={() => setEditingDoc(null)}
-                aria-label="Tutup edit dokumen"
-                disabled={isSavingEdit}
-                className="text-slate-400 hover:text-slate-600 p-1"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      <Modal
+        open={!!editingDoc}
+        onClose={() => setEditingDoc(null)}
+        title="Edit Dokumen / Berkas"
+        titleId="edit-document-title"
+        size="lg"
+        onAttemptClose={isSavingEdit ? () => false : undefined}
+        onSubmit={handleSaveEdit}
+        footer={(
+          <>
+            <Button type="button" variant="outline" onClick={() => setEditingDoc(null)} disabled={isSavingEdit}>
+              Batal
+            </Button>
+            <Button type="submit" disabled={isSavingEdit} className="bg-[#c20000] hover:bg-[#a30000] text-white">
+              {isSavingEdit ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Simpan Perubahan
+            </Button>
+          </>
+        )}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              Judul Dokumen <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              data-autofocus
+              value={editForm.title}
+              onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              Slug URL Publik <span className="text-xs text-slate-400 font-normal">(/files/slug)</span>
+            </label>
+            <div className="flex items-center rounded-xl border border-slate-200 overflow-hidden focus-within:border-[#c20000] focus-within:ring-1 focus-within:ring-[#c20000]">
+              <span className="px-3 py-2 bg-slate-50 text-slate-500 text-xs font-mono border-r border-slate-200 select-none">
+                /files/
+              </span>
+              <input
+                type="text"
+                value={editForm.slug}
+                onChange={(e) => setEditForm({ ...editForm, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
+                placeholder="nama-file-atau-foto"
+                className="flex-1 px-3 py-2 text-sm text-slate-800 outline-none font-mono"
+              />
             </div>
+            <p className="text-xs text-slate-400 mt-1">
+              Huruf kecil dan tanda hubung (-). Mengubah slug akan mengubah link publik berkas ini.
+            </p>
+          </div>
 
-            <form onSubmit={handleSaveEdit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  Judul Dokumen <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={editForm.title}
-                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] text-sm"
-                />
-              </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              Deskripsi
+            </label>
+            <textarea
+              rows={3}
+              value={editForm.description}
+              onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] text-sm resize-none"
+              placeholder="Deskripsi singkat..."
+            />
+          </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  Slug URL Publik <span className="text-xs text-slate-400 font-normal">(/files/slug)</span>
-                </label>
-                <div className="flex items-center rounded-sm border border-slate-200 overflow-hidden focus-within:border-[#c20000] focus-within:ring-1 focus-within:ring-[#c20000]">
-                  <span className="px-3 py-2 bg-slate-50 text-slate-500 text-xs font-mono border-r border-slate-200 select-none">
-                    /files/
-                  </span>
-                  <input
-                    type="text"
-                    value={editForm.slug}
-                    onChange={(e) => setEditForm({ ...editForm, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
-                    placeholder="nama-file-atau-foto"
-                    className="flex-1 px-3 py-2 text-sm text-slate-800 outline-none font-mono"
-                  />
-                </div>
-                <p className="text-xs text-slate-400 mt-1">
-                  Huruf kecil dan tanda hubung (-). Mengubah slug akan mengubah link publik berkas ini.
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  Deskripsi
-                </label>
-                <textarea
-                  rows={3}
-                  value={editForm.description}
-                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] text-sm resize-none"
-                  placeholder="Deskripsi singkat..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Status</label>
-                <select
-                  value={editForm.status}
-                  onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] text-sm bg-slate-50"
-                >
-                  <option value="published">Published</option>
-                  <option value="draft">Draft</option>
-                </select>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setEditingDoc(null)}
-                  disabled={isSavingEdit}
-                >
-                  Batal
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSavingEdit}
-                  className="bg-[#c20000] hover:bg-[#a30000] text-white"
-                >
-                  {isSavingEdit ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                  Simpan Perubahan
-                </Button>
-              </div>
-            </form>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Status</label>
+            <select
+              value={editForm.status}
+              onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+              className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] text-sm bg-slate-50"
+            >
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+            </select>
           </div>
         </div>
-      )}
+      </Modal>
 
       {transferItem && (
         <TransferOwnershipModal

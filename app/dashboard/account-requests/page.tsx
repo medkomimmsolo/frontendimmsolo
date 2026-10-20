@@ -10,6 +10,7 @@ import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { RowActions } from '@/components/ui/RowActions';
+import { Modal } from '@/components/ui/Modal';
 
 type StatusFilter = 'pending' | 'approved' | 'rejected';
 
@@ -222,24 +223,28 @@ export default function AccountRequestsPage() {
       </div>
 
       {approveId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" onClick={() => setApproveId(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 sm:p-7 border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2"><UserPlus className="w-5 h-5 text-emerald-600" /> Setujui Akun</h2>
-            <p className="text-xs text-slate-500 mb-4">Pilih role final untuk akun pemohon ini.</p>
-            <select value={approveRole} onChange={(e) => setApproveRole(e.target.value)}
-              className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs cursor-pointer">
-              <option value="komisariat">Komisariat (Kontributor Lokal)</option>
-              <option value="bidang">Bidang (Cabang)</option>
-              <option value="admin">Admin</option>
-            </select>
-            <div className="flex justify-end gap-2.5 mt-6 pt-4 border-t border-slate-100">
+        <Modal
+          open
+          onClose={() => setApproveId(null)}
+          title={<span className="flex items-center gap-2 text-lg font-bold text-slate-900"><UserPlus className="h-5 w-5 text-emerald-600" /> Setujui Akun</span>}
+          description="Pilih role final untuk akun pemohon ini."
+          size="sm"
+          footer={(
+            <>
               <Button variant="outline" onClick={() => setApproveId(null)} className="rounded-xl h-10 px-4 text-xs font-semibold border-slate-200 hover:bg-slate-50">Batal</Button>
               <Button onClick={handleApprove} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-10 px-4 text-xs font-bold shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]">
                 {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />} Setujui & Aktifkan
               </Button>
-            </div>
-          </div>
-        </div>
+            </>
+          )}
+        >
+          <select value={approveRole} onChange={(e) => setApproveRole(e.target.value)}
+            className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs cursor-pointer">
+            <option value="komisariat">Komisariat (Kontributor Lokal)</option>
+            <option value="bidang">Bidang (Cabang)</option>
+            <option value="admin">Admin</option>
+          </select>
+        </Modal>
       )}
     </div>
   );

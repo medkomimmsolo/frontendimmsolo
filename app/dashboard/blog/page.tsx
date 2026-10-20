@@ -337,14 +337,15 @@ export default function BlogManagement() {
                 <th className="py-3.5 px-4 w-24 text-center">
                   <MessageSquare className="w-4 h-4 text-slate-400 mx-auto" />
                 </th>
-                <th className="py-3.5 px-4 w-40 pr-6">Tanggal</th>
+                <th className="py-3.5 px-4 w-40">Tanggal</th>
+                <th className="py-3.5 px-4 pr-6 text-right">Aksi</th>
               </tr>
             </thead>
             
             <tbody className="divide-y divide-slate-100 text-sm bg-white">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-16 text-center">
+                  <td colSpan={7} className="py-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-500">
                       <Loader2 className="w-8 h-8 animate-spin text-[#c20000] mb-2" />
                       <span className="text-sm font-medium">Memuat data artikel...</span>
@@ -353,7 +354,7 @@ export default function BlogManagement() {
                 </tr>
               ) : loadError ? (
                 <tr>
-                  <td colSpan={6} className="py-16 text-center">
+                  <td colSpan={7} className="py-16 text-center">
                     <p className="text-sm font-semibold text-slate-800">Berita gagal dimuat</p>
                     <p className="mt-1 text-xs text-slate-500">Periksa koneksi, lalu coba muat ulang daftar berita.</p>
                     <Button type="button" variant="outline" onClick={() => void fetchBlogs()} className="mt-4 rounded-xl">
@@ -363,7 +364,7 @@ export default function BlogManagement() {
                 </tr>
               ) : blogs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-16 text-center">
+                  <td colSpan={7} className="py-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-400">
                       <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3 text-slate-300">
                         <FileText className="w-6 h-6" />
@@ -415,9 +416,28 @@ export default function BlogManagement() {
                           <span className="font-semibold">Catatan revisi:</span> {(blog as any).review_note}
                         </p>
                       )}
-                      
-                      {/* Aksi */}
-                      <div className="mt-2">
+                    </td>
+                    <td className="p-4 align-top text-slate-600">
+                      {blog.user?.name || 'Admin'}
+                    </td>
+                    <td className="p-4 align-top text-slate-600">
+                      {blog.category?.name || 'Tanpa Kategori'}
+                    </td>
+                    <td className="p-4 align-top text-center text-slate-600">
+                      <div className="inline-flex items-center justify-center bg-slate-100 border border-slate-200 rounded-full px-2.5 py-0.5 text-xs font-medium group-hover:bg-white group-hover:border-[#c20000]/30 transition-all" title={`${blog.views_count} Views`}>
+                        {blog.views_count || 0}
+                      </div>
+                    </td>
+                    <td className="p-4 align-top pr-4">
+                      <div className="text-[#0f172a] font-medium text-xs">
+                        {blog.status === 'published' ? 'Terbit' : 'Terakhir Diubah'}
+                      </div>
+                      <div className="text-slate-500 text-xs mt-0.5">
+                        {new Date(blog.status === 'published' ? blog.published_at ?? blog.updated_at : blog.updated_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      </div>
+                    </td>
+                    <td className="p-4 align-top pr-6">
+                      <div className="flex justify-end">
                         <RowActions
                           label={`Aksi untuk ${blog.title}`}
                           actions={[
@@ -455,25 +475,6 @@ export default function BlogManagement() {
                         />
                       </div>
                     </td>
-                    <td className="p-4 align-top text-slate-600">
-                      {blog.user?.name || 'Admin'}
-                    </td>
-                    <td className="p-4 align-top text-slate-600">
-                      {blog.category?.name || 'Tanpa Kategori'}
-                    </td>
-                    <td className="p-4 align-top text-center text-slate-600">
-                      <div className="inline-flex items-center justify-center bg-slate-100 border border-slate-200 rounded-full px-2.5 py-0.5 text-xs font-medium group-hover:bg-white group-hover:border-[#c20000]/30 transition-all" title={`${blog.views_count} Views`}>
-                        {blog.views_count || 0}
-                      </div>
-                    </td>
-                    <td className="p-4 align-top pr-4">
-                      <div className="text-[#0f172a] font-medium text-xs">
-                        {blog.status === 'published' ? 'Terbit' : 'Terakhir Diubah'}
-                      </div>
-                      <div className="text-slate-500 text-xs mt-0.5">
-                        {new Date(blog.status === 'published' ? blog.published_at ?? blog.updated_at : blog.updated_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
-                      </div>
-                    </td>
                   </tr>
                 ))
               )}
@@ -496,7 +497,8 @@ export default function BlogManagement() {
                 <th className="py-3 px-4 text-center">
                   <MessageSquare className="w-4 h-4 text-slate-400 mx-auto" />
                 </th>
-                <th className="py-3 px-4 pr-6">Tanggal</th>
+                <th className="py-3 px-4">Tanggal</th>
+                <th className="py-3 px-4 pr-6 text-right">Aksi</th>
               </tr>
             </tfoot>
           </table>

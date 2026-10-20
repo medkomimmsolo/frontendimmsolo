@@ -261,14 +261,15 @@ export default function EventsManagement() {
                 <th className="py-3.5 px-4">Agenda</th>
                 <th className="py-3.5 px-4 w-48">Lokasi</th>
                 <th className="py-3.5 px-4 w-32">Status</th>
-                <th className="py-3.5 px-4 w-48 pr-6">Tanggal</th>
+                <th className="py-3.5 px-4 w-48">Tanggal</th>
+                <th className="py-3.5 px-4 pr-6 text-right">Aksi</th>
               </tr>
             </thead>
             
             <tbody className="divide-y divide-slate-100 text-sm bg-white">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="py-16 text-center">
+                  <td colSpan={6} className="py-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-500">
                       <Loader2 className="w-8 h-8 animate-spin text-[#c20000] mb-2" />
                       <span className="text-sm font-medium">Memuat data agenda...</span>
@@ -277,7 +278,7 @@ export default function EventsManagement() {
                 </tr>
               ) : events.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-16 text-center">
+                  <td colSpan={6} className="py-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-400">
                       <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3 text-slate-300">
                         <CalendarDays className="w-6 h-6" />
@@ -309,9 +310,30 @@ export default function EventsManagement() {
                           Pembuat: <span className="font-medium text-slate-700">{(event as any).user.name}</span>
                         </div>
                       )}
-                      
-                      {/* Aksi */}
-                      <div className="mt-2">
+                    </td>
+                    <td className="p-4\1align-top text-slate-600">
+                      <div className="flex items-start text-xs mt-0.5">
+                        <MapPin className="w-3.5 h-3.5 mr-1 text-slate-400 shrink-0 mt-0.5" />
+                        <span className="line-clamp-2">{event.location}</span>
+                      </div>
+                    </td>
+                    <td className="p-4\1align-top">
+                      {event.status === 'upcoming' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200">Mendatang</span>}
+                      {event.status === 'ongoing' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-600 border border-amber-200">Berlangsung</span>}
+                      {event.status === 'completed' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-200">Selesai</span>}
+                      {event.status === 'cancelled' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-600 border border-red-200">Dibatalkan</span>}
+                    </td>
+                    <td className="p-4\1align-top pr-4">
+                      <div className="text-[#0f172a] font-medium text-xs flex items-center">
+                         <CalendarDays className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
+                         {formatDateTime(event.event_date).split(' ')[0]}
+                      </div>
+                      <div className="text-slate-500 text-xs mt-0.5 ml-5">
+                         {formatDateTime(event.event_date).split(' ').slice(1).join(' ')}
+                      </div>
+                    </td>
+                    <td className="p-4\1align-top pr-6">
+                      <div className="flex justify-end">
                         <RowActions
                           label={`Aksi untuk ${event.title}`}
                           actions={[
@@ -335,27 +357,6 @@ export default function EventsManagement() {
                         />
                       </div>
                     </td>
-                    <td className="p-4\1align-top text-slate-600">
-                      <div className="flex items-start text-xs mt-0.5">
-                        <MapPin className="w-3.5 h-3.5 mr-1 text-slate-400 shrink-0 mt-0.5" />
-                        <span className="line-clamp-2">{event.location}</span>
-                      </div>
-                    </td>
-                    <td className="p-4\1align-top">
-                      {event.status === 'upcoming' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200">Mendatang</span>}
-                      {event.status === 'ongoing' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-600 border border-amber-200">Berlangsung</span>}
-                      {event.status === 'completed' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-200">Selesai</span>}
-                      {event.status === 'cancelled' && <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-600 border border-red-200">Dibatalkan</span>}
-                    </td>
-                    <td className="p-4\1align-top pr-4">
-                      <div className="text-[#0f172a] font-medium text-xs flex items-center">
-                         <CalendarDays className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
-                         {formatDateTime(event.event_date).split(' ')[0]}
-                      </div>
-                      <div className="text-slate-500 text-xs mt-0.5 ml-5">
-                         {formatDateTime(event.event_date).split(' ').slice(1).join(' ')}
-                      </div>
-                    </td>
                   </tr>
                 ))
               )}
@@ -374,7 +375,8 @@ export default function EventsManagement() {
                 <th className="py-3 px-4">Agenda</th>
                 <th className="py-3 px-4">Lokasi</th>
                 <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 pr-6">Tanggal</th>
+                <th className="py-3 px-4">Tanggal</th>
+                <th className="py-3 px-4 pr-6 text-right">Aksi</th>
               </tr>
             </tfoot>
           </table>

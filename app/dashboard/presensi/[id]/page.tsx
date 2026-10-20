@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { PaginationControls } from '@/components/ui/PaginationControls';
 import { RowActions } from '@/components/ui/RowActions';
-import { Loader2, Users, QrCode, ClipboardCheck, Settings, Upload, Download, Plus, Trash2, Search, ArrowLeft, Save, Layers, RefreshCw, History, ChevronDown, Mail, Phone } from 'lucide-react';
+import { Loader2, Users, QrCode, ClipboardCheck, Settings, Upload, Download, Plus, Trash2, Search, ArrowLeft, Save, Layers, RefreshCw, History, ChevronDown, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
@@ -457,13 +457,11 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
               <span className="text-xs font-medium text-slate-400">{totalPeserta} peserta</span>
             </div>
             <div className="overflow-x-auto">
-              <table className={`admin-panel-table w-full text-left border-collapse ${presensi.mode === 'self' ? 'min-w-[1080px]' : 'min-w-[820px]'}`}>
+              <table className={`admin-panel-table w-full text-left border-collapse ${presensi.mode === 'self' ? 'min-w-[760px]' : 'min-w-[560px]'}`}>
                 <thead>
                   <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-2xs font-bold uppercase tracking-wider">
                     <th className="py-3 px-3 pl-6 w-12 text-center">No</th>
                     <th className="py-3 px-4">Peserta</th>
-                    <th className="py-3 px-4 w-60">Kontak</th>
-                    <th className="py-3 px-4 w-36">Asal</th>
                     {presensi.mode === 'self' && <th className="py-3 px-4">Jawaban Form</th>}
                     <th className="py-3 px-4 w-52">Status Kehadiran</th>
                     <th className="py-3 px-3 pr-6 w-12"></th>
@@ -472,13 +470,13 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                 <tbody className="divide-y divide-slate-100 text-sm bg-white">
                   {pesertaLoading ? (
                     <tr>
-                      <td colSpan={presensi.mode === 'self' ? 7 : 6} className="py-16 text-center">
+                      <td colSpan={presensi.mode === 'self' ? 5 : 4} className="py-16 text-center">
                         <Loader2 className="w-7 h-7 animate-spin text-[#c20000] mx-auto" />
                       </td>
                     </tr>
                   ) : peserta.length === 0 ? (
                     <tr>
-                      <td colSpan={presensi.mode === 'self' ? 7 : 6} className="py-16 text-center">
+                      <td colSpan={presensi.mode === 'self' ? 5 : 4} className="py-16 text-center">
                         <div className="flex flex-col items-center justify-center text-slate-400">
                           <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3 text-slate-300">
                             <Users className="w-6 h-6" />
@@ -507,36 +505,14 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                             </div>
                             <div className="min-w-0">
                               <div className="font-semibold text-slate-800 truncate" title={p.nama}>{p.nama}</div>
-                              {p.kode && <div className="text-2xs text-slate-400">Kode {p.kode}</div>}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-4 text-xs">
-                          {(p.email || p.phone) ? (
-                            <div className="space-y-1">
                               {p.email && (
-                                <a href={`mailto:${p.email}`} className="flex items-center gap-1.5 text-slate-600 hover:text-[#c20000]" title={p.email}>
-                                  <Mail className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                                <a href={`mailto:${p.email}`} className="mt-0.5 flex max-w-[220px] items-center gap-1.5 text-2xs text-slate-500 truncate transition-colors hover:text-[#c20000]" title={p.email}>
+                                  <Mail className="w-3 h-3 shrink-0 text-slate-400" />
                                   <span className="truncate">{p.email}</span>
                                 </a>
                               )}
-                              {p.phone && (
-                                <div className="flex items-center gap-1.5 text-slate-500">
-                                  <Phone className="w-3.5 h-3.5 shrink-0 text-slate-400" />
-                                  <span className="truncate">{p.phone}</span>
-                                </div>
-                              )}
                             </div>
-                          ) : (
-                            <span className="text-slate-300">—</span>
-                          )}
-                        </td>
-                        <td className="py-3.5 px-4 text-xs">
-                          {p.asal ? (
-                            <span className="block max-w-[150px] truncate text-slate-600" title={p.asal}>{p.asal}</span>
-                          ) : (
-                            <span className="text-slate-300">—</span>
-                          )}
+                          </div>
                         </td>
                         {presensi.mode === 'self' && (
                           <td className="py-3.5 px-4 align-top">

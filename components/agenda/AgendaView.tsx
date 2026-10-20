@@ -351,7 +351,7 @@ export default function AgendaView({ events }: { events: AgendaEvent[] }) {
       {/* ===== POPUP DETAIL EVENT ===== */}
       {popupEvent && (
         <div
-          className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setPopupEvent(null)}
         >
           <div
@@ -360,7 +360,8 @@ export default function AgendaView({ events }: { events: AgendaEvent[] }) {
           >
             <button
               onClick={() => setPopupEvent(null)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 transition-colors p-1"
+              aria-label="Tutup"
+              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>

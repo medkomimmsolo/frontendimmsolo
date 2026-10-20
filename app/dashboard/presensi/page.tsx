@@ -155,12 +155,13 @@ export default function PresensiManagement() {
                 <th className="py-3.5 px-4 w-32">Mode</th>
                 <th className="py-3.5 px-4 w-28">Peserta</th>
                 <th className="py-3.5 px-4 w-28">Status</th>
+                <th className="py-3.5 px-4 pr-6 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm bg-white">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="py-16 text-center">
+                  <td colSpan={6} className="py-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-500">
                       <Loader2 className="w-8 h-8 animate-spin text-[#c20000] mb-2" />
                       <span className="text-sm font-medium">Memuat data presensi...</span>
@@ -169,7 +170,7 @@ export default function PresensiManagement() {
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-16 text-center">
+                  <td colSpan={6} className="py-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-400">
                       <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3 text-slate-300">
                         <QrCode className="w-6 h-6" />
@@ -199,27 +200,6 @@ export default function PresensiManagement() {
                           Pembuat: <span className="font-medium text-slate-700">{item.user.name}</span>
                         </div>
                       )}
-                      <div className="mt-2">
-                        <RowActions
-                          label={`Aksi untuk ${item.title}`}
-                          actions={[
-                            { label: 'Kelola', icon: <Edit className="w-4 h-4" />, href: `/dashboard/presensi/${item.id}` },
-                            {
-                              label: item.is_open ? 'Tutup presensi' : 'Buka presensi',
-                              icon: item.is_open ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />,
-                              tone: item.is_open ? 'warning' : 'success',
-                              onClick: () => handleToggle(item),
-                            },
-                            {
-                              label: 'Hapus',
-                              icon: <Trash2 className="w-4 h-4" />,
-                              tone: 'danger',
-                              dividerBefore: true,
-                              onClick: () => handleDelete(item.id),
-                            },
-                          ]}
-                        />
-                      </div>
                     </td>
                     <td className="p-4 align-top text-slate-600">
                       <div className="text-[#0f172a] font-medium text-xs flex items-center">
@@ -252,6 +232,29 @@ export default function PresensiManagement() {
                       ) : (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-500 border border-slate-200">Ditutup</span>
                       )}
+                    </td>
+                    <td className="p-4 align-top pr-6">
+                      <div className="flex justify-end">
+                        <RowActions
+                          label={`Aksi untuk ${item.title}`}
+                          actions={[
+                            { label: 'Kelola', icon: <Edit className="w-4 h-4" />, href: `/dashboard/presensi/${item.id}` },
+                            {
+                              label: item.is_open ? 'Tutup presensi' : 'Buka presensi',
+                              icon: item.is_open ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />,
+                              tone: item.is_open ? 'warning' : 'success',
+                              onClick: () => handleToggle(item),
+                            },
+                            {
+                              label: 'Hapus',
+                              icon: <Trash2 className="w-4 h-4" />,
+                              tone: 'danger',
+                              dividerBefore: true,
+                              onClick: () => handleDelete(item.id),
+                            },
+                          ]}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))

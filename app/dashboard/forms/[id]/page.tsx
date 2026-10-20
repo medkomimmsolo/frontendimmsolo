@@ -1249,7 +1249,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
 
       {selectedResponse && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setSelectedResponse(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 sm:p-7 my-8 max-h-[90vh] overflow-y-auto border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 sm:p-7 my-8 border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between border-b border-slate-200 pb-4 mb-5">
               <div>
                 <span className="text-2xs font-mono px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold uppercase">
@@ -1262,7 +1262,7 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
                   Disubmit pada: {new Date(selectedResponse.created_at).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' })}
                 </p>
               </div>
-              <button onClick={() => setSelectedResponse(null)} className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors">
+              <button onClick={() => setSelectedResponse(null)} aria-label="Tutup" className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1349,10 +1349,12 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
 
       {isPreviewOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setIsPreviewOpen(false)}>
-          <div className="bg-[#f8f9fa] rounded-2xl shadow-2xl max-w-2xl w-full p-6 sm:p-8 my-8 max-h-[90vh] overflow-y-auto border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-[#f8f9fa] rounded-2xl shadow-2xl max-w-2xl w-full p-6 sm:p-8 my-8 border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
               <h2 className="text-base font-bold text-slate-800">Pratinjau Formulir</h2>
-              <button onClick={() => setIsPreviewOpen(false)} className="text-xs font-semibold px-2.5 py-1 rounded-lg text-slate-500 hover:text-[#c20000] hover:bg-red-50 transition-colors">Tutup ✕</button>
+              <button onClick={() => setIsPreviewOpen(false)} aria-label="Tutup" className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             <FormFillClient
               form={{
@@ -1377,8 +1379,8 @@ export default function FormDetailPage({ params }: { params: Promise<{ id: strin
       )}
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" onClick={() => setIsModalOpen(false)}>
-          <form onSubmit={handleSaveField} className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-7 border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setIsModalOpen(false)}>
+          <form onSubmit={handleSaveField} className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-7 my-8 border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold text-slate-900">{editing ? 'Edit Kolom Pertanyaan' : 'Tambah Kolom Pertanyaan'}</h2>
               <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors">

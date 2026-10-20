@@ -878,8 +878,8 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
 
       {/* ── MODAL TAMBAH / EDIT ITEM TAUTAN ── */}
       {isItemModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4" onClick={() => setIsItemModalOpen(false)}>
-          <form onSubmit={handleSaveItem} className="bg-white rounded-sm shadow-xl max-w-lg w-full p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" onClick={() => setIsItemModalOpen(false)}>
+          <form onSubmit={handleSaveItem} className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 border border-slate-200/90" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-bold text-slate-800 mb-5">{editingItem ? 'Edit Tautan' : 'Tambah Tautan Baru'}</h2>
             <div className="space-y-4">
               <div>
@@ -943,7 +943,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
                 Tampilkan tautan ini ke publik
               </label>
             </div>
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-end gap-3 mt-6 pt-5 border-t border-slate-100">
               <Button type="button" variant="outline" onClick={() => setIsItemModalOpen(false)}>Batal</Button>
               <Button type="submit" disabled={isItemSaving} className="bg-[#c20000] hover:bg-[#a30000] text-white">
                 {isItemSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />} Simpan
@@ -955,7 +955,7 @@ export default function LinkItemsPage({ params }: { params: Promise<{ id: string
 
       {isQrModalOpen && page && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/70 p-4 backdrop-blur-sm"
           onClick={() => setIsQrModalOpen(false)}
         >
           <section

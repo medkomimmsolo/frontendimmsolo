@@ -24,6 +24,7 @@ import Link from 'next/link';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { RowActions } from '@/components/ui/RowActions';
+import { Modal } from '@/components/ui/Modal';
 
 type BidangNode = {
   id: string;
@@ -668,102 +669,102 @@ export default function StrukturalManagement() {
       )}
 
       {/* Create Period Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-7 border border-slate-200/90">
-            <h3 className="text-lg font-bold text-slate-900 mb-1" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Buat Periode Baru</h3>
-            <p className="text-slate-500 text-xs mb-5">Masukkan nama periode kepengurusan baru PC IMM Kota Surakarta.</p>
-            
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Periode</label>
-                <input 
-                  type="text" 
-                  value={newPeriodName}
-                  onChange={(e) => setNewPeriodName(e.target.value)}
-                  placeholder="Contoh: 2025-2026"
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs"
-                  autoFocus
-                />
-              </div>
-              
-              {selectedPeriod && (
-                <div className="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
-                  <input 
-                    type="checkbox" 
-                    id="copyStructure"
-                    checked={copyStructure}
-                    onChange={(e) => setCopyStructure(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 accent-[#c20000] rounded cursor-pointer"
-                  />
-                  <label htmlFor="copyStructure" className="text-xs text-slate-700 cursor-pointer leading-relaxed">
-                    Salin struktur jabatan dari periode <span className="font-bold text-slate-900">{selectedPeriod}</span> 
-                    <br /><span className="text-2xs text-slate-400">(hanya menyalin format jabatannya, nama pengurus akan otomatis dikosongkan)</span>
-                  </label>
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
-              <Button variant="outline" onClick={() => setIsModalOpen(false)} className="rounded-xl px-4 text-xs font-semibold h-10 border-slate-200 hover:bg-slate-50">
-                Batal
-              </Button>
-              <Button onClick={submitNewPeriod} disabled={isLoading || !newPeriodName.trim()} className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl px-5 text-xs font-bold h-10 shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]">
-                {isLoading ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : null}
-                Buat Periode
-              </Button>
-            </div>
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Buat Periode Baru"
+        description="Masukkan nama periode kepengurusan baru PC IMM Kota Surakarta."
+        size="md"
+        footer={(
+          <>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)} className="rounded-xl px-4 text-xs font-semibold h-10 border-slate-200 hover:bg-slate-50">
+              Batal
+            </Button>
+            <Button onClick={submitNewPeriod} disabled={isLoading || !newPeriodName.trim()} className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl px-5 text-xs font-bold h-10 shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]">
+              {isLoading ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : null}
+              Buat Periode
+            </Button>
+          </>
+        )}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Periode</label>
+            <input
+              type="text"
+              value={newPeriodName}
+              onChange={(e) => setNewPeriodName(e.target.value)}
+              placeholder="Contoh: 2025-2026"
+              className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs"
+              autoFocus
+            />
           </div>
+
+          {selectedPeriod && (
+            <div className="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+              <input
+                type="checkbox"
+                id="copyStructure"
+                checked={copyStructure}
+                onChange={(e) => setCopyStructure(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-[#c20000] rounded cursor-pointer"
+              />
+              <label htmlFor="copyStructure" className="text-xs text-slate-700 cursor-pointer leading-relaxed">
+                Salin struktur jabatan dari periode <span className="font-bold text-slate-900">{selectedPeriod}</span>
+                <br /><span className="text-2xs text-slate-400">(hanya menyalin format jabatannya, nama pengurus akan otomatis dikosongkan)</span>
+              </label>
+            </div>
+          )}
         </div>
-      )}
+      </Modal>
 
       {/* Create Bidang Modal */}
-      {isBidangModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-7 border border-slate-200/90">
-            <h3 className="text-lg font-bold text-slate-900 mb-1" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Buat Bidang / Lembaga Baru</h3>
-            <p className="text-slate-500 text-xs mb-5">Tambah kelompok pengurus pada periode <span className="font-bold text-slate-800">{selectedPeriod}</span>.</p>
-            
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kategori</label>
-                <select 
-                  value={newKategori}
-                  onChange={(e) => setNewKategori(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs cursor-pointer"
-                >
-                  <option value="BPH">Badan Pimpinan Harian (BPH)</option>
-                  <option value="Lembaga Otonom">Lembaga Otonom</option>
-                  <option value="Lembaga Semi Otonom">Lembaga Semi Otonom</option>
-                  <option value="Korkom">Korkom</option>
-                  <option value="Lainnya">Lainnya</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Bidang / Lembaga</label>
-                <input 
-                  type="text" 
-                  value={newBidangName}
-                  onChange={(e) => setNewBidangName(e.target.value)}
-                  placeholder="Contoh: Bidang Kader, LSO Tunas, Korkom UMS..."
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs"
-                  autoFocus
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
-              <Button variant="outline" onClick={() => setIsBidangModalOpen(false)} className="rounded-xl px-4 text-xs font-semibold h-10 border-slate-200 hover:bg-slate-50">
-                Batal
-              </Button>
-              <Button onClick={submitNewBidang} disabled={isLoading || !newBidangName.trim()} className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl px-5 text-xs font-bold h-10 shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]">
-                {isLoading ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : null}
-                Simpan Bidang
-              </Button>
-            </div>
+      <Modal
+        open={isBidangModalOpen}
+        onClose={() => setIsBidangModalOpen(false)}
+        title="Buat Bidang / Lembaga Baru"
+        description={<span>Tambah kelompok pengurus pada periode <span className="font-bold text-slate-800">{selectedPeriod}</span>.</span>}
+        size="md"
+        footer={(
+          <>
+            <Button variant="outline" onClick={() => setIsBidangModalOpen(false)} className="rounded-xl px-4 text-xs font-semibold h-10 border-slate-200 hover:bg-slate-50">
+              Batal
+            </Button>
+            <Button onClick={submitNewBidang} disabled={isLoading || !newBidangName.trim()} className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl px-5 text-xs font-bold h-10 shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]">
+              {isLoading ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : null}
+              Simpan Bidang
+            </Button>
+          </>
+        )}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kategori</label>
+            <select
+              value={newKategori}
+              onChange={(e) => setNewKategori(e.target.value)}
+              className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs cursor-pointer"
+            >
+              <option value="BPH">Badan Pimpinan Harian (BPH)</option>
+              <option value="Lembaga Otonom">Lembaga Otonom</option>
+              <option value="Lembaga Semi Otonom">Lembaga Semi Otonom</option>
+              <option value="Korkom">Korkom</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nama Bidang / Lembaga</label>
+            <input
+              type="text"
+              value={newBidangName}
+              onChange={(e) => setNewBidangName(e.target.value)}
+              placeholder="Contoh: Bidang Kader, LSO Tunas, Korkom UMS..."
+              className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#c20000] focus:ring-2 focus:ring-[#c20000]/20 transition-all shadow-2xs"
+              autoFocus
+            />
           </div>
         </div>
-      )}
+      </Modal>
 
     </div>
   );

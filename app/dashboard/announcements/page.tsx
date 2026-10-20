@@ -16,7 +16,6 @@ import {
   AlertCircle,
   Info,
   Calendar,
-  X,
   UserCheck,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -24,6 +23,7 @@ import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
+import { Modal } from '@/components/ui/Modal';
 
 interface AnnouncementItem {
   id: number;
@@ -329,121 +329,103 @@ export default function AnnouncementsPage() {
       </Card>
 
       {/* Modal Form */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-[#0f172a]/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-sm shadow-2xl max-w-lg w-full p-6 relative">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h2 className="text-lg font-bold text-[#0f172a] mb-4" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-              {editingItem ? 'Edit Pengumuman' : 'Buat Pengumuman Baru'}
-            </h2>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Judul Pengumuman
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Contoh: Rapat Pleno Cabang, Jadwal LKTM, dll"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Tipe & Warna Banner
-                </label>
-                <select
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] bg-white"
-                >
-                  <option value="info">Info (Biru)</option>
-                  <option value="warning">Peringatan (Kuning/Oranye)</option>
-                  <option value="urgent">Penting / Darurat (Merah)</option>
-                  <option value="success">Sukses / Pengumuman Bahagia (Hijau)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Isi Pengumuman
-                </label>
-                <textarea
-                  required
-                  rows={4}
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Tuliskan detail informasi, instruksi, atau link yang ingin disampaikan..."
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Tanggal Berakhir (Opsional)
-                </label>
-                <input
-                  type="datetime-local"
-                  value={formData.expires_at}
-                  onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
-                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000]"
-                />
-                <p className="text-2xs text-slate-400 mt-1">
-                  Kosongkan jika ingin pengumuman tayang selamanya sampai dinonaktifkan secara manual.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="is_active"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                  className="rounded text-[#c20000] focus:ring-[#c20000]"
-                />
-                <label htmlFor="is_active" className="text-sm font-medium text-slate-700 cursor-pointer">
-                  Langsung aktifkan pengumuman ini
-                </label>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsModalOpen(false)}
-                  disabled={isSaving}
-                >
-                  Batal
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSaving}
-                  className="bg-[#c20000] hover:bg-[#a30000] text-white"
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
-                      Menyimpan...
-                    </>
-                  ) : (
-                    'Simpan'
-                  )}
-                </Button>
-              </div>
-            </form>
-          </div>
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingItem ? 'Edit Pengumuman' : 'Buat Pengumuman Baru'}
+        size="lg"
+        onSubmit={handleSubmit}
+        footer={(
+          <>
+            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSaving}>
+              Batal
+            </Button>
+            <Button type="submit" disabled={isSaving} className="bg-[#c20000] hover:bg-[#a30000] text-white">
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
+                  Menyimpan...
+                </>
+              ) : (
+                'Simpan'
+              )}
+            </Button>
+          </>
+        )}
+      >
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            Judul Pengumuman
+          </label>
+          <input
+            type="text"
+            required
+            data-autofocus
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            placeholder="Contoh: Rapat Pleno Cabang, Jadwal LKTM, dll"
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+          />
         </div>
-      )}
+
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            Tipe & Warna Banner
+          </label>
+          <select
+            value={formData.type}
+            onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000] bg-white"
+          >
+            <option value="info">Info (Biru)</option>
+            <option value="warning">Peringatan (Kuning/Oranye)</option>
+            <option value="urgent">Penting / Darurat (Merah)</option>
+            <option value="success">Sukses / Pengumuman Bahagia (Hijau)</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            Isi Pengumuman
+          </label>
+          <textarea
+            required
+            rows={4}
+            value={formData.content}
+            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+            placeholder="Tuliskan detail informasi, instruksi, atau link yang ingin disampaikan..."
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000]"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            Tanggal Berakhir (Opsional)
+          </label>
+          <input
+            type="datetime-local"
+            value={formData.expires_at}
+            onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000]"
+          />
+          <p className="text-2xs text-slate-400 mt-1">
+            Kosongkan jika ingin pengumuman tayang selamanya sampai dinonaktifkan secara manual.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 pt-1">
+          <input
+            type="checkbox"
+            id="is_active"
+            checked={formData.is_active}
+            onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+            className="rounded text-[#c20000] focus:ring-[#c20000]"
+          />
+          <label htmlFor="is_active" className="text-sm font-medium text-slate-700 cursor-pointer">
+            Langsung aktifkan pengumuman ini
+          </label>
+        </div>
+      </Modal>
 
       {/* Modal Transfer Pemilik */}
       {transferItem && (

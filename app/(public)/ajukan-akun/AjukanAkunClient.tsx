@@ -5,7 +5,7 @@ import Link from 'next/link';
 import axios from 'axios';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
-import { Loader2, CheckCircle2, UserPlus, ArrowLeft, MessageCircle, UserRound, Mail, LockKeyhole, ShieldCheck, Eye, EyeOff, AtSign, FileText } from 'lucide-react';
+import { Loader2, CheckCircle2, UserPlus, ArrowLeft, MessageCircle, UserRound, Mail, LockKeyhole, ShieldCheck, Eye, EyeOff, AtSign, FileText, Info } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getApiBase, normalizeSettings } from '@/lib/settings';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
@@ -210,6 +210,10 @@ export default function AjukanAkunClient() {
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#c20000]">Mulai di sini</p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>Pengajuan Akun</h2>
               <p className="mt-2 text-sm leading-6 text-slate-500">Lengkapi data berikut. Pastikan username dan email aktif sebelum mengirim.</p>
+              <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5" role="note">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                <p className="text-xs font-medium leading-5 text-amber-800">Halaman pengajuan akun ini diperuntukkan untuk internal PC IMM Kota Surakarta.</p>
+              </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">

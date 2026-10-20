@@ -5,7 +5,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { Plus, Search, Edit, Trash2, Loader2, ClipboardList, ExternalLink, UserCheck, X, Calendar, Users, ShieldCheck, ImageIcon } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Loader2, ClipboardList, ExternalLink, UserCheck, Calendar, Users, ShieldCheck, ImageIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
@@ -15,6 +15,7 @@ import { useDebounce } from 'use-debounce';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { RowActions } from '@/components/ui/RowActions';
+import { Modal } from '@/components/ui/Modal';
 
 export default function FormsManagement() {
   const { user } = useAuth();
@@ -297,296 +298,287 @@ export default function FormsManagement() {
         </div>
       </div>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-3 sm:p-5 animate-in fade-in duration-200" onClick={() => setIsModalOpen(false)}>
-          <form 
-            onSubmit={handleSave} 
-            className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-100" 
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header Modern */}
-            <div className="px-6 py-4.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-red-50 border border-red-100 text-[#c20000] flex items-center justify-center shrink-0 shadow-2xs">
-                  <ClipboardList className="w-5 h-5" />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-slate-900">
-                    {editing ? 'Edit Formulir Pendaftaran' : 'Buat Formulir Pendaftaran Baru'}
-                  </h2>
-                  <p className="text-xs text-slate-500">
-                    Atur identitas, jadwal, banner, kuota, dan validasi formulir online
-                  </p>
-                </div>
-              </div>
-              <button 
-                type="button" 
-                onClick={() => setIsModalOpen(false)} 
-                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
-                title="Tutup"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        titleId="form-modal-title"
+        size="xl"
+        onSubmit={handleSave}
+        header={(
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-red-50 border border-red-100 text-[#c20000] flex items-center justify-center shrink-0 shadow-2xs">
+              <ClipboardList className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 id="form-modal-title" className="text-base font-bold text-slate-900">
+                {editing ? 'Edit Formulir Pendaftaran' : 'Buat Formulir Pendaftaran Baru'}
+              </h2>
+              <p className="text-xs text-slate-500">
+                Atur identitas, jadwal, banner, kuota, dan validasi formulir online
+              </p>
+            </div>
+          </div>
+        )}
+        headerClassName="px-6 py-4 border-b border-slate-100 bg-slate-50/70"
+        bodyClassName="p-6 sm:p-7 custom-scrollbar"
+        footer={(
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsModalOpen(false)}
+              className="rounded-xl h-10 px-4 text-xs font-semibold border-slate-200 hover:bg-slate-100"
+            >
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSaving}
+              className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl h-10 px-5 text-xs font-bold shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+              {editing ? 'Simpan Perubahan Formulir' : 'Buat Formulir Sekarang'}
+            </Button>
+          </>
+        )}
+        className="max-h-[92vh] sm:max-w-2xl"
+      >
+        <div className="space-y-6">
+          {/* Bagian 1: Informasi Dasar */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Judul Formulir <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                data-autofocus
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Contoh: Pendaftaran Darul Arqam Dasar (DAD) 2026"
+                className={inputClass}
+              />
             </div>
 
-            {/* Modal Body Scrollable */}
-            <div className="p-6 sm:p-7 overflow-y-auto space-y-6 custom-scrollbar flex-1">
-              {/* Bagian 1: Informasi Dasar */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Judul Formulir <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={formData.title} 
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Contoh: Pendaftaran Darul Arqam Dasar (DAD) 2026" 
-                    className={inputClass} 
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Slug URL Kustom <span className="text-slate-400 font-normal lowercase">(kosongkan = otomatis dari judul)</span>
-                  </label>
-                  <div className="flex items-center border border-slate-200/90 rounded-xl overflow-hidden focus-within:border-[#c20000] focus-within:ring-2 focus-within:ring-[#c20000]/20 shadow-2xs transition-all bg-white">
-                    <span className="px-3.5 py-2.5 text-xs font-mono font-bold text-slate-500 bg-slate-50 border-r border-slate-200/90 select-none">
-                      /form/
-                    </span>
-                    <input 
-                      type="text" 
-                      value={formData.slug} 
-                      onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '') })}
-                      placeholder="dad-2026" 
-                      className="flex-1 px-3.5 py-2.5 text-sm focus:outline-none font-mono text-slate-800" 
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Deskripsi / Petunjuk Pengisian
-                  </label>
-                  <textarea 
-                    value={formData.description} 
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
-                    rows={2}
-                    placeholder="Tuliskan petunjuk umum atau pengantar sebelum peserta mengisi formulir..." 
-                    className={`${inputClass} resize-none`} 
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Pesan Sukses Setelah Pengiriman <span className="text-slate-400 font-normal lowercase">(opsional)</span>
-                  </label>
-                  <textarea 
-                    value={formData.success_message} 
-                    onChange={(e) => setFormData({ ...formData, success_message: e.target.value })} 
-                    rows={2}
-                    placeholder="Default: Jawaban Anda telah berhasil dicatat. Terima kasih atas partisipasi Anda." 
-                    className={`${inputClass} resize-none`} 
-                  />
-                </div>
-              </div>
-
-              {/* Bagian 2: Jadwal & Kuota Responden */}
-              <div className="p-4 sm:p-5 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4 text-[#c20000]" /> Jadwal & Batas Kuota
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Waktu Dibuka <span className="text-slate-400 font-normal">(opsional)</span>
-                    </label>
-                    <input 
-                      type="datetime-local" 
-                      value={formData.starts_at} 
-                      onChange={(e) => setFormData({ ...formData, starts_at: e.target.value })} 
-                      className={inputClass} 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Waktu Ditutup <span className="text-slate-400 font-normal">(opsional)</span>
-                    </label>
-                    <input 
-                      type="datetime-local" 
-                      value={formData.ends_at} 
-                      onChange={(e) => setFormData({ ...formData, ends_at: e.target.value })} 
-                      className={inputClass} 
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-slate-200/60">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-slate-500" /> Kuota Pendaftar
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, max_responses: '' })}
-                      className="text-2xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
-                    >
-                      Set Unlimited (Tanpa Batas)
-                    </button>
-                  </div>
-                  <input
-                    type="number"
-                    min={1}
-                    value={formData.max_responses}
-                    onChange={(e) => setFormData({ ...formData, max_responses: e.target.value })}
-                    placeholder="Kosongkan untuk Unlimited (Tanpa Batas Kuota)"
-                    className={inputClass}
-                  />
-                  <p className="text-2xs text-slate-500 mt-1.5">
-                    {formData.max_responses ? (
-                      <span className="text-amber-700 font-semibold">
-                        Pendaftaran otomatis tertutup setelah mencapai {formData.max_responses} responden.
-                      </span>
-                    ) : (
-                      <span className="text-emerald-700 font-medium">
-                        Status: Bebas kuota (Unlimited). Pendaftaran menerima tanggapan tanpa batasan kuota.
-                      </span>
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              {/* Bagian 3: Banner Gambar Header Formulir */}
-              <div className="p-4 sm:p-5 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-4">
-                <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <ImageIcon className="w-4 h-4 text-[#c20000]" /> Banner Gambar Header Formulir
-                </h3>
-
-                <ImageUploadPicker
-                  label=""
-                  value={headerImageValue}
-                  onChange={(val) => setHeaderImageValue(val)}
-                  aspectRatio={formData.header_image_size as any || 'banner'}
-                  allowedFolder="forms"
-                  description="Resolusi bebas — rasio mengikuti format frame yang dipilih; rasio pas tidak terpotong."
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Slug URL Kustom <span className="text-slate-400 font-normal lowercase">(kosongkan = otomatis dari judul)</span>
+              </label>
+              <div className="flex items-center border border-slate-200/90 rounded-xl overflow-hidden focus-within:border-[#c20000] focus-within:ring-2 focus-within:ring-[#c20000]/20 shadow-2xs transition-all bg-white">
+                <span className="px-3.5 py-2.5 text-xs font-mono font-bold text-slate-500 bg-slate-50 border-r border-slate-200/90 select-none">
+                  /form/
+                </span>
+                <input 
+                  type="text" 
+                  value={formData.slug} 
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, '') })}
+                  placeholder="dad-2026" 
+                  className="flex-1 px-3.5 py-2.5 text-sm focus:outline-none font-mono text-slate-800" 
                 />
-
-                <div className="pt-2 border-t border-slate-200/60">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    Format Frame Banner di Halaman Publik
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      { id: 'banner', label: 'Banner 4:1', desc: 'Rasio Google Form (4:1)' },
-                      { id: 'medium', label: 'Sedang 21:9', desc: 'Rasio proporsi sistem (21:9)' },
-                      { id: 'wide', label: 'Lebar 16:9', desc: 'Rasio standar video (16:9)' },
-                      { id: 'natural', label: 'Proporsional', desc: 'Rasio utuh asli (Auto)' },
-                    ].map((opt) => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, header_image_size: opt.id })}
-                        className={`p-2.5 rounded-xl border text-left transition-all ${
-                          formData.header_image_size === opt.id
-                            ? 'bg-red-50/90 border-[#c20000] ring-1 ring-[#c20000] text-[#c20000] font-bold shadow-2xs'
-                            : 'bg-white border-slate-200/90 hover:border-slate-300 text-slate-700'
-                        }`}
-                      >
-                        <div className="text-xs flex items-center justify-between">
-                          <span>{opt.label}</span>
-                          {formData.header_image_size === opt.id && <span className="w-1.5 h-1.5 rounded-full bg-[#c20000]"></span>}
-                        </div>
-                        <div className="text-2xs text-slate-400 font-normal mt-0.5 leading-tight">
-                          {opt.desc}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Bagian 4: Pengaturan Email, Keamanan & Status */}
-              <div className="p-4 sm:p-5 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-3">
-                <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" /> Keamanan, Validasi & Publikasi
-                </h3>
-                
-                <label className="flex items-start gap-3 text-xs text-slate-700 cursor-pointer p-3 bg-white border border-slate-200/80 rounded-xl hover:border-slate-300 transition-colors shadow-2xs">
-                  <input
-                    type="checkbox"
-                    checked={formData.require_email}
-                    onChange={(e) => setFormData({ ...formData, require_email: e.target.checked })}
-                    className="w-4 h-4 mt-0.5 accent-[#c20000] cursor-pointer"
-                  />
-                  <div>
-                    <span className="font-bold text-slate-800 block text-xs">Wajibkan Pengisian Email (Anti-Spam)</span>
-                    <p className="text-slate-500 mt-0.5 text-2xs leading-relaxed">
-                      Memerlukan alamat email aktif pendaftar yang diverifikasi otomatis untuk mencegah bot dan respon spam.
-                    </p>
-                  </div>
-                </label>
-
-                <label className="flex items-start gap-3 text-xs text-slate-700 cursor-pointer p-3 bg-white border border-slate-200/80 rounded-xl hover:border-slate-300 transition-colors shadow-2xs">
-                  <input
-                    type="checkbox"
-                    checked={formData.limit_one_response}
-                    disabled={!formData.require_email}
-                    onChange={(e) => setFormData({ ...formData, limit_one_response: e.target.checked })}
-                    className="w-4 h-4 mt-0.5 accent-[#c20000] cursor-pointer disabled:opacity-40"
-                  />
-                  <div>
-                    <span className={`font-bold block text-xs ${!formData.require_email ? 'text-slate-400' : 'text-slate-800'}`}>
-                      Batasi 1 Tanggapan per Email
-                    </span>
-                    <p className="text-slate-500 mt-0.5 text-2xs leading-relaxed">
-                      Mencegah pengisian berulang kali dengan alamat email yang sama.
-                    </p>
-                  </div>
-                </label>
-
-                <label className="flex items-start gap-3 text-xs text-slate-700 cursor-pointer p-3 bg-white border border-slate-200/80 rounded-xl hover:border-slate-300 transition-colors shadow-2xs">
-                  <input 
-                    type="checkbox" 
-                    checked={formData.is_active} 
-                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} 
-                    className="w-4 h-4 mt-0.5 accent-[#c20000] cursor-pointer" 
-                  />
-                  <div>
-                    <span className="font-bold text-slate-800 block text-xs">Buka Pendaftaran (Terima Tanggapan)</span>
-                    <p className="text-slate-500 mt-0.5 text-2xs leading-relaxed">
-                      Aktifkan untuk membuka formulir ke publik. Nonaktifkan jika formulir masih draf atau pendaftaran ditutup.
-                    </p>
-                  </div>
-                </label>
               </div>
             </div>
 
-            {/* Modal Actions Footer Sticky */}
-            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/70 flex items-center justify-end gap-3 shrink-0">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsModalOpen(false)} 
-                className="rounded-xl h-10 px-4 text-xs font-semibold border-slate-200 hover:bg-slate-100"
-              >
-                Batal
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSaving} 
-                className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl h-10 px-5 text-xs font-bold shadow-xs transition-all hover:scale-[1.02] active:scale-[0.98]"
-              >
-                {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                {editing ? 'Simpan Perubahan Formulir' : 'Buat Formulir Sekarang'}
-              </Button>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Deskripsi / Petunjuk Pengisian
+              </label>
+              <textarea 
+                value={formData.description} 
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
+                rows={2}
+                placeholder="Tuliskan petunjuk umum atau pengantar sebelum peserta mengisi formulir..." 
+                className={`${inputClass} resize-none`} 
+              />
             </div>
-          </form>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                Pesan Sukses Setelah Pengiriman <span className="text-slate-400 font-normal lowercase">(opsional)</span>
+              </label>
+              <textarea 
+                value={formData.success_message} 
+                onChange={(e) => setFormData({ ...formData, success_message: e.target.value })} 
+                rows={2}
+                placeholder="Default: Jawaban Anda telah berhasil dicatat. Terima kasih atas partisipasi Anda." 
+                className={`${inputClass} resize-none`} 
+              />
+            </div>
+          </div>
+
+          {/* Bagian 2: Jadwal & Kuota Responden */}
+          <div className="p-4 sm:p-5 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <Calendar className="w-4 h-4 text-[#c20000]" /> Jadwal & Batas Kuota
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Waktu Dibuka <span className="text-slate-400 font-normal">(opsional)</span>
+                </label>
+                <input 
+                  type="datetime-local" 
+                  value={formData.starts_at} 
+                  onChange={(e) => setFormData({ ...formData, starts_at: e.target.value })} 
+                  className={inputClass} 
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Waktu Ditutup <span className="text-slate-400 font-normal">(opsional)</span>
+                </label>
+                <input 
+                  type="datetime-local" 
+                  value={formData.ends_at} 
+                  onChange={(e) => setFormData({ ...formData, ends_at: e.target.value })} 
+                  className={inputClass} 
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-200/60">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-slate-500" /> Kuota Pendaftar
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, max_responses: '' })}
+                  className="text-2xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
+                >
+                  Set Unlimited (Tanpa Batas)
+                </button>
+              </div>
+              <input
+                type="number"
+                min={1}
+                value={formData.max_responses}
+                onChange={(e) => setFormData({ ...formData, max_responses: e.target.value })}
+                placeholder="Kosongkan untuk Unlimited (Tanpa Batas Kuota)"
+                className={inputClass}
+              />
+              <p className="text-2xs text-slate-500 mt-1.5">
+                {formData.max_responses ? (
+                  <span className="text-amber-700 font-semibold">
+                    Pendaftaran otomatis tertutup setelah mencapai {formData.max_responses} responden.
+                  </span>
+                ) : (
+                  <span className="text-emerald-700 font-medium">
+                    Status: Bebas kuota (Unlimited). Pendaftaran menerima tanggapan tanpa batasan kuota.
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+
+          {/* Bagian 3: Banner Gambar Header Formulir */}
+          <div className="p-4 sm:p-5 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-4">
+            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+              <ImageIcon className="w-4 h-4 text-[#c20000]" /> Banner Gambar Header Formulir
+            </h3>
+
+            <ImageUploadPicker
+              label=""
+              value={headerImageValue}
+              onChange={(val) => setHeaderImageValue(val)}
+              aspectRatio={formData.header_image_size as any || 'banner'}
+              allowedFolder="forms"
+              description="Resolusi bebas — rasio mengikuti format frame yang dipilih; rasio pas tidak terpotong."
+            />
+
+            <div className="pt-2 border-t border-slate-200/60">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                Format Frame Banner di Halaman Publik
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { id: 'banner', label: 'Banner 4:1', desc: 'Rasio Google Form (4:1)' },
+                  { id: 'medium', label: 'Sedang 21:9', desc: 'Rasio proporsi sistem (21:9)' },
+                  { id: 'wide', label: 'Lebar 16:9', desc: 'Rasio standar video (16:9)' },
+                  { id: 'natural', label: 'Proporsional', desc: 'Rasio utuh asli (Auto)' },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, header_image_size: opt.id })}
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                      formData.header_image_size === opt.id
+                        ? 'bg-red-50/90 border-[#c20000] ring-1 ring-[#c20000] text-[#c20000] font-bold shadow-2xs'
+                        : 'bg-white border-slate-200/90 hover:border-slate-300 text-slate-700'
+                    }`}
+                  >
+                    <div className="text-xs flex items-center justify-between">
+                      <span>{opt.label}</span>
+                      {formData.header_image_size === opt.id && <span className="w-1.5 h-1.5 rounded-full bg-[#c20000]"></span>}
+                    </div>
+                    <div className="text-2xs text-slate-400 font-normal mt-0.5 leading-tight">
+                      {opt.desc}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bagian 4: Pengaturan Email, Keamanan & Status */}
+          <div className="p-4 sm:p-5 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-3">
+            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" /> Keamanan, Validasi & Publikasi
+            </h3>
+            
+            <label className="flex items-start gap-3 text-xs text-slate-700 cursor-pointer p-3 bg-white border border-slate-200/80 rounded-xl hover:border-slate-300 transition-colors shadow-2xs">
+              <input
+                type="checkbox"
+                checked={formData.require_email}
+                onChange={(e) => setFormData({ ...formData, require_email: e.target.checked })}
+                className="w-4 h-4 mt-0.5 accent-[#c20000] cursor-pointer"
+              />
+              <div>
+                <span className="font-bold text-slate-800 block text-xs">Wajibkan Pengisian Email (Anti-Spam)</span>
+                <p className="text-slate-500 mt-0.5 text-2xs leading-relaxed">
+                  Memerlukan alamat email aktif pendaftar yang diverifikasi otomatis untuk mencegah bot dan respon spam.
+                </p>
+              </div>
+            </label>
+
+            <label className="flex items-start gap-3 text-xs text-slate-700 cursor-pointer p-3 bg-white border border-slate-200/80 rounded-xl hover:border-slate-300 transition-colors shadow-2xs">
+              <input
+                type="checkbox"
+                checked={formData.limit_one_response}
+                disabled={!formData.require_email}
+                onChange={(e) => setFormData({ ...formData, limit_one_response: e.target.checked })}
+                className="w-4 h-4 mt-0.5 accent-[#c20000] cursor-pointer disabled:opacity-40"
+              />
+              <div>
+                <span className={`font-bold block text-xs ${!formData.require_email ? 'text-slate-400' : 'text-slate-800'}`}>
+                  Batasi 1 Tanggapan per Email
+                </span>
+                <p className="text-slate-500 mt-0.5 text-2xs leading-relaxed">
+                  Mencegah pengisian berulang kali dengan alamat email yang sama.
+                </p>
+              </div>
+            </label>
+
+            <label className="flex items-start gap-3 text-xs text-slate-700 cursor-pointer p-3 bg-white border border-slate-200/80 rounded-xl hover:border-slate-300 transition-colors shadow-2xs">
+              <input 
+                type="checkbox" 
+                checked={formData.is_active} 
+                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} 
+                className="w-4 h-4 mt-0.5 accent-[#c20000] cursor-pointer" 
+              />
+              <div>
+                <span className="font-bold text-slate-800 block text-xs">Buka Pendaftaran (Terima Tanggapan)</span>
+                <p className="text-slate-500 mt-0.5 text-2xs leading-relaxed">
+                  Aktifkan untuk membuka formulir ke publik. Nonaktifkan jika formulir masih draf atau pendaftaran ditutup.
+                </p>
+              </div>
+            </label>
+          </div>
         </div>
-      )}
+      </Modal>
 
       {/* Modal Transfer Pemilik */}
       {transferItem && (

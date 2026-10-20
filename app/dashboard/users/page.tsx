@@ -527,7 +527,7 @@ export default function UsersManagement() {
       </div>
 
       {accessModalUser && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-[#0f172a]/60 backdrop-blur-sm p-4 sm:p-6" onClick={() => setAccessModalUser(null)}>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6" onClick={() => setAccessModalUser(null)}>
           <div
             className="mx-auto flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
@@ -799,9 +799,9 @@ export default function UsersManagement() {
 
       {/* Role Management Modal */}
       {isRolesModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4" onClick={() => setIsRolesModalOpen(false)}>
-          <div className="bg-white rounded-sm shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" onClick={() => setIsRolesModalOpen(false)}>
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200/90 max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex shrink-0 justify-between items-center gap-3 px-6 pt-6 pb-4 border-b border-slate-100">
               <div>
                 <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                   <Shield className="w-5 h-5 text-[#c20000]" />
@@ -811,9 +811,9 @@ export default function UsersManagement() {
                   Hak akses role bawaan dapat diubah atau dinonaktifkan oleh Super Admin.
                 </p>
               </div>
-              <Button variant="outline" size="sm" onClick={() => setIsRolesModalOpen(false)} className="rounded-sm">
-                Tutup
-              </Button>
+              <button type="button" onClick={() => setIsRolesModalOpen(false)} aria-label="Tutup" className="shrink-0 text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
             {rolesLoading ? (
@@ -821,7 +821,7 @@ export default function UsersManagement() {
                 <Loader2 className="w-8 h-8 animate-spin text-[#c20000]" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-y-auto custom-scrollbar p-6">
                 {/* Form Tambah Role Baru */}
                 <div className="lg:col-span-5 bg-slate-50 p-5 rounded-sm border border-slate-200 space-y-4">
                   <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">

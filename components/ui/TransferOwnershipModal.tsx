@@ -67,16 +67,16 @@ export function TransferOwnershipModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-sm shadow-xl max-w-md w-full p-6 space-y-5 border border-slate-100"
+        className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-5 border border-slate-200/90"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-red-50 text-[#c20000] rounded-sm">
+            <div className="p-2 bg-red-50 text-[#c20000] rounded-xl">
               <UserCheck className="w-5 h-5" />
             </div>
             <div>
@@ -86,13 +86,14 @@ export function TransferOwnershipModal({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 p-1 rounded-sm hover:bg-slate-50 transition-colors"
+            aria-label="Tutup"
+            className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-3 bg-slate-50 rounded-sm border border-slate-200 text-xs space-y-1">
+        <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
           <div className="text-slate-500 font-medium">Data yang dialihkan:</div>
           <div className="font-bold text-slate-800 line-clamp-2">{itemTitle}</div>
           <div className="pt-1 text-slate-500">
@@ -113,7 +114,7 @@ export function TransferOwnershipModal({
                 required
                 value={selectedUserId}
                 onChange={(e) => setSelectedUserId(e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded-sm px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#c20000] capitalize"
+                className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-[#c20000] capitalize"
               >
                 {users.map((u) => (
                   <option key={u.id} value={u.id}>
@@ -128,14 +129,14 @@ export function TransferOwnershipModal({
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-            <Button type="button" variant="outline" size="sm" onClick={onClose} className="rounded-sm">
+            <Button type="button" variant="outline" size="sm" onClick={onClose} className="rounded-xl">
               Batal
             </Button>
             <Button
               type="submit"
               size="sm"
               disabled={isSubmitting || isLoadingUsers}
-              className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-sm font-semibold"
+              className="bg-[#c20000] hover:bg-[#a30000] text-white rounded-xl font-semibold"
             >
               {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />}
               Transfer Sekarang

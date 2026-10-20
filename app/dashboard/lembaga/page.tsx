@@ -13,10 +13,9 @@ import {
   Loader2, 
   ExternalLink, 
   GraduationCap, 
-  Landmark, 
-  Building2, 
-  Globe, 
-  X,
+  Landmark,
+  Building2,
+  Globe,
   Upload
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -26,6 +25,7 @@ import { useAuth } from '@/hooks/useAuth';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { RowActions } from '@/components/ui/RowActions';
+import { Modal } from '@/components/ui/Modal';
 
 interface LembagaItem {
   id: number;
@@ -358,135 +358,115 @@ export default function LembagaManagementPage() {
       </div>
 
       {/* Modal Tambah / Edit Lembaga */}
-      {isModalOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/50 backdrop-blur-sm p-4 overflow-y-auto"
-          onClick={() => setIsModalOpen(false)}
-        >
-          <div 
-            className="bg-white rounded-sm shadow-xl max-w-lg w-full p-6 my-8 space-y-4 border border-slate-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h2 className="text-base font-bold text-slate-800">
-                {editingItem ? 'Edit Data Lembaga' : 'Tambah Lembaga / Komisariat Baru'}
-              </h2>
-              <button 
-                type="button" 
-                onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingItem ? 'Edit Data Lembaga' : 'Tambah Lembaga / Komisariat Baru'}
+        size="lg"
+        onSubmit={handleSave}
+        footer={(
+          <>
+            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="h-10 px-4 text-xs">
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSaving}
+              className="h-10 px-4 bg-[#c20000] hover:bg-[#a30000] text-white text-xs font-semibold"
+            >
+              {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />}
+              {editingItem ? 'Simpan Perubahan' : 'Tambah Lembaga'}
+            </Button>
+          </>
+        )}
+      >
+        <div className="space-y-4 text-xs">
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">
+              Nama Lembaga / Komisariat <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              data-autofocus
+              placeholder="Contoh: Komisariat Moh. Djazman UMS"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Tipe Lembaga <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.tipe}
+                onChange={(e) => setFormData({ ...formData, tipe: e.target.value as any })}
+                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] bg-white"
               >
-                <X className="w-5 h-5" />
-              </button>
+                {TIPE_OPTIONS.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <form onSubmit={handleSave} className="space-y-4 text-xs">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Nama Lembaga / Komisariat <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Komisariat Moh. Djazman UMS"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full border border-slate-200 rounded-sm px-3 py-2 text-xs focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
-                />
-              </div>
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">
+                Website / Link Resmi <span className="text-slate-400 font-normal">(opsional)</span>
+              </label>
+              <input
+                type="url"
+                placeholder="https://komisariat.id"
+                value={formData.website_url}
+                onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+              />
+            </div>
+          </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Tipe Lembaga <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={formData.tipe}
-                    onChange={(e) => setFormData({ ...formData, tipe: e.target.value as any })}
-                    className="w-full border border-slate-200 rounded-sm px-3 py-2 text-xs focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] bg-white"
-                  >
-                    {TIPE_OPTIONS.map((t) => (
-                      <option key={t.value} value={t.value}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+          {/* Logo Lembaga */}
+          <div>
+            <ImageUploadPicker
+              label="Logo Lembaga"
+              value={logoValue}
+              onChange={(val) => setLogoValue(val)}
+              aspectRatio="square"
+              allowedFolder="lembaga"
+              description="Pilih dari Media Library atau unggah file logo baru dari perangkat."
+            />
+          </div>
 
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Website / Link Resmi <span className="text-slate-400 font-normal">(opsional)</span>
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://komisariat.id"
-                    value={formData.website_url}
-                    onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
-                    className="w-full border border-slate-200 rounded-sm px-3 py-2 text-xs focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
-                  />
-                </div>
-              </div>
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">
+              Visi & Misi <span className="text-slate-400 font-normal">(opsional)</span>
+            </label>
+            <textarea
+              rows={3}
+              placeholder="Ringkasan visi dan misi lembaga..."
+              value={formData.visi_misi}
+              onChange={(e) => setFormData({ ...formData, visi_misi: e.target.value })}
+              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+            />
+          </div>
 
-              {/* Logo Lembaga */}
-              <div>
-                <ImageUploadPicker
-                  label="Logo Lembaga"
-                  value={logoValue}
-                  onChange={(val) => setLogoValue(val)}
-                  aspectRatio="square"
-                  allowedFolder="lembaga"
-                  description="Pilih dari Media Library atau unggah file logo baru dari perangkat."
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Visi & Misi <span className="text-slate-400 font-normal">(opsional)</span>
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Ringkasan visi dan misi lembaga..."
-                  value={formData.visi_misi}
-                  onChange={(e) => setFormData({ ...formData, visi_misi: e.target.value })}
-                  className="w-full border border-slate-200 rounded-sm px-3 py-2 text-xs focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Sejarah Singkat <span className="text-slate-400 font-normal">(opsional)</span>
-                </label>
-                <textarea
-                  rows={4}
-                  placeholder="Sejarah berdirinya komisariat / lembaga ini..."
-                  value={formData.sejarah}
-                  onChange={(e) => setFormData({ ...formData, sejarah: e.target.value })}
-                  className="w-full border border-slate-200 rounded-sm px-3 py-2 text-xs focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsModalOpen(false)}
-                  className="h-8 px-4 text-xs"
-                >
-                  Batal
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSaving}
-                  className="h-8 px-4 bg-[#c20000] hover:bg-[#a30000] text-white text-xs font-semibold"
-                >
-                  {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />}
-                  {editingItem ? 'Simpan Perubahan' : 'Tambah Lembaga'}
-                </Button>
-              </div>
-            </form>
+          <div>
+            <label className="block font-semibold text-slate-700 mb-1">
+              Sejarah Singkat <span className="text-slate-400 font-normal">(opsional)</span>
+            </label>
+            <textarea
+              rows={4}
+              placeholder="Sejarah berdirinya komisariat / lembaga ini..."
+              value={formData.sejarah}
+              onChange={(e) => setFormData({ ...formData, sejarah: e.target.value })}
+              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000]"
+            />
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

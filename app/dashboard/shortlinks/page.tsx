@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Plus, Edit, Trash2, Link as LinkIcon, ExternalLink, Activity, Key, Loader2, Search, QrCode, BarChart3, X, UserCheck } from 'lucide-react';
+import { Plus, Edit, Trash2, Link as LinkIcon, ExternalLink, Activity, Key, Loader2, Search, QrCode, BarChart3, UserCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
@@ -13,6 +13,7 @@ import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
 import { QRCodeSVG } from 'qrcode.react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { RowActions } from '@/components/ui/RowActions';
+import { Modal } from '@/components/ui/Modal';
 
 export default function ShortlinksPage() {
   const { user } = useAuth();
@@ -21,6 +22,7 @@ export default function ShortlinksPage() {
   const [shortlinks, setShortlinks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [transferItem, setTransferItem] = useState<any>(null);
   
@@ -90,6 +92,7 @@ export default function ShortlinksPage() {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
       if (editingId) {
         await api.put(`/shortlinks/${editingId}`, formData);
@@ -102,6 +105,8 @@ export default function ShortlinksPage() {
       fetchShortlinks();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Terjadi kesalahan');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -384,93 +389,85 @@ export default function ShortlinksPage() {
         </div>
 
       {/* Modal Form */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-[#0f172a]/50 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-          <div className="bg-white rounded-sm w-full max-w-md shadow-2xl overflow-hidden relative z-10 border border-slate-200">
-            <div className="p-6">
-              <h2 className="text-lg font-bold mb-5 text-slate-800" style={{ fontFamily: 'var(--font-poppins), sans-serif' }}>
-                {editingId ? 'Edit Shortlink' : 'Buat Shortlink Baru'}
-              </h2>
-              <form onSubmit={handleSubmit} className="space-y-5">
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    Slug / Nama Tautan Akhir <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <input 
-                      type="text"
-                      value={formData.slug}
-                      onChange={(e) => setFormData({...formData, slug: e.target.value.replace(/[^a-zA-Z0-9-_]/g, '')})}
-                      placeholder="RegisPIDNAS26"
-                      required
-                      className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors text-sm"
-                    />
-                    <Button type="button" variant="outline" onClick={generateSlug} title="Generate Random" className="shrink-0 text-sm h-[38px]">
-                      Acak
-                    </Button>
-                  </div>
-                  <p className="text-2xs text-slate-500 mt-1.5 leading-relaxed">
-                    Tanpa spasi, hanya huruf, angka, strip (-), dan underscore (_).<br/>
-                    Akan menjadi: <span className="text-[#c20000] font-medium">immsolo.or.id/{formData.slug || '...'}</span>
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                    URL Tujuan (Target) <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="url"
-                    value={formData.target_url}
-                    onChange={(e) => setFormData({...formData, target_url: e.target.value})}
-                    placeholder="https://docs.google.com/forms/..."
-                    required
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-sm focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors text-sm"
-                  />
-                </div>
-
-
-                <div className="flex items-center gap-2 pt-2">
-                  <input 
-                    type="checkbox" 
-                    id="is_active" 
-                    checked={formData.is_active}
-                    onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
-                    className="w-4 h-4 rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]"
-                  />
-                  <label htmlFor="is_active" className="text-sm font-medium text-slate-700 cursor-pointer select-none">
-                    Aktifkan Tautan
-                  </label>
-                </div>
-
-                <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 mt-6">
-                  <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="px-6">
-                    Batal
-                  </Button>
-                  <Button type="submit" className="bg-[#c20000] hover:bg-[#a30000] text-white px-6 shadow-sm shadow-[#c20000]/20">
-                    Simpan
-                  </Button>
-                </div>
-
-              </form>
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingId ? 'Edit Shortlink' : 'Buat Shortlink Baru'}
+        size="md"
+        onAttemptClose={isSaving ? () => false : undefined}
+        onSubmit={handleSubmit}
+        footer={(
+          <>
+            <Button type="button" variant="outline" disabled={isSaving} onClick={() => setIsModalOpen(false)} className="px-6">
+              Batal
+            </Button>
+            <Button type="submit" disabled={isSaving} className="bg-[#c20000] hover:bg-[#a30000] text-white px-6 shadow-sm shadow-[#c20000]/20 disabled:opacity-60">
+              {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              {isSaving ? 'Menyimpan...' : 'Simpan'}
+            </Button>
+          </>
+        )}
+      >
+        <div className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              Slug / Nama Tautan Akhir <span className="text-red-500">*</span>
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                data-autofocus
+                value={formData.slug}
+                onChange={(e) => setFormData({...formData, slug: e.target.value.replace(/[^a-zA-Z0-9-_]/g, '')})}
+                placeholder="RegisPIDNAS26"
+                required
+                className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors text-sm"
+              />
+              <Button type="button" variant="outline" onClick={generateSlug} title="Generate Random" className="shrink-0 text-sm h-[38px]">
+                Acak
+              </Button>
             </div>
+            <p className="text-2xs text-slate-500 mt-1.5 leading-relaxed">
+              Tanpa spasi, hanya huruf, angka, strip (-), dan underscore (_).<br/>
+              Akan menjadi: <span className="text-[#c20000] font-medium">immsolo.or.id/{formData.slug || '...'}</span>
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              URL Tujuan (Target) <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="url"
+              value={formData.target_url}
+              onChange={(e) => setFormData({...formData, target_url: e.target.value})}
+              placeholder="https://docs.google.com/forms/..."
+              required
+              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] transition-colors text-sm"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 pt-1">
+            <input
+              type="checkbox"
+              id="is_active"
+              checked={formData.is_active}
+              onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
+              className="w-4 h-4 rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]"
+            />
+            <label htmlFor="is_active" className="text-sm font-medium text-slate-700 cursor-pointer select-none">
+              Aktifkan Tautan
+            </label>
           </div>
         </div>
-      )}
+      </Modal>
 
       {/* Modal QR Code */}
-      {qrItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-[#0f172a]/50 backdrop-blur-sm" onClick={() => setQrItem(null)}></div>
-          <div className="bg-white rounded-sm w-full max-w-xs shadow-2xl relative z-10 border border-slate-200 p-6 text-center">
-            <button onClick={() => setQrItem(null)} className="absolute top-3 right-3 text-slate-400 hover:text-slate-700" aria-label="Tutup">
-              <X className="w-5 h-5" />
-            </button>
-            <h2 className="text-base font-bold text-slate-800 mb-1">QR Code</h2>
+      <Modal open={!!qrItem} onClose={() => setQrItem(null)} title="QR Code" size="sm" ariaLabel={`QR Code shortlink ${qrItem?.slug ?? ''}`}>
+        {qrItem && (
+          <div className="text-center">
             <p className="text-xs text-slate-500 mb-4 font-mono">immsolo.or.id/{qrItem.slug}</p>
-            <div className="flex justify-center bg-white p-3 border border-slate-100 rounded-sm">
+            <div className="flex justify-center bg-white p-3 border border-slate-100 rounded-xl">
               <QRCodeSVG value={`${typeof window !== 'undefined' ? window.location.origin : 'https://immsolo.or.id'}/${qrItem.slug}`} size={200} level="M" />
             </div>
             <Button
@@ -487,18 +484,13 @@ export default function ShortlinksPage() {
               Salin Link
             </Button>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
       {/* Modal Statistik per shortlink */}
-      {statsItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-[#0f172a]/50 backdrop-blur-sm" onClick={() => { setStatsItem(null); setStatsData(null); }}></div>
-          <div className="bg-white rounded-sm w-full max-w-md shadow-2xl relative z-10 border border-slate-200 p-6">
-            <button onClick={() => { setStatsItem(null); setStatsData(null); }} className="absolute top-3 right-3 text-slate-400 hover:text-slate-700" aria-label="Tutup">
-              <X className="w-5 h-5" />
-            </button>
-            <h2 className="text-base font-bold text-slate-800">Statistik Klik</h2>
+      <Modal open={!!statsItem} onClose={() => { setStatsItem(null); setStatsData(null); }} title="Statistik Klik" size="md">
+        {statsItem && (
+          <div>
             <p className="text-xs text-slate-500 mb-4 font-mono">immsolo.or.id/{statsItem.slug} • total {statsItem.clicks} klik</p>
             {statsLoading ? (
               <p className="text-sm text-slate-500 flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Memuat...</p>
@@ -535,8 +527,8 @@ export default function ShortlinksPage() {
               <p className="text-sm text-slate-500">Gagal memuat data.</p>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
       {/* Modal Transfer Pemilik */}
       {transferItem && (
