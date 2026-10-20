@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Download, Copy, Check, RefreshCw, Upload, X, ImageDown, Tv, QrCode, Mail } from 'lucide-react';
+import { PaginationControls } from '@/components/ui/PaginationControls';
+import { Download, Copy, Check, RefreshCw, Upload, X, ImageDown, Tv, QrCode, Mail, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { siteUrl } from '@/lib/env';
@@ -19,9 +20,14 @@ interface Props {
   activeSesi?: PresensiSesi | null;
   onRefreshPeserta: () => void;
   stats?: PresensiStats | null;
+  isLoading?: boolean;
+  page?: number;
+  lastPage?: number;
+  total?: number;
+  onPageChange?: (page: number) => void;
 }
 
-export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props) {
+export function PresensiQrPanel({ presensi, peserta, activeSesi, stats, isLoading = false, page = 1, lastPage = 1, total, onPageChange }: Props) {
   const [copied, setCopied] = useState(false);
   const [showProjector, setShowProjector] = useState(false);
 
@@ -308,7 +314,8 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
           <CardHeader>
             <CardTitle className="text-base">QR Unik per Peserta — Scan Petugas</CardTitle>
             <p className="text-sm text-slate-500 mt-1">
-              Pilih logo terlebih dahulu jika diperlukan, lalu klik Generate untuk membuat QR. QR yang pernah dibuat tetap tampil meski halaman di-refresh (hanya selama sesi browser ini). Unduhan hanya berisi QR (tanpa nama atau keterangan); nama peserta digunakan sebagai nama file. Menampilkan {peserta.length} peserta di halaman ini. QR juga bisa dikirim ke email peserta (tombol Kirim) — hanya untuk peserta yang punya alamat e-mail. Anda bisa menyiapkan pesan utama (opsional) yang ikut tampil menonjol di dalam email.
+              Generate QR unik tiap peserta, lalu unduh atau kirim ke email mereka. QR yang pernah dibuat tetap tampil setelah halaman di-refresh (per browser). Unduhan hanya berisi QR; nama peserta dipakai sebagai nama file.
+              {total !== undefined && <> Menampilkan {peserta.length} dari {total} peserta.</>}
             </p>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -394,7 +401,9 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
               </div>
             </div>
 
-            {peserta.length === 0 ? (
+            {isLoading ? (
+              <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-[#c20000]" /></div>
+            ) : peserta.length === 0 ? (
               <p className="text-sm text-slate-400 py-6 text-center">Belum ada peserta. Impor peserta terlebih dahulu.</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -452,6 +461,19 @@ export function PresensiQrPanel({ presensi, peserta, activeSesi, stats }: Props)
                   </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {!isLoading && total !== undefined && total > 0 && lastPage > 1 && (
+              <div className="-mx-6 md:-mx-8 mt-1">
+                <PaginationControls
+                  currentPage={page}
+                  totalPages={lastPage}
+                  totalItems={total}
+                  pageSize={24}
+                  unit="peserta"
+                  onPageChange={onPageChange ?? (() => {})}
+                />
               </div>
             )}
           </CardContent>

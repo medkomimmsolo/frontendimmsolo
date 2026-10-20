@@ -25,6 +25,7 @@ import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { useAuth } from '@/hooks/useAuth';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { RowActions } from '@/components/ui/RowActions';
 
 interface LembagaItem {
   id: number;
@@ -331,23 +332,20 @@ export default function LembagaManagementPage() {
                         )}
                       </td>
                       <td className="p-4 pr-6">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => openEditModal(item)}
-                            title="Edit Lembaga"
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-sm transition-colors"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(item)}
-                            title="Hapus Lembaga"
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-sm transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                        <div className="flex justify-end">
+                          <RowActions
+                            label={`Aksi untuk ${item.name}`}
+                            actions={[
+                              { label: 'Edit Lembaga', icon: <Edit className="w-4 h-4" />, onClick: () => openEditModal(item) },
+                              {
+                                label: 'Hapus Lembaga',
+                                icon: <Trash2 className="w-4 h-4" />,
+                                tone: 'danger',
+                                dividerBefore: true,
+                                onClick: () => handleDelete(item),
+                              },
+                            ]}
+                          />
                         </div>
                       </td>
                     </tr>

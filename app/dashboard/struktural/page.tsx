@@ -23,6 +23,7 @@ import { Struktural } from '@/types';
 import Link from 'next/link';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { RowActions } from '@/components/ui/RowActions';
 
 type BidangNode = {
   id: string;
@@ -611,17 +612,20 @@ export default function StrukturalManagement() {
                                                                               {item.jabatan}
                                                                             </td>
                                                                             <td className="p-3 pr-4">
-                                                                              <div className="flex items-center justify-end gap-1">
-                                                                                <Link href={`/dashboard/struktural/${item.id}`} className="h-8 w-8 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors" title="Edit">
-                                                                                  <Edit className="w-3.5 h-3.5" />
-                                                                                </Link>
-                                                                                <button 
-                                                                                  onClick={() => handleDelete(item.id)}
-                                                                                  className="h-8 w-8 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-xl transition-colors" 
-                                                                                  title="Hapus"
-                                                                                >
-                                                                                  <Trash2 className="w-3.5 h-3.5" />
-                                                                                </button>
+                                                                              <div className="flex justify-end">
+                                                                                <RowActions
+                                                                                  label={`Aksi untuk ${item.name}`}
+                                                                                  actions={[
+                                                                                    { label: 'Edit', icon: <Edit className="w-4 h-4" />, href: `/dashboard/struktural/${item.id}` },
+                                                                                    {
+                                                                                      label: 'Hapus',
+                                                                                      icon: <Trash2 className="w-4 h-4" />,
+                                                                                      tone: 'danger',
+                                                                                      dividerBefore: true,
+                                                                                      onClick: () => handleDelete(item.id),
+                                                                                    },
+                                                                                  ]}
+                                                                                />
                                                                               </div>
                                                                             </td>
                                                                           </tr>

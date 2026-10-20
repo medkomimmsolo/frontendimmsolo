@@ -31,17 +31,12 @@ const ACTION_LABEL: Record<string, string> = {
 export function PresensiHistoryPanel({ presensiId, activeSesiId, sesis }: Props) {
   const [items, setItems] = useState<PresensiKehadiranLog[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [sesiId, setSesiId] = useState<number | null>(activeSesiId);
-
-  useEffect(() => {
-    setSesiId(activeSesiId);
-  }, [activeSesiId]);
 
   const fetchLogs = useCallback(async () => {
     setIsLoading(true);
     try {
       const res = await api.get(`/presensi/${presensiId}/kehadiran-logs`, {
-        params: { sesi_id: sesiId ?? undefined },
+        params: { sesi_id: activeSesiId ?? undefined },
       });
       setItems(res.data.data.items || []);
     } catch (error) {
@@ -49,13 +44,13 @@ export function PresensiHistoryPanel({ presensiId, activeSesiId, sesis }: Props)
     } finally {
       setIsLoading(false);
     }
-  }, [presensiId, sesiId]);
+  }, [presensiId, activeSesiId]);
 
   useEffect(() => {
     fetchLogs();
   }, [fetchLogs]);
 
-  const activeSesi = sesis.find((s) => s.id === sesiId) || null;
+  const activeSesi = sesis.find((s) => s.id === activeSesiId) || null;
 
   return (
     <div className="space-y-4">
@@ -64,29 +59,14 @@ export function PresensiHistoryPanel({ presensiId, activeSesiId, sesis }: Props)
           <History className="w-4 h-4" />
           Jejak perubahan kehadiran{activeSesi ? ` — ${activeSesi.name}` : ' — seluruh kegiatan'}.
         </div>
-        <div className="flex items-center gap-2">
-          {sesis.length > 0 && (
-            <select
-              value={sesiId ?? ''}
-              onChange={(e) => setSesiId(e.target.value ? Number(e.target.value) : null)}
-              className="h-9 bg-white border border-slate-200 rounded-lg px-3 text-xs font-bold text-slate-700 outline-none focus:border-[#c20000]"
-              title="Filter sesi"
-            >
-              <option value="">Semua sesi</option>
-              {sesis.map((s) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
-          )}
-          <button
-            onClick={fetchLogs}
-            disabled={isLoading}
-            className="h-9 w-9 inline-flex items-center justify-center text-slate-500 hover:text-[#c20000] border border-slate-200 rounded-lg transition-colors"
-            title="Muat ulang"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
+        <button
+          onClick={fetchLogs}
+          disabled={isLoading}
+          className="h-9 w-9 inline-flex items-center justify-center text-slate-500 hover:text-[#c20000] border border-slate-200 rounded-lg transition-colors"
+          title="Muat ulang"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+        </button>
       </div>
 
       <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">

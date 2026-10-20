@@ -14,6 +14,7 @@ import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
 import { useDebounce } from 'use-debounce';
 import ImageUploadPicker from '@/components/dashboard/ImageUploadPicker';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { RowActions } from '@/components/ui/RowActions';
 
 export default function FormsManagement() {
   const { user } = useAuth();
@@ -257,25 +258,28 @@ export default function FormsManagement() {
                     </span>
                   </td>
                   <td className="p-4 pr-6">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link href={`/dashboard/forms/${f.id}`} title="Kelola kolom & data" className="h-9 w-9 inline-flex items-center justify-center text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-xl transition-colors">
-                        <ClipboardList className="w-4 h-4" />
-                      </Link>
-                      {isSuperAdmin && (
-                        <button
-                          onClick={() => setTransferItem(f)}
-                          title="Transfer Pemilik"
-                          className="h-9 w-9 inline-flex items-center justify-center text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-xl transition-colors"
-                        >
-                          <UserCheck className="w-4 h-4" />
-                        </button>
-                      )}
-                      <button onClick={() => openModal(f)} title="Edit" className="h-9 w-9 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => handleDelete(f.id)} title="Hapus" className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-xl transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                    <div className="flex justify-end">
+                      <RowActions
+                        label={`Aksi untuk ${f.title}`}
+                        actions={[
+                          { label: 'Kelola kolom & data', icon: <ClipboardList className="w-4 h-4" />, tone: 'violet', href: `/dashboard/forms/${f.id}` },
+                          { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: () => openModal(f) },
+                          {
+                            label: 'Transfer Pemilik',
+                            icon: <UserCheck className="w-4 h-4" />,
+                            tone: 'violet',
+                            hidden: !isSuperAdmin,
+                            onClick: () => setTransferItem(f),
+                          },
+                          {
+                            label: 'Hapus',
+                            icon: <Trash2 className="w-4 h-4" />,
+                            tone: 'danger',
+                            dividerBefore: true,
+                            onClick: () => handleDelete(f.id),
+                          },
+                        ]}
+                      />
                     </div>
                   </td>
                 </tr>

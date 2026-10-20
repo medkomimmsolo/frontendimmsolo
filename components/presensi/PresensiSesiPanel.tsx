@@ -149,7 +149,7 @@ export function PresensiSesiPanel({ presensiId, sesis, activeSesiId, onSelect, o
         </CardTitle>
         <p className="text-sm text-slate-500 mt-1">
           Satu data kegiatan bisa punya banyak sesi (mis. Sesi 1, Sesi 2). Peserta & QR-nya sama — tidak perlu input ulang.
-          Pilih sesi aktif di bawah untuk memfilter peserta, QR, scan, kehadiran, dan ekspor.
+          Pilih sesi aktif untuk memfilter peserta, kehadiran, dan ekspor. Klik sesi yang aktif lagi untuk melihat semua sesi.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">

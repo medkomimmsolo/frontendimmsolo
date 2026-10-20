@@ -43,6 +43,7 @@ import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { User } from '@/types';
 import Link from 'next/link';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { RowActions } from '@/components/ui/RowActions';
 
 const PERM_LABELS: Record<string, string> = {
   'manage-blog': 'Kelola Post',
@@ -476,37 +477,35 @@ export default function UsersManagement() {
                       </span>
                     </td>
                     <td className="p-4 pr-6">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link href={`/dashboard/users/${u.id}`} className="h-9 w-9 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors" title="Edit">
-                          <Edit className="w-4 h-4" />
-                        </Link>
-                        {isSuperAdmin && (
-                          <button
-                            onClick={() => openAccessModal(u)}
-                            className="h-9 w-9 inline-flex items-center justify-center text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-sm transition-colors"
-                            title="Hak Akses Modul"
-                          >
-                            <ShieldCheck className="w-4 h-4" />
-                          </button>
-                        )}
-                        {isSuperAdmin && user?.id !== u.id && (
-                          <button
-                            onClick={() => handleToggleActive(u)}
-                            className={`h-9 w-9 inline-flex items-center justify-center rounded-sm transition-colors ${u.is_active ? 'text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100' : 'text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100'}`}
-                            title={u.is_active ? 'Nonaktifkan' : 'Aktifkan'}
-                          >
-                            {u.is_active ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
-                          </button>
-                        )}
-                        {user?.id !== u.id && (
-                          <button 
-                            onClick={() => handleDelete(u.id)}
-                            className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors" 
-                            title="Hapus"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
+                      <div className="flex justify-end">
+                        <RowActions
+                          label={`Aksi untuk ${u.name}`}
+                          actions={[
+                            { label: 'Edit', icon: <Edit className="w-4 h-4" />, href: `/dashboard/users/${u.id}` },
+                            {
+                              label: 'Hak Akses Modul',
+                              icon: <ShieldCheck className="w-4 h-4" />,
+                              tone: 'violet',
+                              hidden: !isSuperAdmin,
+                              onClick: () => openAccessModal(u),
+                            },
+                            {
+                              label: u.is_active ? 'Nonaktifkan' : 'Aktifkan',
+                              icon: u.is_active ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />,
+                              tone: u.is_active ? 'warning' : 'success',
+                              hidden: !isSuperAdmin || user?.id === u.id,
+                              onClick: () => handleToggleActive(u),
+                            },
+                            {
+                              label: 'Hapus',
+                              icon: <Trash2 className="w-4 h-4" />,
+                              tone: 'danger',
+                              dividerBefore: true,
+                              hidden: user?.id === u.id,
+                              onClick: () => handleDelete(u.id),
+                            },
+                          ]}
+                        />
                       </div>
                     </td>
                   </tr>

@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import TransferOwnershipModal from '@/components/ui/TransferOwnershipModal';
 import { QRCodeSVG } from 'qrcode.react';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { RowActions } from '@/components/ui/RowActions';
 
 export default function ShortlinksPage() {
   const { user } = useAuth();
@@ -318,55 +319,50 @@ export default function ShortlinksPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {!item.is_active && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-9 w-9 p-0 text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-sm" 
-                              onClick={async () => {
-                                try {
-                                  const res = await api.post(`/shortlinks/${item.id}/token`);
-                                  const token = res.data.data.token;
-                                  fetchShortlinks();
+                        <div className="flex justify-end">
+                          <RowActions
+                            label={`Aksi untuk ${item.slug}`}
+                            actions={[
+                              { label: 'Edit', icon: <Edit className="w-4 h-4" />, onClick: () => handleOpenModal(item) },
+                              { label: 'QR Code', icon: <QrCode className="w-4 h-4" />, onClick: () => setQrItem(item) },
+                              { label: 'Statistik klik & referer', icon: <BarChart3 className="w-4 h-4" />, tone: 'success', onClick: () => openStats(item) },
+                              {
+                                label: 'Generate Token Aktivasi',
+                                icon: <Key className="w-4 h-4" />,
+                                tone: 'warning',
+                                hidden: item.is_active,
+                                onClick: async () => {
                                   try {
-                                    await navigator.clipboard.writeText(token);
-                                    toast.success('Token aktivasi dibuat dan berhasil disalin.');
-                                  } catch {
-                                    toast.error('Token aktivasi sudah dibuat, tetapi belum tersalin. Salin token dari daftar shortlink.');
+                                    const res = await api.post(`/shortlinks/${item.id}/token`);
+                                    const token = res.data.data.token;
+                                    fetchShortlinks();
+                                    try {
+                                      await navigator.clipboard.writeText(token);
+                                      toast.success('Token aktivasi dibuat dan berhasil disalin.');
+                                    } catch {
+                                      toast.error('Token aktivasi sudah dibuat, tetapi belum tersalin. Salin token dari daftar shortlink.');
+                                    }
+                                  } catch (e) {
+                                    toast.error(getUserFacingErrorMessage(e, 'Gagal generate token'));
                                   }
-                                } catch (e) {
-                                  toast.error(getUserFacingErrorMessage(e, 'Gagal generate token'));
-                                }
-                              }}
-                              title="Generate Token Aktivasi"
-                            >
-                              <Key className="w-4 h-4" />
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="sm" onClick={() => setQrItem(item)} title="QR Code" className="h-9 w-9 p-0 text-slate-600 hover:text-[#c20000] bg-slate-50 hover:bg-red-50 rounded-sm">
-                            <QrCode className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => openStats(item)} title="Statistik klik & referer" className="h-9 w-9 p-0 text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-sm">
-                            <BarChart3 className="w-4 h-4" />
-                          </Button>
-                          {isSuperAdmin && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setTransferItem(item)}
-                              title="Transfer Pemilik"
-                              className="h-9 w-9 p-0 text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-sm"
-                            >
-                              <UserCheck className="w-4 h-4" />
-                            </Button>
-                          )}
-                          <Button variant="ghost" size="sm" onClick={() => handleOpenModal(item)} title="Edit" className="h-9 w-9 p-0 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-9 w-9 p-0 text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm" title="Hapus" onClick={() => handleDelete(item.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                                },
+                              },
+                              {
+                                label: 'Transfer Pemilik',
+                                icon: <UserCheck className="w-4 h-4" />,
+                                tone: 'violet',
+                                hidden: !isSuperAdmin,
+                                onClick: () => setTransferItem(item),
+                              },
+                              {
+                                label: 'Hapus',
+                                icon: <Trash2 className="w-4 h-4" />,
+                                tone: 'danger',
+                                dividerBefore: true,
+                                onClick: () => handleDelete(item.id),
+                              },
+                            ]}
+                          />
                         </div>
                       </td>
                     </tr>

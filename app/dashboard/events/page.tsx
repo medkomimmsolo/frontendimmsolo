@@ -23,6 +23,7 @@ import { Event } from '@/types';
 import Link from 'next/link';
 import { useDebounce } from 'use-debounce';
 import { PaginationControls } from '@/components/ui/PaginationControls';
+import { RowActions } from '@/components/ui/RowActions';
 import { TransferOwnershipModal } from '@/components/ui/TransferOwnershipModal';
 import { PageHeader } from '@/components/ui/PageHeader';
 
@@ -310,25 +311,28 @@ export default function EventsManagement() {
                       )}
                       
                       {/* Aksi */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <Link href={`/dashboard/events/${event.id}`} title="Edit" className="h-9 w-9 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors">
-                          <Edit className="w-4 h-4" />
-                        </Link>
-                        {isSuperAdmin && (
-                          <button
-                            onClick={() => setTransferItem(event)}
-                            title="Transfer Pemilik"
-                            className="h-9 w-9 inline-flex items-center justify-center text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-sm transition-colors"
-                          >
-                            <UserCheck className="w-4 h-4" />
-                          </button>
-                        )}
-                        <button onClick={() => handleDelete(event.id)} title="Hapus" className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                        <Link href={`/agenda/${event.slug}`} target="_blank" title="Lihat" className="h-9 w-9 inline-flex items-center justify-center text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-sm transition-colors">
-                          <Eye className="w-4 h-4" />
-                        </Link>
+                      <div className="mt-2">
+                        <RowActions
+                          label={`Aksi untuk ${event.title}`}
+                          actions={[
+                            { label: 'Edit', icon: <Edit className="w-4 h-4" />, href: `/dashboard/events/${event.id}` },
+                            { label: 'Lihat', icon: <Eye className="w-4 h-4" />, href: `/agenda/${event.slug}`, external: true },
+                            {
+                              label: 'Transfer Pemilik',
+                              icon: <UserCheck className="w-4 h-4" />,
+                              tone: 'violet',
+                              hidden: !isSuperAdmin,
+                              onClick: () => setTransferItem(event),
+                            },
+                            {
+                              label: 'Hapus',
+                              icon: <Trash2 className="w-4 h-4" />,
+                              tone: 'danger',
+                              dividerBefore: true,
+                              onClick: () => handleDelete(event.id),
+                            },
+                          ]}
+                        />
                       </div>
                     </td>
                     <td className="p-4\1align-top text-slate-600">

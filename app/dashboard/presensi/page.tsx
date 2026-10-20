@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import {
@@ -12,7 +11,6 @@ import {
   MapPin,
   Edit,
   Trash2,
-  Eye,
   QrCode,
   ToggleLeft,
   ToggleRight,
@@ -27,6 +25,7 @@ import Link from 'next/link';
 import { useDebounce } from 'use-debounce';
 import { PaginationControls } from '@/components/ui/PaginationControls';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { RowActions } from '@/components/ui/RowActions';
 
 const MODE_LABEL: Record<string, string> = {
   self: 'Form Presensi',
@@ -35,7 +34,6 @@ const MODE_LABEL: Record<string, string> = {
 };
 
 export default function PresensiManagement() {
-  const { user } = useAuth();
   const { confirm } = useConfirm();
   const [items, setItems] = useState<Presensi[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -116,25 +114,25 @@ export default function PresensiManagement() {
         </Link>
       </PageHeader>
 
-      <ul className="flex flex-wrap gap-2 text-sm text-slate-500 mb-2 font-medium">
-        {([
-          ['all', 'Semua'],
-          ['open', 'Dibuka'],
-          ['closed', 'Ditutup'],
-        ] as const).map(([key, label], idx) => (
-          <li key={key}>
-            <button
-              onClick={() => setStatusFilter(key)}
-              className={`transition-colors pb-1 ${statusFilter === key ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
-            >
-              {label}
-            </button>
-            {idx < 2 && <span className="text-slate-300 mx-2">|</span>}
-          </li>
-        ))}
-      </ul>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <ul className="flex flex-wrap gap-2 text-sm text-slate-500 font-medium">
+          {([
+            ['all', 'Semua'],
+            ['open', 'Dibuka'],
+            ['closed', 'Ditutup'],
+          ] as const).map(([key, label], idx) => (
+            <li key={key}>
+              <button
+                onClick={() => setStatusFilter(key)}
+                className={`transition-colors pb-1 ${statusFilter === key ? 'text-[#c20000] border-b-2 border-[#c20000]' : 'hover:text-[#c20000]'}`}
+              >
+                {label}
+              </button>
+              {idx < 2 && <span className="text-slate-300 mx-2">|</span>}
+            </li>
+          ))}
+        </ul>
 
-      <div className="flex justify-end mb-4">
         <div className="flex items-center gap-2 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -178,6 +176,9 @@ export default function PresensiManagement() {
                       </div>
                       <p className="text-sm font-semibold text-slate-700">Belum ada sesi presensi</p>
                       <p className="text-xs text-slate-400 mt-1">Buat sesi baru untuk mulai mencatat kehadiran</p>
+                      <Link href="/dashboard/presensi/create" className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[#c20000] hover:underline">
+                        <Plus className="w-3.5 h-3.5" /> Buat Sesi Presensi
+                      </Link>
                     </div>
                   </td>
                 </tr>
@@ -198,16 +199,26 @@ export default function PresensiManagement() {
                           Pembuat: <span className="font-medium text-slate-700">{item.user.name}</span>
                         </div>
                       )}
-                      <div className="flex items-center gap-2 mt-2">
-                        <Link href={`/dashboard/presensi/${item.id}`} title="Kelola" className="h-9 w-9 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors">
-                          <Edit className="w-4 h-4" />
-                        </Link>
-                        <button onClick={() => handleToggle(item)} title={item.is_open ? 'Tutup' : 'Buka'} className={`h-9 w-9 inline-flex items-center justify-center rounded-sm transition-colors ${item.is_open ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'}`}>
-                          {item.is_open ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
-                        </button>
-                        <button onClick={() => handleDelete(item.id)} title="Hapus" className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <div className="mt-2">
+                        <RowActions
+                          label={`Aksi untuk ${item.title}`}
+                          actions={[
+                            { label: 'Kelola', icon: <Edit className="w-4 h-4" />, href: `/dashboard/presensi/${item.id}` },
+                            {
+                              label: item.is_open ? 'Tutup presensi' : 'Buka presensi',
+                              icon: item.is_open ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />,
+                              tone: item.is_open ? 'warning' : 'success',
+                              onClick: () => handleToggle(item),
+                            },
+                            {
+                              label: 'Hapus',
+                              icon: <Trash2 className="w-4 h-4" />,
+                              tone: 'danger',
+                              dividerBefore: true,
+                              onClick: () => handleDelete(item.id),
+                            },
+                          ]}
+                        />
                       </div>
                     </td>
                     <td className="p-4 align-top text-slate-600">
@@ -250,15 +261,17 @@ export default function PresensiManagement() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs mt-4 overflow-hidden">
-        <PaginationControls
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          unit="sesi"
-          onPageChange={setCurrentPage}
-        />
-      </div>
+      {totalItems > 0 && (
+        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            unit="sesi"
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
     </div>
   );
 }

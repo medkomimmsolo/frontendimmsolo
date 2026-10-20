@@ -6,8 +6,9 @@ import api from '@/lib/api';
 import { Button } from '@/components/ui/Button';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Loader2, Users, QrCode, ClipboardCheck, Settings, Upload, Download, Plus, Trash2, Search, ArrowLeft, Save, Layers, RefreshCw, History } from 'lucide-react';
+import { PaginationControls } from '@/components/ui/PaginationControls';
+import { RowActions } from '@/components/ui/RowActions';
+import { Loader2, Users, QrCode, ClipboardCheck, Settings, Upload, Download, Plus, Trash2, Search, ArrowLeft, Save, Layers, RefreshCw, History, ChevronDown, Mail, Phone } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
@@ -27,6 +28,17 @@ import { DEFAULT_PRESENSI_FORM_FIELDS } from '@/lib/presensi';
 
 const inputCls =
   'w-full bg-white border border-slate-200 rounded-sm px-3.5 py-2.5 text-sm text-slate-700 focus:border-[#c20000] focus:ring-1 focus:ring-[#c20000] outline-none shadow-sm transition-all';
+
+const STATUS_SELECT_STYLE: Record<string, string> = {
+  hadir: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  telat: 'border-amber-200 bg-amber-50 text-amber-700',
+  izin: 'border-blue-200 bg-blue-50 text-blue-700',
+  tidak_hadir: 'border-red-200 bg-red-50 text-red-700',
+};
+
+function initials(name: string): string {
+  return name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() ?? '').join('');
+}
 
 type Tab = 'peserta' | 'qr' | 'kehadiran' | 'riwayat' | 'sesi' | 'settings';
 
@@ -55,6 +67,14 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
   const [statusFilter, setStatusFilter] = useState<'all' | 'hadir' | 'belum'>('all');
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
+  const [totalPeserta, setTotalPeserta] = useState(0);
+
+  // Peserta untuk tab QR — tidak terpengaruh filter pencarian/status di tab Peserta.
+  const [qrPeserta, setQrPeserta] = useState<PresensiPeserta[]>([]);
+  const [qrPage, setQrPage] = useState(1);
+  const [qrLastPage, setQrLastPage] = useState(1);
+  const [qrTotal, setQrTotal] = useState(0);
+  const [qrLoading, setQrLoading] = useState(false);
 
   // Kehadiran
   const [kehadiran, setKehadiran] = useState<PresensiKehadiran[]>([]);
@@ -99,11 +119,20 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
     }
   }, [id, router, activeSesiId]);
 
-  // Pilih sesi pertama secara otomatis saat daftar sesi termuat / berubah.
+  const didInitSesi = useRef(false);
+
+  // Pilih sesi pertama sekali saat daftar sesi termuat. Setelah itu hormati
+  // pilihan pengguna — termasuk "Semua Sesi" (null) — saat data disegarkan.
   useEffect(() => {
+    if (!didInitSesi.current) {
+      if (sesis.length === 0) return;
+      didInitSesi.current = true;
+      setActiveSesiId(sesis[0].id);
+      return;
+    }
     setActiveSesiId((prev) => {
-      if (prev !== null && sesis.some((s) => s.id === prev)) return prev;
-      return sesis.length > 0 ? sesis[0].id : null;
+      if (prev === null) return null;
+      return sesis.some((s) => s.id === prev) ? prev : (sesis[0]?.id ?? null);
     });
   }, [sesis]);
 
@@ -116,12 +145,30 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
       const payload = res.data.data;
       setPeserta(payload.data || []);
       setLastPage(payload.last_page || 1);
+      setTotalPeserta(payload.total || 0);
     } catch (error) {
       toast.error(getUserFacingErrorMessage(error, 'Gagal memuat daftar peserta'));
     } finally {
       setPesertaLoading(false);
     }
   }, [id, page, debouncedSearch, statusFilter, activeSesiId]);
+
+  const fetchQrPeserta = useCallback(async () => {
+    setQrLoading(true);
+    try {
+      const res = await api.get(`/presensi/${id}/peserta`, {
+        params: { page: qrPage, per_page: 24 },
+      });
+      const payload = res.data.data;
+      setQrPeserta(payload.data || []);
+      setQrLastPage(payload.last_page || 1);
+      setQrTotal(payload.total || 0);
+    } catch (error) {
+      toast.error(getUserFacingErrorMessage(error, 'Gagal memuat daftar peserta QR'));
+    } finally {
+      setQrLoading(false);
+    }
+  }, [id, qrPage]);
 
   const fetchKehadiran = useCallback(async () => {
     try {
@@ -144,25 +191,31 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
   useEffect(() => { fetchDetail(); }, [fetchDetail]);
   useEffect(() => {
     if (tab === 'peserta') fetchPeserta();
+    if (tab === 'qr') fetchQrPeserta();
     if (tab === 'kehadiran') fetchKehadiran();
-  }, [tab, fetchPeserta, fetchKehadiran]);
+  }, [tab, fetchPeserta, fetchQrPeserta, fetchKehadiran]);
   useEffect(() => { setPage(1); }, [debouncedSearch, statusFilter, activeSesiId]);
+  useEffect(() => { setQrPage(1); }, [id]);
 
-  // Auto-refresh saat presensi berlangsung: tarik ulang peserta & kehadiran
-  // tiap 10 detik agar petugas melihat kehadiran masuk tanpa reload manual.
+  // Auto-refresh hanya berjalan saat tab yang datanya perlu diperbarui aktif.
   // Sengaja TIDAK memanggil fetchDetail — agar isian form Pengaturan yang
   // belum disimpan tidak tertimpa.
   useEffect(() => {
     if (!autoRefresh || !presensi?.is_open) return;
     const poll = setInterval(() => {
-      fetchPeserta();
-      fetchKehadiran(); // sekaligus menyegarkan kartu statistik
+      if (tab === 'peserta') fetchPeserta();
+      if (tab === 'qr') fetchQrPeserta();
+      if (tab === 'kehadiran') fetchKehadiran();
     }, 10_000);
 
     return () => clearInterval(poll);
-  }, [autoRefresh, presensi?.is_open, fetchPeserta, fetchKehadiran]);
+  }, [autoRefresh, presensi?.is_open, tab, fetchPeserta, fetchQrPeserta, fetchKehadiran]);
 
-  const refreshAll = () => { fetchDetail(); fetchPeserta(); };
+  useEffect(() => {
+    if (!presensi?.is_open) setAutoRefresh(false);
+  }, [presensi?.is_open]);
+
+  const refreshAll = () => { fetchDetail(); fetchPeserta(); fetchQrPeserta(); };
 
   const activeSesi = sesis.find((s) => s.id === activeSesiId) || null;
 
@@ -234,25 +287,19 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
 
   const exportExcel = () => setShowExportModal(true);
 
-  const handleMarkStatus = async (peserta: PresensiPeserta, status: 'hadir' | 'telat' | 'izin' | 'tidak_hadir') => {
+  const handleMarkStatus = async (peserta: PresensiPeserta, status: 'hadir' | 'telat' | 'izin' | 'tidak_hadir'): Promise<boolean> => {
     const label: Record<string, string> = { hadir: 'Hadir', telat: 'Telat', izin: 'Izin', tidak_hadir: 'Tidak Hadir' };
-    if (peserta.kehadiran?.status === status) return;
-    const scope = activeSesi ? ` pada sesi "${activeSesi.name}"` : '';
-    if (await confirm({
-      title: 'Ubah status kehadiran?',
-      message: `Status kehadiran ${peserta.nama} akan diubah menjadi "${label[status]}"${scope}.`,
-      confirmText: `Tandai ${label[status]}`,
-      tone: status === 'tidak_hadir' ? 'danger' : 'default',
-    })) {
-      try {
-        await api.post(`/presensi/${id}/peserta/${peserta.id}/mark`, { status, sesi_id: activeSesiId ?? undefined });
-        toast.success(`${peserta.nama} ditandai ${label[status]}`);
-        fetchPeserta();
-        fetchDetail();
-      } catch (error) {
-        const err = error as { response?: { data?: { message?: string } } };
-        toast.error(err.response?.data?.message || 'Gagal menandai kehadiran');
-      }
+    if (peserta.kehadiran?.status === status) return false;
+    try {
+      await api.post(`/presensi/${id}/peserta/${peserta.id}/mark`, { status, sesi_id: activeSesiId ?? undefined });
+      toast.success(`${peserta.nama} ditandai ${label[status]}`);
+      fetchPeserta();
+      fetchDetail();
+      return true;
+    } catch (error) {
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(err.response?.data?.message || 'Gagal menandai kehadiran');
+      return false;
     }
   };
 
@@ -285,20 +332,6 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
     <div className="space-y-6 w-full">
       <PageHeader title={presensi.title} description={presensi.location || 'Sesi presensi'} badge={presensi.is_open ? 'Dibuka' : 'Ditutup'}>
         <div className="flex items-center gap-2">
-          {sesis.length > 0 && (
-            <select
-              value={activeSesiId ?? ''}
-              onChange={(e) => setActiveSesiId(e.target.value ? Number(e.target.value) : null)}
-              className={`${inputCls} h-10 w-44 text-xs font-bold`}
-              title="Pilih sesi aktif"
-            >
-              {sesis.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}{s.is_open ? '' : ' (tutup)'}
-                </option>
-              ))}
-            </select>
-          )}
           <Button onClick={handleToggleOpen} variant="outline" className="h-10 px-4 rounded-xl text-xs font-bold">
             {presensi.is_open ? 'Tutup Presensi' : 'Buka Presensi'}
           </Button>
@@ -316,6 +349,18 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
           <span className="inline-flex items-center gap-1.5 font-bold text-slate-600">
             <Layers className="w-3.5 h-3.5" /> Sesi aktif:
           </span>
+          <button
+            type="button"
+            aria-pressed={activeSesiId === null}
+            onClick={() => setActiveSesiId(null)}
+            className={`px-3 py-1 rounded-full border font-semibold transition-colors ${
+              activeSesiId === null
+                ? 'bg-slate-700 text-white border-slate-700'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400 hover:text-slate-800'
+            }`}
+          >
+            Semua Sesi
+          </button>
           {sesis.map((s) => (
             <button
               key={s.id}
@@ -331,37 +376,6 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
               {s.name}{!s.is_open && ' · tutup'}
             </button>
           ))}
-        </div>
-      )}
-
-      {/* Statistik — cakupan mengikuti sesi aktif bila ada. */}
-      {scopeStats && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="font-bold text-slate-600">
-              Statistik {activeSesi ? `Sesi: ${activeSesi.name}` : 'Seluruh Kegiatan'}
-            </span>
-            <span className="text-slate-400">
-              · {activeSesi ? 'angka dihitung untuk sesi yang dipilih' : 'angka dihitung untuk seluruh sesi'}
-            </span>
-            {activeSesi && <span className="ml-auto font-bold text-emerald-600">{scopeStats.persen_hadir}% kehadiran</span>}
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            {[
-              ['Total Peserta', scopeStats.total_peserta, 'text-slate-700'],
-              ['Hadir', scopeStats.hadir, 'text-emerald-600'],
-              ['Telat', scopeStats.telat, 'text-amber-600'],
-              ['Izin', scopeStats.izin, 'text-blue-600'],
-              ['Belum Hadir', scopeStats.belum_hadir, 'text-slate-500'],
-            ].map(([label, value, color]) => (
-              <Card key={label as string} className="border-slate-200/90 rounded-xl shadow-2xs">
-                <CardContent className="pt-5 pb-4">
-                  <div className={`text-2xl font-bold ${color}`}>{value as number}</div>
-                  <div className="text-xs text-slate-500 mt-0.5">{label as string}</div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </div>
       )}
 
@@ -381,16 +395,22 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
             </button>
           ))}
         </div>
-        <label className="ml-auto mb-1 inline-flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            className="w-4 h-4 rounded border-slate-300 text-[#c20000] focus:ring-[#c20000]"
-            checked={autoRefresh}
-            onChange={(e) => setAutoRefresh(e.target.checked)}
-          />
-          <RefreshCw className={`w-3.5 h-3.5 ${autoRefresh ? 'text-emerald-500' : 'text-slate-400'}`} />
-          Auto-refresh {autoRefresh && presensi.is_open ? '(aktif)' : ''}
-        </label>
+        {['peserta', 'qr', 'kehadiran'].includes(tab) && (
+          <label
+            className={`ml-auto mb-1 inline-flex items-center gap-2 text-xs font-semibold select-none ${presensi.is_open ? 'text-slate-600 cursor-pointer' : 'text-slate-400 cursor-not-allowed'}`}
+            title={presensi.is_open ? 'Muat ulang data tiap 10 detik' : 'Buka presensi untuk mengaktifkan auto-refresh'}
+          >
+            <input
+              type="checkbox"
+              className="w-4 h-4 rounded border-slate-300 text-[#c20000] focus:ring-[#c20000] disabled:cursor-not-allowed"
+              checked={autoRefresh}
+              disabled={!presensi.is_open}
+              onChange={(e) => setAutoRefresh(e.target.checked)}
+            />
+            <RefreshCw className={`w-3.5 h-3.5 ${autoRefresh && presensi.is_open ? 'text-emerald-500' : 'text-slate-400'}`} />
+            Auto-refresh {autoRefresh && presensi.is_open ? '(aktif)' : ''}
+          </label>
+        )}
       </div>
 
       {/* Peserta */}
@@ -432,84 +452,154 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
           </div>
 
           <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+            <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-6 py-3.5">
+              <h3 className="text-sm font-bold text-slate-800">Daftar Peserta</h3>
+              <span className="text-xs font-medium text-slate-400">{totalPeserta} peserta</span>
+            </div>
             <div className="overflow-x-auto">
-              <table className="admin-panel-table w-full text-left border-collapse">
+              <table className={`admin-panel-table w-full text-left border-collapse ${presensi.mode === 'self' ? 'min-w-[1080px]' : 'min-w-[820px]'}`}>
                 <thead>
-                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                    <th className="py-3 px-4 pl-6 w-16">No</th>
-                    <th className="py-3 px-4">Nama</th>
-                    <th className="py-3 px-4 w-56">Kontak</th>
-                    <th className="py-3 px-4 w-40">Asal</th>
+                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-2xs font-bold uppercase tracking-wider">
+                    <th className="py-3 px-3 pl-6 w-12 text-center">No</th>
+                    <th className="py-3 px-4">Peserta</th>
+                    <th className="py-3 px-4 w-60">Kontak</th>
+                    <th className="py-3 px-4 w-36">Asal</th>
                     {presensi.mode === 'self' && <th className="py-3 px-4">Jawaban Form</th>}
-                    <th className="py-3 px-4 w-32">Status</th>
-                    <th className="py-3 px-4 w-16 pr-6"></th>
+                    <th className="py-3 px-4 w-52">Status Kehadiran</th>
+                    <th className="py-3 px-3 pr-6 w-12"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm bg-white">
                   {pesertaLoading ? (
-                    <tr><td colSpan={presensi.mode === 'self' ? 7 : 6} className="py-14 text-center"><Loader2 className="w-7 h-7 animate-spin text-[#c20000] mx-auto" /></td></tr>
+                    <tr>
+                      <td colSpan={presensi.mode === 'self' ? 7 : 6} className="py-16 text-center">
+                        <Loader2 className="w-7 h-7 animate-spin text-[#c20000] mx-auto" />
+                      </td>
+                    </tr>
                   ) : peserta.length === 0 ? (
-                    <tr><td colSpan={presensi.mode === 'self' ? 7 : 6} className="py-14 text-center text-slate-400 text-sm">{presensi.mode === 'self' ? 'Belum ada peserta yang mengisi form presensi.' : 'Belum ada peserta. Impor dari Excel atau tambah manual.'}</td></tr>
+                    <tr>
+                      <td colSpan={presensi.mode === 'self' ? 7 : 6} className="py-16 text-center">
+                        <div className="flex flex-col items-center justify-center text-slate-400">
+                          <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3 text-slate-300">
+                            <Users className="w-6 h-6" />
+                          </div>
+                          <p className="text-sm font-semibold text-slate-700">
+                            {presensi.mode === 'self' ? 'Belum ada peserta yang mengisi form' : 'Belum ada peserta'}
+                          </p>
+                          <p className="text-xs text-slate-400 mt-1">
+                            {presensi.mode === 'self'
+                              ? 'Peserta akan muncul otomatis setelah mengisi form presensi.'
+                              : 'Impor dari Excel atau tambah manual untuk memulai.'}
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
                   ) : (
                     peserta.map((p, i) => (
-                      <tr key={p.id} className="hover:bg-slate-50/80">
-                        <td className="py-3 px-4 pl-6 text-slate-400 text-xs">{(page - 1) * 25 + i + 1}</td>
-                        <td className="py-3 px-4">
-                          <div className="font-semibold text-slate-800">{p.nama}</div>
-                          {p.kode && <div className="text-xs text-slate-400">Kode: {p.kode}</div>}
+                      <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3.5 px-3 pl-6 text-center text-xs font-medium text-slate-400">
+                          {(page - 1) * 25 + i + 1}
                         </td>
-                        <td className="py-3 px-4 text-slate-600 text-xs">
-                          {p.email && <div>{p.email}</div>}
-                          {p.phone && <div>{p.phone}</div>}
-                          {!p.email && !p.phone && <span className="text-slate-300">—</span>}
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-3">
+                            <div className="hidden sm:flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-red-100 bg-red-50 text-xs font-bold text-[#c20000]">
+                              {initials(p.nama)}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-semibold text-slate-800 truncate" title={p.nama}>{p.nama}</div>
+                              {p.kode && <div className="text-2xs text-slate-400">Kode {p.kode}</div>}
+                            </div>
+                          </div>
                         </td>
-                        <td className="py-3 px-4 text-slate-600 text-xs">{p.asal || '—'}</td>
+                        <td className="py-3.5 px-4 text-xs">
+                          {(p.email || p.phone) ? (
+                            <div className="space-y-1">
+                              {p.email && (
+                                <a href={`mailto:${p.email}`} className="flex items-center gap-1.5 text-slate-600 hover:text-[#c20000]" title={p.email}>
+                                  <Mail className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                                  <span className="truncate">{p.email}</span>
+                                </a>
+                              )}
+                              {p.phone && (
+                                <div className="flex items-center gap-1.5 text-slate-500">
+                                  <Phone className="w-3.5 h-3.5 shrink-0 text-slate-400" />
+                                  <span className="truncate">{p.phone}</span>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-slate-300">—</span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4 text-xs">
+                          {p.asal ? (
+                            <span className="block max-w-[150px] truncate text-slate-600" title={p.asal}>{p.asal}</span>
+                          ) : (
+                            <span className="text-slate-300">—</span>
+                          )}
+                        </td>
                         {presensi.mode === 'self' && (
-                          <td className="py-3 px-4 text-xs text-slate-600">
+                          <td className="py-3.5 px-4 align-top">
                             {(() => {
                               const answers = (presensi.form_fields || [])
                                 .filter((field) => !['nama', 'email', 'phone', 'asal'].includes(field.key))
                                 .map((field) => {
-                                const answer = p.form_data?.[field.key];
-                                const display = Array.isArray(answer) ? answer.join(', ') : answer;
-                                return display ? <div key={field.key}><span className="font-semibold">{field.label}:</span> {display}</div> : null;
-                                }).filter(Boolean);
-                              return answers.length ? answers : '—';
+                                  const answer = p.form_data?.[field.key];
+                                  const display = Array.isArray(answer) ? answer.join(', ') : answer;
+                                  return display ? (
+                                    <div key={field.key} className="flex max-w-[240px] items-baseline gap-1 text-2xs">
+                                      <span className="shrink-0 text-slate-400">{field.label}:</span>
+                                      <span className="truncate font-medium text-slate-700" title={String(display)}>{display}</span>
+                                    </div>
+                                  ) : null;
+                                })
+                                .filter(Boolean);
+                              return answers.length ? <div className="space-y-1">{answers}</div> : <span className="text-slate-300">—</span>;
                             })()}
                           </td>
                         )}
-                        <td className="py-3 px-4">
-                          {p.kehadiran ? (
-                            <div className="flex flex-wrap items-center gap-1.5">
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${statusBadgeClass(p.kehadiran.status)}`}>
-                                {statusLabel(p.kehadiran.status)}
-                              </span>
-                              <span
-                                className={`inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-semibold border ${methodBadgeClass(p.kehadiran.method)}`}
-                                title={methodHint(p.kehadiran.method)}
+                        <td className="py-3.5 px-4">
+                          <div className="flex flex-col items-start gap-1.5">
+                            <div className="relative">
+                              <select
+                                value={p.kehadiran?.status ?? ''}
+                                onChange={async (e) => {
+                                  const next = e.target.value as 'hadir' | 'telat' | 'izin' | 'tidak_hadir';
+                                  if (!next) return;
+                                  const changed = await handleMarkStatus(p, next);
+                                  if (!changed) e.target.value = p.kehadiran?.status ?? '';
+                                }}
+                                title="Ubah status kehadiran"
+                                className={`h-8 min-w-[132px] cursor-pointer appearance-none rounded-lg border pl-3 pr-8 text-xs font-semibold outline-none transition-colors focus:ring-2 focus:ring-[#c20000]/20 ${p.kehadiran ? STATUS_SELECT_STYLE[p.kehadiran.status] : 'border-dashed border-slate-200 bg-white text-slate-500 hover:border-slate-300'}`}
                               >
-                                {methodLabel(p.kehadiran.method)}
-                              </span>
+                                <option value="" disabled>Belum hadir</option>
+                                <option value="hadir">Hadir</option>
+                                <option value="telat">Telat</option>
+                                <option value="izin">Izin</option>
+                                <option value="tidak_hadir">Tidak Hadir</option>
+                              </select>
+                              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 opacity-70" />
                             </div>
-                          ) : (
-                            <span className="text-xs text-slate-400">Belum hadir</span>
-                          )}
-                          <div className="flex flex-wrap items-center gap-1 mt-1.5">
-                            {(['hadir', 'telat', 'izin'] as const).map((st) => (
-                              <button
-                                key={st}
-                                onClick={() => handleMarkStatus(p, st)}
-                                disabled={p.kehadiran?.status === st}
-                                className="px-2 py-0.5 text-2xs font-semibold rounded border border-slate-200 text-slate-600 hover:border-[#c20000] hover:text-[#c20000] transition-colors disabled:opacity-40 disabled:cursor-default disabled:hover:border-slate-200 disabled:hover:text-slate-600"
-                                title={`Tandai ${st}`}
-                              >
-                                {st}
-                              </button>
-                            ))}
+                            {p.kehadiran && (
+                              <div className="flex items-center gap-1.5 text-2xs text-slate-400">
+                                <span
+                                  className={`inline-flex items-center rounded border px-1.5 py-0.5 font-semibold ${methodBadgeClass(p.kehadiran.method)}`}
+                                  title={methodHint(p.kehadiran.method)}
+                                >
+                                  {methodLabel(p.kehadiran.method)}
+                                </span>
+                                <span>{new Date(p.kehadiran.checked_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
+                            )}
                           </div>
                         </td>
-                        <td className="py-3 px-4 pr-6 text-right">
-                          <button onClick={() => handleDeletePeserta(p.id)} className="h-8 w-8 inline-flex items-center justify-center text-red-500 hover:bg-red-50 rounded-sm transition-colors">
+                        <td className="py-3.5 px-3 pr-6 text-right">
+                          <button
+                            onClick={() => handleDeletePeserta(p.id)}
+                            title="Hapus peserta"
+                            aria-label={`Hapus ${p.nama}`}
+                            className="h-8 w-8 inline-flex items-center justify-center text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </td>
@@ -519,28 +609,50 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                 </tbody>
               </table>
             </div>
+            {totalPeserta > 0 && (
+              <PaginationControls
+                currentPage={page}
+                totalPages={lastPage}
+                totalItems={totalPeserta}
+                pageSize={25}
+                unit="peserta"
+                onPageChange={setPage}
+              />
+            )}
           </div>
-
-          {lastPage > 1 && (
-            <div className="flex items-center justify-center gap-3">
-              <Button variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="h-9 px-4 text-xs rounded-lg">Sebelumnya</Button>
-              <span className="text-xs text-slate-500">Halaman {page} / {lastPage}</span>
-              <Button variant="outline" disabled={page >= lastPage} onClick={() => setPage((p) => p + 1)} className="h-9 px-4 text-xs rounded-lg">Berikutnya</Button>
-            </div>
-          )}
         </div>
       )}
 
       {/* QR */}
       {tab === 'qr' && presensi && (
-        <PresensiQrPanel presensi={presensi} peserta={peserta} activeSesi={activeSesi} onRefreshPeserta={fetchPeserta} stats={scopeStats} />
+        <PresensiQrPanel
+          presensi={presensi}
+          peserta={qrPeserta}
+          activeSesi={activeSesi}
+          stats={scopeStats}
+          isLoading={qrLoading}
+          page={qrPage}
+          lastPage={qrLastPage}
+          total={qrTotal}
+          onPageChange={setQrPage}
+          onRefreshPeserta={fetchQrPeserta}
+        />
       )}
 
       {/* Kehadiran */}
       {tab === 'kehadiran' && (
-        <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="admin-panel-table w-full text-left border-collapse">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-semibold text-slate-500">
+              {kehadiran.length} kehadiran tercatat{activeSesi ? ` · ${activeSesi.name}` : ''}
+            </p>
+            <Button onClick={exportExcel} variant="outline" className="h-9 px-3 rounded-xl text-xs font-bold">
+              <Download className="w-4 h-4 mr-1.5" /> Export Excel
+            </Button>
+          </div>
+          <div className="bg-white border border-slate-200/90 rounded-2xl shadow-2xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="admin-panel-table w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 text-xs font-bold uppercase tracking-wider">
                   <th className="py-3 px-4 pl-6">Nama</th>
@@ -585,7 +697,8 @@ export default function PresensiDetailPage({ params }: { params: Promise<{ id: s
                   ))
                 )}
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
         </div>
       )}

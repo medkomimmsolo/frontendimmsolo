@@ -22,6 +22,7 @@ import { useDebounce } from 'use-debounce';
 import { PaginationControls } from '@/components/ui/PaginationControls';
 import { TransferOwnershipModal } from '@/components/ui/TransferOwnershipModal';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { RowActions } from '@/components/ui/RowActions';
 
 export default function BlogManagement() {
   const { user } = useAuth();
@@ -416,35 +417,42 @@ export default function BlogManagement() {
                       )}
                       
                       {/* Aksi */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <Link href={`/dashboard/blog/${blog.id}`} title="Edit" className="h-9 w-9 inline-flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors">
-                          <Edit className="w-4 h-4" />
-                        </Link>
-                        {isAdmin && blog.review_status === 'pending' && (
-                          <>
-                            <button onClick={() => handleApprove(blog.id)} title="Setujui" className="h-9 w-9 inline-flex items-center justify-center text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-sm transition-colors">
-                              <Check className="w-4 h-4" />
-                            </button>
-                            <button onClick={() => handleReject(blog.id)} title="Tolak" className="h-9 w-9 inline-flex items-center justify-center text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-sm transition-colors">
-                              <X className="w-4 h-4" />
-                            </button>
-                          </>
-                        )}
-                        <button onClick={() => handleDelete(blog.id)} title="Hapus" className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                        {isSuperAdmin && (
-                          <button
-                            onClick={() => setTransferItem(blog)}
-                            title="Transfer Pemilik"
-                            className="h-9 w-9 inline-flex items-center justify-center text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-sm transition-colors"
-                          >
-                            <UserCheck className="w-4 h-4" />
-                          </button>
-                        )}
-                        <Link href={`/post/${blog.slug}`} target="_blank" title="Lihat" className="h-9 w-9 inline-flex items-center justify-center text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-sm transition-colors">
-                          <Eye className="w-4 h-4" />
-                        </Link>
+                      <div className="mt-2">
+                        <RowActions
+                          label={`Aksi untuk ${blog.title}`}
+                          actions={[
+                            { label: 'Edit', icon: <Edit className="w-4 h-4" />, href: `/dashboard/blog/${blog.id}` },
+                            { label: 'Lihat', icon: <Eye className="w-4 h-4" />, href: `/post/${blog.slug}`, external: true },
+                            {
+                              label: 'Setujui',
+                              icon: <Check className="w-4 h-4" />,
+                              tone: 'success',
+                              hidden: !(isAdmin && blog.review_status === 'pending'),
+                              onClick: () => handleApprove(blog.id),
+                            },
+                            {
+                              label: 'Tolak',
+                              icon: <X className="w-4 h-4" />,
+                              tone: 'warning',
+                              hidden: !(isAdmin && blog.review_status === 'pending'),
+                              onClick: () => handleReject(blog.id),
+                            },
+                            {
+                              label: 'Transfer Pemilik',
+                              icon: <UserCheck className="w-4 h-4" />,
+                              tone: 'violet',
+                              hidden: !isSuperAdmin,
+                              onClick: () => setTransferItem(blog),
+                            },
+                            {
+                              label: 'Hapus',
+                              icon: <Trash2 className="w-4 h-4" />,
+                              tone: 'danger',
+                              dividerBefore: true,
+                              onClick: () => handleDelete(blog.id),
+                            },
+                          ]}
+                        />
                       </div>
                     </td>
                     <td className="p-4 align-top text-slate-600">

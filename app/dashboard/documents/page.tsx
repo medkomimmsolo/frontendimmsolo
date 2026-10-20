@@ -28,6 +28,7 @@ import { useDebounce } from 'use-debounce';
 import { PaginationControls } from '@/components/ui/PaginationControls';
 import { TransferOwnershipModal } from '@/components/ui/TransferOwnershipModal';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { RowActions } from '@/components/ui/RowActions';
 import { getApiBase } from '@/lib/settings';
 
 export default function DocumentsManagement() {
@@ -455,44 +456,34 @@ export default function DocumentsManagement() {
                         </div>
                       )}
                       
-                      <div className="flex items-center gap-2 mt-2.5">
-                        <a 
-                          href={`${getApiBase()}/documents/${doc.id}/download`}
-                          target="_blank" 
-                          rel="noreferrer" 
-                          title="Unduh Berkas" 
-                          className="h-8 px-2.5 inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-sm transition-colors font-medium"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Unduh
-                        </a>
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(doc)}
-                          title="Edit Dokumen"
-                          className="h-8 px-2.5 inline-flex items-center gap-1 text-xs text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-sm transition-colors font-medium"
-                        >
-                          <Edit className="w-3.5 h-3.5" />
-                          Edit
-                        </button>
-                        {isSuperAdmin && (
-                          <button
-                            type="button"
-                            onClick={() => setTransferItem(doc)}
-                            title="Transfer Pemilik"
-                            className="h-8 w-8 inline-flex items-center justify-center text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-sm transition-colors"
-                          >
-                            <UserCheck className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                        <button 
-                          type="button"
-                          onClick={() => handleDelete(doc.id)} 
-                          title="Hapus" 
-                          className="h-8 w-8 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-sm transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                      <div className="mt-2.5">
+                        <RowActions
+                          label={`Aksi untuk ${doc.title}`}
+                          actions={[
+                            {
+                              label: 'Unduh Berkas',
+                              icon: <Download className="w-4 h-4" />,
+                              tone: 'info',
+                              href: `${getApiBase()}/documents/${doc.id}/download`,
+                              external: true,
+                            },
+                            { label: 'Edit Dokumen', icon: <Edit className="w-4 h-4" />, onClick: () => openEditModal(doc) },
+                            {
+                              label: 'Transfer Pemilik',
+                              icon: <UserCheck className="w-4 h-4" />,
+                              tone: 'violet',
+                              hidden: !isSuperAdmin,
+                              onClick: () => setTransferItem(doc),
+                            },
+                            {
+                              label: 'Hapus',
+                              icon: <Trash2 className="w-4 h-4" />,
+                              tone: 'danger',
+                              dividerBefore: true,
+                              onClick: () => handleDelete(doc.id),
+                            },
+                          ]}
+                        />
                       </div>
                     </td>
                     <td className="p-4 align-top">

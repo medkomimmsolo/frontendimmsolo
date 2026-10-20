@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { getUserFacingErrorMessage } from '@/lib/errorMessage';
 import { useConfirm } from '@/components/providers/ConfirmProvider';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { RowActions } from '@/components/ui/RowActions';
 
 type StatusFilter = 'pending' | 'approved' | 'rejected';
 
@@ -192,13 +193,14 @@ export default function AccountRequestsPage() {
                   <td className="p-4 text-center">{statusBadge(r.status)}</td>
                   <td className="p-4 pr-6">
                     {r.status === 'pending' ? (
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => openApprove(r)} title="Setujui" className="h-9 w-9 inline-flex items-center justify-center text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors">
-                          <Check className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => handleReject(r.id, r.name)} title="Tolak" className="h-9 w-9 inline-flex items-center justify-center text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-xl transition-colors">
-                          <X className="w-4 h-4" />
-                        </button>
+                      <div className="flex justify-end">
+                        <RowActions
+                          label={`Aksi pengajuan ${r.name}`}
+                          actions={[
+                            { label: 'Setujui', icon: <Check className="w-4 h-4" />, tone: 'success', onClick: () => openApprove(r) },
+                            { label: 'Tolak', icon: <X className="w-4 h-4" />, tone: 'danger', onClick: () => handleReject(r.id, r.name) },
+                          ]}
+                        />
                       </div>
                     ) : (
                       <div className="text-right text-xs text-slate-400">oleh {r.reviewer?.name || '-'}</div>
