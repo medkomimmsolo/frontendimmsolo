@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { User } from '@/types';
 import { clearSession } from '@/lib/session';
 
 export function useAuth() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -34,7 +36,7 @@ export function useAuth() {
       localStorage.removeItem('auth_token');
       clearSession();
       setUser(null);
-      window.location.href = '/login';
+      router.push('/login');
     }
   };
 

@@ -41,6 +41,12 @@ interface ModalProps {
   onAttemptClose?: () => boolean | Promise<boolean>;
   ariaLabel?: string;
   bodyId?: string;
+  /**
+   * Mengunci interaksi modal saat mutasi/pengiriman sedang berlangsung:
+   * tombol tutup di-disable, klik backdrop dan tombol Escape diabaikan,
+   * sehingga form tidak tertutup di tengah proses atau dikirim ganda.
+   */
+  isSubmitting?: boolean;
 }
 
 let scrollLockCount = 0;
@@ -112,6 +118,7 @@ export function Modal({
   onAttemptClose,
   ariaLabel,
   bodyId,
+  isSubmitting = false,
 }: ModalProps) {
   const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLElement | null>(null);
@@ -132,12 +139,13 @@ export function Modal({
   }, []);
 
   const requestClose = useCallback(async () => {
+    if (isSubmitting) return;
     const allowed = guardRef.current ? await guardRef.current() : true;
     if (!allowed) return;
     onCloseRef.current();
-  }, []);
+  }, [isSubmitting]);
 
-  useEscapeToClose(open && closeOnEsc ? requestClose : null);
+  useEscapeToClose(open && closeOnEsc && !isSubmitting ? requestClose : null);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (event.key !== 'Tab') return;
@@ -218,8 +226,9 @@ export function Modal({
         <button
           type="button"
           onClick={() => void requestClose()}
+          disabled={isSubmitting}
           aria-label="Tutup"
-          className="shrink-0 rounded-lg bg-white p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          className="shrink-0 rounded-lg bg-white p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:pointer-events-none disabled:opacity-40"
         >
           <X className="h-5 w-5" />
         </button>

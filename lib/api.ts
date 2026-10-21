@@ -47,6 +47,7 @@ api.interceptors.response.use(
         clearSession();
         // Avoid redirecting to login if we are already there or checking /me
         if (!window.location.pathname.includes('/login') && !error.config.url?.includes('/me')) {
+            // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- Di luar pohon komponen React, hard redirect diperlukan untuk pembersihan sesi total
             window.location.href = '/login';
         }
       }
